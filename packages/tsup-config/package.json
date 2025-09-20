@@ -1,9 +1,13 @@
 {
-  "name": "@repo/tsup-config",
-  "version": "1.0.0",
-  "license": "UNLICENSED",
-  "private": true,
-  "exports": {
-    ".": "./tsup.config.mjs"
-  }
+	"exports": {
+		".": "./tsup.config.mjs"
+	},
+	"license": "UNLICENSED",
+	"name": "@repo/tsup-config",
+	"private": true,
+	"scripts": {
+		"format": "biome check --fix --unsafe .",
+		"lint": "biome check ."
+	},
+	"version": "1.0.0"
 }

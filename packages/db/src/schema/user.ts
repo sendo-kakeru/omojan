@@ -5,23 +5,23 @@ import * as v from "valibot";
 
 // TODO: スキーマ整備
 export const userTable = pgTable("user", {
-  id: uuid().primaryKey().defaultRandom(),
-  sub: text().unique().notNull(),
-  email: text().unique().notNull(),
-  name: text().notNull(),
-  avatarUrl: text(),
-  isActive: boolean().default(true).notNull(),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at")
-    .notNull()
-    .defaultNow()
-    .$onUpdate(() => sql`now()`),
+	avatarUrl: text(),
+	createdAt: timestamp("created_at").notNull().defaultNow(),
+	email: text().unique().notNull(),
+	id: uuid().primaryKey().defaultRandom(),
+	isActive: boolean().default(true).notNull(),
+	name: text().notNull(),
+	sub: text().unique().notNull(),
+	updatedAt: timestamp("updated_at")
+		.notNull()
+		.defaultNow()
+		.$onUpdate(() => sql`now()`),
 });
 
 // model
 export const userSchema = v.omit(createSelectSchema(userTable), [
-  "createdAt",
-  "updatedAt",
+	"createdAt",
+	"updatedAt",
 ]);
 
 export type User = v.InferOutput<typeof userSchema>;
