@@ -32,8 +32,8 @@ pnpm-debug.log*
 out/
 build
 dist
+bin
 
 # Misc
 .DS_Store
 *.pem
-bin

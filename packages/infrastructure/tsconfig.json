@@ -2,15 +2,12 @@
 	"compilerOptions": {
 		"experimentalDecorators": true,
 		"forceConsistentCasingInFileNames": true,
-		"module": "commonjs",
-		"moduleResolution": "node",
 		"noFallthroughCasesInSwitch": true,
 		"noImplicitReturns": true,
 		"outDir": "bin",
 		"pretty": true,
-		"sourceMap": true,
-		"strict": true,
-		"target": "es2020"
+		"sourceMap": true
 	},
+	"extends": "@repo/typescript-config/base.json",
 	"files": ["index.ts"]
 }

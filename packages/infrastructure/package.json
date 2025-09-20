@@ -1,13 +1,23 @@
 {
 	"dependencies": {
 		"@pulumi/aws": "^7.0.0",
-		"@pulumi/awsx": "^3.0.0",
 		"@pulumi/pulumi": "^3.113.0"
 	},
 	"devDependencies": {
+		"@repo/typescript-config": "workspace:*",
 		"@types/node": "^18",
-		"typescript": "^5.0.0"
+		"typescript": "^5.9.2"
 	},
+	"license": "UNLICENSED",
 	"main": "index.ts",
-	"name": "omojan"
+	"name": "@repo/infrastructure",
+	"private": true,
+	"scripts": {
+		"destroy": "RUN_TYPE=DESTROY pulumi up -y && pulumi destroy -y",
+		"format": "biome check --fix --unsafe .",
+		"lint": "biome check .",
+		"type-check": "tsc --noEmit",
+		"up": "pulumi up -y"
+	},
+	"version": "1.0.0"
 }
