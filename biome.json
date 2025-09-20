@@ -31,7 +31,8 @@
 			"correctness": {
 				"noConstantCondition": "error",
 				"noUnusedImports": "error",
-				"noUnusedVariables": "error"
+				"noUnusedVariables": "error",
+				"useUniqueElementIds": "warn"
 			},
 			"nursery": {
 				"noFloatingPromises": "error",
@@ -58,7 +59,8 @@
 			},
 			"suspicious": {
 				"noArrayIndexKey": "warn",
-				"noExplicitAny": "error"
+				"noExplicitAny": "error",
+				"noUnknownAtRules": "off"
 			}
 		}
 	},
