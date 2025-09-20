@@ -9,6 +9,7 @@
 	},
 	"devDependencies": {
 		"@react-router/dev": "^7.7.1",
+		"@repo/typescript-config": "workspace:*",
 		"@tailwindcss/vite": "^4.1.4",
 		"@types/node": "^20",
 		"@types/react": "^19.1.2",
@@ -18,7 +19,8 @@
 		"vite": "^6.3.3",
 		"vite-tsconfig-paths": "^5.1.4"
 	},
-	"name": "web",
+	"license": "UNLICENSED",
+	"name": "@repo/web",
 	"private": true,
 	"scripts": {
 		"build": "react-router build",
@@ -28,5 +30,6 @@
 		"start": "react-router-serve ./build/server/index.js",
 		"typecheck": "react-router typegen && tsc"
 	},
-	"type": "module"
+	"type": "module",
+	"version": "1.0.0"
 }
