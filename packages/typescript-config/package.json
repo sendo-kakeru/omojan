@@ -4,6 +4,6 @@
   "license": "UNLICENSED",
   "private": true,
   "exports": {
-    "./*": "./*.json"
+    "./base.json": "./base.json"
   }
 }

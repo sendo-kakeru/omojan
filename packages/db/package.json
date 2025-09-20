@@ -1,0 +1,35 @@
+{
+  "name": "@repo/db",
+  "version": "1.0.0",
+  "license": "UNLICENSED",
+  "private": true,
+  "exports": {
+    "./schema/*": {
+      "types": "./dist/schema/*.d.ts",
+      "import": "./dist/esm/*.js",
+      "require": "./dist/*.js"
+    }
+  },
+  "scripts": {
+    "dev": "pnpm run \"/^dev:/\"",
+    "dev:tsup": "tsup --watch",
+    "dev:tsc": "tsc --watch",
+    "build": "pnpm run \"/^build:/\"",
+    "build:tsup": "tsup --clean",
+    "build:tsc": "tsc",
+    "migrate": "drizzle-kit push",
+    "studio": "drizzle-kit studio",
+    "lint": "biome check .",
+    "format": "biome check --fix --unsafe .",
+    "type-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@repo/tsup-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "^24.5.2",
+    "drizzle-kit": "^0.31.4",
+    "drizzle-orm": "^0.44.5",
+    "drizzle-valibot": "^0.4.2",
+    "valibot": "^1.1.0"
+  }
+}
