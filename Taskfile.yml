@@ -1,0 +1,29 @@
+version: "3"
+
+tasks:
+  up:
+    desc: Up DB
+    cmds:
+      - docker-compose up -d
+      - task: migrate
+
+  drop:
+    desc: Drop all tables from dev DB
+    cmds:
+      - docker-compose exec -T postgres psql -U local -d local -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
+
+  reset:
+    desc: Reset DB
+    cmds:
+      - task: drop
+      - task: migrate
+
+  migrate:
+    desc: Run dev database migrations
+    cmds:
+      - cd packages/db && pnpm migrate
+
+  psql:
+    desc: Connect to the main PostgreSQL container via bash
+    cmds:
+      - docker-compose exec postgres bash
