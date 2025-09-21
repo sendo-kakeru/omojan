@@ -1,12 +1,12 @@
 {
-	"dependencies": {
-		"@pulumi/aws": "^7.0.0",
-		"@pulumi/pulumi": "^3.113.0"
-	},
 	"devDependencies": {
+		"@pulumi/aws": "^7.0.0",
+		"@pulumi/pulumi": "^3.113.0",
 		"@repo/typescript-config": "workspace:*",
-		"@types/node": "^18",
-		"typescript": "^5.9.2"
+		"@types/node": "^24.5.2",
+		"dotenv": "^17.2.2",
+		"typescript": "^5.9.2",
+		"valibot": "^1.1.0"
 	},
 	"license": "UNLICENSED",
 	"main": "index.ts",
