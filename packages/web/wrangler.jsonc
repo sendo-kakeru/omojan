@@ -1,0 +1,33 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"compatibility_date": "2025-09-22",
+	"compatibility_flags": ["nodejs_compat"],
+	"env": {
+		"development": {
+			"vars": {
+				"ENV": "development"
+			}
+		},
+		"production": {
+			"routes": [{ "custom_domain": true, "pattern": "omojan.com" }],
+			"vars": {
+				"ENV": "production"
+			}
+		},
+		"staging": {
+			"routes": [{ "custom_domain": true, "pattern": "stg.omojan.com" }],
+			"vars": {
+				"ENV": "staging"
+			}
+		}
+	},
+	"main": "./workers/app.ts",
+	"name": "web",
+	"observability": {
+		"enabled": true
+	},
+	"vars": {
+		"BASIC_AUTH_PASSWORD": "omojan",
+		"BASIC_AUTH_USERNAME": "online"
+	}
+}
