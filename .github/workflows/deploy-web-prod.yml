@@ -1,0 +1,38 @@
+name: Deploy Web Production
+on:
+  push:
+    branches:
+      - main
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 60
+    env:
+      CLOUDFLARE_ENV: production
+      VITE_COGNITO_USER_POOL_ID: ${{ vars.VITE_COGNITO_USER_POOL_ID }}
+      VITE_COGNITO_CLIENT_ID: ${{ vars.VITE_COGNITO_CLIENT_ID }}
+      VITE_COGNITO_DOMAIN: ${{ vars.VITE_COGNITO_DOMAIN }}
+      VITE_API_URL: ${{ vars.VITE_API_URL }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup pnpm
+        uses: ./.github/actions/setup-pnpm
+
+      - name: Build dependencies packages
+        run: |
+          pnpm --filter @repo/env run build
+          pnpm --filter @repo/db run build
+          pnpm --filter @repo/shared run build
+          pnpm --filter @repo/api run build
+
+      - name: Build
+        run: pnpm run build
+        working-directory: packages/web
+      - name: Deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: packages/web

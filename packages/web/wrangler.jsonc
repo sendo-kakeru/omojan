@@ -11,12 +11,16 @@
 		"production": {
 			"routes": [{ "custom_domain": true, "pattern": "omojan.com" }],
 			"vars": {
+				"BASIC_AUTH_PASSWORD": "online",
+				"BASIC_AUTH_USERNAME": "omojan",
 				"ENV": "production"
 			}
 		},
 		"staging": {
 			"routes": [{ "custom_domain": true, "pattern": "stg.omojan.com" }],
 			"vars": {
+				"BASIC_AUTH_PASSWORD": "online",
+				"BASIC_AUTH_USERNAME": "omojan",
 				"ENV": "staging"
 			}
 		}
@@ -25,9 +29,5 @@
 	"name": "web",
 	"observability": {
 		"enabled": true
-	},
-	"vars": {
-		"BASIC_AUTH_PASSWORD": "omojan",
-		"BASIC_AUTH_USERNAME": "online"
 	}
 }
