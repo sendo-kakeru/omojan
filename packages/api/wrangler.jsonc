@@ -11,11 +11,6 @@
 	// 	]
 	// },
 	"env": {
-		"development": {
-			"vars": {
-				"ENV": "development"
-			}
-		},
 		"production": {
 			// "durable_objects": {
 			// 	"bindings": [

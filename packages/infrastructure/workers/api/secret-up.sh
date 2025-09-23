@@ -5,7 +5,7 @@ IFS=$'\n\t'
 # --- ENV 必須 & バリデーション ---
 : "${ENV:?ENV is required (production|staging)}"
 case "$ENV" in
-  production|staging|development) ;;
+  production|staging) ;;
   *) echo "ENV must be one of: production | staging" >&2; exit 2 ;;
 esac
 
