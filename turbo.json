@@ -16,6 +16,13 @@
 		"format": {},
 		"lint": {},
 		"migrate": {},
+		"storybook": {
+			"with": ["storybook:styles"]
+		},
+		"storybook:styles": {
+			"cache": false,
+			"persistent": true
+		},
 		"studio": {},
 		"up": {}
 	},
