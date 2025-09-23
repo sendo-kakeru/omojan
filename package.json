@@ -12,5 +12,7 @@
 	"name": "omojan",
 	"packageManager": "pnpm@10.17.0",
 	"private": true,
-	"scripts": {}
+	"scripts": {
+		"ci": "biome ci && turbo run check-types"
+	}
 }
