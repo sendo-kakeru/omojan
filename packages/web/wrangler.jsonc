@@ -3,26 +3,11 @@
 	"compatibility_date": "2025-09-22",
 	"compatibility_flags": ["nodejs_compat"],
 	"env": {
-		"development": {
-			"vars": {
-				"ENV": "development"
-			}
-		},
 		"production": {
-			"routes": [{ "custom_domain": true, "pattern": "omojan.com" }],
-			"vars": {
-				"BASIC_AUTH_PASSWORD": "online",
-				"BASIC_AUTH_USERNAME": "omojan",
-				"ENV": "production"
-			}
+			"routes": [{ "custom_domain": true, "pattern": "omojan.com" }]
 		},
 		"staging": {
-			"routes": [{ "custom_domain": true, "pattern": "stg.omojan.com" }],
-			"vars": {
-				"BASIC_AUTH_PASSWORD": "online",
-				"BASIC_AUTH_USERNAME": "omojan",
-				"ENV": "staging"
-			}
+			"routes": [{ "custom_domain": true, "pattern": "stg.omojan.com" }]
 		}
 	},
 	"main": "./workers/app.ts",
