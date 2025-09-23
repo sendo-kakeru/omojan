@@ -1,19 +1,19 @@
-import * as v from "valibot";
+import { type InferOutput, literal, object, string, variant } from "valibot";
 
-const serverEnvSchema = v.variant("ENV", [
-	v.object({
-		BASIC_AUTH_PASSWORD: v.string(),
-		BASIC_AUTH_USERNAME: v.string(),
-		ENV: v.literal("production"),
+const serverEnvSchema = variant("ENV", [
+	object({
+		BASIC_AUTH_PASSWORD: string(),
+		BASIC_AUTH_USERNAME: string(),
+		ENV: literal("production"),
 	}),
-	v.object({
-		BASIC_AUTH_PASSWORD: v.string(),
-		BASIC_AUTH_USERNAME: v.string(),
-		ENV: v.literal("staging"),
+	object({
+		BASIC_AUTH_PASSWORD: string(),
+		BASIC_AUTH_USERNAME: string(),
+		ENV: literal("staging"),
 	}),
-	v.object({
-		ENV: v.literal("development"),
+	object({
+		ENV: literal("development"),
 	}),
 ]);
 
-export type Env = v.InferOutput<typeof serverEnvSchema>;
+export type Env = InferOutput<typeof serverEnvSchema>;

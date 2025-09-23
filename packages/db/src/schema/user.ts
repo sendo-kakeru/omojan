@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm";
 import { boolean, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-valibot";
-import * as v from "valibot";
+import { type InferOutput, omit } from "valibot";
 
 // TODO: スキーマ整備
 export const userTable = pgTable("user", {
@@ -19,9 +19,9 @@ export const userTable = pgTable("user", {
 });
 
 // model
-export const userSchema = v.omit(createSelectSchema(userTable), [
+export const userSchema = omit(createSelectSchema(userTable), [
 	"createdAt",
 	"updatedAt",
 ]);
 
-export type User = v.InferOutput<typeof userSchema>;
+export type User = InferOutput<typeof userSchema>;
