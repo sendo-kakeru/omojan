@@ -3,16 +3,22 @@
 		"@cloudflare/vite-plugin": "^1.13.3",
 		"@react-router/node": "^7.9.1",
 		"@react-router/serve": "^7.9.1",
+		"classnames": "^2.5.1",
 		"isbot": "^5.1.30",
 		"react": "^19.1.1",
 		"react-dom": "^19.1.1",
+		"react-icons": "^5.5.0",
 		"react-router": "^7.9.1",
+		"tailwind-merge": "^3.3.1",
+		"tailwind-variants": "^3.1.1",
 		"valibot": "^1.1.0",
 		"vite-plugin-valibot-env": "^1.0.1"
 	},
 	"devDependencies": {
 		"@react-router/dev": "^7.9.1",
 		"@repo/typescript-config": "workspace:*",
+		"@storybook/react-vite": "^9.1.7",
+		"@tailwindcss/cli": "^4.1.13",
 		"@tailwindcss/vite": "^4.1.13",
 		"@types/node": "^24.5.2",
 		"@types/react": "^19.1.13",
@@ -22,6 +28,9 @@
 		"vite": "^7.1.7",
 		"vite-tsconfig-paths": "^5.1.4",
 		"wrangler": "^4.38.0"
+	},
+	"exports": {
+		"./style.css": "./dist/index.css"
 	},
 	"license": "UNLICENSED",
 	"name": "@repo/web",
@@ -35,6 +44,7 @@
 		"lint": "biome check .",
 		"preview": "pnpm run build && vite preview",
 		"start": "react-router-serve ./build/server/index.js",
+		"storybook:styles": "tailwindcss -i ./app/app.css -o ./dist/index.css --watch",
 		"typecheck": "pnpm run cf-typegen && react-router typegen && tsc"
 	},
 	"type": "module",
