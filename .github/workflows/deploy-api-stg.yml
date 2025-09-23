@@ -1,0 +1,35 @@
+name: Deploy API Staging
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - packages/api/**
+      - packages/db/**
+      - packages/shared/**
+      - packages/env/**
+      - packages/typescript-config/**
+      - .github/workflows/deploy-api-stg.yml
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup pnpm
+        uses: ./.github/actions/setup-pnpm
+
+      - name: Build dependencies packages
+        run: |
+          pnpm --filter @repo/env run build
+          pnpm --filter @repo/db run build
+          pnpm --filter @repo/shared run build
+
+      - name: Deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: packages/api
+          command: deploy --env staging
