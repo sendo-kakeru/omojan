@@ -3,13 +3,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - packages/api/**
-      - packages/db/**
-      - packages/shared/**
-      - packages/env/**
-      - packages/typescript-config/**
-      - .github/workflows/deploy-api-prod.yml
 jobs:
   deploy:
     runs-on: ubuntu-latest

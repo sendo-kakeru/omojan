@@ -3,6 +3,13 @@ on:
   push:
     branches:
       - develop
+    paths:
+      - packages/web/**
+      - packages/db/**
+      - packages/shared/**
+      - packages/env/**
+      - packages/typescript-config/**
+      - .github/workflows/deploy-web-stg.yml
 jobs:
   deploy:
     runs-on: ubuntu-latest
