@@ -27,98 +27,102 @@ type AnchorProps = ShareProps &
 		to: To;
 	};
 
-const variants = tv(
+const buttonVariants = tv(
 	{
+		base: classNames(
+			"pointer-events-auto inline-flex h-fit shrink-0 items-center justify-center gap-x-4 rounded-full font-medium transition-colors",
+			"disabled:cursor-not-allowed disabled:border-none disabled:bg-gray-300 disabled:text-gray-500 disabled:opacity-50",
+		),
 		compoundVariants: [
 			// アイコンのみ
 			{
-				class: { base: "p-6", content: "size-12" },
+				class: "size-fit justify-center p-6",
 				isIconOnly: true,
 				size: "S",
 			},
 			{
-				class: { base: "p-8", content: "size-16" },
+				class: "size-fit justify-center p-8",
 				isIconOnly: true,
 				size: "M",
 			},
 			{
-				class: { base: "p-10", content: "size-16" },
+				class: "size-fit justify-center p-10",
 				isIconOnly: true,
 				size: "L",
 			},
 
 			// 右アイコンあり
 			{
-				class: { base: "pr-8" },
+				class: "pr-8",
 				hasRightIcon: true,
 				size: "S",
 			},
 			{
-				class: { base: "pr-12" },
+				class: "pr-12",
 				hasRightIcon: true,
 				size: "M",
 			},
 			{
-				class: { base: "pr-16" },
+				class: "pr-16",
 				hasRightIcon: true,
 				size: "L",
 			},
 
 			// 左アイコンあり
 			{
-				class: { base: "pl-8" },
+				class: "pl-8",
 				hasLeftIcon: true,
 				size: "S",
 			},
 			{
-				class: { base: "pl-12" },
+				class: "pl-12",
 				hasLeftIcon: true,
 				size: "M",
 			},
 			{
-				class: { base: "pl-16" },
+				class: "pl-16",
 				hasLeftIcon: true,
 				size: "L",
 			},
 
 			// アイコン無し
 			{
-				class: { base: "px-12 py-2", content: "text-xs leading-20" },
+				class: "px-12 py-2",
 				isIconOnly: false,
 				size: "S",
 			},
 			{
-				class: { base: "px-16 py-4", content: "text-sm leading-24" },
+				class: "px-16 py-4",
 				isIconOnly: false,
 				size: "M",
 			},
 			{
-				class: { base: "px-20 py-4", content: "text-base leading-28" },
+				class: "px-20 py-4",
 				isIconOnly: false,
 				size: "L",
 			},
 
 			// fill
 			{
-				class: { base: "bg-green-400 hover:bg-green-500" },
+				class: "bg-green-400 text-white hover:bg-green-500",
 				color: "primary",
 				disabled: false,
 				variant: "fill",
 			},
 			{
-				class: { base: "bg-red-500 hover:bg-red-600" },
+				class: "bg-red-500 text-white hover:bg-red-600",
 				color: "danger",
 				disabled: false,
 				variant: "fill",
 			},
 			{
-				class: { base: "bg-gray-700 hover:bg-gray-900" },
+				class: "bg-gray-700 text-white hover:bg-gray-900",
 				color: "black",
 				disabled: false,
 				variant: "fill",
 			},
 			{
-				class: { base: "bg-gray-300 hover:bg-gray-400" },
+				class: "bg-gray-300 text-white hover:bg-gray-400",
 				color: "gray",
 				disabled: false,
 				variant: "fill",
@@ -126,38 +130,33 @@ const variants = tv(
 
 			// outline
 			{
-				class: { base: "border-green-400 text-green-400 hover:bg-green-100" },
+				class:
+					"border-1 border-green-400 bg-white text-green-400 hover:bg-green-100",
 				color: "primary",
 				disabled: false,
 				variant: "outline",
 			},
 			{
-				class: { base: "border-red-500 text-red-500 hover:bg-red-100" },
+				class: "border-1 border-red-500 bg-white text-red-500 hover:bg-red-100",
 				color: "danger",
 				disabled: false,
 				variant: "outline",
 			},
 			{
-				class: { base: "border-gray-700 text-gray-700 hover:bg-gray-200" },
+				class:
+					"border-1 border-gray-700 bg-white text-gray-700 hover:bg-gray-200",
 				color: "black",
 				disabled: false,
 				variant: "outline",
 			},
 			{
-				class: { base: "border-gray-300 text-gray-500 hover:bg-gray-200" },
+				class:
+					"border-1 border-gray-300 bg-white text-gray-500 hover:bg-gray-200",
 				color: "gray",
 				disabled: false,
 				variant: "outline",
 			},
 		],
-		slots: {
-			base: classNames(
-				"pointer-events-auto inline-flex h-fit shrink-0 items-center justify-center gap-x-4 rounded-full font-medium transition-colors",
-				"disabled:cursor-not-allowed disabled:border-none disabled:bg-gray-300 disabled:text-gray-500 disabled:opacity-50",
-			),
-			content: "flex shrink-0 items-center justify-center",
-			icon: "flex size-20 shrink-0 items-center justify-center",
-		},
 		variants: {
 			color: {
 				black: "",
@@ -170,7 +169,7 @@ const variants = tv(
 			hasRightIcon: { false: "", true: "" },
 			isIconOnly: {
 				false: "",
-				true: { base: "size-fit justify-center" },
+				true: "",
 			},
 			size: {
 				L: "",
@@ -178,10 +177,71 @@ const variants = tv(
 				S: "",
 			},
 			variant: {
-				fill: { base: "text-white", content: "font-bold" },
-				outline: { base: "border-1 bg-white" },
+				fill: "",
+				outline: "",
 			},
 		},
+	},
+	{ twMerge: false },
+);
+
+const contentVariants = tv(
+	{
+		base: "flex shrink-0 items-center justify-center",
+		compoundVariants: [
+			{
+				class: "size-12",
+				isIconOnly: true,
+				size: "S",
+			},
+			{
+				class: "size-16",
+				isIconOnly: true,
+				size: "M",
+			},
+			{
+				class: "size-16",
+				isIconOnly: true,
+				size: "L",
+			},
+			{
+				class: "text-xs leading-20",
+				isIconOnly: false,
+				size: "S",
+			},
+			{
+				class: "text-sm leading-24",
+				isIconOnly: false,
+				size: "M",
+			},
+			{
+				class: "text-base leading-28",
+				isIconOnly: false,
+				size: "L",
+			},
+		],
+		variants: {
+			isIconOnly: {
+				false: "",
+				true: "",
+			},
+			size: {
+				L: "",
+				M: "",
+				S: "",
+			},
+			variant: {
+				fill: "font-bold",
+				outline: "",
+			},
+		},
+	},
+	{ twMerge: false },
+);
+
+const iconVariants = tv(
+	{
+		base: "flex size-20 shrink-0 items-center justify-center",
 	},
 	{ twMerge: false },
 );
@@ -199,11 +259,9 @@ export function Button({
 	...props
 }: ButtonProps | AnchorProps) {
 	const disabled = props.as === "link" ? false : (props.disabled ?? false);
-	const {
-		base: baseVariants,
-		content: contentVariants,
-		icon: iconVariants,
-	} = variants({
+
+	const buttonClassName = buttonVariants({
+		className,
 		color,
 		disabled,
 		hasLeftIcon: !!leftIcon,
@@ -212,18 +270,25 @@ export function Button({
 		size,
 		variant,
 	});
-	const buttonClassName = baseVariants({ className });
+
+	const contentClassName = contentVariants({
+		isIconOnly,
+		size,
+		variant,
+	});
+
+	const iconClassName = iconVariants();
 
 	const content = (
 		<>
 			{leftIcon && (
-				<span aria-disabled={disabled} className={iconVariants()}>
+				<span aria-disabled={disabled} className={iconClassName}>
 					{leftIcon}
 				</span>
 			)}
-			<span className={contentVariants()}>{children}</span>
+			<span className={contentClassName}>{children}</span>
 			{rightIcon && (
-				<span aria-disabled={disabled} className={iconVariants()}>
+				<span aria-disabled={disabled} className={iconClassName}>
 					{rightIcon}
 				</span>
 			)}
