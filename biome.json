@@ -32,7 +32,7 @@
 				"noConstantCondition": "error",
 				"noUnusedImports": "error",
 				"noUnusedVariables": "error",
-				"useUniqueElementIds": "warn"
+				"useUniqueElementIds": "off"
 			},
 			"nursery": {
 				"noFloatingPromises": "error",
