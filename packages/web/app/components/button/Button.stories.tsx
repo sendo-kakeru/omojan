@@ -174,21 +174,6 @@ export const BaseButton: Story = {
 	),
 };
 
-export const Hover: Story = {
-	args: {} as never,
-	parameters: {
-		pseudo: {
-			hover: true,
-		},
-	},
-	render: () => (
-		<div className="flex flex-col gap-32">
-			<ButtonTemplate />
-			<LinkTemplate />
-		</div>
-	),
-};
-
 export const Disabled: Story = {
 	args: {} as never,
 	render: () => <ButtonTemplate args={{ disabled: true }} />,
