@@ -1,1 +1,2 @@
-@import "@repo/web/style.css";
+@import "@repo/web/build.css";
+@import "@repo/web/config.css";

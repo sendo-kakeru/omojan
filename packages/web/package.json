@@ -30,7 +30,8 @@
 		"wrangler": "^4.38.0"
 	},
 	"exports": {
-		"./style.css": "./dist/index.css"
+		"./build.css": "./dist/index.css",
+		"./config.css": "./app/app.css"
 	},
 	"license": "UNLICENSED",
 	"name": "@repo/web",
