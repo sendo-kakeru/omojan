@@ -10,6 +10,7 @@ node_modules
 .env.test
 .env.production
 .env.staging
+*.local
 
 # Testing
 coverage
@@ -21,16 +22,20 @@ worker-configuration.d.ts
 # Turbo
 .turbo
 
+# Storybook
+storybook-static
+
 # React Router
 .react-router
 
 # logs
-logs/
+logs
 *.log
 pnpm-debug.log*
 
 # Build Outputs
-out/
+out
+dist-ssr
 build
 dist
 bin
@@ -38,3 +43,8 @@ bin
 # Misc
 .DS_Store
 *.pem
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

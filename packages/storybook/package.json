@@ -1,0 +1,41 @@
+{
+	"dependencies": {
+		"react": "^19.1.1",
+		"react-dom": "^19.1.1",
+		"react-router": "^7.9.1"
+	},
+	"devDependencies": {
+		"@chromatic-com/storybook": "^4.1.1",
+		"@repo/typescript-config": "workspace:*",
+		"@repo/web": "workspace:*",
+		"@storybook/addon-a11y": "^9.1.7",
+		"@storybook/addon-docs": "^9.1.7",
+		"@storybook/addon-vitest": "^9.1.7",
+		"@storybook/react-vite": "^9.1.7",
+		"@tailwindcss/vite": "^4.1.13",
+		"@types/react": "^19.1.13",
+		"@types/react-dom": "^19.1.9",
+		"@vitejs/plugin-react": "^5.0.3",
+		"@vitest/browser": "^3.2.4",
+		"@vitest/coverage-v8": "^3.2.4",
+		"globals": "^16.4.0",
+		"playwright": "^1.55.1",
+		"storybook": "^9.1.7",
+		"tailwindcss": "^4.1.13",
+		"typescript": "~5.8.3",
+		"vite": "^7.1.7",
+		"vitest": "^3.2.4"
+	},
+	"license": "UNLICENSED",
+	"name": "@repo/storybook",
+	"private": true,
+	"scripts": {
+		"build": "storybook build",
+		"format": "biome check --fix --unsafe .",
+		"lint": "biome check .",
+		"storybook": "storybook dev -p 6006",
+		"type-check": "pnpm run cf-typegen && tsc --noEmit"
+	},
+	"type": "module",
+	"version": "1.0.0"
+}
