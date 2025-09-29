@@ -17,7 +17,7 @@
 	"devDependencies": {
 		"@react-router/dev": "^7.9.3",
 		"@repo/typescript-config": "workspace:*",
-		"@storybook/react-vite": "^9.1.7",
+		"@storybook/react-vite": "^9.1.8",
 		"@tailwindcss/cli": "^4.1.13",
 		"@tailwindcss/vite": "^4.1.13",
 		"@types/node": "^24.5.2",
