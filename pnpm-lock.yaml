@@ -183,8 +183,8 @@ importers:
         specifier: ^2.5.1
         version: 2.5.1
       isbot:
-        specifier: ^5.1.30
-        version: 5.1.30
+        specifier: ^5.1.31
+        version: 5.1.31
       react:
         specifier: ^19.1.1
         version: 19.1.1
@@ -2947,8 +2947,8 @@ packages:
     resolution: {integrity: sha512-fKzAra0rGJUUBwGBgNkHZuToZcn+TtXHpeCgmkMJMMYx1sQDYaCSyjJBSCa2nH1DGm7s3n1oBnohoVTBaN7Lww==}
     engines: {node: '>=8'}
 
-  isbot@5.1.30:
-    resolution: {integrity: sha512-3wVJEonAns1OETX83uWsk5IAne2S5zfDcntD2hbtU23LelSqNXzXs9zKjMPOLMzroCgIjCfjYAEHrd2D6FOkiA==}
+  isbot@5.1.31:
+    resolution: {integrity: sha512-DPgQshehErHAqSCKDb3rNW03pa2wS/v5evvUqtxt6TTnHRqAG8FdzcSSJs9656pK6Y+NT7K9R4acEYXLHYfpUQ==}
     engines: {node: '>=18'}
 
   isexe@2.0.0:
@@ -5578,7 +5578,7 @@ snapshots:
       dedent: 1.7.0
       es-module-lexer: 1.7.0
       exit-hook: 2.2.1
-      isbot: 5.1.30
+      isbot: 5.1.31
       jsesc: 3.0.2
       lodash: 4.17.21
       pathe: 1.1.2
@@ -7032,7 +7032,7 @@ snapshots:
     dependencies:
       is-docker: 2.2.1
 
-  isbot@5.1.30: {}
+  isbot@5.1.31: {}
 
   isexe@2.0.0: {}
 
