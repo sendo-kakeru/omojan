@@ -271,12 +271,6 @@ export function Button({
 		variant,
 	});
 
-	const contentClassName = contentVariants({
-		isIconOnly,
-		size,
-		variant,
-	});
-
 	const iconClassName = iconVariants();
 
 	const content = (
@@ -286,7 +280,15 @@ export function Button({
 					{leftIcon}
 				</span>
 			)}
-			<span className={contentClassName}>{children}</span>
+			<span
+				className={contentVariants({
+					isIconOnly,
+					size,
+					variant,
+				})}
+			>
+				{children}
+			</span>
 			{rightIcon && (
 				<span aria-disabled={disabled} className={iconClassName}>
 					{rightIcon}
