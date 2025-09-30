@@ -4,7 +4,7 @@ import { userSchema, userTable } from "./user";
 
 // model
 export const meSchema = object({
-	...pick(userSchema, ["email", "name", "avatarUrl"]).entries,
+	...pick(userSchema, ["email", "name", "image"]).entries,
 	userId: userSchema.entries.id,
 });
 export type Me = InferOutput<typeof meSchema>;
@@ -17,7 +17,7 @@ export type GetMeResponseBody = InferOutput<typeof getMeResponseBodySchema>;
 export const createMeRequestBodySchema = pick(createInsertSchema(userTable), [
 	"email",
 	"name",
-	"avatarUrl",
+	"image",
 ]);
 export type CreateMeRequestBody = InferOutput<typeof createMeRequestBodySchema>;
 export const createMeResponseBodySchema = meSchema;
