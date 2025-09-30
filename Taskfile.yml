@@ -21,7 +21,7 @@ tasks:
   migrate:
     desc: Run dev database migrations
     cmds:
-      - cd packages/db && pnpm migrate
+      - pnpm turbo run migrate --filter=@repo/db
 
   psql:
     desc: Connect to the main PostgreSQL container via bash

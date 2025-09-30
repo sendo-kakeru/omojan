@@ -1,21 +1,22 @@
-import { sql } from "drizzle-orm";
-import { boolean, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-valibot";
 import { type InferOutput, omit } from "valibot";
 
-// TODO: スキーマ整備
+export const userStatusEnum = pgEnum("user_status", ["active", "deactivated"]);
+
 export const userTable = pgTable("user", {
-	avatarUrl: text(),
-	createdAt: timestamp("created_at").notNull().defaultNow(),
+	createdAt: timestamp("created_at", { mode: "date", withTimezone: true })
+		.notNull()
+		.defaultNow(),
 	email: text().unique().notNull(),
 	id: uuid().primaryKey().defaultRandom(),
-	isActive: boolean().default(true).notNull(),
+	image: text(),
 	name: text().notNull(),
+	status: userStatusEnum().notNull().default("active"),
 	sub: text().unique().notNull(),
-	updatedAt: timestamp("updated_at")
+	updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true })
 		.notNull()
-		.defaultNow()
-		.$onUpdate(() => sql`now()`),
+		.defaultNow(),
 });
 
 // model
