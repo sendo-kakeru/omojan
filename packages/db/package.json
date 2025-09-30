@@ -6,20 +6,21 @@
 		"drizzle-kit": "^0.31.4",
 		"drizzle-orm": "^0.44.5",
 		"drizzle-valibot": "^0.4.2",
+		"pg": "^8.16.3",
 		"valibot": "^1.1.0"
 	},
 	"exports": {
 		"./schema/*": {
+			"types": "./dist/schema/*.d.ts",
 			"import": "./dist/esm/*.js",
-			"require": "./dist/*.js",
-			"types": "./dist/schema/*.d.ts"
+			"require": "./dist/*.js"
 		}
 	},
 	"license": "UNLICENSED",
 	"name": "@repo/db",
 	"private": true,
 	"scripts": {
-		"build": "pnpm run \"/^build:/\"",
+		"build": "pnpm run build:tsup && pnpm run build:tsc",
 		"build:tsc": "tsc",
 		"build:tsup": "tsup --clean",
 		"dev": "pnpm run \"/^dev:/\"",
