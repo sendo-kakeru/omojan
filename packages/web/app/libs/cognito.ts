@@ -331,20 +331,22 @@ class CognitoService {
 
 		const LAST_USER_KEY = `${COGNITO_LOCALSTORAGE_KEY_PREFIX}.LastAuthUser`;
 		const lastUser = localStorage.getItem(LAST_USER_KEY);
-		if (lastUser) {
-			const prefix = `${COGNITO_LOCALSTORAGE_KEY_PREFIX}.${lastUser}`;
-			for (const key of [
-				`${prefix}.idToken`,
-				`${prefix}.accessToken`,
-				`${prefix}.refreshToken`,
-				`${prefix}.clockDrift`,
-				LAST_USER_KEY,
-				PKCE_STORAGE_KEY,
-				STATE_STORAGE_KEY,
-				NONCE_STORAGE_KEY,
-			]) {
-				localStorage.removeItem(key);
-			}
+
+		if (!lastUser) {
+			throw new Error("最後に認証したユーザーが見つかりません");
+		}
+		const prefix = `${COGNITO_LOCALSTORAGE_KEY_PREFIX}.${lastUser}`;
+		for (const key of [
+			`${prefix}.idToken`,
+			`${prefix}.accessToken`,
+			`${prefix}.refreshToken`,
+			`${prefix}.clockDrift`,
+			LAST_USER_KEY,
+			PKCE_STORAGE_KEY,
+			STATE_STORAGE_KEY,
+			NONCE_STORAGE_KEY,
+		]) {
+			localStorage.removeItem(key);
 		}
 	}
 
