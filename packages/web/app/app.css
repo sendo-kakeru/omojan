@@ -35,8 +35,8 @@
 
 @layer components {
 	.container {
-		max-width: 1040px;
-		padding-inline: 24px;
+		max-width: 800px;
+		padding-inline: 16px;
 		margin-inline: auto;
 	}
 }
