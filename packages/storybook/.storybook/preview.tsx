@@ -1,14 +1,17 @@
 import type { Preview } from "@storybook/react-vite";
 import { BrowserRouter } from "react-router";
+import { ToastProvider } from "../../web/app/components/Toast";
 import "../style.css";
 import type { ReactNode } from "react";
 
 const decorator = (Story: () => ReactNode) => {
 	return (
 		<BrowserRouter>
-			<div className="font-[Inter] text-neutral-800">
-				<Story />
-			</div>
+			<ToastProvider>
+				<div className="font-[Inter] text-neutral-800">
+					<Story />
+				</div>
+			</ToastProvider>
 		</BrowserRouter>
 	);
 };
