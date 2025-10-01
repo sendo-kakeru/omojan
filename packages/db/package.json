@@ -32,5 +32,6 @@
 		"studio": "drizzle-kit studio",
 		"type-check": "tsc --noEmit"
 	},
+	"type": "module",
 	"version": "1.0.0"
 }
