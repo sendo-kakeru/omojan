@@ -10,6 +10,7 @@ import {
 import type { Route } from "./+types/root";
 import "./app.css";
 import type { PropsWithChildren } from "react";
+import { AuthHeader } from "./components/auth/AuthHeader";
 import { ToastProvider } from "./components/Toast";
 
 // TODO: メタ情報設定
@@ -46,7 +47,8 @@ export function Layout({ children }: PropsWithChildren) {
 
 export default function App() {
 	return (
-		<div className="container">
+		<div className="mx-auto min-h-svh max-w-[800px] px-16">
+			<AuthHeader user={null} />
 			<Outlet />
 		</div>
 	);

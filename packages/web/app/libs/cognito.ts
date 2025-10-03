@@ -7,7 +7,7 @@ import {
 	CognitoUserPool,
 	type CognitoUserSession,
 } from "amazon-cognito-identity-js";
-import { createRemoteJWKSet, jwtVerify } from "jose";
+import { jwtDecode } from "jwt-decode";
 import {
 	type InferOutput,
 	object,
@@ -19,8 +19,6 @@ import {
 } from "valibot";
 
 const COGNITO_LOCALSTORAGE_KEY_PREFIX = `CognitoIdentityServiceProvider.${import.meta.env.VITE_COGNITO_CLIENT_ID}`;
-const ISSUER = `${import.meta.env.VITE_COGNITO_DOMAIN}/${import.meta.env.VITE_COGNITO_USER_POOL_ID}`;
-const JWKS = createRemoteJWKSet(new URL(`${ISSUER}/.well-known/jwks.json`));
 const PKCE_STORAGE_KEY = "pkce_verifier";
 const STATE_STORAGE_KEY = "oauth_state";
 const NONCE_STORAGE_KEY = "oauth_nonce";
@@ -329,25 +327,12 @@ class CognitoService {
 		const cognitoUser = this.userPool.getCurrentUser();
 		if (cognitoUser) cognitoUser.signOut();
 
-		const LAST_USER_KEY = `${COGNITO_LOCALSTORAGE_KEY_PREFIX}.LastAuthUser`;
-		const lastUser = localStorage.getItem(LAST_USER_KEY);
-
-		if (!lastUser) {
-			throw new Error("最後に認証したユーザーが見つかりません");
-		}
-		const prefix = `${COGNITO_LOCALSTORAGE_KEY_PREFIX}.${lastUser}`;
-		for (const key of [
-			`${prefix}.idToken`,
-			`${prefix}.accessToken`,
-			`${prefix}.refreshToken`,
-			`${prefix}.clockDrift`,
-			LAST_USER_KEY,
-			PKCE_STORAGE_KEY,
-			STATE_STORAGE_KEY,
-			NONCE_STORAGE_KEY,
-		]) {
-			localStorage.removeItem(key);
-		}
+		window.location.href = `${import.meta.env.VITE_COGNITO_DOMAIN}/logout?${new URLSearchParams(
+			{
+				client_id: import.meta.env.VITE_COGNITO_CLIENT_ID,
+				logout_uri: `${window.location.origin}`,
+			},
+		).toString()}`;
 	}
 
 	async getCurrentSession(): Promise<CognitoUserSession | null> {
@@ -382,12 +367,7 @@ class CognitoService {
 
 	async decodeIdToken(idToken: string): Promise<CognitoIdTokenPayload | null> {
 		try {
-			const { payload } = await jwtVerify(idToken, JWKS, {
-				algorithms: ["RS256"],
-				audience: import.meta.env.VITE_COGNITO_CLIENT_ID,
-				issuer: ISSUER,
-			});
-
+			const payload = jwtDecode(idToken);
 			return parse(cognitoIdTokenPayloadSchema, payload);
 		} catch (error) {
 			console.error(

@@ -7,21 +7,26 @@ export function Dialog({
 	title,
 	description,
 	footer,
+	onOpenAutoFocus,
 	children,
 	...props
 }: Pick<
 	React.ComponentProps<typeof DialogPrimitive.Root>,
 	"open" | "onOpenChange" | "children"
-> & {
-	trigger?: React.ReactNode;
-	title?: React.ReactNode;
-	description?: React.ReactNode;
-	footer?: React.ReactNode;
-}) {
+> &
+	Pick<
+		React.ComponentProps<typeof DialogPrimitive.Content>,
+		"onOpenAutoFocus"
+	> & {
+		trigger?: React.ReactNode;
+		title?: React.ReactNode;
+		description?: React.ReactNode;
+		footer?: React.ReactNode;
+	}) {
 	return (
 		<DialogRoot {...props}>
 			{trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-			<DialogContent>
+			<DialogContent onOpenAutoFocus={onOpenAutoFocus}>
 				{(title || description) && (
 					<DialogHeader>
 						{title && <DialogTitle>{title}</DialogTitle>}
