@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
 @theme {
 	--spacing: 1px;
@@ -30,13 +31,5 @@
 		to {
 			transform: translateX(calc(100% + 25px));
 		}
-	}
-}
-
-@layer components {
-	.container {
-		max-width: 800px;
-		padding-inline: 16px;
-		margin-inline: auto;
 	}
 }
