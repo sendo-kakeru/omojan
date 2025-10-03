@@ -115,7 +115,9 @@ export const userPoolClient = new aws.cognito.UserPoolClient(
 		allowedOauthFlowsUserPoolClient: true,
 		allowedOauthScopes: ["email", "openid", "profile"],
 
-		// TODO: 本番環境のURLを設定(Stack追加時)
+		// TODO:
+		// 本番環境のURLを設定(Stack追加時)
+		// URLの定数化
 		callbackUrls: [
 			"http://localhost:5173/auth/callback",
 			"https://stg.omojan.com/auth/callback",
@@ -127,6 +129,8 @@ export const userPoolClient = new aws.cognito.UserPoolClient(
 		// セキュリティ設定
 		generateSecret: false,
 		idTokenValidity: 24, // 24時間
+
+		logoutUrls: ["http://localhost:5173", "https://stg.omojan.com"],
 		name: "user-pool-client",
 		preventUserExistenceErrors: "ENABLED",
 
