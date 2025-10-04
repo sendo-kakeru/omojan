@@ -1,12 +1,9 @@
-import type { User } from "@repo/db/schema/user";
 import { useState } from "react";
 import { LuLogIn } from "react-icons/lu";
 import { Button } from "../button/Button";
 import { SigninModal } from "./SigninModal";
 
-type PickedUser = Pick<User, "name" | "image">;
-
-export function AuthUserMenuButton({ user }: { user: PickedUser | null }) {
+export function AuthUserMenuButton() {
 	// if (user) {
 	// 	return <UserMenuButton user={user} />;
 	// }
