@@ -11,7 +11,7 @@ export type DrizzleClient = NodePgDatabase<Record<string, never>> & {
 	$client: Pool;
 };
 
-// NOTE: 今のDrizzleのバージョンではneonの型定義にバグがあるので無理やり方の上書きをしている https://github.com/drizzle-team/drizzle-orm/issues/3334#issuecomment-3239456692
+// NOTE: 今のDrizzleのバージョンではneonの型定義にバグがあるので無理やり型の上書きをしている https://github.com/drizzle-team/drizzle-orm/issues/3334#issuecomment-3239456692
 export function getDrizzleClient({
 	env,
 	isWs,
