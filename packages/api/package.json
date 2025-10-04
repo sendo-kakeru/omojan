@@ -1,11 +1,17 @@
 {
 	"dependencies": {
+		"@hono/valibot-validator": "^0.5.3",
+		"@neondatabase/serverless": "^1.0.2",
 		"@repo/db": "workspace:*",
-		"hono": "^4.9.8"
+		"aws-jwt-verify": "^5.1.1",
+		"drizzle-orm": "^0.44.5",
+		"hono": "^4.9.8",
+		"valibot": "^1.1.0"
 	},
 	"devDependencies": {
 		"@repo/tsup-config": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
+		"@types/pg": "^8.15.5",
 		"wrangler": "^4.4.0"
 	},
 	"exports": {
