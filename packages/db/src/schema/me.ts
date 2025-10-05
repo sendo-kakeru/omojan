@@ -1,5 +1,5 @@
 import { createInsertSchema } from "drizzle-valibot";
-import { type InferOutput, object, pick } from "valibot";
+import { type InferOutput, nullable, object, pick } from "valibot";
 import { userSchema, userTable } from "./user";
 
 // model
@@ -10,7 +10,7 @@ export const meSchema = object({
 export type Me = InferOutput<typeof meSchema>;
 
 // find
-export const getMeResponseBodySchema = meSchema;
+export const getMeResponseBodySchema = nullable(meSchema);
 export type GetMeResponseBody = InferOutput<typeof getMeResponseBodySchema>;
 
 // create
