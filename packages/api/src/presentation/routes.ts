@@ -11,6 +11,7 @@ import type {
 	HybridRouteContext,
 	PrivateRouteContext,
 } from "../types";
+import { routes as meRoutes } from "./me/meRoutes";
 
 // HTTP
 const publicRoutes = new Hono<BaseContext>();
@@ -21,7 +22,8 @@ const privateRoutes = new Hono<PrivateRouteContext>()
 	.use(privateAuthMiddleware())
 	.get("/private", (c): HttpRespondReturn => {
 		return c.json({ data: null, message: "This is a private route" });
-	});
+	})
+	.route("/me", meRoutes);
 
 // WebSocket
 const wsHybridRoutes = new Hono<HybridRouteContext>().use(

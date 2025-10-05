@@ -13,7 +13,7 @@ export const routeValidateCallback:
 	| undefined = (result): void => {
 	if (!result.success) {
 		throw new HTTPException(400, {
-			message: result.issues.map((issue) => issue.message).join("\n"),
+			message: `リクエストの内容が正しくありません: ${result.issues.map((issue) => issue.message).join("\n")}`,
 		});
 	}
 };

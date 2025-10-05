@@ -1,11 +1,13 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { HTTPException } from "hono/http-exception";
+import { getDrizzleClient } from "./libs/drizzle";
 import { routes } from "./presentation/routes";
 import type { BaseContext, HttpRespondReturn } from "./types";
 
 const app = new Hono<BaseContext>()
 	.use((c, next) => {
+		c.set("db", getDrizzleClient(c));
 		const corsMiddleware = cors({
 			allowHeaders: ["Content-Type", "Authorization"],
 			allowMethods: [
