@@ -30,5 +30,10 @@ jobs:
       - name: Setup pnpm
         uses: ./.github/actions/setup-pnpm
 
+      - name: Build dependencies packages
+        run: |
+          pnpm turbo run build --filter @repo/db
+          pnpm turbo run build --filter @repo/mock
+          pnpm turbo run build --filter @repo/shared
       - name: Run CI
         run: pnpm run ci --concurrency=100%
