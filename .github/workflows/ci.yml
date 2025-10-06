@@ -9,6 +9,24 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test-db
+        ports:
+          - "5434:5432"
+        options: >-
+          --health-cmd="pg_isready -U postgres -d test-db"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      TEST_DATABASE_URL: postgresql://postgres:postgres@postgres:5432/test-db
+
     steps:
       - uses: actions/checkout@v5
 
