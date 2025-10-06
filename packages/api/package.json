@@ -38,8 +38,8 @@
 		"dev:wrangler": "wrangler dev",
 		"format": "biome check --fix --unsafe .",
 		"lint": "biome check .",
-		"test": "dotenv -- bash -c 'export DATABASE_URL=${TEST_DATABASE_URL}; vitest'",
-		"test:run": "dotenv -- bash -c 'export DATABASE_URL=${TEST_DATABASE_URL}; vitest run'",
+		"test": "DATABASE_URL=postgresql://test:test@localhost:5432/test?schema=public vitest",
+		"test:run": "DATABASE_URL=postgresql://test:test@localhost:5432/test?schema=public vitest run",
 		"type-check": "pnpm run cf-typegen && tsc --noEmit"
 	},
 	"type": "module",

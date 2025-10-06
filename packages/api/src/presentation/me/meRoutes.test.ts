@@ -11,6 +11,7 @@ import type { PrivateRouteContext } from "../../types";
 import { routes } from "./meRoutes";
 
 describe("meRoutes", () => {
+	const db = drizzle(process.env.DATABASE_URL);
 	const app = new Hono<PrivateRouteContext>()
 		.use("*", async (c, next) => {
 			c.set("db", db);
@@ -18,7 +19,6 @@ describe("meRoutes", () => {
 			await next();
 		})
 		.route("/me", routes);
-	const db = drizzle(process.env.DATABASE_URL);
 	const mockHonoClient = testClient<typeof app>(app);
 
 	beforeEach(async () => {
