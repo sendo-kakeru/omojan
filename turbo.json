@@ -15,7 +15,7 @@
 		},
 		"format": {},
 		"lint": {},
-		"migrate": {},
+		"migrate:dev": {},
 		"storybook": {
 			"with": ["storybook:styles"]
 		},
@@ -24,6 +24,8 @@
 			"persistent": true
 		},
 		"studio": {},
+		"test": {},
+		"test:run": {},
 		"up": {}
 	},
 	"ui": "tui"

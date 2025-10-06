@@ -11,6 +11,9 @@ importers:
       '@biomejs/biome':
         specifier: ^2.2.4
         version: 2.2.4
+      dotenv-cli:
+        specifier: ^10.0.0
+        version: 10.0.0
       lefthook:
         specifier: ^1.13.4
         version: 1.13.4
@@ -43,10 +46,10 @@ importers:
         version: 5.1.1
       drizzle-orm:
         specifier: ^0.44.5
-        version: 0.44.6(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@types/pg@8.15.5)(pg@8.16.3)
+        version: 0.44.6(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@types/pg@8.15.5)(pg@8.16.3)(postgres@3.4.7)
       drizzle-valibot:
         specifier: ^0.4.2
-        version: 0.4.2(drizzle-orm@0.44.6(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@types/pg@8.15.5)(pg@8.16.3))(valibot@1.1.0(typescript@5.9.2))
+        version: 0.4.2(drizzle-orm@0.44.6(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@types/pg@8.15.5)(pg@8.16.3)(postgres@3.4.7))(valibot@1.1.0(typescript@5.9.2))
       hono:
         specifier: ^4.9.8
         version: 4.9.8
@@ -54,6 +57,12 @@ importers:
         specifier: ^1.1.0
         version: 1.1.0(typescript@5.9.2)
     devDependencies:
+      '@faker-js/faker':
+        specifier: ^10.0.0
+        version: 10.0.0
+      '@repo/mock':
+        specifier: workspace:*
+        version: link:../mock
       '@repo/tsup-config':
         specifier: workspace:*
         version: link:../tsup-config
@@ -63,6 +72,12 @@ importers:
       '@types/pg':
         specifier: ^8.15.5
         version: 8.15.5
+      pg:
+        specifier: ^8.16.3
+        version: 8.16.3
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/node@24.5.2)(@vitest/browser@3.2.4)(jiti@2.6.0)(lightningcss@1.30.1)
       wrangler:
         specifier: ^4.4.0
         version: 4.38.0
@@ -83,10 +98,10 @@ importers:
         version: 0.31.4
       drizzle-orm:
         specifier: ^0.44.5
-        version: 0.44.6(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@types/pg@8.15.5)(pg@8.16.3)
+        version: 0.44.6(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@types/pg@8.15.5)(pg@8.16.3)(postgres@3.4.7)
       drizzle-valibot:
         specifier: ^0.4.2
-        version: 0.4.2(drizzle-orm@0.44.6(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@types/pg@8.15.5)(pg@8.16.3))(valibot@1.1.0(typescript@5.9.2))
+        version: 0.4.2(drizzle-orm@0.44.6(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@types/pg@8.15.5)(pg@8.16.3)(postgres@3.4.7))(valibot@1.1.0(typescript@5.9.2))
       pg:
         specifier: ^8.16.3
         version: 8.16.3
@@ -117,6 +132,21 @@ importers:
       valibot:
         specifier: ^1.1.0
         version: 1.1.0(typescript@5.9.2)
+
+  packages/mock:
+    devDependencies:
+      '@faker-js/faker':
+        specifier: ^10.0.0
+        version: 10.0.0
+      '@repo/db':
+        specifier: workspace:*
+        version: link:../db
+      '@repo/tsup-config':
+        specifier: workspace:*
+        version: link:../tsup-config
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
 
   packages/shared:
     dependencies:
@@ -1048,6 +1078,10 @@ packages:
     engines: {node: '>=18'}
     cpu: [x64]
     os: [win32]
+
+  '@faker-js/faker@10.0.0':
+    resolution: {integrity: sha512-UollFEUkVXutsaP+Vndjxar40Gs5JL2HeLcl8xO1QAjJgOdhc3OmBFWyEylS+RddWaaBiAzH+5/17PLQJwDiLw==}
+    engines: {node: ^20.19.0 || ^22.13.0 || ^23.5.0 || >=24.0.0, npm: '>=10'}
 
   '@floating-ui/core@1.7.3':
     resolution: {integrity: sha512-sGnvb5dmrJaKEZ+LDIpguvdX3bDlEllmv4/ClQ9awcmCZrlx5jQyyMWFM5kBI+EyNOCDDiKk8il0zeuX3Zlg/w==}
@@ -2888,6 +2922,18 @@ packages:
   dom-accessibility-api@0.6.3:
     resolution: {integrity: sha512-7ZgogeTnjuHbo+ct10G9Ffp0mif17idi0IyWNVA/wcwcm7NPOD/WEHVP3n7n3MhXqxoIYm8d6MuZohYWIZ4T3w==}
 
+  dotenv-cli@10.0.0:
+    resolution: {integrity: sha512-lnOnttzfrzkRx2echxJHQRB6vOAMSCzzZg79IxpC00tU42wZPuZkQxNNrrwVAxaQZIIh001l4PxVlCrBxngBzA==}
+    hasBin: true
+
+  dotenv-expand@11.0.7:
+    resolution: {integrity: sha512-zIHwmZPRshsCdpMDyVsqGmgyP0yT8GAgXUnkdAoJisxvf33k7yO6OuoKmcTGuXPWSsm8Oh88nZicRLA9Y0rUeA==}
+    engines: {node: '>=12'}
+
+  dotenv@16.6.1:
+    resolution: {integrity: sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow==}
+    engines: {node: '>=12'}
+
   dotenv@17.2.2:
     resolution: {integrity: sha512-Sf2LSQP+bOlhKWWyhFsn0UsfdK/kCWRv1iuA2gXAwt3dyNabr6QSj00I2V10pidqz69soatm9ZwZvpQMTIOd5Q==}
     engines: {node: '>=12'}
@@ -4129,6 +4175,10 @@ packages:
   postgres-interval@1.2.0:
     resolution: {integrity: sha512-9ZhXKM/rw350N1ovuWHbGxnGh/SNJ4cnxHiM0rxE4VN41wsg8P8zWn9hv/buK00RP4WvlOyr/RBDiptyxVbkZQ==}
     engines: {node: '>=0.10.0'}
+
+  postgres@3.4.7:
+    resolution: {integrity: sha512-Jtc2612XINuBjIl/QTWsV5UvE8UHuNblcO3vVADSrKsrc6RqGX6lOW1cEo3CM2v0XG4Nat8nI+YM7/f26VxXLw==}
+    engines: {node: '>=12'}
 
   prettier@3.6.2:
     resolution: {integrity: sha512-I7AIg5boAr5R0FFtJ6rCfD+LFsWHp81dolrFD8S79U9tb8Az2nGrJncnMSnys+bpQJfRUzqs9hnA81OAA3hCuQ==}
@@ -5637,6 +5687,8 @@ snapshots:
 
   '@esbuild/win32-x64@0.25.4':
     optional: true
+
+  '@faker-js/faker@10.0.0': {}
 
   '@floating-ui/core@1.7.3':
     dependencies:
@@ -7532,6 +7584,19 @@ snapshots:
 
   dom-accessibility-api@0.6.3: {}
 
+  dotenv-cli@10.0.0:
+    dependencies:
+      cross-spawn: 7.0.6
+      dotenv: 17.2.2
+      dotenv-expand: 11.0.7
+      minimist: 1.2.8
+
+  dotenv-expand@11.0.7:
+    dependencies:
+      dotenv: 16.6.1
+
+  dotenv@16.6.1: {}
+
   dotenv@17.2.2: {}
 
   drizzle-kit@0.31.4:
@@ -7543,16 +7608,17 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.44.6(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@types/pg@8.15.5)(pg@8.16.3):
+  drizzle-orm@0.44.6(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@types/pg@8.15.5)(pg@8.16.3)(postgres@3.4.7):
     optionalDependencies:
       '@neondatabase/serverless': 1.0.2
       '@opentelemetry/api': 1.9.0
       '@types/pg': 8.15.5
       pg: 8.16.3
+      postgres: 3.4.7
 
-  drizzle-valibot@0.4.2(drizzle-orm@0.44.6(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@types/pg@8.15.5)(pg@8.16.3))(valibot@1.1.0(typescript@5.9.2)):
+  drizzle-valibot@0.4.2(drizzle-orm@0.44.6(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@types/pg@8.15.5)(pg@8.16.3)(postgres@3.4.7))(valibot@1.1.0(typescript@5.9.2)):
     dependencies:
-      drizzle-orm: 0.44.6(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@types/pg@8.15.5)(pg@8.16.3)
+      drizzle-orm: 0.44.6(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@types/pg@8.15.5)(pg@8.16.3)(postgres@3.4.7)
       valibot: 1.1.0(typescript@5.9.2)
 
   dunder-proto@1.0.1:
@@ -8698,6 +8764,9 @@ snapshots:
   postgres-interval@1.2.0:
     dependencies:
       xtend: 4.0.2
+
+  postgres@3.4.7:
+    optional: true
 
   prettier@3.6.2: {}
 

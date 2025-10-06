@@ -14,7 +14,7 @@ const createUserRepositoryArgsSchema = pick(createInsertSchema(userTable), [
 	"name",
 	"image",
 ]);
-type CreateUserRepositoryArgs = InferOutput<
+export type CreateUserRepositoryArgs = InferOutput<
 	typeof createUserRepositoryArgsSchema
 >;
 
