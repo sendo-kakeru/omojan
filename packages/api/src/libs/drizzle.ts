@@ -16,7 +16,7 @@ export function getDrizzleClient({
 	env,
 	isWs,
 }: {
-	env: Env;
+	env: Pick<Env, "DATABASE_URL" | "ENV">;
 	/**
 	 * WebSocket用のクライアントか
 	 */

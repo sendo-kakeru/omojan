@@ -28,7 +28,7 @@
 		"dev:tsup": "tsup --watch",
 		"format": "biome check --fix --unsafe .",
 		"lint": "biome check .",
-		"migrate": "drizzle-kit push",
+		"migrate:dev": "drizzle-kit push",
 		"studio": "drizzle-kit studio",
 		"type-check": "tsc --noEmit"
 	},

@@ -6,7 +6,7 @@ import type { UserRepository } from "../../infrastructure/user/UserRepository";
 
 type FindMeBySubServiceArgs = User["sub"];
 
-export const registerMeServiceArgsSchema = pick(createInsertSchema(userTable), [
+const registerMeServiceArgsSchema = pick(createInsertSchema(userTable), [
 	"sub",
 	"email",
 	"name",
