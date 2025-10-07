@@ -28,7 +28,7 @@
 	"private": true,
 	"scripts": {
 		"build": "pnpm run cf-typegen && pnpm run build:tsup && pnpm run build:tsc",
-		"build:tsc": "tsc",
+		"build:tsc": "tsc -p tsconfig.build.json",
 		"build:tsup": "tsup --clean",
 		"cf-typegen": "wrangler types --env-interface CloudflareBindings",
 		"deploy": "wrangler deploy --minify",
