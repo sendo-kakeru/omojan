@@ -25,6 +25,7 @@ const NONCE_STORAGE_KEY = "oauth_nonce";
 
 export const cognitoIdTokenPayloadSchema = object({
 	email: emailSchema,
+	// NOTE: 現在はGoogle認証のみ対応しているためnameは非optional
 	name: string(),
 	picture: optional(string()),
 	sub: string(),
