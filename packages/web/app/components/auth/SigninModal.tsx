@@ -1,5 +1,5 @@
 import type { ComponentPropsWithoutRef } from "react";
-import { cognitoService } from "~/libs/cognito";
+import { cognito } from "~/libs/cognito";
 import { GoogleSigninButton } from "../button/GoogleSigninButton";
 import { Dialog } from "../Dialog";
 
@@ -13,7 +13,7 @@ export function SigninModal(
 				<p className="w-full">
 					GoogleログインをしてOmojanをもっと楽しみましょう！
 				</p>
-				<GoogleSigninButton onClick={() => cognitoService.signInWithGoogle()}>
+				<GoogleSigninButton onClick={() => cognito.signInWithGoogle()}>
 					Sign in with Google
 				</GoogleSigninButton>
 			</div>

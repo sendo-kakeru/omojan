@@ -25,7 +25,7 @@ const NONCE_STORAGE_KEY = "oauth_nonce";
 
 export const cognitoIdTokenPayloadSchema = object({
 	email: emailSchema,
-	name: optional(string()),
+	name: string(),
 	picture: optional(string()),
 	sub: string(),
 });
@@ -59,7 +59,7 @@ export type CognitoIdTokenPayload = InferOutput<
 // export type SignupFormInput = InferInput<typeof signupSchema>;
 // export type VerifyFormInput = InferInput<typeof verifySchema>;
 
-class CognitoService {
+class Cognito {
 	private readonly userPool: CognitoUserPool;
 
 	constructor() {
@@ -381,4 +381,4 @@ class CognitoService {
 	}
 }
 
-export const cognitoService = new CognitoService();
+export const cognito = new Cognito();

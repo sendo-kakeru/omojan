@@ -14,7 +14,7 @@ export const Unauthenticated: Story = {
 	args: {},
 	render: () => (
 		<div className="grid h-800 w-full grid-cols-1">
-			<AuthHeader user={null} />
+			<AuthHeader />
 		</div>
 	),
 };
@@ -23,12 +23,7 @@ export const Authenticated: Story = {
 	args: {},
 	render: () => (
 		<div className="grid h-800 w-full grid-cols-1">
-			<AuthHeader
-				user={{
-					image: "/favicon.ico",
-					name: "John Doe",
-				}}
-			/>
+			<AuthHeader />
 		</div>
 	),
 };
