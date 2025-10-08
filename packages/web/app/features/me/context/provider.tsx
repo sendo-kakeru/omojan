@@ -1,6 +1,6 @@
 import type { Me } from "@repo/db/schema/me";
+import type { HttpResponseBody } from "@repo/shared/types";
 import type { InferRequestType } from "hono";
-import type { HttpResponseBody } from "node_modules/@repo/api/dist/types";
 import { createContext, type PropsWithChildren } from "react";
 import type { KeyedMutator } from "swr";
 import useSWRImmutable from "swr/immutable";
