@@ -12,6 +12,7 @@ import "./app.css";
 import type { PropsWithChildren } from "react";
 import { AuthHeader } from "./components/auth/AuthHeader";
 import { ToastProvider } from "./components/Toast";
+import { MeProvider } from "./features/me/context/provider";
 
 // TODO: メタ情報設定
 export const links: Route.LinksFunction = () => [
@@ -47,10 +48,12 @@ export function Layout({ children }: PropsWithChildren) {
 
 export default function App() {
 	return (
-		<div className="mx-auto min-h-svh max-w-[800px] px-16">
-			<AuthHeader user={null} />
-			<Outlet />
-		</div>
+		<MeProvider>
+			<div className="mx-auto min-h-svh max-w-[800px] px-16">
+				<AuthHeader />
+				<Outlet />
+			</div>
+		</MeProvider>
 	);
 }
 

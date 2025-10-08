@@ -6,5 +6,6 @@
 		"**/__tests__/**",
 		"**/__mocks__/**"
 	],
-	"extends": "./tsconfig.json"
+	"extends": "./tsconfig.json",
+	"include": ["src", "worker-configuration.d.ts"]
 }

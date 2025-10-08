@@ -1,8 +1,11 @@
 // import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 // import { honoClient } from "~/libs/apiClient.client";
-import { cognitoService } from "~/libs/cognito";
+
+import { honoClient } from "~/libs/apiClient.client";
+import { cognito } from "~/libs/cognito";
 import type { Route } from "./+types/page";
 
+// TODO: UI
 export async function clientLoader({ request }: Route.LoaderArgs) {
 	const url = new URL(request.url);
 	const code = url.searchParams.get("code");
@@ -13,37 +16,37 @@ export async function clientLoader({ request }: Route.LoaderArgs) {
 			throw new Error(`OAuth error: ${error}`);
 		}
 
-		await cognitoService.handleOAuthCallback({
+		const tokens = await cognito.handleOAuthCallback({
 			code,
 			state,
 		});
 
-		// const getMeResponse = await honoClient.me.$get();
-		// const getMeResult = await getMeResponse.json();
-		// // 初回ログインでなければトップへ
-		// if (getMeResult.data) {
-		//   window.location.href = "/";
-		//   return;
-		// }
+		const getMeResponse = await honoClient.me.$get();
+		const getMeResult = await getMeResponse.json();
+		// 初回ログインでなければトップへ
+		if (getMeResult.data) {
+			window.location.href = "/";
+			return;
+		}
 
-		// const payload = cognitoService.decodeIdToken(tokens.idToken);
-		// if (!payload) {
-		//   throw new Error("Invalid ID token payload");
-		// }
+		const payload = await cognito.decodeIdToken(tokens.idToken);
+		if (!payload) {
+			throw new Error("IDトークンのデコード結果がありません");
+		}
 
-		// const createMeResponse = await honoClient.me.$post({
-		//   json: {
-		//     email: payload.email,
-		//     name: payload.name ?? payload.email,
-		//     avatarUrl: payload.picture,
-		//   },
-		// });
-		// const createdMeResult = await createMeResponse.json();
-		// if (!createdMeResult.data) {
-		//   throw new Error(
-		//     createdMeResult.message || "ユーザーの作成に失敗しました",
-		//   );
-		// }
+		const createMeResponse = await honoClient.me.$post({
+			json: {
+				email: payload.email,
+				image: payload.picture,
+				name: payload.name,
+			},
+		});
+		const createdMeResult = await createMeResponse.json();
+		if (!createdMeResult.data) {
+			throw new Error(
+				createdMeResult.message || "ユーザーの作成に失敗しました",
+			);
+		}
 	} catch (error) {
 		console.error("認証後の処理に失敗しました:", error);
 		alert("認証後の処理に失敗しました");
