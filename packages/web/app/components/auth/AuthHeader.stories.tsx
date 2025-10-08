@@ -21,6 +21,9 @@ export const Unauthenticated: Story = {
 
 export const Authenticated: Story = {
 	args: {},
+	parameters: {
+		authed: true,
+	},
 	render: () => (
 		<div className="grid h-800 w-full grid-cols-1">
 			<AuthHeader />
