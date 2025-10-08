@@ -10,15 +10,18 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof AuthUserMenuButton>;
 
-export const Authenticated: Story = {
+export const Unauthenticated: Story = {
 	args: {},
 	render: () => {
 		return <AuthUserMenuButton />;
 	},
 };
 
-export const Unauthenticated: Story = {
+export const Authenticated: Story = {
 	args: {},
+	parameters: {
+		authed: true,
+	},
 	render: () => {
 		return <AuthUserMenuButton />;
 	},
