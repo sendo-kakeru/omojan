@@ -10,7 +10,7 @@ import {
 } from "./UserRepository";
 
 describe("UserRepository", () => {
-	const db = drizzle(process.env.DATABASE_URL);
+	const db = drizzle(process.env.DATABASE_URL, { casing: "snake_case" });
 	const userRepository = new UserRepository(db);
 
 	beforeEach(async () => {

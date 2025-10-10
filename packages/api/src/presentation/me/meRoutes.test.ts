@@ -11,7 +11,7 @@ import type { PrivateRouteContext } from "../../types";
 import { routes } from "./meRoutes";
 
 describe("meRoutes", () => {
-	const db = drizzle(process.env.DATABASE_URL);
+	const db = drizzle(process.env.DATABASE_URL, { casing: "snake_case" });
 	const app = new Hono<PrivateRouteContext>()
 		.use("*", async (c, next) => {
 			c.set("db", db);
