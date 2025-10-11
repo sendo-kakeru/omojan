@@ -37,7 +37,7 @@ export const routes = new Hono<
 					201,
 				);
 			} catch (error) {
-				console.error("Gameの作成に失敗しました:", error);
+				console.error("Roomの作成に失敗しました:", error);
 				throw new HTTPException(500, { message: "Roomの作成に失敗しました" });
 			}
 		},
