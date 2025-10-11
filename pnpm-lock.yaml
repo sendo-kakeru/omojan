@@ -138,6 +138,9 @@ importers:
       '@repo/db':
         specifier: workspace:*
         version: link:../db
+      '@repo/shared':
+        specifier: workspace:*
+        version: link:../shared
       '@repo/tsup-config':
         specifier: workspace:*
         version: link:../tsup-config
@@ -147,6 +150,9 @@ importers:
 
   packages/shared:
     dependencies:
+      '@repo/db':
+        specifier: workspace:*
+        version: link:../db
       valibot:
         specifier: ^1.1.0
         version: 1.1.0(typescript@5.9.2)
@@ -157,6 +163,9 @@ importers:
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
+      '@types/node':
+        specifier: ^24.5.2
+        version: 24.5.2
 
   packages/storybook:
     dependencies:

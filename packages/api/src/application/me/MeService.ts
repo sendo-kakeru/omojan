@@ -1,6 +1,6 @@
-import type { Me } from "@repo/db/schema/me";
 import { type User, userTable } from "@repo/db/schema/user";
 import { UniqueKeyAlreadyExistsError } from "@repo/shared/error";
+import type { Me } from "@repo/shared/model/me";
 import { hasCode } from "@repo/shared/utils";
 import { DrizzleQueryError, eq } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-valibot";

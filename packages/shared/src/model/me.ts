@@ -1,5 +1,5 @@
+import { userSchema } from "@repo/db/schema/user";
 import { type InferOutput, object, pick } from "valibot";
-import { userSchema } from "./user";
 
 export const meSchema = object({
 	...pick(userSchema, ["email", "name", "image"]).entries,

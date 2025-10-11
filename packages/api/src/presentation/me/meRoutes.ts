@@ -1,7 +1,7 @@
 import { vValidator } from "@hono/valibot-validator";
-import { meSchema } from "@repo/db/schema/me";
 import { userTable } from "@repo/db/schema/user";
 import { UniqueKeyAlreadyExistsError } from "@repo/shared/error";
+import { meSchema } from "@repo/shared/model/me";
 import { createInsertSchema } from "drizzle-valibot";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";

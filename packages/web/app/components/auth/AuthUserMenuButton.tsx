@@ -1,4 +1,4 @@
-import type { Me } from "@repo/db/schema/me";
+import type { Me } from "@repo/shared/model/me";
 import { useState } from "react";
 import { LuLogIn } from "react-icons/lu";
 import { Link } from "react-router";
