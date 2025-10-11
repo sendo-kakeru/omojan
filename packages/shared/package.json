@@ -1,6 +1,8 @@
 {
 	"dependencies": {
-		"valibot": "^1.1.0"
+		"@repo/db": "workspace:*",
+		"valibot": "^1.1.0",
+		"drizzle-valibot": "^0.4.2"
 	},
 	"devDependencies": {
 		"@repo/typescript-config": "workspace:*",

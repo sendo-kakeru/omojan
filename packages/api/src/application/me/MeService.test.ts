@@ -1,4 +1,4 @@
-import { MOCK_USER } from "@repo/mock/domain";
+import { MOCK_USER } from "@repo/mock/model";
 import { describe, expect, test, vi } from "vitest";
 import type { UserRepository } from "../../infrastructure/user/UserRepository";
 import { MeService, type RegisterMeServiceArgs } from "./MeService";
