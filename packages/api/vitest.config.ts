@@ -5,5 +5,11 @@ export default defineConfig({
 		environment: "node",
 		globalSetup: "./src/test/vitest.setup.ts",
 		globals: true,
+		pool: "forks",
+		poolOptions: {
+			forks: {
+				singleFork: true,
+			},
+		},
 	},
 });

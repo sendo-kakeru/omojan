@@ -11,12 +11,15 @@ import type {
 	HybridRouteContext,
 	PrivateRouteContext,
 } from "../types";
+import { routes as gameRoutes } from "./game/gameRoutes";
 import { routes as meRoutes } from "./me/meRoutes";
 
 // HTTP
 const publicRoutes = new Hono<BaseContext>();
 
-const hybridRoutes = new Hono<HybridRouteContext>().use(hybridAuthMiddleware());
+const hybridRoutes = new Hono<HybridRouteContext>()
+	.use(hybridAuthMiddleware())
+	.route("/game", gameRoutes);
 
 const privateRoutes = new Hono<PrivateRouteContext>()
 	.use(privateAuthMiddleware())

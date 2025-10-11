@@ -7,8 +7,6 @@ import { createInsertSchema } from "drizzle-valibot";
 import { type InferOutput, pick } from "valibot";
 import type { DrizzleClient } from "../../libs/drizzle";
 
-type FindMeBySubServiceArgs = User["sub"];
-
 const registerMeServiceArgsSchema = pick(createInsertSchema(userTable), [
 	"sub",
 	"email",
@@ -22,7 +20,7 @@ export type RegisterMeServiceArgs = InferOutput<
 export class MeService {
 	constructor(private readonly db: DrizzleClient) {}
 
-	async findBySub(sub: FindMeBySubServiceArgs): Promise<Me | null> {
+	async findBySub(sub: User["sub"]): Promise<Me | null> {
 		const [findUser] = await this.db
 			.select({
 				email: userTable.email,
