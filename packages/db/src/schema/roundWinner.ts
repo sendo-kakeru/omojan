@@ -1,6 +1,6 @@
 import { pgTable, uuid } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-valibot";
-import { type InferOutput, omit } from "valibot";
+import type { InferOutput } from "valibot";
 import { tableBaseColumns } from "./common";
 import { playerTable } from "./player";
 import { roundTable } from "./round";
@@ -15,9 +15,5 @@ export const roundWinnerTable = pgTable("round_winner", {
 		.references(() => roundTable.id, { onDelete: "cascade" }),
 });
 
-// model
-export const roundWinnerSchema = omit(createSelectSchema(roundWinnerTable), [
-	"createdAt",
-	"updatedAt",
-]);
+export const roundWinnerSchema = createSelectSchema(roundWinnerTable);
 export type RoundWinner = InferOutput<typeof roundWinnerSchema>;

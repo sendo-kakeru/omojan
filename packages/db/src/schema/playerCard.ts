@@ -1,6 +1,6 @@
 import { pgTable, uuid } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-valibot";
-import { type InferOutput, omit } from "valibot";
+import type { InferOutput } from "valibot";
 import { tableBaseColumns } from "./common";
 import { playerTable } from "./player";
 import { roundTable } from "./round";
@@ -23,9 +23,5 @@ export const playerCardTable = pgTable("player_card", {
 		.references(() => wordTable.id, { onDelete: "cascade" }),
 });
 
-// model
-export const playerCardSchema = omit(createSelectSchema(playerCardTable), [
-	"createdAt",
-	"updatedAt",
-]);
+export const playerCardSchema = createSelectSchema(playerCardTable);
 export type PlayerCard = InferOutput<typeof playerCardSchema>;

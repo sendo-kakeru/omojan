@@ -1,6 +1,6 @@
 import { pgEnum, pgTable, uuid } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-valibot";
-import { type InferOutput, omit } from "valibot";
+import type { InferOutput } from "valibot";
 import { tableBaseColumns } from "./common";
 import { playerTable } from "./player";
 import { roundTable } from "./round";
@@ -21,9 +21,5 @@ export const submissionTable = pgTable("submission", {
 		.references(() => roundTable.id, { onDelete: "cascade" }),
 });
 
-// model
-export const submissionSchema = omit(createSelectSchema(submissionTable), [
-	"createdAt",
-	"updatedAt",
-]);
+export const submissionSchema = createSelectSchema(submissionTable);
 export type Submission = InferOutput<typeof submissionSchema>;

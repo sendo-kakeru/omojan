@@ -8,15 +8,13 @@ import { UniqueKeyAlreadyExistsError } from "@repo/shared/error";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { MeService } from "../../application/me/MeService";
-import { UserRepository } from "../../infrastructure/user/UserRepository";
 import { routeValidateCallback } from "../../libs/validation";
 import type { HttpRespondReturn, PrivateRouteContext } from "../../types";
 
 export const routes = new Hono<PrivateRouteContext>()
 	.get("/", async (c): Promise<HttpRespondReturn<GetMeResponseBody>> => {
 		const { db, sub } = c.var;
-		const userRepository = new UserRepository(db);
-		const meService = new MeService(userRepository);
+		const meService = new MeService(db);
 
 		try {
 			const findMe = await meService.findBySub(sub);
@@ -50,8 +48,7 @@ export const routes = new Hono<PrivateRouteContext>()
 			const body = c.req.valid("json");
 			const { db, sub } = c.var;
 
-			const userRepository = new UserRepository(db);
-			const meService = new MeService(userRepository);
+			const meService = new MeService(db);
 
 			try {
 				const createdMe = await meService.register({

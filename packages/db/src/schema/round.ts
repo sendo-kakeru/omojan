@@ -1,6 +1,6 @@
 import { pgEnum, pgTable, smallint, uuid } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-valibot";
-import { type InferOutput, omit } from "valibot";
+import type { InferOutput } from "valibot";
 import { tableBaseColumns } from "./common";
 import { gameTable } from "./game";
 
@@ -19,9 +19,5 @@ export const roundTable = pgTable("round", {
 	status: roundStatusEnum().notNull().default("submitting"),
 });
 
-// model
-export const roundSchema = omit(createSelectSchema(roundTable), [
-	"createdAt",
-	"updatedAt",
-]);
+export const roundSchema = createSelectSchema(roundTable);
 export type Round = InferOutput<typeof roundSchema>;

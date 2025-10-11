@@ -1,6 +1,6 @@
 import { pgEnum, pgTable, text } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-valibot";
-import { type InferOutput, omit } from "valibot";
+import type { InferOutput } from "valibot";
 import { tableBaseColumns } from "./common";
 
 export const userStatusEnum = pgEnum("user_status", ["active", "deactivated"]);
@@ -14,10 +14,6 @@ export const userTable = pgTable("user", {
 	sub: text().unique().notNull(),
 });
 
-// model
-export const userSchema = omit(createSelectSchema(userTable), [
-	"createdAt",
-	"updatedAt",
-]);
+export const userSchema = createSelectSchema(userTable);
 
 export type User = InferOutput<typeof userSchema>;

@@ -1,8 +1,11 @@
 import type { Me } from "@repo/db/schema/me";
 import { type User, userTable } from "@repo/db/schema/user";
+import { UniqueKeyAlreadyExistsError } from "@repo/shared/error";
+import { hasCode } from "@repo/shared/utils";
+import { DrizzleQueryError, eq } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-valibot";
 import { type InferOutput, pick } from "valibot";
-import type { UserRepository } from "../../infrastructure/user/UserRepository";
+import type { DrizzleClient } from "../../libs/drizzle";
 
 type FindMeBySubServiceArgs = User["sub"];
 
@@ -17,16 +20,48 @@ export type RegisterMeServiceArgs = InferOutput<
 >;
 
 export class MeService {
-	constructor(private readonly userRepository: UserRepository) {}
+	constructor(private readonly db: DrizzleClient) {}
 
 	async findBySub(sub: FindMeBySubServiceArgs): Promise<Me | null> {
-		const findUser = await this.userRepository.findBySub(sub);
+		const [findUser] = await this.db
+			.select({
+				email: userTable.email,
+				id: userTable.id,
+				image: userTable.image,
+				name: userTable.name,
+			})
+			.from(userTable)
+			.where(eq(userTable.sub, sub));
 		return findUser ? this.convertUserToMe(findUser) : null;
 	}
 
 	async register(user: RegisterMeServiceArgs): Promise<Me> {
-		const createdUser = await this.userRepository.create(user);
-		return this.convertUserToMe(createdUser);
+		try {
+			const [createdUser] = await this.db
+				.insert(userTable)
+				.values(user)
+				.returning({
+					email: userTable.email,
+					id: userTable.id,
+					image: userTable.image,
+					name: userTable.name,
+				});
+
+			if (!createdUser) {
+				throw new Error("作成したユーザーの取得に失敗しました");
+			}
+
+			return this.convertUserToMe(createdUser);
+		} catch (error) {
+			if (
+				error instanceof DrizzleQueryError &&
+				hasCode(error.cause) &&
+				error.cause.code === "23505"
+			) {
+				throw new UniqueKeyAlreadyExistsError();
+			}
+			throw error;
+		}
 	}
 
 	private convertUserToMe(
