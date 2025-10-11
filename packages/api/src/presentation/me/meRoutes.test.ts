@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { userTable } from "@repo/db/schema/user";
-import { MOCK_USER } from "@repo/mock/domain";
+import { MOCK_USER } from "@repo/mock/model";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Hono } from "hono";

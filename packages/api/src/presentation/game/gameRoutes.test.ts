@@ -2,7 +2,7 @@ import { faker } from "@faker-js/faker";
 import { gameTable } from "@repo/db/schema/game";
 import { playerTable } from "@repo/db/schema/player";
 import { userTable } from "@repo/db/schema/user";
-import { MOCK_USER } from "@repo/mock/domain";
+import { MOCK_USER } from "@repo/mock/model";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Hono } from "hono";
