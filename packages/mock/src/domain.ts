@@ -3,12 +3,14 @@ import type { Me } from "@repo/db/schema/me";
 import type { User } from "@repo/db/schema/user";
 
 export const MOCK_USER: User = {
+	createdAt: new Date(),
 	email: faker.internet.email(),
 	id: faker.string.uuid(),
 	image: faker.image.avatar(),
 	name: faker.person.fullName(),
 	status: "active",
 	sub: faker.string.uuid(),
+	updatedAt: new Date(),
 };
 
 export const MOCK_ME: Me = {
