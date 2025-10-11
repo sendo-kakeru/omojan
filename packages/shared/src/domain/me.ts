@@ -2,7 +2,6 @@ import { userSchema, userTable } from "@repo/db/schema/user";
 import { createInsertSchema } from "drizzle-valibot";
 import { type InferOutput, nullable, object, pick } from "valibot";
 
-// model
 export const meSchema = object({
 	...pick(userSchema, ["email", "name", "image"]).entries,
 	userId: userSchema.entries.id,

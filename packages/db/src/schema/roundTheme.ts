@@ -1,6 +1,6 @@
 import { pgTable, uuid } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-valibot";
-import { type InferOutput, omit } from "valibot";
+import type { InferOutput } from "valibot";
 import { tableBaseColumns } from "./common";
 import { roundTable } from "./round";
 import { wordTable } from "./word";
@@ -15,9 +15,5 @@ export const roundThemeTable = pgTable("round_theme", {
 		.references(() => wordTable.id, { onDelete: "cascade" }),
 });
 
-// model
-export const roundThemeSchema = omit(createSelectSchema(roundThemeTable), [
-	"createdAt",
-	"updatedAt",
-]);
+export const roundThemeSchema = createSelectSchema(roundThemeTable);
 export type RoundTheme = InferOutput<typeof roundThemeSchema>;

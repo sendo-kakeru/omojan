@@ -1,6 +1,6 @@
 import { boolean, pgEnum, pgTable, smallint, text } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-valibot";
-import { type InferOutput, omit } from "valibot";
+import type { InferOutput } from "valibot";
 import { tableBaseColumns } from "./common";
 
 export const gameStatusEnum = pgEnum("game_status", [
@@ -18,9 +18,5 @@ export const gameTable = pgTable("game", {
 	title: text().notNull(),
 });
 
-// model
-export const gameSchema = omit(createSelectSchema(gameTable), [
-	"createdAt",
-	"updatedAt",
-]);
+export const gameSchema = createSelectSchema(gameTable);
 export type Game = InferOutput<typeof gameSchema>;
