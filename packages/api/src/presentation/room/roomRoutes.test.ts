@@ -3,16 +3,16 @@ import { gameTable } from "@repo/db/schema/game";
 import { playerTable } from "@repo/db/schema/player";
 import { userTable } from "@repo/db/schema/user";
 import { MOCK_USER } from "@repo/mock/model";
+import type { CreateRoomRequestBody } from "@repo/shared/model/room";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Hono } from "hono";
 import { testClient } from "hono/testing";
 import { beforeEach, describe, expect, test } from "vitest";
 import type { HybridRouteContext } from "../../types";
-import type { CreateGameRequestBody } from "./gameRoutes";
-import { routes } from "./gameRoutes";
+import { routes } from "./roomRoutes";
 
-describe("gameRoutes", () => {
+describe("roomRoutes", () => {
 	const db = drizzle(process.env.DATABASE_URL, { casing: "snake_case" });
 
 	describe("認証済みユーザー", () => {
@@ -22,7 +22,7 @@ describe("gameRoutes", () => {
 				c.set("sub", MOCK_USER.sub);
 				await next();
 			})
-			.route("/game", routes);
+			.route("/room", routes);
 		const mockHonoClient = testClient<typeof app>(app);
 
 		beforeEach(async () => {
@@ -31,8 +31,8 @@ describe("gameRoutes", () => {
 			await db.delete(userTable);
 		});
 
-		describe("POST /game", () => {
-			const MOCK_REQUEST_BODY: CreateGameRequestBody = {
+		describe("POST /room", () => {
+			const MOCK_REQUEST_BODY: CreateRoomRequestBody = {
 				isPrivate: false,
 				password: null,
 				playerName: MOCK_USER.name,
@@ -40,26 +40,26 @@ describe("gameRoutes", () => {
 				title: faker.lorem.words(3),
 			};
 
-			test("認証済みユーザーがゲームを作成した場合、201とゲームIDを返す", async () => {
+			test("認証済みユーザーがルームを作成した場合、201とゲームIDを返す", async () => {
 				const [insertedUser] = await db
 					.insert(userTable)
 					.values(MOCK_USER)
 					.returning();
 
-				const response = await mockHonoClient.game.$post({
+				const response = await mockHonoClient.room.$post({
 					json: MOCK_REQUEST_BODY,
 				});
 
 				expect(response.status).toBe(201);
 				const body = await response.json();
 				expect(body.data).toBeDefined();
-				expect(body.data?.id).toBeDefined();
+				expect(body.data?.gameId).toBeDefined();
 				expect(body.message).toBe("OK");
 
 				const [createdGame] = await db
 					.select()
 					.from(gameTable)
-					.where(eq(gameTable.id, body.data.id));
+					.where(eq(gameTable.id, body.data.gameId));
 				expect(createdGame).toBeDefined();
 				expect(createdGame?.title).toBe(MOCK_REQUEST_BODY.title);
 				expect(createdGame?.timeLimit).toBe(MOCK_REQUEST_BODY.timeLimit);
@@ -70,7 +70,7 @@ describe("gameRoutes", () => {
 				const [createdPlayer] = await db
 					.select()
 					.from(playerTable)
-					.where(eq(playerTable.gameId, body.data.id));
+					.where(eq(playerTable.gameId, body.data.gameId));
 				expect(createdPlayer).toBeDefined();
 				expect(createdPlayer?.playerName).toBe(MOCK_REQUEST_BODY.playerName);
 				expect(createdPlayer?.isHost).toBe(true);
@@ -78,37 +78,37 @@ describe("gameRoutes", () => {
 				expect(createdPlayer?.userId).toBe(insertedUser?.id);
 			});
 
-			test("プライベートゲーム（パスワード付き）を作成できる", async () => {
+			test("プライベートルーム（パスワード付き）を作成できる", async () => {
 				await db.insert(userTable).values(MOCK_USER);
 
-				const privateGameBody: CreateGameRequestBody = {
+				const privateRoomBody: CreateRoomRequestBody = {
 					...MOCK_REQUEST_BODY,
 					isPrivate: true,
 					password: faker.internet.password(),
 				};
 
-				const response = await mockHonoClient.game.$post({
-					json: privateGameBody,
+				const response = await mockHonoClient.room.$post({
+					json: privateRoomBody,
 				});
 
 				expect(response.status).toBe(201);
 				const body = await response.json();
-				expect(body.data?.id).toBeDefined();
+				expect(body.data?.gameId).toBeDefined();
 
 				const [createdGame] = await db
 					.select()
 					.from(gameTable)
-					.where(eq(gameTable.id, body.data.id));
+					.where(eq(gameTable.id, body.data.gameId));
 				expect(createdGame?.isPrivate).toBe(true);
-				expect(createdGame?.password).toBe(privateGameBody.password);
+				expect(createdGame?.password).toBe(privateRoomBody.password);
 			});
 
 			test("バリデーションエラーの場合、400を返す", async () => {
 				const invalidBody = {
 					title: MOCK_REQUEST_BODY.title,
-				} as unknown as CreateGameRequestBody;
+				} as unknown as CreateRoomRequestBody;
 
-				const response = await mockHonoClient.game.$post({
+				const response = await mockHonoClient.room.$post({
 					json: invalidBody,
 				});
 
@@ -119,9 +119,9 @@ describe("gameRoutes", () => {
 				const invalidBody = {
 					...MOCK_REQUEST_BODY,
 					timeLimit: -1,
-				} as CreateGameRequestBody;
+				} as CreateRoomRequestBody;
 
-				const response = await mockHonoClient.game.$post({
+				const response = await mockHonoClient.room.$post({
 					json: invalidBody,
 				});
 
@@ -137,7 +137,7 @@ describe("gameRoutes", () => {
 				c.set("sub", null);
 				await next();
 			})
-			.route("/game", routes);
+			.route("/room", routes);
 		const mockHonoClient = testClient<typeof app>(app);
 
 		beforeEach(async () => {
@@ -146,8 +146,8 @@ describe("gameRoutes", () => {
 			await db.delete(userTable);
 		});
 
-		describe("POST /game", () => {
-			const MOCK_REQUEST_BODY: CreateGameRequestBody = {
+		describe("POST /room", () => {
+			const MOCK_REQUEST_BODY: CreateRoomRequestBody = {
 				isPrivate: false,
 				password: null,
 				playerName: faker.person.firstName(),
@@ -155,28 +155,28 @@ describe("gameRoutes", () => {
 				title: faker.lorem.words(3),
 			};
 
-			test("未認証ユーザーでもゲームを作成できる", async () => {
-				const response = await mockHonoClient.game.$post({
+			test("未認証ユーザーでもルームを作成できる", async () => {
+				const response = await mockHonoClient.room.$post({
 					json: MOCK_REQUEST_BODY,
 				});
 
 				expect(response.status).toBe(201);
 				const body = await response.json();
 				expect(body.data).toBeDefined();
-				expect(body.data?.id).toBeDefined();
+				expect(body.data?.gameId).toBeDefined();
 				expect(body.message).toBe("OK");
 
 				const [createdGame] = await db
 					.select()
 					.from(gameTable)
-					.where(eq(gameTable.id, body.data.id));
+					.where(eq(gameTable.id, body.data.gameId));
 				expect(createdGame).toBeDefined();
 				expect(createdGame?.title).toBe(MOCK_REQUEST_BODY.title);
 
 				const [createdPlayer] = await db
 					.select()
 					.from(playerTable)
-					.where(eq(playerTable.gameId, body.data.id));
+					.where(eq(playerTable.gameId, body.data.gameId));
 				expect(createdPlayer).toBeDefined();
 				expect(createdPlayer?.playerName).toBe(MOCK_REQUEST_BODY.playerName);
 				expect(createdPlayer?.isHost).toBe(true);
