@@ -11,10 +11,16 @@ import { MeService } from "../../application/me/MeService";
 import { routeValidateCallback } from "../../libs/validation";
 import type { HttpRespondReturn, PrivateRouteContext } from "../../types";
 
-export const routes = new Hono<PrivateRouteContext>()
+export const routes = new Hono<
+	PrivateRouteContext & { Variables: { meService: MeService } }
+>()
+	.use(async (c, next) => {
+		const meService = new MeService(c.var.db);
+		c.set("meService", meService);
+		await next();
+	})
 	.get("/", async (c): Promise<HttpRespondReturn<GetMeResponseBody>> => {
-		const { db, sub } = c.var;
-		const meService = new MeService(db);
+		const { meService, sub } = c.var;
 
 		try {
 			const findMe = await meService.findBySub({ sub });
