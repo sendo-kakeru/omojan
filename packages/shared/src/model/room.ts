@@ -35,3 +35,7 @@ export const createRoomRequestBodySchema = object({
 export type CreateRoomRequestBody = InferOutput<
 	typeof createRoomRequestBodySchema
 >;
+export const createRoomResponseBodySchema = pick(roomSchema, ["gameId"]);
+export type CreateRoomResponseBody = InferOutput<
+	typeof createRoomResponseBodySchema
+>;

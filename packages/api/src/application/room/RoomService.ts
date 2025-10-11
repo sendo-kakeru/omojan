@@ -1,7 +1,10 @@
 import { gameTable } from "@repo/db/schema/game";
 import { playerTable } from "@repo/db/schema/player";
 import { type User, userTable } from "@repo/db/schema/user";
-import type { CreateRoomRequestBody, Room } from "@repo/shared/model/room";
+import type {
+	CreateRoomRequestBody,
+	CreateRoomResponseBody,
+} from "@repo/shared/model/room";
 import { eq } from "drizzle-orm";
 import type { DrizzleClient } from "../../libs/drizzle";
 
@@ -10,9 +13,9 @@ export class RoomService {
 	async create({
 		sub,
 		...dto
-	}: CreateRoomRequestBody & { sub: User["sub"] | null }): Promise<
-		Pick<Room, "gameId">
-	> {
+	}: CreateRoomRequestBody & {
+		sub: User["sub"] | null;
+	}): Promise<CreateRoomResponseBody> {
 		return await this.db.transaction(async (tx) => {
 			const authUser = await (async () => {
 				if (!sub) return null;

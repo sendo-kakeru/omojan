@@ -1,7 +1,7 @@
 import { vValidator } from "@hono/valibot-validator";
 import {
+	type CreateRoomResponseBody,
 	createRoomRequestBodySchema,
-	type Room,
 } from "@repo/shared/model/room";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
@@ -20,7 +20,7 @@ export const routes = new Hono<
 	.post(
 		"/",
 		vValidator("json", createRoomRequestBodySchema, routeValidateCallback),
-		async (c): Promise<HttpRespondReturn<Pick<Room, "gameId">>> => {
+		async (c): Promise<HttpRespondReturn<CreateRoomResponseBody>> => {
 			const { roomService, sub } = c.var;
 			const body = c.req.valid("json");
 

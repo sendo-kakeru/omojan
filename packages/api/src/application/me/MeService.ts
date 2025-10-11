@@ -1,6 +1,11 @@
 import { type User, userTable } from "@repo/db/schema/user";
 import { UniqueKeyAlreadyExistsError } from "@repo/shared/error";
-import type { CreateMeRequestBody, Me } from "@repo/shared/model/me";
+import type {
+	CreateMeRequestBody,
+	CreateMeResponseBody,
+	GetMeResponseBody,
+	Me,
+} from "@repo/shared/model/me";
 import { hasCode } from "@repo/shared/utils";
 import { DrizzleQueryError, eq } from "drizzle-orm";
 import type { DrizzleClient } from "../../libs/drizzle";
@@ -8,7 +13,7 @@ import type { DrizzleClient } from "../../libs/drizzle";
 export class MeService {
 	constructor(private readonly db: DrizzleClient) {}
 
-	async findBySub({ sub }: Pick<User, "sub">): Promise<Me | null> {
+	async findBySub({ sub }: Pick<User, "sub">): Promise<GetMeResponseBody> {
 		const [findUser] = await this.db
 			.select({
 				email: userTable.email,
@@ -21,7 +26,9 @@ export class MeService {
 		return findUser ? this.convertUserToMe(findUser) : null;
 	}
 
-	async register(dto: CreateMeRequestBody & Pick<User, "sub">): Promise<Me> {
+	async register(
+		dto: CreateMeRequestBody & Pick<User, "sub">,
+	): Promise<CreateMeResponseBody> {
 		try {
 			const [createdUser] = await this.db
 				.insert(userTable)
