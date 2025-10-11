@@ -1,30 +1,15 @@
 import { vValidator } from "@hono/valibot-validator";
-import { userTable } from "@repo/db/schema/user";
 import { UniqueKeyAlreadyExistsError } from "@repo/shared/error";
-import { meSchema } from "@repo/shared/model/me";
-import { createInsertSchema } from "drizzle-valibot";
+import {
+	type CreateMeResponseBody,
+	createMeRequestBodySchema,
+	type GetMeResponseBody,
+} from "@repo/shared/model/me";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
-import { type InferOutput, nullable, pick } from "valibot";
 import { MeService } from "../../application/me/MeService";
 import { routeValidateCallback } from "../../libs/validation";
 import type { HttpRespondReturn, PrivateRouteContext } from "../../types";
-
-// find
-export const getMeResponseBodySchema = nullable(meSchema);
-export type GetMeResponseBody = InferOutput<typeof getMeResponseBodySchema>;
-
-// create
-export const createMeRequestBodySchema = pick(createInsertSchema(userTable), [
-	"email",
-	"name",
-	"image",
-]);
-export type CreateMeRequestBody = InferOutput<typeof createMeRequestBodySchema>;
-export const createMeResponseBodySchema = meSchema;
-export type CreateMeResponseBody = InferOutput<
-	typeof createMeResponseBodySchema
->;
 
 export const routes = new Hono<PrivateRouteContext>()
 	.get("/", async (c): Promise<HttpRespondReturn<GetMeResponseBody>> => {
@@ -32,7 +17,7 @@ export const routes = new Hono<PrivateRouteContext>()
 		const meService = new MeService(db);
 
 		try {
-			const findMe = await meService.findBySub(sub);
+			const findMe = await meService.findBySub({ sub });
 
 			if (findMe) {
 				return c.json(
