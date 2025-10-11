@@ -1,4 +1,4 @@
-import { MOCK_ME } from "@repo/mock/domain";
+import { MOCK_ME } from "@repo/mock/model";
 import type { Decorator, Preview } from "@storybook/react-vite";
 import { BrowserRouter } from "react-router";
 import { ToastProvider } from "../../web/app/components/Toast";

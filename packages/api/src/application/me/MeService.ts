@@ -1,26 +1,19 @@
-import type { Me } from "@repo/db/schema/me";
 import { type User, userTable } from "@repo/db/schema/user";
 import { UniqueKeyAlreadyExistsError } from "@repo/shared/error";
+import type {
+	CreateMeRequestBody,
+	CreateMeResponseBody,
+	GetMeResponseBody,
+	Me,
+} from "@repo/shared/model/me";
 import { hasCode } from "@repo/shared/utils";
 import { DrizzleQueryError, eq } from "drizzle-orm";
-import { createInsertSchema } from "drizzle-valibot";
-import { type InferOutput, pick } from "valibot";
 import type { DrizzleClient } from "../../libs/drizzle";
-
-const registerMeServiceArgsSchema = pick(createInsertSchema(userTable), [
-	"sub",
-	"email",
-	"name",
-	"image",
-]);
-export type RegisterMeServiceArgs = InferOutput<
-	typeof registerMeServiceArgsSchema
->;
 
 export class MeService {
 	constructor(private readonly db: DrizzleClient) {}
 
-	async findBySub(sub: User["sub"]): Promise<Me | null> {
+	async findBySub({ sub }: Pick<User, "sub">): Promise<GetMeResponseBody> {
 		const [findUser] = await this.db
 			.select({
 				email: userTable.email,
@@ -33,11 +26,13 @@ export class MeService {
 		return findUser ? this.convertUserToMe(findUser) : null;
 	}
 
-	async register(user: RegisterMeServiceArgs): Promise<Me> {
+	async register(
+		dto: CreateMeRequestBody & Pick<User, "sub">,
+	): Promise<CreateMeResponseBody> {
 		try {
 			const [createdUser] = await this.db
 				.insert(userTable)
-				.values(user)
+				.values(dto)
 				.returning({
 					email: userTable.email,
 					id: userTable.id,

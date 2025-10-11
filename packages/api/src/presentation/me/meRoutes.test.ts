@@ -1,13 +1,14 @@
 import { faker } from "@faker-js/faker";
 import { userTable } from "@repo/db/schema/user";
-import { MOCK_USER } from "@repo/mock/domain";
+import { MOCK_USER } from "@repo/mock/model";
+import type { CreateMeRequestBody } from "@repo/shared/model/me";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Hono } from "hono";
 import { testClient } from "hono/testing";
 import { beforeEach, describe, expect, test } from "vitest";
 import type { PrivateRouteContext } from "../../types";
-import { type CreateMeRequestBody, routes } from "./meRoutes";
+import { routes } from "./meRoutes";
 
 describe("meRoutes", () => {
 	const db = drizzle(process.env.DATABASE_URL, { casing: "snake_case" });
