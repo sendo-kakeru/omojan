@@ -1,5 +1,4 @@
 import { faker } from "@faker-js/faker";
-import type { CreateMeRequestBody } from "@repo/db/schema/me";
 import { userTable } from "@repo/db/schema/user";
 import { MOCK_USER } from "@repo/mock/domain";
 import { eq } from "drizzle-orm";
@@ -8,7 +7,7 @@ import { Hono } from "hono";
 import { testClient } from "hono/testing";
 import { beforeEach, describe, expect, test } from "vitest";
 import type { PrivateRouteContext } from "../../types";
-import { routes } from "./meRoutes";
+import { type CreateMeRequestBody, routes } from "./meRoutes";
 
 describe("meRoutes", () => {
 	const db = drizzle(process.env.DATABASE_URL, { casing: "snake_case" });
@@ -93,17 +92,37 @@ describe("meRoutes", () => {
 			expect(response.status).toBe(400);
 		});
 
-		test("ユーザーが既に存在する場合、409を返す", async () => {
+		test("subが既に存在する場合、409を返す", async () => {
 			const firstResponse = await mockHonoClient.me.$post({
 				json: MOCK_REQUEST_BODY,
 			});
 			expect(firstResponse.status).toBe(201);
 
 			const secondResponse = await mockHonoClient.me.$post({
-				json: {
-					...MOCK_REQUEST_BODY,
-					email: faker.internet.email(),
-				},
+				json: { ...MOCK_REQUEST_BODY, email: faker.internet.email() },
+			});
+
+			expect(secondResponse.status).toBe(409);
+		});
+
+		test("emailが既に存在する場合、409を返す", async () => {
+			const firstResponse = await mockHonoClient.me.$post({
+				json: MOCK_REQUEST_BODY,
+			});
+			expect(firstResponse.status).toBe(201);
+
+			const differentSubHonoClient = testClient<typeof app>(
+				new Hono<PrivateRouteContext>()
+					.use("*", async (c, next) => {
+						c.set("db", db);
+						c.set("sub", faker.string.uuid());
+						await next();
+					})
+					.route("/me", routes),
+			);
+
+			const secondResponse = await differentSubHonoClient.me.$post({
+				json: MOCK_REQUEST_BODY,
 			});
 
 			expect(secondResponse.status).toBe(409);

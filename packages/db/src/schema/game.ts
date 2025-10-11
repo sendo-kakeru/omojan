@@ -12,7 +12,7 @@ export const gameStatusEnum = pgEnum("game_status", [
 export const gameTable = pgTable("game", {
 	...tableBaseColumns,
 	isPrivate: boolean().notNull().default(false),
-	passWord: text(),
+	password: text(),
 	status: gameStatusEnum().notNull().default("waiting"),
 	timeLimit: smallint().notNull(),
 	title: text().notNull(),
