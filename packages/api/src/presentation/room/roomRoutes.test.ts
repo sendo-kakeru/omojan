@@ -22,7 +22,7 @@ describe("roomRoutes", () => {
 				c.set("sub", MOCK_USER.sub);
 				await next();
 			})
-			.route("/room", routes);
+			.route("/rooms", routes);
 		const mockHonoClient = testClient<typeof app>(app);
 
 		beforeEach(async () => {
@@ -31,7 +31,7 @@ describe("roomRoutes", () => {
 			await db.delete(userTable);
 		});
 
-		describe("POST /room", () => {
+		describe("POST /rooms", () => {
 			const MOCK_REQUEST_BODY: CreateRoomRequestBody = {
 				isPrivate: false,
 				password: null,
@@ -46,7 +46,7 @@ describe("roomRoutes", () => {
 					.values(MOCK_USER)
 					.returning();
 
-				const response = await mockHonoClient.room.$post({
+				const response = await mockHonoClient.rooms.$post({
 					json: MOCK_REQUEST_BODY,
 				});
 
@@ -87,7 +87,7 @@ describe("roomRoutes", () => {
 					password: faker.internet.password(),
 				};
 
-				const response = await mockHonoClient.room.$post({
+				const response = await mockHonoClient.rooms.$post({
 					json: privateRoomBody,
 				});
 
@@ -108,7 +108,7 @@ describe("roomRoutes", () => {
 					title: MOCK_REQUEST_BODY.title,
 				} as unknown as CreateRoomRequestBody;
 
-				const response = await mockHonoClient.room.$post({
+				const response = await mockHonoClient.rooms.$post({
 					json: invalidBody,
 				});
 
@@ -121,7 +121,7 @@ describe("roomRoutes", () => {
 					timeLimit: -1,
 				} as CreateRoomRequestBody;
 
-				const response = await mockHonoClient.room.$post({
+				const response = await mockHonoClient.rooms.$post({
 					json: invalidBody,
 				});
 
@@ -137,7 +137,7 @@ describe("roomRoutes", () => {
 				c.set("sub", null);
 				await next();
 			})
-			.route("/room", routes);
+			.route("/rooms", routes);
 		const mockHonoClient = testClient<typeof app>(app);
 
 		beforeEach(async () => {
@@ -146,7 +146,7 @@ describe("roomRoutes", () => {
 			await db.delete(userTable);
 		});
 
-		describe("POST /room", () => {
+		describe("POST /rooms", () => {
 			const MOCK_REQUEST_BODY: CreateRoomRequestBody = {
 				isPrivate: false,
 				password: null,
@@ -156,7 +156,7 @@ describe("roomRoutes", () => {
 			};
 
 			test("未認証ユーザーでもルームを作成できる", async () => {
-				const response = await mockHonoClient.room.$post({
+				const response = await mockHonoClient.rooms.$post({
 					json: MOCK_REQUEST_BODY,
 				});
 
