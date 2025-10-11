@@ -3,7 +3,6 @@
 		"@repo/typescript-config": "workspace:*",
 		"@repo/tsup-config": "workspace:*",
 		"@repo/db": "workspace:*",
-		"@repo/shared": "workspace:*",
 		"@faker-js/faker": "^10.0.0"
 	},
 	"exports": {

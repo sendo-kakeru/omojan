@@ -3,7 +3,7 @@ import {
 	type CreateMeResponseBody,
 	createMeRequestBodySchema,
 	type GetMeResponseBody,
-} from "@repo/shared/domain/me";
+} from "@repo/db/schema/me";
 import { UniqueKeyAlreadyExistsError } from "@repo/shared/error";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";

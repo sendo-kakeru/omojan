@@ -1,5 +1,5 @@
+import type { Me } from "@repo/db/schema/me";
 import { type User, userTable } from "@repo/db/schema/user";
-import type { Me } from "@repo/shared/domain/me";
 import { createInsertSchema } from "drizzle-valibot";
 import { type InferOutput, pick } from "valibot";
 import type { UserRepository } from "../../infrastructure/user/UserRepository";
