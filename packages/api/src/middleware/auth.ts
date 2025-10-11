@@ -1,6 +1,6 @@
 import type { MiddlewareHandler } from "hono";
 import { HTTPException } from "hono/http-exception";
-import { CognitoService } from "../application/cognitoService";
+import { CognitoService } from "../application/CognitoService";
 import type { HybridRouteContext, PrivateRouteContext } from "../types";
 
 /**
