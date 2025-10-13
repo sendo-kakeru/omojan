@@ -2,7 +2,7 @@ import type { Me } from "@repo/shared/model/me";
 import { useState } from "react";
 import { LuLogIn } from "react-icons/lu";
 import { Link } from "react-router";
-import { useMe } from "~/features/me/context/hooks";
+import { useMe } from "~/context/me/hooks";
 import { cognito } from "~/libs/cognito";
 import { Avatar } from "../Avatar";
 import { Button } from "../button/Button";

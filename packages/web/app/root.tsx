@@ -12,7 +12,7 @@ import "./app.css";
 import type { PropsWithChildren } from "react";
 import { AuthHeader } from "./components/auth/AuthHeader";
 import { ToastProvider } from "./components/Toast";
-import { MeProvider } from "./features/me/context/provider";
+import { MeProvider } from "./context/me/provider";
 
 // TODO: メタ情報設定
 export const links: Route.LinksFunction = () => [

@@ -2,7 +2,7 @@ import { MOCK_ME } from "@repo/mock/model";
 import type { Decorator, Preview } from "@storybook/react-vite";
 import { BrowserRouter } from "react-router";
 import { ToastProvider } from "../../web/app/components/Toast";
-import { MeContext } from "../../web/app/features/me/context/provider";
+import { MeContext } from "../../web/app/context/me/provider";
 import "../style.css";
 
 const decorator: Decorator = (Story, context) => {
