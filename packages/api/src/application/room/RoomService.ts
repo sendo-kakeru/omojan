@@ -4,12 +4,76 @@ import { type User, userTable } from "@repo/db/schema/user";
 import type {
 	CreateRoomRequestBody,
 	CreateRoomResponseBody,
+	GetRoomListResponseBody,
 } from "@repo/shared/model/room";
-import { eq } from "drizzle-orm";
+import { desc, eq, inArray } from "drizzle-orm";
 import type { DrizzleClient } from "../../libs/drizzle";
 
 export class RoomService {
 	constructor(private readonly db: DrizzleClient) {}
+
+	/**
+	 * 募集中のルーム一覧を取得する
+	 */
+	async findMany(): Promise<GetRoomListResponseBody> {
+		return await this.db.transaction(async (tx) => {
+			const games = await tx
+				.select({
+					createdAt: gameTable.createdAt,
+					id: gameTable.id,
+					isPrivate: gameTable.isPrivate,
+					timeLimit: gameTable.timeLimit,
+					title: gameTable.title,
+				})
+				.from(gameTable)
+				.where(eq(gameTable.status, "waiting"))
+				.orderBy(desc(gameTable.createdAt));
+
+			if (games.length === 0) return [];
+
+			const players = await tx
+				.select({
+					gameId: playerTable.gameId,
+					id: playerTable.id,
+					image: userTable.image,
+					isHost: playerTable.isHost,
+					playerName: playerTable.playerName,
+					seat: playerTable.seat,
+				})
+				.from(playerTable)
+				.leftJoin(userTable, eq(playerTable.userId, userTable.id))
+				.where(
+					inArray(
+						playerTable.gameId,
+						games.map((game) => game.id),
+					),
+				);
+
+			const groupedPlayersByGameId = new Map<string, typeof players>();
+
+			for (const player of players) {
+				const arr = groupedPlayersByGameId.get(player.gameId) ?? [];
+				arr.push(player);
+				groupedPlayersByGameId.set(player.gameId, arr);
+			}
+
+			return games.map((game) => ({
+				gameId: game.id,
+				isPrivate: game.isPrivate,
+				players: (groupedPlayersByGameId.get(game.id) ?? [])
+					.sort((a, b) => a.seat - b.seat)
+					.map((player) => ({
+						id: player.id,
+						image: player.image,
+						isHost: player.isHost,
+						playerName: player.playerName,
+						seat: player.seat,
+					})),
+				timeLimit: game.timeLimit,
+				title: game.title,
+			}));
+		});
+	}
 	async create({
 		sub,
 		...dto

@@ -9,6 +9,7 @@ import {
 	nullable,
 	number,
 	object,
+	omit,
 	pick,
 	pipe,
 } from "valibot";
@@ -19,11 +20,19 @@ export const roomSchema = object({
 	players: array(
 		object({
 			...pick(playerSchema, ["id", "playerName", "isHost", "seat"]).entries,
-			user: nullable(pick(userSchema, ["image"])),
+			image: nullable(userSchema.entries.image),
 		}),
 	),
 });
 export type Room = InferOutput<typeof roomSchema>;
+
+// find many
+export const getRoomListResponseBodySchema = array(
+	omit(roomSchema, ["password"]),
+);
+export type GetRoomListResponseBody = InferOutput<
+	typeof getRoomListResponseBodySchema
+>;
 
 // create
 export const createRoomRequestBodySchema = object({

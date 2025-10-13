@@ -128,6 +128,77 @@ describe("roomRoutes", () => {
 				expect(response.status).toBe(400);
 			});
 		});
+
+		describe("GET /rooms", () => {
+			test("待機中のルーム一覧を取得できる", async () => {
+				await db.insert(userTable).values(MOCK_USER);
+
+				const [insertedUser] = await db
+					.select()
+					.from(userTable)
+					.where(eq(userTable.sub, MOCK_USER.sub));
+
+				const gameData = [
+					{
+						isPrivate: false,
+						password: null,
+						status: "waiting" as const,
+						timeLimit: 30,
+						title: "Room 1",
+					},
+					{
+						isPrivate: true,
+						password: "secret",
+						status: "waiting" as const,
+						timeLimit: 60,
+						title: "Room 2",
+					},
+					{
+						isPrivate: false,
+						password: null,
+						status: "active" as const,
+						timeLimit: 45,
+						title: "Room 3",
+					},
+				];
+
+				const createdGames = await Promise.all(
+					gameData.map(async (data) => {
+						const [game] = await db.insert(gameTable).values(data).returning();
+						return game;
+					}),
+				);
+
+				await Promise.all(
+					createdGames.slice(0, 2).map(async (game, index) => {
+						if (!game) return;
+						await db.insert(playerTable).values({
+							gameId: game.id,
+							isHost: true,
+							playerName: `Player ${index + 1}`,
+							seat: 1,
+							userId: insertedUser?.id,
+						});
+					}),
+				);
+
+				const response = await mockHonoClient.rooms.$get({});
+
+				expect(response.status).toBe(200);
+				const body = await response.json();
+				expect(body.data).toBeDefined();
+				expect(body.data?.length).toBe(2);
+
+				const [room1, room2] = body.data || [];
+				expect(room1?.title).toBe("Room 2");
+				expect(room1?.isPrivate).toBe(true);
+				expect(room1?.players.length).toBe(1);
+
+				expect(room2?.title).toBe("Room 1");
+				expect(room2?.isPrivate).toBe(false);
+				expect(room2?.players.length).toBe(1);
+			});
+		});
 	});
 
 	describe("未認証ユーザー", () => {
