@@ -92,11 +92,11 @@ export class RoomService {
 				return findUser;
 			})();
 
-			// TODO: 鍵部屋ならパスワードを生成して割り当てる
 			const [createdGame] = await tx
 				.insert(gameTable)
 				.values({
 					isPrivate: dto.isPrivate,
+					password: dto.isPrivate ? this.generateRoomPassword() : null,
 					timeLimit: dto.timeLimit,
 					title: dto.title,
 				})
@@ -116,5 +116,19 @@ export class RoomService {
 
 			return { gameId: createdGame.id };
 		});
+	}
+	private generateRoomPassword(length = 6): string {
+		// NOTE: 身内以外が参加してほしくないだけなのでユーザーが入力する面倒を減らすため、一旦小文字英数字のみ。
+		// ハッシュ化や厳密なランダムもしない
+		const CHARACTERS = "abcdefghijklmnopqrstuvwxyz0123456789";
+		// const CHARACTERS =
+		// 	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+		let password = "";
+		for (let i = 0; i < length; i++) {
+			password += CHARACTERS.charAt(
+				Math.floor(Math.random() * CHARACTERS.length),
+			);
+		}
+		return password;
 	}
 }
