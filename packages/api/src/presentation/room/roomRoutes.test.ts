@@ -34,7 +34,6 @@ describe("roomRoutes", () => {
 		describe("POST /rooms", () => {
 			const MOCK_REQUEST_BODY: CreateRoomRequestBody = {
 				isPrivate: false,
-				password: null,
 				playerName: MOCK_USER.name,
 				timeLimit: 30,
 				title: faker.lorem.words(3),
@@ -64,7 +63,6 @@ describe("roomRoutes", () => {
 				expect(createdGame?.title).toBe(MOCK_REQUEST_BODY.title);
 				expect(createdGame?.timeLimit).toBe(MOCK_REQUEST_BODY.timeLimit);
 				expect(createdGame?.isPrivate).toBe(MOCK_REQUEST_BODY.isPrivate);
-				expect(createdGame?.password).toBe(MOCK_REQUEST_BODY.password);
 				expect(createdGame?.status).toBe("waiting");
 
 				const [createdPlayer] = await db
@@ -78,13 +76,12 @@ describe("roomRoutes", () => {
 				expect(createdPlayer?.userId).toBe(insertedUser?.id);
 			});
 
-			test("プライベートルーム（パスワード付き）を作成できる", async () => {
+			test("プライベートルームを作成できる", async () => {
 				await db.insert(userTable).values(MOCK_USER);
 
 				const privateRoomBody: CreateRoomRequestBody = {
 					...MOCK_REQUEST_BODY,
 					isPrivate: true,
-					password: faker.internet.password(),
 				};
 
 				const response = await mockHonoClient.rooms.$post({
@@ -100,7 +97,7 @@ describe("roomRoutes", () => {
 					.from(gameTable)
 					.where(eq(gameTable.id, body.data.gameId));
 				expect(createdGame?.isPrivate).toBe(true);
-				expect(createdGame?.password).toBe(privateRoomBody.password);
+				expect(createdGame?.password).toBeTypeOf("string");
 			});
 
 			test("バリデーションエラーの場合、400を返す", async () => {
@@ -220,7 +217,6 @@ describe("roomRoutes", () => {
 		describe("POST /rooms", () => {
 			const MOCK_REQUEST_BODY: CreateRoomRequestBody = {
 				isPrivate: false,
-				password: null,
 				playerName: faker.person.firstName(),
 				timeLimit: 60,
 				title: faker.lorem.words(3),

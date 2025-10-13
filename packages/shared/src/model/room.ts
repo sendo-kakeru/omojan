@@ -36,8 +36,7 @@ export type GetRoomListResponseBody = InferOutput<
 
 // create
 export const createRoomRequestBodySchema = object({
-	...pick(createSelectSchema(gameTable), ["isPrivate", "password", "title"])
-		.entries,
+	...pick(createSelectSchema(gameTable), ["isPrivate", "title"]).entries,
 	timeLimit: pipe(number(), minValue(1)),
 	...pick(createSelectSchema(playerTable), ["playerName"]).entries,
 });
