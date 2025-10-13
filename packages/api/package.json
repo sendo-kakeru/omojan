@@ -18,7 +18,7 @@
 		"@types/pg": "^8.15.5",
 		"pg": "^8.16.3",
 		"vitest": "^3.2.4",
-		"wrangler": "^4.4.0"
+		"wrangler": "^4.42.2"
 	},
 	"exports": {
 		".": "./dist/index.d.ts"
