@@ -92,11 +92,11 @@ export class RoomService {
 				return findUser;
 			})();
 
+			// TODO: 鍵部屋ならパスワードを生成して割り当てる
 			const [createdGame] = await tx
 				.insert(gameTable)
 				.values({
 					isPrivate: dto.isPrivate,
-					password: dto.password,
 					timeLimit: dto.timeLimit,
 					title: dto.title,
 				})
