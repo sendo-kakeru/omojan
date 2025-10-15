@@ -1,35 +1,23 @@
+import { useState } from "react";
+import { FaPlus } from "react-icons/fa";
 import { Button } from "~/components/button/Button";
-import { useToast } from "~/components/Toast";
-import { cognito } from "~/libs/cognito";
-import type { Route } from "./+types/page";
+import { CreateRoomDialog } from "./_components/CreateRoomDialog";
 
-export async function clientLoader() {
-	const accessToken = await cognito.getAccessToken();
-	console.log("accessToken:", accessToken);
-	return { accessToken };
-}
-
-export default function Home({
-	loaderData: { accessToken },
-}: Route.ComponentProps) {
-	const { showToast } = useToast();
-	const handleSignOut = () => {
-		try {
-			cognito.signOut();
-		} catch (error) {
-			console.error("ログアウトに失敗しました:", error);
-			showToast({ title: "ログアウトに失敗しました。", type: "error" });
-		}
-	};
-
+export default function () {
+	const [isOpen, setIsOpen] = useState(false);
 	return (
-		<div className="w-full bg-white p-8">
-			{accessToken && (
-				<Button as="button" onClick={() => handleSignOut()} type="button">
-					ログアウト
+		<>
+			<div className="grid gap-y-8">
+				<Button
+					as="button"
+					className="w-fit justify-self-end"
+					leftIcon={<FaPlus />}
+					onClick={() => setIsOpen(true)}
+				>
+					部屋作成
 				</Button>
-			)}
-			<p>hello</p>
-		</div>
+			</div>
+			<CreateRoomDialog isOpen={isOpen} setIsOpen={setIsOpen} />
+		</>
 	);
 }

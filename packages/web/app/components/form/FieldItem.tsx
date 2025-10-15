@@ -48,7 +48,9 @@ export function FieldItem({
 			</div>
 			<div className="grid grid-cols-1 gap-y-4">
 				{children}
-				{note && <p className="text-gray-500 text-xs">{note}</p>}
+				{note && (
+					<p className="whitespace-pre-line text-gray-500 text-xs">{note}</p>
+				)}
 				{errorMessage && (
 					<p className="flex items-center gap-x-8">
 						<FaCircleExclamation aria-hidden className="text-red-700" />
