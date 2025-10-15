@@ -5,6 +5,9 @@ import { createSelectSchema } from "drizzle-valibot";
 import {
 	array,
 	type InferOutput,
+	maxLength,
+	maxValue,
+	minLength,
 	minValue,
 	nullable,
 	number,
@@ -12,6 +15,7 @@ import {
 	omit,
 	pick,
 	pipe,
+	string,
 } from "valibot";
 
 export const roomSchema = object({
@@ -36,9 +40,31 @@ export type GetRoomListResponseBody = InferOutput<
 
 // create
 export const createRoomRequestBodySchema = object({
-	...pick(createSelectSchema(gameTable), ["isPrivate", "title"]).entries,
-	timeLimit: pipe(number(), minValue(1)),
-	...pick(createSelectSchema(playerTable), ["playerName"]).entries,
+	...pick(
+		createSelectSchema(gameTable, {
+			timeLimit: pipe(
+				number("制限時間を選択してください"),
+				minValue(15, "制限時間は15秒以上で入力してください"),
+				maxValue(360, "制限時間は360秒以下で入力してください"),
+			),
+			title: pipe(
+				string(),
+				minLength(1, "部屋名を入力してください"),
+				maxLength(50, "部屋名は50文字以下で入力してください"),
+			),
+		}),
+		["timeLimit", "title", "isPrivate"],
+	).entries,
+	...pick(
+		createSelectSchema(playerTable, {
+			playerName: pipe(
+				string(),
+				minLength(1, "プレイヤー名を入力してください"),
+				maxLength(50, "プレイヤー名は50文字以下で入力してください"),
+			),
+		}),
+		["playerName"],
+	).entries,
 });
 export type CreateRoomRequestBody = InferOutput<
 	typeof createRoomRequestBodySchema

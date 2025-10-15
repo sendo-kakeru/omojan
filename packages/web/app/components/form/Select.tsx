@@ -17,7 +17,7 @@ export function Select({
 		<div className="relative flex w-fit">
 			<select
 				className={classNames(
-					"size-full cursor-pointer appearance-none overflow-hidden text-ellipsis whitespace-nowrap rounded-sm border border-gray-200 py-8 pr-40 pl-16 transition-colors",
+					"size-full cursor-pointer appearance-none overflow-hidden text-ellipsis whitespace-nowrap rounded-sm border border-gray-200 py-4 pr-40 pl-16 text-base transition-colors",
 					"invalid:text-gray-500", // 未選択時（一つ目の要素選択時）に文字色を変える
 					"hover:bg-gray-50",
 					"focus-visible:border-gray-400",

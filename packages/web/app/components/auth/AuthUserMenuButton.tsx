@@ -83,7 +83,7 @@ function SigninButton() {
 			>
 				<LuLogIn aria-hidden="true" />
 			</Button>
-			<SigninModal onOpenChange={setIsOpen} open={isOpen} />
+			<SigninModal isOpen={isOpen} setIsOpen={setIsOpen} />
 		</>
 	);
 }
