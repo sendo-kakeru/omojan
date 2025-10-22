@@ -10,7 +10,7 @@
 		"@tanstack/react-form": "^1.23.7",
 		"amazon-cognito-identity-js": "^6.3.15",
 		"classnames": "^2.5.1",
-		"hono": "^4.10.1",
+		"hono": "^4.10.2",
 		"isbot": "^5.1.31",
 		"jwt-decode": "^4.0.0",
 		"react": "^19.2.0",
