@@ -13,6 +13,6 @@
 	"packageManager": "pnpm@10.17.0",
 	"private": true,
 	"scripts": {
-		"ci": "biome ci && turbo run check-types test:run"
+		"ci": "biome ci && turbo run typecheck test:run"
 	}
 }

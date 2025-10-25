@@ -7,7 +7,6 @@
 			"outputs": ["dist/**"]
 		},
 		"cf-typegen": {},
-		"check-types": {},
 		"destroy": {},
 		"dev": {
 			"cache": false,
@@ -26,6 +25,7 @@
 		"studio": {},
 		"test": {},
 		"test:run": {},
+		"typecheck": {},
 		"up": {}
 	},
 	"ui": "tui"

@@ -40,7 +40,7 @@
 		"lint": "biome check .",
 		"test": "DATABASE_URL=postgresql://test:test@localhost:5432/test?schema=public vitest",
 		"test:run": "DATABASE_URL=postgresql://test:test@localhost:5432/test?schema=public vitest run",
-		"type-check": "pnpm run cf-typegen && tsc --noEmit"
+		"typecheck": "pnpm run cf-typegen && tsc --noEmit"
 	},
 	"type": "module",
 	"version": "1.0.0"

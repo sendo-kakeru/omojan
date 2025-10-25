@@ -28,7 +28,7 @@
 		"build:tsc": "tsc",
 		"lint": "biome check .",
 		"format": "biome check --fix --unsafe .",
-		"type-check": "tsc --noEmit"
+		"typecheck": "tsc --noEmit"
 	},
 	"type": "module",
 	"version": "1.0.0"

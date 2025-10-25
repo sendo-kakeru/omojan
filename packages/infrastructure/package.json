@@ -16,7 +16,7 @@
 		"destroy": "RUN_TYPE=DESTROY pulumi up -y && pulumi destroy -y",
 		"format": "biome check --fix --unsafe .",
 		"lint": "biome check .",
-		"type-check": "tsc --noEmit",
+		"typecheck": "tsc --noEmit",
 		"up": "pulumi up -y"
 	},
 	"version": "1.0.0"
