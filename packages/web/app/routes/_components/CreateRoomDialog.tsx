@@ -33,6 +33,7 @@ export function CreateRoomDialog({
 			title: "誰でも歓迎",
 		},
 		onSubmit: async ({ value }) => {
+			// NOTE: 必要ならSWRフック化し、mutateで送信。作成後は自動でページ遷移するため今の所不要
 			startLoading();
 			try {
 				const response = await honoClient.rooms.$post({

@@ -16,3 +16,6 @@
 - propsは分割代入し、引数で型定義
 - tailwind mergeの使用はいとしないマージが起こるので使用禁止
 - tailwind variantsのslotは複雑になるので基本使用しない
+
+#### tailwind css
+- `space-*`は使用せず、`gap-*`を使う
