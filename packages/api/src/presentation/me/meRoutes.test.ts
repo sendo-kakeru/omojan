@@ -11,6 +11,9 @@ import type { PrivateRouteContext } from "../../types";
 import { routes } from "./meRoutes";
 
 describe("meRoutes", () => {
+	if (!process.env.DATABASE_URL) {
+		throw new Error("DATABASE_URL is not defined");
+	}
 	const db = drizzle(process.env.DATABASE_URL, { casing: "snake_case" });
 	const app = new Hono<PrivateRouteContext>()
 		.use("*", async (c, next) => {
