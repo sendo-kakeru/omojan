@@ -4,8 +4,8 @@
 	},
 	"editor.defaultFormatter": "biomejs.biome",
 	"editor.formatOnSave": true,
-	"typescript.tsdk": "node_modules/typescript/lib"
 	// "tailwindCSS.experimental.classRegex": [
-	//   ["([\"'`][^\"'`]*.*?[\"'`])", "[\"'`]([^\"'`]*).*?[\"'`]"]
-	// ]
+	// 	["([\"'`][^\"'`]*.*?[\"'`])", "[\"'`]([^\"'`]*).*?[\"'`]"]
+	// ],
+	"typescript.tsdk": "node_modules/typescript/lib"
 }
