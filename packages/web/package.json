@@ -59,7 +59,7 @@
 		"preview": "pnpm run build && vite preview",
 		"start": "react-router-serve ./build/server/index.js",
 		"storybook:styles": "tailwindcss -i ./app/app.css -o ./dist/index.css --watch",
-		"typecheck": "pnpm run cf-typegen && react-router typegen && tsc"
+		"typecheck": "pnpm run cf-typegen && react-router typegen && tsc --noEmit"
 	},
 	"type": "module",
 	"version": "1.0.0"

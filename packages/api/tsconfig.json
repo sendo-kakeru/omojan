@@ -3,5 +3,6 @@
 		"lib": ["ESNext", "DOM"],
 		"outDir": "./dist"
 	},
+	"exclude": ["**/*.test.ts", "**/*.test.tsx"],
 	"extends": "@repo/typescript-config/base.json"
 }

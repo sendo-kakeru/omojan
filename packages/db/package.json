@@ -30,7 +30,7 @@
 		"lint": "biome check .",
 		"migrate:dev": "drizzle-kit push",
 		"studio": "drizzle-kit studio",
-		"type-check": "tsc --noEmit"
+		"typecheck": "tsc --noEmit"
 	},
 	"type": "module",
 	"version": "1.0.0"

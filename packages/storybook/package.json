@@ -35,7 +35,7 @@
 		"format": "biome check --fix --unsafe .",
 		"lint": "biome check .",
 		"storybook": "storybook dev -p 6006",
-		"type-check": "pnpm run cf-typegen && tsc --noEmit"
+		"typecheck": "tsc --noEmit"
 	},
 	"type": "module",
 	"version": "1.0.0"
