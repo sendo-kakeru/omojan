@@ -27,13 +27,18 @@ export function getDrizzleClient({
 	if (env.ENV === "production" || env.ENV === "staging") {
 		if (isWs) {
 			return neonServerlessDrizzle(env.DATABASE_URL, {
+				casing: "snake_case",
 				logger,
 			}) as unknown as DrizzleClient;
 		}
 		return neonHttpDrizzle(env.DATABASE_URL, {
+			casing: "snake_case",
 			logger,
 		}) as unknown as DrizzleClient;
 	}
 
-	return nodePostgresDrizzle(env.DATABASE_URL, { logger });
+	return nodePostgresDrizzle(env.DATABASE_URL, {
+		casing: "snake_case",
+		logger,
+	});
 }
