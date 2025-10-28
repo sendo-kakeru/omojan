@@ -4,7 +4,7 @@
 		"@repo/typescript-config": "workspace:*",
 		"@types/node": "^24.9.1",
 		"drizzle-kit": "^0.31.5",
-		"drizzle-orm": "^0.44.5",
+		"drizzle-orm": "^0.44.7",
 		"drizzle-valibot": "^0.4.2",
 		"pg": "^8.16.3",
 		"valibot": "^1.1.0"

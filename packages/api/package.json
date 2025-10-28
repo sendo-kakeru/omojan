@@ -5,7 +5,7 @@
 		"@hono/valibot-validator": "^0.5.3",
 		"@neondatabase/serverless": "^1.0.2",
 		"aws-jwt-verify": "^5.1.1",
-		"drizzle-orm": "^0.44.5",
+		"drizzle-orm": "^0.44.7",
 		"drizzle-valibot": "^0.4.2",
 		"hono": "^4.10.3",
 		"valibot": "^1.1.0"
