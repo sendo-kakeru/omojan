@@ -7,7 +7,7 @@
 		"@react-router/node": "^7.9.4",
 		"@react-router/serve": "^7.9.4",
 		"@repo/shared": "workspace:*",
-		"@tanstack/react-form": "^1.23.7",
+		"@tanstack/react-form": "^1.23.8",
 		"amazon-cognito-identity-js": "^6.3.15",
 		"classnames": "^2.5.1",
 		"hono": "^4.10.3",
