@@ -15,7 +15,7 @@
 		"@repo/typescript-config": "workspace:*",
 		"@repo/mock": "workspace:*",
 		"@faker-js/faker": "^10.1.0",
-		"@types/pg": "^8.15.5",
+		"@types/pg": "^8.15.6",
 		"pg": "^8.16.3",
 		"vitest": "^4.0.4",
 		"wrangler": "^4.45.1"
