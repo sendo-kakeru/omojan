@@ -42,11 +42,11 @@ importers:
         specifier: ^5.1.1
         version: 5.1.1
       drizzle-orm:
-        specifier: ^0.44.5
-        version: 0.44.6(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@types/pg@8.15.5)(pg@8.16.3)(postgres@3.4.7)
+        specifier: ^0.44.7
+        version: 0.44.7(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@types/pg@8.15.5)(pg@8.16.3)(postgres@3.4.7)
       drizzle-valibot:
         specifier: ^0.4.2
-        version: 0.4.2(drizzle-orm@0.44.6(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@types/pg@8.15.5)(pg@8.16.3)(postgres@3.4.7))(valibot@1.1.0(typescript@5.9.3))
+        version: 0.4.2(drizzle-orm@0.44.7(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@types/pg@8.15.5)(pg@8.16.3)(postgres@3.4.7))(valibot@1.1.0(typescript@5.9.3))
       hono:
         specifier: ^4.10.3
         version: 4.10.3
@@ -94,11 +94,11 @@ importers:
         specifier: ^0.31.5
         version: 0.31.5
       drizzle-orm:
-        specifier: ^0.44.5
-        version: 0.44.6(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@types/pg@8.15.5)(pg@8.16.3)(postgres@3.4.7)
+        specifier: ^0.44.7
+        version: 0.44.7(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@types/pg@8.15.5)(pg@8.16.3)(postgres@3.4.7)
       drizzle-valibot:
         specifier: ^0.4.2
-        version: 0.4.2(drizzle-orm@0.44.6(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@types/pg@8.15.5)(pg@8.16.3)(postgres@3.4.7))(valibot@1.1.0(typescript@5.9.3))
+        version: 0.4.2(drizzle-orm@0.44.7(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@types/pg@8.15.5)(pg@8.16.3)(postgres@3.4.7))(valibot@1.1.0(typescript@5.9.3))
       pg:
         specifier: ^8.16.3
         version: 8.16.3
@@ -155,7 +155,7 @@ importers:
         version: link:../db
       drizzle-valibot:
         specifier: ^0.4.2
-        version: 0.4.2(drizzle-orm@0.44.6(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@types/pg@8.15.5)(pg@8.16.3)(postgres@3.4.7))(valibot@1.1.0(typescript@5.9.3))
+        version: 0.4.2(drizzle-orm@0.44.7(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@types/pg@8.15.5)(pg@8.16.3)(postgres@3.4.7))(valibot@1.1.0(typescript@5.9.3))
       valibot:
         specifier: ^1.1.0
         version: 1.1.0(typescript@5.9.3)
@@ -3221,8 +3221,8 @@ packages:
     resolution: {integrity: sha512-+CHgPFzuoTQTt7cOYCV6MOw2w8vqEn/ap1yv4bpZOWL03u7rlVRQhUY0WYT3rHsgVTXwYQDZaSUJSQrMBUKuWg==}
     hasBin: true
 
-  drizzle-orm@0.44.6:
-    resolution: {integrity: sha512-uy6uarrrEOc9K1u5/uhBFJbdF5VJ5xQ/Yzbecw3eAYOunv5FDeYkR2m8iitocdHBOHbvorviKOW5GVw0U1j4LQ==}
+  drizzle-orm@0.44.7:
+    resolution: {integrity: sha512-quIpnYznjU9lHshEOAYLoZ9s3jweleHlZIAWR/jX9gAWNg/JhQ1wj0KGRf7/Zm+obRrYd9GjPVJg790QY9N5AQ==}
     peerDependencies:
       '@aws-sdk/client-rds-data': '>=3'
       '@cloudflare/workers-types': '>=4'
@@ -8113,7 +8113,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.44.6(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@types/pg@8.15.5)(pg@8.16.3)(postgres@3.4.7):
+  drizzle-orm@0.44.7(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@types/pg@8.15.5)(pg@8.16.3)(postgres@3.4.7):
     optionalDependencies:
       '@neondatabase/serverless': 1.0.2
       '@opentelemetry/api': 1.9.0
@@ -8121,9 +8121,9 @@ snapshots:
       pg: 8.16.3
       postgres: 3.4.7
 
-  drizzle-valibot@0.4.2(drizzle-orm@0.44.6(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@types/pg@8.15.5)(pg@8.16.3)(postgres@3.4.7))(valibot@1.1.0(typescript@5.9.3)):
+  drizzle-valibot@0.4.2(drizzle-orm@0.44.7(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@types/pg@8.15.5)(pg@8.16.3)(postgres@3.4.7))(valibot@1.1.0(typescript@5.9.3)):
     dependencies:
-      drizzle-orm: 0.44.6(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@types/pg@8.15.5)(pg@8.16.3)(postgres@3.4.7)
+      drizzle-orm: 0.44.7(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@types/pg@8.15.5)(pg@8.16.3)(postgres@3.4.7)
       valibot: 1.1.0(typescript@5.9.3)
 
   dunder-proto@1.0.1:
