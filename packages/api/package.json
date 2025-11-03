@@ -7,7 +7,7 @@
 		"aws-jwt-verify": "^5.1.1",
 		"drizzle-orm": "^0.44.7",
 		"drizzle-valibot": "^0.4.2",
-		"hono": "^4.10.3",
+		"hono": "^4.10.4",
 		"valibot": "^1.1.0"
 	},
 	"devDependencies": {
@@ -18,7 +18,7 @@
 		"@types/pg": "^8.15.6",
 		"pg": "^8.16.3",
 		"vitest": "^4.0.4",
-		"wrangler": "^4.45.1"
+		"wrangler": "^4.45.3"
 	},
 	"exports": {
 		".": "./dist/index.d.ts"
