@@ -3,7 +3,7 @@
 		"@pulumi/aws": "^7.10.0",
 		"@pulumi/pulumi": "^3.205.0",
 		"@repo/typescript-config": "workspace:*",
-		"@types/node": "^24.9.1",
+		"@types/node": "^24.9.2",
 		"dotenv": "^17.2.3",
 		"typescript": "^5.9.3",
 		"valibot": "^1.1.0"
