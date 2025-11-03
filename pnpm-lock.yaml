@@ -112,8 +112,8 @@ importers:
         specifier: ^7.10.0
         version: 7.10.0(typescript@5.9.3)
       '@pulumi/pulumi':
-        specifier: ^3.204.0
-        version: 3.204.0(typescript@5.9.3)
+        specifier: ^3.205.0
+        version: 3.205.0(typescript@5.9.3)
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
@@ -1916,8 +1916,8 @@ packages:
   '@pulumi/aws@7.10.0':
     resolution: {integrity: sha512-1ykqa7bRcXv7iAmfBdfLckVwbaORsZbOHsqyHZk8A0gcM0RVrv38u3EagQTq13yNjZCaYdfzM2zTYpim2fDUVQ==}
 
-  '@pulumi/pulumi@3.204.0':
-    resolution: {integrity: sha512-B+FJTd0lJ1/6kl/OHsLzUc/QoNp+0VwOXbhlbCVYzlsPi6UTIdaio25oCOSTFuQEj0gKWkE9m0Rq1d4Pk5DErw==}
+  '@pulumi/pulumi@3.205.0':
+    resolution: {integrity: sha512-AcYCPNAPYpRX9D2D6vwnEfNP+1hg1R45eQYrBTJlbGY3rcR22sHP8fYheY5nJQy1g9KPY21kkkvfBDu6Ch6UIw==}
     engines: {node: '>=20'}
     peerDependencies:
       ts-node: '>= 7.0.1 < 12'
@@ -2548,8 +2548,8 @@ packages:
     resolution: {integrity: sha512-t09vSN3MdfsyCHoFcTRCH/iUtG7OJ0CsjzB8cjAmKc/va/kIgeDI/TxsigdncE/4be734m0cvIYwNaV4i2XqAw==}
     engines: {node: '>=10'}
 
-  '@sindresorhus/is@7.1.0':
-    resolution: {integrity: sha512-7F/yz2IphV39hiS2zB4QYVkivrptHHh0K8qJJd9HhuWSdvf8AN7NpebW3CcDZDBQsUPMoDKWsY2WWgW7bqOcfA==}
+  '@sindresorhus/is@7.1.1':
+    resolution: {integrity: sha512-rO92VvpgMc3kfiTjGT52LEtJ8Yc5kCWhZjLQ3LwlA4pSgPpQO7bVpYXParOD8Jwf+cVQECJo3yP/4I8aZtUQTQ==}
     engines: {node: '>=18'}
 
   '@smithy/types@4.6.0':
@@ -6786,7 +6786,7 @@ snapshots:
   '@poppinss/dumper@0.6.4':
     dependencies:
       '@poppinss/colors': 4.1.5
-      '@sindresorhus/is': 7.1.0
+      '@sindresorhus/is': 7.1.1
       supports-color: 10.2.2
 
   '@poppinss/exception@1.2.2': {}
@@ -6816,7 +6816,7 @@ snapshots:
 
   '@pulumi/aws@7.10.0(typescript@5.9.3)':
     dependencies:
-      '@pulumi/pulumi': 3.204.0(typescript@5.9.3)
+      '@pulumi/pulumi': 3.205.0(typescript@5.9.3)
       mime: 2.6.0
     transitivePeerDependencies:
       - bluebird
@@ -6824,7 +6824,7 @@ snapshots:
       - ts-node
       - typescript
 
-  '@pulumi/pulumi@3.204.0(typescript@5.9.3)':
+  '@pulumi/pulumi@3.205.0(typescript@5.9.3)':
     dependencies:
       '@grpc/grpc-js': 1.14.0
       '@logdna/tail-file': 2.2.0
@@ -7412,7 +7412,7 @@ snapshots:
 
   '@sindresorhus/is@4.6.0': {}
 
-  '@sindresorhus/is@7.1.0': {}
+  '@sindresorhus/is@7.1.1': {}
 
   '@smithy/types@4.6.0':
     dependencies:
