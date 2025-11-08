@@ -21,7 +21,7 @@ describe("meRoutes", () => {
 			c.set("sub", MOCK_USER.sub);
 			await next();
 		})
-		.route("/me", routes);
+		.route("/v1/me", routes);
 	const mockHonoClient = testClient<typeof app>(app);
 
 	beforeEach(async () => {
@@ -35,7 +35,7 @@ describe("meRoutes", () => {
 				.values(MOCK_USER)
 				.returning();
 
-			const response = await mockHonoClient.me.$get();
+			const response = await mockHonoClient.v1.me.$get();
 
 			expect(response.status).toBe(200);
 			const body = await response.json();
@@ -48,7 +48,7 @@ describe("meRoutes", () => {
 		});
 
 		test("ユーザーが存在しない場合、404を返す", async () => {
-			const response = await mockHonoClient.me.$get();
+			const response = await mockHonoClient.v1.me.$get();
 
 			expect(response.status).toBe(404);
 			const body = await response.json();
@@ -63,7 +63,7 @@ describe("meRoutes", () => {
 			name: MOCK_USER.name,
 		};
 		test("正常にユーザーを作成した場合、201とユーザー情報を返す", async () => {
-			const response = await mockHonoClient.me.$post({
+			const response = await mockHonoClient.v1.me.$post({
 				json: MOCK_REQUEST_BODY,
 			});
 
@@ -89,7 +89,7 @@ describe("meRoutes", () => {
 				email: "invalid-email",
 			} as unknown as CreateMeRequestBody;
 
-			const response = await mockHonoClient.me.$post({
+			const response = await mockHonoClient.v1.me.$post({
 				json: invalidBody,
 			});
 
@@ -97,12 +97,12 @@ describe("meRoutes", () => {
 		});
 
 		test("subが既に存在する場合、409を返す", async () => {
-			const firstResponse = await mockHonoClient.me.$post({
+			const firstResponse = await mockHonoClient.v1.me.$post({
 				json: MOCK_REQUEST_BODY,
 			});
 			expect(firstResponse.status).toBe(201);
 
-			const secondResponse = await mockHonoClient.me.$post({
+			const secondResponse = await mockHonoClient.v1.me.$post({
 				json: { ...MOCK_REQUEST_BODY, email: faker.internet.email() },
 			});
 
@@ -110,7 +110,7 @@ describe("meRoutes", () => {
 		});
 
 		test("emailが既に存在する場合、409を返す", async () => {
-			const firstResponse = await mockHonoClient.me.$post({
+			const firstResponse = await mockHonoClient.v1.me.$post({
 				json: MOCK_REQUEST_BODY,
 			});
 			expect(firstResponse.status).toBe(201);
@@ -122,10 +122,10 @@ describe("meRoutes", () => {
 						c.set("sub", faker.string.uuid());
 						await next();
 					})
-					.route("/me", routes),
+					.route("/v1/me", routes),
 			);
 
-			const secondResponse = await differentSubHonoClient.me.$post({
+			const secondResponse = await differentSubHonoClient.v1.me.$post({
 				json: MOCK_REQUEST_BODY,
 			});
 
@@ -133,7 +133,7 @@ describe("meRoutes", () => {
 		});
 
 		test("imageなしでもユーザーを作成できる", async () => {
-			const response = await mockHonoClient.me.$post({
+			const response = await mockHonoClient.v1.me.$post({
 				json: { ...MOCK_REQUEST_BODY, image: null },
 			});
 

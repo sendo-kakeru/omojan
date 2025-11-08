@@ -14,8 +14,8 @@ export const MeContext = createContext<{
 	mutate: (...args: MutateArgs) => Promise<void>;
 } | null>(null);
 
-async function fetcher(args: InferRequestType<typeof honoClient.me.$get>) {
-	const response = await honoClient.me.$get(args);
+async function fetcher(args: InferRequestType<typeof honoClient.v1.me.$get>) {
+	const response = await honoClient.v1.me.$get(args);
 	return await response.json();
 }
 
