@@ -36,7 +36,7 @@ export function CreateRoomDialog({
 			// NOTE: 必要ならSWRフック化し、mutateで送信。作成後は自動でページ遷移するため今の所不要
 			startLoading();
 			try {
-				const response = await honoClient.rooms.$post({
+				const response = await honoClient.v1.rooms.$post({
 					json: value,
 				});
 				// TODO: 作成後の移動

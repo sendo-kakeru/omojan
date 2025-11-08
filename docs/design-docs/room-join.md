@@ -93,7 +93,7 @@
 ---
 
 ## 8. WebSocket 認証
-- Client: `new WebSocket("wss://api.example.com/ws/<gameId>?token=<game_token>")`
+- Client: `new WebSocket("wss://api.example.com/v1/ws/<gameId>?token=<game_token>")`
 - Server: ハンドシェイク要求の `URLSearchParams.get("token")` を検証し、OK のときのみ upgrade。
   - 失敗は **HTTP 401/403**（upgrade しない）。
 
@@ -104,7 +104,7 @@
 ---
 
 ## 9. 代表的フロー
-- ホスト作成 → `game_token` 受領 → `wss://.../ws/<gameId>?token=...` で接続。
+- ホスト作成 → `game_token` 受領 → `wss://.../v1/ws/<gameId>?token=...` で接続。
 - 参加 → `game_token` 受領 → 同上。
 - 再接続 → 同トークンで接続、DO が旧接続を **4001 replaced** で排他。
 - 募集中退室 → 該当 `player` 失効 → そのトークンでは以後接続不可。

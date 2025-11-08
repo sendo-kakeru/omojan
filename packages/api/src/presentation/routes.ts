@@ -19,14 +19,14 @@ const publicRoutes = new Hono<BaseContext>();
 
 const hybridRoutes = new Hono<HybridRouteContext>()
 	.use(hybridAuthMiddleware())
-	.route("/rooms", roomRoutes);
+	.route("/v1/rooms", roomRoutes);
 
 const privateRoutes = new Hono<PrivateRouteContext>()
 	.use(privateAuthMiddleware())
 	.get("/private", (c): HttpRespondReturn => {
 		return c.json({ data: null, message: "This is a private route" });
 	})
-	.route("/me", meRoutes);
+	.route("/v1/me", meRoutes);
 
 // WebSocket
 const wsHybridRoutes = new Hono<HybridRouteContext>().use(
@@ -45,11 +45,7 @@ const wsRoutes = new Hono<BaseContext>()
 // Aggregate
 export const routes = new Hono<BaseContext>()
 	.use(logger())
-	// ヘルスチェック（ロードバランサー・監視用）
-	.get("/", (c): HttpRespondReturn => {
-		return c.json({ data: null, message: "ok" });
-	})
 	.route("", publicRoutes)
 	.route("", hybridRoutes)
-	.route("/ws", wsRoutes)
+	.route("/v1/ws", wsRoutes)
 	.route("", privateRoutes);

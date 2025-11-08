@@ -25,7 +25,7 @@ describe("roomRoutes", () => {
 				c.set("sub", MOCK_USER.sub);
 				await next();
 			})
-			.route("/rooms", routes);
+			.route("/v1/rooms", routes);
 		const mockHonoClient = testClient<typeof app>(app);
 
 		beforeEach(async () => {
@@ -48,7 +48,7 @@ describe("roomRoutes", () => {
 					.values(MOCK_USER)
 					.returning();
 
-				const response = await mockHonoClient.rooms.$post({
+				const response = await mockHonoClient.v1.rooms.$post({
 					json: MOCK_REQUEST_BODY,
 				});
 
@@ -87,7 +87,7 @@ describe("roomRoutes", () => {
 					isPrivate: true,
 				};
 
-				const response = await mockHonoClient.rooms.$post({
+				const response = await mockHonoClient.v1.rooms.$post({
 					json: privateRoomBody,
 				});
 
@@ -108,7 +108,7 @@ describe("roomRoutes", () => {
 					title: MOCK_REQUEST_BODY.title,
 				} as unknown as CreateRoomRequestBody;
 
-				const response = await mockHonoClient.rooms.$post({
+				const response = await mockHonoClient.v1.rooms.$post({
 					json: invalidBody,
 				});
 
@@ -121,7 +121,7 @@ describe("roomRoutes", () => {
 					timeLimit: -1,
 				} as CreateRoomRequestBody;
 
-				const response = await mockHonoClient.rooms.$post({
+				const response = await mockHonoClient.v1.rooms.$post({
 					json: invalidBody,
 				});
 
@@ -182,7 +182,7 @@ describe("roomRoutes", () => {
 					}),
 				);
 
-				const response = await mockHonoClient.rooms.$get({});
+				const response = await mockHonoClient.v1.rooms.$get({});
 
 				expect(response.status).toBe(200);
 				const body = await response.json();
@@ -208,7 +208,7 @@ describe("roomRoutes", () => {
 				c.set("sub", null);
 				await next();
 			})
-			.route("/rooms", routes);
+			.route("/v1/rooms", routes);
 		const mockHonoClient = testClient<typeof app>(app);
 
 		beforeEach(async () => {
@@ -226,7 +226,7 @@ describe("roomRoutes", () => {
 			};
 
 			test("未認証ユーザーでもルームを作成できる", async () => {
-				const response = await mockHonoClient.rooms.$post({
+				const response = await mockHonoClient.v1.rooms.$post({
 					json: MOCK_REQUEST_BODY,
 				});
 

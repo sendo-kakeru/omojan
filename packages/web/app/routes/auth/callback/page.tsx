@@ -21,7 +21,7 @@ export async function clientLoader({ request }: Route.LoaderArgs) {
 			state,
 		});
 
-		const getMeResponse = await honoClient.me.$get();
+		const getMeResponse = await honoClient.v1.me.$get();
 		const getMeResult = await getMeResponse.json();
 		// 初回ログインでなければトップへ
 		if (getMeResult.data) {
@@ -34,7 +34,7 @@ export async function clientLoader({ request }: Route.LoaderArgs) {
 			throw new Error("IDトークンのデコード結果がありません");
 		}
 
-		const createMeResponse = await honoClient.me.$post({
+		const createMeResponse = await honoClient.v1.me.$post({
 			json: {
 				email: payload.email,
 				image: payload.picture,
