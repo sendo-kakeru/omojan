@@ -112,8 +112,8 @@ importers:
         specifier: ^7.11.0
         version: 7.11.0(typescript@5.9.3)
       '@pulumi/pulumi':
-        specifier: ^3.205.0
-        version: 3.205.0(typescript@5.9.3)
+        specifier: ^3.206.0
+        version: 3.206.0(typescript@5.9.3)
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
@@ -1500,8 +1500,8 @@ packages:
   '@floating-ui/utils@0.2.10':
     resolution: {integrity: sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ==}
 
-  '@grpc/grpc-js@1.14.0':
-    resolution: {integrity: sha512-N8Jx6PaYzcTRNzirReJCtADVoq4z7+1KQ4E70jTg/koQiMoUSN1kbNjPOqpPbhMFhfU1/l7ixspPl8dNY+FoUg==}
+  '@grpc/grpc-js@1.14.1':
+    resolution: {integrity: sha512-sPxgEWtPUR3EnRJCEtbGZG2iX8LQDUls2wUS3o27jg07KqJFMq6YDeWvMo1wfpmy3rqRdS0rivpLwhqQtEyCuQ==}
     engines: {node: '>=12.10.0'}
 
   '@grpc/proto-loader@0.8.0':
@@ -1955,8 +1955,8 @@ packages:
   '@pulumi/aws@7.11.0':
     resolution: {integrity: sha512-LlK11UZRsN3vExnAAz6XRxTf6bQaeoghe9yK+U3eGUdaL7Fl5ifUBl1TvUHe7UhpGANprJHN406YH/RxKQwOQw==}
 
-  '@pulumi/pulumi@3.205.0':
-    resolution: {integrity: sha512-AcYCPNAPYpRX9D2D6vwnEfNP+1hg1R45eQYrBTJlbGY3rcR22sHP8fYheY5nJQy1g9KPY21kkkvfBDu6Ch6UIw==}
+  '@pulumi/pulumi@3.206.0':
+    resolution: {integrity: sha512-xTiAcs7LhVOK2mUvTCUOlS7tTtzSh0T+C9pOAOkbpJuAX0GKw+wg7PZZ3qQbqW63fGfCBHs7h27e9d9iyHEC/w==}
     engines: {node: '>=20'}
     peerDependencies:
       ts-node: '>= 7.0.1 < 12'
@@ -6396,7 +6396,7 @@ snapshots:
 
   '@floating-ui/utils@0.2.10': {}
 
-  '@grpc/grpc-js@1.14.0':
+  '@grpc/grpc-js@1.14.1':
     dependencies:
       '@grpc/proto-loader': 0.8.0
       '@js-sdsl/ordered-map': 4.4.2
@@ -6892,7 +6892,7 @@ snapshots:
 
   '@pulumi/aws@7.11.0(typescript@5.9.3)':
     dependencies:
-      '@pulumi/pulumi': 3.205.0(typescript@5.9.3)
+      '@pulumi/pulumi': 3.206.0(typescript@5.9.3)
       mime: 2.6.0
     transitivePeerDependencies:
       - bluebird
@@ -6900,9 +6900,9 @@ snapshots:
       - ts-node
       - typescript
 
-  '@pulumi/pulumi@3.205.0(typescript@5.9.3)':
+  '@pulumi/pulumi@3.206.0(typescript@5.9.3)':
     dependencies:
-      '@grpc/grpc-js': 1.14.0
+      '@grpc/grpc-js': 1.14.1
       '@logdna/tail-file': 2.2.0
       '@npmcli/arborist': 7.5.4
       '@opentelemetry/api': 1.9.0
