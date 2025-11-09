@@ -1,9 +1,11 @@
 {
 	"dependencies": {
-		"@repo/db": "workspace:*",
-		"@repo/shared": "workspace:*",
 		"@hono/valibot-validator": "^0.5.3",
 		"@neondatabase/serverless": "^1.0.2",
+		"@noble/hashes": "^1.4.0",
+		"@oslojs/encoding": "^1.1.0",
+		"@repo/db": "workspace:*",
+		"@repo/shared": "workspace:*",
 		"aws-jwt-verify": "^5.1.1",
 		"drizzle-orm": "^0.44.7",
 		"drizzle-valibot": "^0.4.2",
@@ -11,10 +13,10 @@
 		"valibot": "^1.1.0"
 	},
 	"devDependencies": {
+		"@faker-js/faker": "^10.1.0",
+		"@repo/mock": "workspace:*",
 		"@repo/tsup-config": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
-		"@repo/mock": "workspace:*",
-		"@faker-js/faker": "^10.1.0",
 		"@types/pg": "^8.15.6",
 		"pg": "^8.16.3",
 		"vitest": "^4.0.8",

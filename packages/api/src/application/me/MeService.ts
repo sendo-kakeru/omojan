@@ -1,5 +1,4 @@
 import { type User, userTable } from "@repo/db/schema/user";
-import { UniqueKeyAlreadyExistsError } from "@repo/shared/error";
 import type {
 	CreateMeRequestBody,
 	CreateMeResponseBody,
@@ -8,6 +7,7 @@ import type {
 } from "@repo/shared/model/me";
 import { hasCode } from "@repo/shared/utils";
 import { DrizzleQueryError, eq } from "drizzle-orm";
+import { HTTPException } from "hono/http-exception";
 import type { DrizzleClient } from "../../libs/drizzle";
 
 export class MeService {
@@ -41,7 +41,9 @@ export class MeService {
 				});
 
 			if (!createdUser) {
-				throw new Error("作成したユーザーの取得に失敗しました");
+				throw new HTTPException(500, {
+					message: "作成したユーザーの取得に失敗しました",
+				});
 			}
 
 			return this.convertUserToMe(createdUser);
@@ -51,7 +53,9 @@ export class MeService {
 				hasCode(error.cause) &&
 				error.cause.code === "23505"
 			) {
-				throw new UniqueKeyAlreadyExistsError();
+				throw new HTTPException(409, {
+					message: "ユーザーは既に存在します",
+				});
 			}
 			throw error;
 		}

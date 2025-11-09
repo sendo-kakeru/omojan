@@ -1,10 +1,15 @@
 import { gameSchema, gameTable } from "@repo/db/schema/game";
-import { playerSchema, playerTable } from "@repo/db/schema/player";
+import {
+	playerNameSchema,
+	playerSchema,
+	playerTable,
+} from "@repo/db/schema/player";
 import { userSchema } from "@repo/db/schema/user";
 import { createSelectSchema } from "drizzle-valibot";
 import {
 	array,
 	type InferOutput,
+	length,
 	maxLength,
 	maxValue,
 	minLength,
@@ -13,6 +18,7 @@ import {
 	number,
 	object,
 	omit,
+	optional,
 	pick,
 	pipe,
 	string,
@@ -38,6 +44,27 @@ export type GetRoomListResponseBody = InferOutput<
 	typeof getRoomListResponseBodySchema
 >;
 
+// join
+export const joinRoomRequestBodySchema = object({
+	/**
+	 * クライアントで保持しているトークン
+	 * 既に参加している場合の重複参加防止に使用
+	 */
+	heldToken: nullable(string()),
+	password: optional(
+		pipe(string(), length(6, "パスワードは6文字で入力してください")),
+	),
+	playerName: playerNameSchema,
+});
+export type JoinRoomRequestBody = InferOutput<typeof joinRoomRequestBodySchema>;
+
+export const joinRoomResponseBodySchema = object({
+	token: playerSchema.entries.gameTokenHash,
+});
+export type JoinRoomResponseBody = InferOutput<
+	typeof joinRoomResponseBodySchema
+>;
+
 // create
 export const createRoomRequestBodySchema = object({
 	...pick(
@@ -57,11 +84,7 @@ export const createRoomRequestBodySchema = object({
 	).entries,
 	...pick(
 		createSelectSchema(playerTable, {
-			playerName: pipe(
-				string(),
-				minLength(1, "プレイヤー名を入力してください"),
-				maxLength(50, "プレイヤー名は50文字以下で入力してください"),
-			),
+			playerName: playerNameSchema,
 		}),
 		["playerName"],
 	).entries,
@@ -69,7 +92,15 @@ export const createRoomRequestBodySchema = object({
 export type CreateRoomRequestBody = InferOutput<
 	typeof createRoomRequestBodySchema
 >;
-export const createRoomResponseBodySchema = pick(roomSchema, ["gameId"]);
+export const createRoomResponseBodySchema = object({
+	...joinRoomResponseBodySchema.entries,
+	gameId: gameSchema.entries.id,
+});
 export type CreateRoomResponseBody = InferOutput<
 	typeof createRoomResponseBodySchema
 >;
+
+// verify token
+export const verifyRoomTokenRequestQuerySchema = object({
+	token: string(),
+});
