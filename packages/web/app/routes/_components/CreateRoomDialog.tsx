@@ -2,6 +2,7 @@
 import { createRoomRequestBodySchema } from "@repo/shared/model/room";
 import { useForm } from "@tanstack/react-form";
 import { type Dispatch, type SetStateAction, useId } from "react";
+import { useNavigate } from "react-router";
 import { Button } from "~/components/button/Button";
 import { Dialog } from "~/components/Dialog";
 import { Checkbox } from "~/components/form/Checkbox";
@@ -12,6 +13,7 @@ import { useToast } from "~/components/Toast";
 import { useMe } from "~/context/me/hooks";
 import { useIsLoading } from "~/hooks/useIsLoading";
 import { honoClient } from "~/libs/apiClient.client";
+import { gameTokenLocalStorage } from "~/libs/gameTokenLocalStorage";
 
 export function CreateRoomDialog({
 	isOpen,
@@ -24,6 +26,7 @@ export function CreateRoomDialog({
 	const formId = useId();
 	const { showToast } = useToast();
 	const { isLoading, startLoading, stopLoading } = useIsLoading();
+	const navigate = useNavigate();
 
 	const form = useForm({
 		defaultValues: {
@@ -39,8 +42,13 @@ export function CreateRoomDialog({
 				const response = await honoClient.v1.rooms.$post({
 					json: value,
 				});
-				// TODO: 作成後の移動
-				await response.json();
+				const {
+					data: { gameId, token },
+				} = await response.json();
+
+				gameTokenLocalStorage.set(token);
+				void navigate(`/matching/${gameId}`);
+
 				setIsOpen(false);
 			} catch (error) {
 				console.error("部屋の作成に失敗しました:", error);
