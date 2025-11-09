@@ -6,8 +6,12 @@ import { cognito } from "~/libs/cognito";
 export const honoClient = hc<Api>(import.meta.env.VITE_API_URL, {
 	async headers() {
 		const accessToken = await cognito.getAccessToken();
-		return {
-			Authorization: `Bearer ${accessToken}`,
-		};
+		const headers: Record<string, string> = {};
+
+		if (accessToken) {
+			headers.Authorization = `Bearer ${accessToken}`;
+		}
+
+		return headers;
 	},
 });

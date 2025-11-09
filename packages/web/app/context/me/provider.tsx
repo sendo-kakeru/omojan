@@ -5,6 +5,7 @@ import { createContext, type PropsWithChildren } from "react";
 import type { KeyedMutator } from "swr";
 import useSWRImmutable from "swr/immutable";
 import { honoClient } from "~/libs/apiClient.client";
+import { cognito } from "~/libs/cognito";
 
 type MutateArgs = Parameters<KeyedMutator<HttpResponseBody<Me | null>>>;
 
@@ -15,6 +16,12 @@ export const MeContext = createContext<{
 } | null>(null);
 
 async function fetcher(args: InferRequestType<typeof honoClient.v1.me.$get>) {
+	const accessToken = await cognito.getAccessToken();
+
+	if (!accessToken) {
+		return { data: null, message: "未ログイン" };
+	}
+
 	const response = await honoClient.v1.me.$get(args);
 	return await response.json();
 }
