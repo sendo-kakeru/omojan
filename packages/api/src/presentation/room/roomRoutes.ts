@@ -3,6 +3,8 @@ import {
 	type CreateRoomResponseBody,
 	createRoomRequestBodySchema,
 	type GetRoomListResponseBody,
+	type JoinRoomResponseBody,
+	joinRoomRequestBodySchema,
 } from "@repo/shared/model/room";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
@@ -32,6 +34,8 @@ export const routes = new Hono<
 			);
 		} catch (error) {
 			console.error("Roomの取得に失敗しました:", error);
+			if (error instanceof HTTPException) throw error;
+
 			throw new HTTPException(500, { message: "Roomの取得に失敗しました" });
 		}
 	})
@@ -43,20 +47,54 @@ export const routes = new Hono<
 			const body = c.req.valid("json");
 
 			try {
-				const createdRoom = await roomService.create({
+				const result = await roomService.create({
 					...body,
 					sub,
 				});
 				return c.json(
 					{
-						data: createdRoom,
+						data: result,
 						message: "OK",
 					},
 					201,
 				);
 			} catch (error) {
 				console.error("Roomの作成に失敗しました:", error);
+				if (error instanceof HTTPException) throw error;
+
 				throw new HTTPException(500, { message: "Roomの作成に失敗しました" });
+			}
+		},
+	)
+	.post(
+		"/:gameId/join",
+		vValidator("json", joinRoomRequestBodySchema, routeValidateCallback),
+		async (c): Promise<HttpRespondReturn<JoinRoomResponseBody>> => {
+			const { roomService, sub } = c.var;
+			const body = c.req.valid("json");
+			const { gameId } = c.req.param();
+
+			try {
+				const playerToken = await roomService.join({
+					...body,
+					gameId,
+					sub,
+				});
+
+				return c.json(
+					{
+						data: playerToken,
+						message: "OK",
+					},
+					201,
+				);
+			} catch (error) {
+				if (error instanceof HTTPException) throw error;
+
+				console.error("Roomへの参加に失敗しました:", error);
+				throw new HTTPException(500, {
+					message: "Roomへの参加に失敗しました",
+				});
 			}
 		},
 	);

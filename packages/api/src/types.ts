@@ -10,7 +10,7 @@ export type HttpRespondReturn<T = null> = Response &
 
 export type BaseContext = HonoEnv & {
 	Bindings: Env & {
-		ROOM: DurableObjectNamespace;
+		// TODO: DurableObjectNamespace
 	};
 	Variables: { db: DrizzleClient };
 };

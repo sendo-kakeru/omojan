@@ -1,5 +1,4 @@
 import { vValidator } from "@hono/valibot-validator";
-import { UniqueKeyAlreadyExistsError } from "@repo/shared/error";
 import {
 	type CreateMeResponseBody,
 	createMeRequestBodySchema,
@@ -44,6 +43,8 @@ export const routes = new Hono<
 			);
 		} catch (error) {
 			console.error("Meの取得に失敗しました:", error);
+			if (error instanceof HTTPException) throw error;
+
 			throw new HTTPException(500, { message: "Meの取得に失敗しました" });
 		}
 	})
@@ -64,11 +65,8 @@ export const routes = new Hono<
 				return c.json({ data: createdMe, message: "Created" }, 201);
 			} catch (error) {
 				console.error("Meの作成に失敗しました:", error);
-				if (error instanceof UniqueKeyAlreadyExistsError) {
-					throw new HTTPException(409, {
-						message: "ユーザーは既に存在します",
-					});
-				}
+				if (error instanceof HTTPException) throw error;
+
 				throw new HTTPException(500, {
 					message: "Meの作成に失敗しました",
 				});

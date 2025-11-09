@@ -6,5 +6,5 @@
 	},
 	"exclude": ["**/*.test.ts", "**/*.test.tsx"],
 	"extends": "@repo/typescript-config/base.json",
-	"include": ["worker-configuration.d.ts"]
+	"include": ["src"]
 }
