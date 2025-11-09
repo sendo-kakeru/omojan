@@ -59,7 +59,7 @@
 - 生成
   - 32B CSPRNG → Base64URL（約 43 文字）。
   - 返却は平文 `game_token`（HTTP レスポンス）。
-  - DB には `SHA-256(game_token)` または `HMAC(pepper, game_token)` を保存。
+  - DB には `SHA-256(game_token)` を保存。
 - 保持（クライアント）
   - `localStorage` 
 - ライフサイクル
