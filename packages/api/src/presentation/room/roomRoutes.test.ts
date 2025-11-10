@@ -70,7 +70,7 @@ describe("roomRoutes", () => {
 				const [createdGame] = await db
 					.select()
 					.from(gameTable)
-					.where(eq(gameTable.id, body.data.gameId));
+					.where(eq(gameTable.id, body.data?.gameId ?? ""));
 				expect(createdGame).toBeDefined();
 				expect(createdGame?.title).toBe(MOCK_REQUEST_BODY.title);
 				expect(createdGame?.timeLimit).toBe(MOCK_REQUEST_BODY.timeLimit);
@@ -80,13 +80,13 @@ describe("roomRoutes", () => {
 				const [createdPlayer] = await db
 					.select()
 					.from(playerTable)
-					.where(eq(playerTable.gameId, body.data.gameId));
+					.where(eq(playerTable.gameId, body.data?.gameId ?? ""));
 				expect(createdPlayer).toBeDefined();
 				expect(createdPlayer?.playerName).toBe(MOCK_REQUEST_BODY.playerName);
 				expect(createdPlayer?.isHost).toBe(true);
 				expect(createdPlayer?.seat).toBe(1);
 				expect(createdPlayer?.userId).toBe(insertedUser?.id);
-				const expectedHash = hashGameToken(body.data.token);
+				const expectedHash = hashGameToken(body.data?.token ?? "");
 				expect(createdPlayer?.gameTokenHash).toBe(expectedHash);
 			});
 
@@ -109,7 +109,7 @@ describe("roomRoutes", () => {
 				const [createdGame] = await db
 					.select()
 					.from(gameTable)
-					.where(eq(gameTable.id, body.data.gameId));
+					.where(eq(gameTable.id, body.data?.gameId ?? ""));
 				expect(createdGame?.isPrivate).toBe(true);
 				expect(createdGame?.password).toBeTypeOf("string");
 			});
@@ -213,7 +213,7 @@ describe("roomRoutes", () => {
 		});
 
 		describe("POST /rooms/:gameId/join", () => {
-			test("既に同じユーザーが参加している場合は409を返す", async () => {
+			test("既に同じユーザーが参加している場合は201を返す", async () => {
 				const [insertedUser] = await db
 					.insert(userTable)
 					.values(MOCK_USER)
@@ -248,10 +248,10 @@ describe("roomRoutes", () => {
 					param: { gameId: createdGame.id },
 				});
 
-				expect(response.status).toBe(409);
+				expect(response.status).toBe(201);
 			});
 
-			test("保持トークンが既に登録済みの場合は409を返す", async () => {
+			test("保持トークンが既に登録済みの場合は201を返す", async () => {
 				const [insertedUser] = await db
 					.insert(userTable)
 					.values(MOCK_USER)
@@ -298,7 +298,7 @@ describe("roomRoutes", () => {
 					param: { gameId: createdGame.id },
 				});
 
-				expect(response.status).toBe(409);
+				expect(response.status).toBe(201);
 			});
 		});
 	});
@@ -341,20 +341,20 @@ describe("roomRoutes", () => {
 				const [createdGame] = await db
 					.select()
 					.from(gameTable)
-					.where(eq(gameTable.id, body.data.gameId));
+					.where(eq(gameTable.id, body.data?.gameId ?? ""));
 				expect(createdGame).toBeDefined();
 				expect(createdGame?.title).toBe(MOCK_REQUEST_BODY.title);
 
 				const [createdPlayer] = await db
 					.select()
 					.from(playerTable)
-					.where(eq(playerTable.gameId, body.data.gameId));
+					.where(eq(playerTable.gameId, body.data?.gameId ?? ""));
 				expect(createdPlayer).toBeDefined();
 				expect(createdPlayer?.playerName).toBe(MOCK_REQUEST_BODY.playerName);
 				expect(createdPlayer?.isHost).toBe(true);
 				expect(createdPlayer?.seat).toBe(1);
 				expect(createdPlayer?.userId).toBeNull();
-				const expectedHash = hashGameToken(body.data?.token);
+				const expectedHash = hashGameToken(body.data?.token ?? "");
 				expect(createdPlayer?.gameTokenHash).toBe(expectedHash);
 			});
 		});
@@ -391,7 +391,9 @@ describe("roomRoutes", () => {
 
 				expect(response.status).toBe(201);
 				const body = await response.json();
-				expect(body.data?.token).toBeDefined();
+				expect(
+					body.data && "token" in body.data && body.data.token,
+				).toBeDefined();
 
 				const createdPlayers = await db
 					.select()
@@ -403,7 +405,9 @@ describe("roomRoutes", () => {
 
 				expect(guestPlayer).toBeDefined();
 				expect(guestPlayer?.userId).toBeNull();
-				const expectedHash = hashGameToken(body.data.token);
+				const expectedHash = hashGameToken(
+					body.data && "token" in body.data ? body.data.token : "",
+				);
 				expect(guestPlayer?.gameTokenHash).toBe(expectedHash);
 				expect(guestPlayer?.seat).toBe(2);
 			});
@@ -507,7 +511,7 @@ describe("roomRoutes", () => {
 					param: { gameId: createdGame.id },
 				});
 
-				expect(response.status).toBe(400);
+				expect(response.status).toBe(409);
 			});
 
 			test("存在しないルームIDの場合は404を返す", async () => {
