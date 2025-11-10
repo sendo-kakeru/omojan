@@ -1,5 +1,5 @@
-import { sha256 } from "@noble/hashes/sha2";
-import { bytesToHex } from "@noble/hashes/utils";
+import { sha256 } from "@noble/hashes/sha2.js";
+import { bytesToHex } from "@noble/hashes/utils.js";
 import { encodeBase64urlNoPadding } from "@oslojs/encoding";
 import { gameTable } from "@repo/db/schema/game";
 import { isPlayerSeat, playerTable } from "@repo/db/schema/player";
