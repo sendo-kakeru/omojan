@@ -87,13 +87,14 @@ export function JoinRoomDialog({
 							title: message,
 							type: "error",
 						});
+						return;
 					}
-					console.error("部屋への参加に失敗しました:", message);
-					return;
+					throw new Error(message);
 				}
 
-				// 既に参加済みならそのままマッチング画面へ（基本発生し得ない）
-				if ("isJoined" in data && data.isJoined) {
+				// 保持しているトークンのプレイヤーが存在する場合（過去に参加済み）そのままマッチング画面へ（基本発生し得ない）
+				if (data.state === "HELD_TOKEN_PLAYER_JOINED") {
+					setIsOpen(false);
 					void navigate(`/matching/${room.gameId}`);
 					return;
 				}

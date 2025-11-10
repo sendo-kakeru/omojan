@@ -63,19 +63,29 @@ export const joinRoomRequestBodySchema = object({
 });
 export type JoinRoomRequestBody = InferOutput<typeof joinRoomRequestBodySchema>;
 
-export const joinRoomResponseBodySchema = variant("isJoined", [
+/**
+ * クライアントの状態に応じたレスポンス
+ */
+export const joinRoomResponseBodySchema = variant("state", [
 	object({
 		/**
-		 * 既に参加しているかを表すフラグ
+		 * 通常の参加成功
 		 */
-		isJoined: literal(false),
+		state: literal("USUAL"),
 		token: playerSchema.entries.gameTokenHash,
 	}),
 	object({
 		/**
-		 * 既に参加しているかを表すフラグ
+		 * 認証ユーザーに紐づくプレイヤーが既に参加済み
 		 */
-		isJoined: literal(true),
+		state: literal("USER_PLAYER_JOINED"),
+		token: playerSchema.entries.gameTokenHash,
+	}),
+	object({
+		/**
+		 * クライアントが保持しているトークンのプレイヤーが参加済み（重複ではなく意図しない退出など）
+		 */
+		state: literal("HELD_TOKEN_PLAYER_JOINED"),
 	}),
 ]);
 export type JoinRoomResponseBody = InferOutput<
