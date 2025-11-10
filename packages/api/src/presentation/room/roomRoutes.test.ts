@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
-import { sha256 } from "@noble/hashes/sha2";
-import { bytesToHex } from "@noble/hashes/utils";
+import { sha256 } from "@noble/hashes/sha2.js";
+import { bytesToHex } from "@noble/hashes/utils.js";
 import { gameTable } from "@repo/db/schema/game";
 import { type PlayerSeat, playerTable } from "@repo/db/schema/player";
 import { userTable } from "@repo/db/schema/user";
