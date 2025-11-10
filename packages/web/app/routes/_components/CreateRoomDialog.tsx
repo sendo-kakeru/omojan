@@ -42,12 +42,14 @@ export function CreateRoomDialog({
 				const response = await honoClient.v1.rooms.$post({
 					json: value,
 				});
-				const {
-					data: { gameId, token },
-				} = await response.json();
+				const { data, message } = await response.json();
 
-				gameTokenLocalStorage.set(token);
-				void navigate(`/matching/${gameId}`);
+				if (!data) {
+					throw new Error(message);
+				}
+
+				gameTokenLocalStorage.set(data.token);
+				void navigate(`/matching/${data.gameId}`);
 
 				setIsOpen(false);
 			} catch (error) {
