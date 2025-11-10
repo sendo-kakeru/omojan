@@ -1,13 +1,2 @@
-// export class UniqueKeyAlreadyExistsError extends Error {
-// 	constructor(message?: string) {
-// 		super(message ?? "ユニークキーが既に存在します");
-// 		this.name = "UniqueKeyAlreadyExistsError";
-// 	}
-// }
-
-// export class NotFoundError extends Error {
-// 	constructor(message?: string) {
-// 		super(message ?? "NotFound");
-// 		this.name = "NotFoundError";
-// 	}
-// }
+export const LOCALSTORAGE_OPERATION_FAILED_MESSAGE =
+	"localStorageの操作に失敗しました。\nブラウザ設定でlocalStorageが有効か確認してください。";

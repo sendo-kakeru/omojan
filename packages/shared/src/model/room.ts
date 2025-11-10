@@ -10,6 +10,7 @@ import {
 	array,
 	type InferOutput,
 	length,
+	literal,
 	maxLength,
 	maxValue,
 	minLength,
@@ -22,7 +23,13 @@ import {
 	pick,
 	pipe,
 	string,
+	variant,
 } from "valibot";
+
+export const roomPasswordSchema = pipe(
+	string("パスワードを入力してください"),
+	length(6, "パスワードは6文字で入力してください"),
+);
 
 export const roomSchema = object({
 	...pick(gameSchema, ["title", "isPrivate", "password", "timeLimit"]).entries,
@@ -51,16 +58,26 @@ export const joinRoomRequestBodySchema = object({
 	 * 既に参加している場合の重複参加防止に使用
 	 */
 	heldToken: nullable(string()),
-	password: optional(
-		pipe(string(), length(6, "パスワードは6文字で入力してください")),
-	),
+	password: optional(roomPasswordSchema),
 	playerName: playerNameSchema,
 });
 export type JoinRoomRequestBody = InferOutput<typeof joinRoomRequestBodySchema>;
 
-export const joinRoomResponseBodySchema = object({
-	token: playerSchema.entries.gameTokenHash,
-});
+export const joinRoomResponseBodySchema = variant("isJoined", [
+	object({
+		/**
+		 * 既に参加しているかを表すフラグ
+		 */
+		isJoined: literal(false),
+		token: playerSchema.entries.gameTokenHash,
+	}),
+	object({
+		/**
+		 * 既に参加しているかを表すフラグ
+		 */
+		isJoined: literal(true),
+	}),
+]);
 export type JoinRoomResponseBody = InferOutput<
 	typeof joinRoomResponseBodySchema
 >;
@@ -93,8 +110,8 @@ export type CreateRoomRequestBody = InferOutput<
 	typeof createRoomRequestBodySchema
 >;
 export const createRoomResponseBodySchema = object({
-	...joinRoomResponseBodySchema.entries,
 	gameId: gameSchema.entries.id,
+	token: playerSchema.entries.gameTokenHash,
 });
 export type CreateRoomResponseBody = InferOutput<
 	typeof createRoomResponseBodySchema

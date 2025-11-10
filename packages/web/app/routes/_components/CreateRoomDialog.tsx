@@ -9,6 +9,7 @@ import { Checkbox } from "~/components/form/Checkbox";
 import { FieldItem } from "~/components/form/FieldItem";
 import { Input } from "~/components/form/Input";
 import { Select } from "~/components/form/Select";
+import { Spinner } from "~/components/Spinner";
 import { useToast } from "~/components/Toast";
 import { useMe } from "~/context/me/hooks";
 import { useIsLoading } from "~/hooks/useIsLoading";
@@ -24,9 +25,9 @@ export function CreateRoomDialog({
 }) {
 	const { me } = useMe();
 	const formId = useId();
+	const navigate = useNavigate();
 	const { showToast } = useToast();
 	const { isLoading, startLoading, stopLoading } = useIsLoading();
-	const navigate = useNavigate();
 
 	const form = useForm({
 		defaultValues: {
@@ -55,7 +56,7 @@ export function CreateRoomDialog({
 			} catch (error) {
 				console.error("部屋の作成に失敗しました:", error);
 				showToast({
-					title: "部屋の作成に失敗しました",
+					title: "部屋の作成に失敗しました。",
 					type: "error",
 				});
 			} finally {
@@ -210,9 +211,12 @@ export function CreateRoomDialog({
 							<Button
 								as="button"
 								disabled={!state.canSubmit || isLoading}
+								leftIcon={
+									isLoading ? <Spinner className="size-16" /> : undefined
+								}
 								type="submit"
 							>
-								{isLoading ? "作成しています..." : "作成する"}
+								{isLoading ? "作成しています" : "作成する"}
 							</Button>
 						)}
 					</form.Subscribe>

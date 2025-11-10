@@ -196,37 +196,7 @@ export class RoomService {
 				.from(playerTable)
 				.where(eq(playerTable.gameId, findGame.id));
 
-			const seat = this.assignSeat(
-				participatingPlayers.map((player) => player.seat),
-			);
-			if (!seat || participatingPlayers.length >= 4) {
-				throw new HTTPException(400, { message: "この部屋は満員です" });
-			}
-			if (!isPlayerSeat(seat)) {
-				throw new HTTPException(409, { message: "席番号が正しくありません" });
-			}
-
 			// NOTE: 退出時にプレイヤーを消すので基本的には起きないはずだが、念のため参加済みか検証
-			const authUser = await (async () => {
-				if (!sub) return null;
-
-				const [findUser] = await tx
-					.select({ id: userTable.id })
-					.from(userTable)
-					.where(eq(userTable.sub, sub));
-
-				return findUser;
-			})();
-
-			if (
-				authUser &&
-				participatingPlayers.some((player) => player.userId === authUser.id)
-			) {
-				throw new HTTPException(409, {
-					message: "既にこの部屋に参加しています",
-				});
-			}
-
 			if (heldToken) {
 				const heldTokenHash = this.hashGameToken(heldToken);
 				const [heldTokenPlayer] = await tx
@@ -242,13 +212,33 @@ export class RoomService {
 					);
 
 				if (heldTokenPlayer) {
-					throw new HTTPException(409, {
-						message: "既にこの部屋に参加しています",
-					});
+					return { isJoined: true };
 				}
 			}
 
+			// 空いている席を割り当てて参加処理
+			const seat = this.assignSeat(
+				participatingPlayers.map((player) => player.seat),
+			);
+			if (participatingPlayers.length >= 4) {
+				throw new HTTPException(409, { message: "この部屋は満員です" });
+			}
+			if (!seat || !isPlayerSeat(seat)) {
+				throw new HTTPException(409, { message: "席番号が正しくありません" });
+			}
+
 			const { gameToken, gameTokenHash } = this.generateGameTokenPair();
+
+			const authUser = await (async () => {
+				if (!sub) return null;
+
+				const [findUser] = await tx
+					.select({ id: userTable.id })
+					.from(userTable)
+					.where(eq(userTable.sub, sub));
+
+				return findUser;
+			})();
 
 			await tx.insert(playerTable).values({
 				gameId: findGame.id,
@@ -259,7 +249,7 @@ export class RoomService {
 				userId: authUser?.id,
 			});
 
-			return { token: gameToken };
+			return { isJoined: false, token: gameToken };
 		});
 	}
 
