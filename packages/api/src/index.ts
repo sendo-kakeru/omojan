@@ -7,7 +7,7 @@ import type { BaseContext, HttpRespondReturn } from "./types";
 
 const app = new Hono<BaseContext>()
 	.use((c, next) => {
-		c.set("db", getDrizzleClient(c));
+		c.set("db", getDrizzleClient({ env: c.env }));
 		const corsMiddleware = cors({
 			allowHeaders: ["Content-Type", "Authorization"],
 			allowMethods: [

@@ -24,94 +24,80 @@ importers:
         specifier: 5.9.3
         version: 5.9.3
 
-  packages/api:
+packages/api:
     dependencies:
-      '@hono/valibot-validator':
+      "@hono/valibot-validator":
         specifier: ^0.5.3
-        version: 0.5.3(hono@4.10.4)(valibot@1.1.0(typescript@5.9.3))
-      '@neondatabase/serverless':
-        specifier: ^1.0.2
-        version: 1.0.2
-      '@noble/hashes':
+        version: ^0.5.3
+      "@noble/hashes":
         specifier: ^2.0.1
-        version: 2.0.1
-      '@oslojs/encoding':
+        version: ^2.0.1
+      "@oslojs/encoding":
         specifier: ^1.1.0
-        version: 1.1.0
-      '@repo/db':
+        version: ^1.1.0
+      "@repo/db":
         specifier: workspace:*
-        version: link:../db
-      '@repo/shared':
+        version: workspace:*
+      "@repo/shared":
         specifier: workspace:*
-        version: link:../shared
+        version: workspace:*
       aws-jwt-verify:
         specifier: ^5.1.1
-        version: 5.1.1
+        version: ^5.1.1
       drizzle-orm:
         specifier: ^0.44.7
-        version: 0.44.7(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@types/pg@8.15.6)(pg@8.16.3)(postgres@3.4.7)
+        version: ^0.44.7
       drizzle-valibot:
         specifier: ^0.4.2
-        version: 0.4.2(drizzle-orm@0.44.7(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@types/pg@8.15.6)(pg@8.16.3)(postgres@3.4.7))(valibot@1.1.0(typescript@5.9.3))
+        version: ^0.4.2
       hono:
         specifier: ^4.10.4
-        version: 4.10.4
+        version: ^4.10.4
       valibot:
         specifier: ^1.1.0
-        version: 1.1.0(typescript@5.9.3)
+        version: ^1.1.0
     devDependencies:
-      '@faker-js/faker':
+      "@faker-js/faker":
         specifier: ^10.1.0
-        version: 10.1.0
-      '@repo/mock':
+        version: ^10.1.0
+      "@repo/mock":
         specifier: workspace:*
-        version: link:../mock
-      '@repo/tsup-config':
+        version: workspace:*
+      "@repo/tsup-config":
         specifier: workspace:*
-        version: link:../tsup-config
-      '@repo/typescript-config':
+        version: workspace:*
+      "@repo/typescript-config":
         specifier: workspace:*
-        version: link:../typescript-config
-      '@types/pg':
-        specifier: ^8.15.6
-        version: 8.15.6
-      pg:
-        specifier: ^8.16.3
-        version: 8.16.3
+        version: workspace:*
       vitest:
         specifier: ^4.0.8
-        version: 4.0.8(@types/node@24.10.0)(@vitest/browser-playwright@4.0.8)(jiti@2.6.1)(lightningcss@1.30.2)
+        version: ^4.0.8
       wrangler:
         specifier: ^4.46.0
-        version: 4.46.0
-
-  packages/db:
+        version: ^4.46.0
+packages/db:
     devDependencies:
-      '@repo/tsup-config':
+      "@repo/tsup-config":
         specifier: workspace:*
-        version: link:../tsup-config
-      '@repo/typescript-config':
+        version: workspace:*
+      "@repo/typescript-config":
         specifier: workspace:*
-        version: link:../typescript-config
-      '@types/node':
+        version: workspace:*
+      "@types/node":
         specifier: ^24.10.0
-        version: 24.10.0
+        version: ^24.10.0
       drizzle-kit:
         specifier: ^0.31.6
-        version: 0.31.6
+        version: ^0.31.6
       drizzle-orm:
         specifier: ^0.44.7
-        version: 0.44.7(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@types/pg@8.15.6)(pg@8.16.3)(postgres@3.4.7)
+        version: ^0.44.7
       drizzle-valibot:
         specifier: ^0.4.2
-        version: 0.4.2(drizzle-orm@0.44.7(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@types/pg@8.15.6)(pg@8.16.3)(postgres@3.4.7))(valibot@1.1.0(typescript@5.9.3))
-      pg:
-        specifier: ^8.16.3
-        version: 8.16.3
+        version: ^0.4.2
       valibot:
         specifier: ^1.1.0
-        version: 1.1.0(typescript@5.9.3)
-
+        version: ^1.1.0
   packages/infrastructure:
     devDependencies:
       '@pulumi/aws':
