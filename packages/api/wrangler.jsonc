@@ -1,50 +1,50 @@
 {
-        "$schema": "node_modules/wrangler/config-schema.json",
-        "compatibility_date": "2025-09-22",
-        "compatibility_flags": ["nodejs_compat"],
-        "d1_databases": [
-                {
-                        "binding": "DB",
-                        "database_id": "local",
-                        "database_name": "omojan-local",
-                        "migrations_dir": "./migrations"
-                }
-        ],
-        "env": {
-                "production": {
-                        "d1_databases": [
-                                {
-                                        "binding": "DB",
-                                        "database_id": "REPLACE_WITH_PRODUCTION_D1_ID",
-                                        "database_name": "omojan-production",
-                                        "migrations_dir": "./migrations"
-                                }
-                        ],
-                        "routes": [{ "custom_domain": true, "pattern": "api.omojan.com" }],
-                        "vars": {
-                                "ENV": "production",
-                                "WEB_URL": "https://omojan.com"
-                        }
-                },
-                "staging": {
-                        "d1_databases": [
-                                {
-                                        "binding": "DB",
-                                        "database_id": "REPLACE_WITH_STAGING_D1_ID",
-                                        "database_name": "omojan-staging",
-                                        "migrations_dir": "./migrations"
-                                }
-                        ],
-                        "routes": [{ "custom_domain": true, "pattern": "api-stg.omojan.com" }],
-                        "vars": {
-                                "ENV": "staging",
-                                "WEB_URL": "https://stg.omojan.com"
-                        }
-                }
-        },
-        "main": "src/index.ts",
-        "name": "api",
-        "observability": {
-                "enabled": true
-        }
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"compatibility_date": "2025-09-22",
+	"compatibility_flags": ["nodejs_compat"],
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_id": "local",
+			"database_name": "omojan-local",
+			"migrations_dir": "./migrations"
+		}
+	],
+	"env": {
+		"production": {
+			"d1_databases": [
+				{
+					"binding": "DB",
+					"database_id": "REPLACE_WITH_PRODUCTION_D1_ID",
+					"database_name": "omojan-production",
+					"migrations_dir": "./migrations"
+				}
+			],
+			"routes": [{ "custom_domain": true, "pattern": "api.omojan.com" }],
+			"vars": {
+				"ENV": "production",
+				"WEB_URL": "https://omojan.com"
+			}
+		},
+		"staging": {
+			"d1_databases": [
+				{
+					"binding": "DB",
+					"database_id": "REPLACE_WITH_STAGING_D1_ID",
+					"database_name": "omojan-staging",
+					"migrations_dir": "./migrations"
+				}
+			],
+			"routes": [{ "custom_domain": true, "pattern": "api-stg.omojan.com" }],
+			"vars": {
+				"ENV": "staging",
+				"WEB_URL": "https://stg.omojan.com"
+			}
+		}
+	},
+	"main": "src/index.ts",
+	"name": "api",
+	"observability": {
+		"enabled": true
+	}
 }

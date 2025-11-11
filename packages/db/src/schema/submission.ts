@@ -6,14 +6,14 @@ import { playerTable } from "./player";
 import { roundTable } from "./round";
 
 export const submissionTable = sqliteTable("submission", {
-        ...tableBaseColumns,
-        playerId: text("player_id")
-                .notNull()
-                .references(() => playerTable.id, { onDelete: "cascade" }),
-        position: text("position", { enum: ["prefix", "suffix"] }).notNull(),
-        roundId: text("round_id")
-                .notNull()
-                .references(() => roundTable.id, { onDelete: "cascade" }),
+	...tableBaseColumns,
+	playerId: text("player_id")
+		.notNull()
+		.references(() => playerTable.id, { onDelete: "cascade" }),
+	position: text("position", { enum: ["prefix", "suffix"] }).notNull(),
+	roundId: text("round_id")
+		.notNull()
+		.references(() => roundTable.id, { onDelete: "cascade" }),
 });
 
 export const submissionSchema = createSelectSchema(submissionTable);

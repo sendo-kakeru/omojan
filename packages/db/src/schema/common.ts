@@ -11,14 +11,11 @@ const randomUuid = sql`
 `;
 
 export const tableBaseColumns = {
-        createdAt: integer("created_at", { mode: "timestamp_ms" })
-                .notNull()
-                .default(timestampMsDefault),
-        id: text("id")
-                .notNull()
-                .primaryKey()
-                .default(randomUuid),
-        updatedAt: integer("updated_at", { mode: "timestamp_ms" })
-                .notNull()
-                .default(timestampMsDefault),
+	createdAt: integer("created_at", { mode: "timestamp_ms" })
+		.notNull()
+		.default(timestampMsDefault),
+	id: text("id").notNull().primaryKey().default(randomUuid),
+	updatedAt: integer("updated_at", { mode: "timestamp_ms" })
+		.notNull()
+		.default(timestampMsDefault),
 };

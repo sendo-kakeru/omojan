@@ -6,13 +6,13 @@ import { roundTable } from "./round";
 import { wordTable } from "./word";
 
 export const roundThemeTable = sqliteTable("round_theme", {
-        ...tableBaseColumns,
-        roundId: text("round_id")
-                .notNull()
-                .references(() => roundTable.id, { onDelete: "cascade" }),
-        wordId: text("word_id")
-                .notNull()
-                .references(() => wordTable.id, { onDelete: "cascade" }),
+	...tableBaseColumns,
+	roundId: text("round_id")
+		.notNull()
+		.references(() => roundTable.id, { onDelete: "cascade" }),
+	wordId: text("word_id")
+		.notNull()
+		.references(() => wordTable.id, { onDelete: "cascade" }),
 });
 
 export const roundThemeSchema = createSelectSchema(roundThemeTable);

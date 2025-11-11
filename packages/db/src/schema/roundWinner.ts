@@ -6,13 +6,13 @@ import { playerTable } from "./player";
 import { roundTable } from "./round";
 
 export const roundWinnerTable = sqliteTable("round_winner", {
-        ...tableBaseColumns,
-        playerId: text("player_id")
-                .notNull()
-                .references(() => playerTable.id, { onDelete: "cascade" }),
-        roundId: text("round_id")
-                .notNull()
-                .references(() => roundTable.id, { onDelete: "cascade" }),
+	...tableBaseColumns,
+	playerId: text("player_id")
+		.notNull()
+		.references(() => playerTable.id, { onDelete: "cascade" }),
+	roundId: text("round_id")
+		.notNull()
+		.references(() => roundTable.id, { onDelete: "cascade" }),
 });
 
 export const roundWinnerSchema = createSelectSchema(roundWinnerTable);
