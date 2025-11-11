@@ -8,15 +8,32 @@ import {
 } from "@repo/shared/model/room";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
-import { RoomService } from "../../application/room/RoomService";
+import { createRoomApplicationService } from "../../application/room";
+import type { RoomApplicationService } from "../../application/room/RoomApplicationService";
+import {
+	RoomClosedError,
+	RoomIsFullError,
+	RoomNotFoundError,
+	RoomPasswordMismatchError,
+	RoomPasswordRequiredError,
+} from "../../domain/room/errors";
+import { DrizzleRoomRepository } from "../../infrastructure/repository/DrizzleRoomRepository";
+import { DrizzleUserRepository } from "../../infrastructure/repository/DrizzleUserRepository";
+import { CryptoRoomTokenService } from "../../infrastructure/security/CryptoRoomTokenService";
+import { RandomRoomPasswordService } from "../../infrastructure/security/RandomRoomPasswordService";
 import { routeValidateCallback } from "../../libs/validation";
 import type { HttpRespondReturn, HybridRouteContext } from "../../types";
 
 export const routes = new Hono<
-	HybridRouteContext & { Variables: { roomService: RoomService } }
+	HybridRouteContext & { Variables: { roomService: RoomApplicationService } }
 >()
 	.use(async (c, next) => {
-		const roomService = new RoomService(c.var.db);
+		const roomService = createRoomApplicationService({
+			roomPasswordService: new RandomRoomPasswordService(),
+			roomRepository: new DrizzleRoomRepository(c.var.db),
+			roomTokenService: new CryptoRoomTokenService(),
+			userRepository: new DrizzleUserRepository(c.var.db),
+		});
 		c.set("roomService", roomService);
 		await next();
 	})
@@ -24,7 +41,7 @@ export const routes = new Hono<
 		const { roomService } = c.var;
 
 		try {
-			const rooms = await roomService.findMany();
+			const rooms = await roomService.listWaitingRooms();
 			return c.json(
 				{
 					data: rooms,
@@ -47,7 +64,7 @@ export const routes = new Hono<
 			const body = c.req.valid("json");
 
 			try {
-				const result = await roomService.create({
+				const result = await roomService.createRoom({
 					...body,
 					sub,
 				});
@@ -75,9 +92,10 @@ export const routes = new Hono<
 			const { gameId } = c.req.param();
 
 			try {
-				const playerToken = await roomService.join({
+				const playerToken = await roomService.joinRoom({
 					...body,
 					gameId,
+					heldToken: body.heldToken,
 					sub,
 				});
 
@@ -91,6 +109,9 @@ export const routes = new Hono<
 			} catch (error) {
 				if (error instanceof HTTPException) throw error;
 
+				const mappedError = mapJoinRoomErrorToHttpException(error);
+				if (mappedError) throw mappedError;
+
 				console.error("Roomへの参加に失敗しました:", error);
 				throw new HTTPException(500, {
 					message: "Roomへの参加に失敗しました",
@@ -98,3 +119,22 @@ export const routes = new Hono<
 			}
 		},
 	);
+
+function mapJoinRoomErrorToHttpException(error: unknown): HTTPException | null {
+	if (error instanceof RoomNotFoundError) {
+		return new HTTPException(404, { message: error.message });
+	}
+	if (error instanceof RoomClosedError) {
+		return new HTTPException(400, { message: error.message });
+	}
+	if (error instanceof RoomPasswordRequiredError) {
+		return new HTTPException(400, { message: error.message });
+	}
+	if (error instanceof RoomPasswordMismatchError) {
+		return new HTTPException(403, { message: error.message });
+	}
+	if (error instanceof RoomIsFullError) {
+		return new HTTPException(409, { message: error.message });
+	}
+	return null;
+}
