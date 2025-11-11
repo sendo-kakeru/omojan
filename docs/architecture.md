@@ -3,13 +3,12 @@
 - サーバー: Cloudflare Workers / Hono
   - Websocket状態保持: Durable Objects
 - クライアント: Cloudflare Workers / React Router
-- DB: PostgreSQL
-  - 本番: Neon
-  - STG: Neon
-  - Local: Docker postgres
+- DB: Cloudflare D1 (SQLite)
+  - 本番: Cloudflare D1
+  - STG: Cloudflare D1
+  - Local: Wrangler D1 （ローカルSQLite）
 - 認証: AWS Cognito(Google OAuth)
 - オブジェクトストレージ: Cloudflare R2
-
 
 ```mermaid
 flowchart LR
@@ -32,7 +31,7 @@ flowchart LR
 
   %% ===== Data Stores =====
   subgraph DATA["データストア"]
-    PG[(PostgreSQL - Neon)]
+    D1[(Cloudflare D1)]
     R2[(Cloudflare R2)]
   end
 
@@ -48,7 +47,7 @@ flowchart LR
 
   API --> Cognito
 
-  API <--> PG
+  API <--> D1
   API <--> R2
 
   %% ===== Styles =====
@@ -59,6 +58,5 @@ flowchart LR
   class CLIENT dim;
   class EDGE edge;
   class AUTH auth;
-  class PG,R2 store;
-
+  class D1,R2 store;
 ```

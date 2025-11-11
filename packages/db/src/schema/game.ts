@@ -1,21 +1,19 @@
-import { boolean, pgEnum, pgTable, smallint, text } from "drizzle-orm/pg-core";
+import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { createSelectSchema } from "drizzle-valibot";
 import type { InferOutput } from "valibot";
 import { tableBaseColumns } from "./common";
 
-export const gameStatusEnum = pgEnum("game_status", [
-	"waiting",
-	"active",
-	"finished",
-]);
-
-export const gameTable = pgTable("game", {
-	...tableBaseColumns,
-	isPrivate: boolean().notNull().default(false),
-	password: text(),
-	status: gameStatusEnum().notNull().default("waiting"),
-	timeLimit: smallint().notNull(),
-	title: text().notNull(),
+export const gameTable = sqliteTable("game", {
+        ...tableBaseColumns,
+        isPrivate: integer("is_private", { mode: "boolean" })
+                .notNull()
+                .default(false),
+        password: text("password"),
+        status: text("status", { enum: ["waiting", "active", "finished"] })
+                .notNull()
+                .default("waiting"),
+        timeLimit: integer("time_limit").notNull(),
+        title: text("title").notNull(),
 });
 
 export const gameSchema = createSelectSchema(gameTable);
