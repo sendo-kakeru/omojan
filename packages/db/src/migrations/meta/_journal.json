@@ -1,0 +1,20 @@
+{
+	"dialect": "sqlite",
+	"entries": [
+		{
+			"breakpoints": true,
+			"idx": 0,
+			"tag": "0000_mean_william_stryker",
+			"version": "6",
+			"when": 1763007266802
+		},
+		{
+			"breakpoints": true,
+			"idx": 1,
+			"tag": "0001_happy_iron_patriot",
+			"version": "6",
+			"when": 1763201721705
+		}
+	],
+	"version": "7"
+}

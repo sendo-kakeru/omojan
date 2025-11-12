@@ -1,13 +1,19 @@
+import { drizzle } from "drizzle-orm/d1";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { HTTPException } from "hono/http-exception";
-import { getDrizzleClient } from "./libs/drizzle";
 import { routes } from "./presentation/routes";
 import type { BaseContext, HttpRespondReturn } from "./types";
 
 const app = new Hono<BaseContext>()
 	.use((c, next) => {
-		c.set("db", getDrizzleClient({ env: c.env }));
+		c.set(
+			"db",
+			drizzle(c.env.DB, {
+				casing: "snake_case",
+				logger: c.env.ENV !== "production",
+			}),
+		);
 		const corsMiddleware = cors({
 			allowHeaders: ["Content-Type", "Authorization"],
 			allowMethods: [

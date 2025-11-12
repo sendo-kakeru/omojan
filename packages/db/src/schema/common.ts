@@ -1,16 +1,25 @@
-import { sql } from "drizzle-orm";
-import { integer, text } from "drizzle-orm/sqlite-core";
+import { customType, text } from "drizzle-orm/sqlite-core";
+import { uuidv7 } from "uuidv7";
 
-const timestampMsDefault = sql`(strftime('%s', 'now') * 1000)`;
+const dateTime = customType<{
+	data: Date;
+	driverData: string;
+}>({
+	dataType: (): string => "text",
+	fromDriver: (value: string): Date => new Date(value),
+	toDriver: (value: Date): string => value.toISOString(),
+});
+
 export const tableBaseColumns = {
-        createdAt: integer("created_at", { mode: "timestamp_ms" })
-                .notNull()
-                .default(timestampMsDefault),
-        id: text("id")
-                .notNull()
-                .primaryKey()
-                .default(sql`cuid2()`),
-        updatedAt: integer("updated_at", { mode: "timestamp_ms" })
-                .notNull()
-                .default(timestampMsDefault),
+	createdAt: dateTime("created_at")
+		.notNull()
+		.$defaultFn(() => new Date()),
+	id: text("id")
+		.notNull()
+		.primaryKey()
+		.$defaultFn(() => uuidv7()),
+	updatedAt: dateTime("updated_at")
+		.notNull()
+		.$defaultFn(() => new Date())
+		.$onUpdateFn(() => new Date()),
 };

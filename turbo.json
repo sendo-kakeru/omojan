@@ -7,6 +7,10 @@
 			"outputs": ["dist/**"]
 		},
 		"cf-typegen": {},
+		"db:drop:local": {},
+		"db:gen:local": {},
+		"db:migrate:local": {},
+		"db:migrate:prod": {},
 		"destroy": {},
 		"dev": {
 			"cache": false,
@@ -14,7 +18,6 @@
 		},
 		"format": {},
 		"lint": {},
-		"migrate:dev": {},
 		"storybook": {
 			"with": ["storybook:styles"]
 		},

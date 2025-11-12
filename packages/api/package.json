@@ -1,47 +1,47 @@
 {
-        "dependencies": {
-                "@hono/valibot-validator": "^0.5.3",
-                "@noble/hashes": "^2.0.1",
-                "@oslojs/encoding": "^1.1.0",
-                "@repo/db": "workspace:*",
-                "@repo/shared": "workspace:*",
-                "aws-jwt-verify": "^5.1.1",
-                "drizzle-orm": "^0.44.7",
-                "drizzle-valibot": "^0.4.2",
-                "hono": "^4.10.4",
-                "valibot": "^1.1.0"
-        },
-        "devDependencies": {
-                "@faker-js/faker": "^10.1.0",
-                "@repo/mock": "workspace:*",
-                "@repo/tsup-config": "workspace:*",
-                "@repo/typescript-config": "workspace:*",
-                "vitest": "^4.0.8",
-                "wrangler": "^4.46.0"
-        },
-        "exports": {
-                ".": "./dist/index.d.ts"
-        },
-        "license": "UNLICENSED",
-        "name": "@repo/api",
-        "private": true,
-        "scripts": {
-                "build": "pnpm run cf-typegen && pnpm run build:tsup && pnpm run build:tsc",
-                "build:tsc": "tsc -p tsconfig.build.json",
-                "build:tsup": "tsup --clean",
-                "cf-typegen": "wrangler types --env-interface CloudflareBindings",
-                "deploy": "wrangler deploy --minify",
-                "dev": "pnpm run dev:tsup & pnpm run dev:tsc & pnpm run dev:wrangler",
-                "dev:tsc": "tsc --watch",
-                "dev:tsup": "tsup --watch",
-                "dev:wrangler": "wrangler dev --local",
-                "format": "biome check --fix --unsafe .",
-                "lint": "biome check .",
-                "migrate:local": "wrangler d1 migrations apply --local --database DB",
-                "test": "vitest",
-                "test:run": "vitest run",
-                "typecheck": "pnpm run cf-typegen && tsc --noEmit"
-        },
-        "type": "module",
-        "version": "1.0.0"
+	"dependencies": {
+		"@hono/valibot-validator": "^0.5.3",
+		"@noble/hashes": "^2.0.1",
+		"@oslojs/encoding": "^1.1.0",
+		"@repo/db": "workspace:*",
+		"@repo/shared": "workspace:*",
+		"aws-jwt-verify": "^5.1.1",
+		"drizzle-orm": "^0.44.7",
+		"drizzle-valibot": "^0.4.2",
+		"hono": "^4.10.4",
+		"valibot": "^1.1.0"
+	},
+	"devDependencies": {
+		"@faker-js/faker": "^10.1.0",
+		"@repo/mock": "workspace:*",
+		"@repo/tsup-config": "workspace:*",
+		"@repo/typescript-config": "workspace:*",
+		"vitest": "^4.0.8",
+		"wrangler": "^4.46.0"
+	},
+	"exports": {
+		".": "./dist/index.d.ts"
+	},
+	"license": "UNLICENSED",
+	"name": "@repo/api",
+	"private": true,
+	"scripts": {
+		"build": "pnpm run cf-typegen && pnpm run build:tsup && pnpm run build:tsc",
+		"build:tsc": "tsc -p tsconfig.build.json",
+		"build:tsup": "tsup --clean",
+		"cf-typegen": "wrangler types --env-interface CloudflareBindings",
+		"deploy": "wrangler deploy --minify",
+		"dev": "pnpm run dev:tsup & pnpm run dev:tsc & pnpm run dev:wrangler",
+		"dev:tsc": "tsc --watch",
+		"dev:tsup": "tsup --watch",
+		"dev:wrangler": "wrangler dev --local",
+		"format": "biome check --fix --unsafe .",
+		"lint": "biome check .",
+		"db:migrate:local": "wrangler d1 migrations apply local-d1-main --local",
+		"test": "vitest",
+		"test:run": "vitest run",
+		"typecheck": "pnpm run cf-typegen && tsc --noEmit"
+	},
+	"type": "module",
+	"version": "1.0.0"
 }

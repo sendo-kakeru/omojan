@@ -1,35 +1,41 @@
 {
-        "devDependencies": {
-                "@repo/tsup-config": "workspace:*",
-                "@repo/typescript-config": "workspace:*",
-                "@types/node": "^24.10.0",
-                "drizzle-kit": "^0.31.6",
-                "drizzle-orm": "^0.44.7",
-                "drizzle-valibot": "^0.4.2",
-                "valibot": "^1.1.0"
-        },
-        "exports": {
-                "./schema/*": {
-                        "types": "./dist/schema/*.d.ts",
-                        "import": "./dist/esm/*.js",
-                        "require": "./dist/*.js"
-                }
-        },
-        "license": "UNLICENSED",
-        "name": "@repo/db",
-        "private": true,
-        "scripts": {
-                "build": "pnpm run build:tsup && pnpm run build:tsc",
-                "build:tsc": "tsc",
-                "build:tsup": "tsup --clean",
-                "dev": "pnpm run \"/^dev:/\"",
-                "dev:tsc": "tsc --watch",
-                "dev:tsup": "tsup --watch",
-                "format": "biome check --fix --unsafe .",
-                "lint": "biome check .",
-                "studio": "drizzle-kit studio",
-                "typecheck": "tsc --noEmit"
-        },
-        "type": "module",
-        "version": "1.0.0"
+	"devDependencies": {
+		"@repo/tsup-config": "workspace:*",
+		"@repo/typescript-config": "workspace:*",
+		"@types/node": "^24.10.0",
+		"better-sqlite3": "^9.6.0",
+		"drizzle-kit": "^0.31.6",
+		"drizzle-orm": "^0.44.7",
+		"drizzle-valibot": "^0.4.2",
+		"valibot": "^1.1.0"
+	},
+	"exports": {
+		"./schema/*": {
+			"types": "./dist/schema/*.d.ts",
+			"import": "./dist/esm/*.js",
+			"require": "./dist/*.js"
+		}
+	},
+	"license": "UNLICENSED",
+	"name": "@repo/db",
+	"private": true,
+	"scripts": {
+		"build": "pnpm run build:tsup && pnpm run build:tsc",
+		"build:tsc": "tsc",
+		"build:tsup": "tsup --clean",
+		"dev": "pnpm run \"/^dev:/\"",
+		"dev:tsc": "tsc --watch",
+		"dev:tsup": "tsup --watch",
+		"db:gen:local": "drizzle-kit generate",
+		"db:drop:local": "drizzle-kit drop",
+		"format": "biome check --fix --unsafe .",
+		"lint": "biome check .",
+		"studio": "drizzle-kit studio",
+		"typecheck": "tsc --noEmit"
+	},
+	"type": "module",
+	"version": "1.0.0",
+	"dependencies": {
+		"uuidv7": "^1.0.2"
+	}
 }

@@ -5,14 +5,14 @@ import { tableBaseColumns } from "./common";
 import { gameTable } from "./game";
 
 export const roundTable = sqliteTable("round", {
-        ...tableBaseColumns,
-        gameId: text("game_id")
-                .notNull()
-                .references(() => gameTable.id, { onDelete: "cascade" }),
-        roundNo: integer("round_no").notNull(),
-        status: text("status", { enum: ["submitting", "voting", "closed"] })
-                .notNull()
-                .default("submitting"),
+	...tableBaseColumns,
+	gameId: text("game_id")
+		.notNull()
+		.references(() => gameTable.id, { onDelete: "cascade" }),
+	roundNo: integer("round_no").notNull(),
+	status: text("status", { enum: ["submitting", "voting", "closed"] })
+		.notNull()
+		.default("submitting"),
 });
 
 export const roundSchema = createSelectSchema(roundTable);

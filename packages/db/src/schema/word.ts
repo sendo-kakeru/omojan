@@ -4,8 +4,8 @@ import type { InferOutput } from "valibot";
 import { tableBaseColumns } from "./common";
 
 export const wordTable = sqliteTable("word", {
-        ...tableBaseColumns,
-        text: text("text").notNull().unique(),
+	...tableBaseColumns,
+	text: text("text").notNull().unique(),
 });
 
 export const wordSchema = createSelectSchema(wordTable);

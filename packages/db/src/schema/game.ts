@@ -4,16 +4,16 @@ import type { InferOutput } from "valibot";
 import { tableBaseColumns } from "./common";
 
 export const gameTable = sqliteTable("game", {
-        ...tableBaseColumns,
-        isPrivate: integer("is_private", { mode: "boolean" })
-                .notNull()
-                .default(false),
-        password: text("password"),
-        status: text("status", { enum: ["waiting", "active", "finished"] })
-                .notNull()
-                .default("waiting"),
-        timeLimit: integer("time_limit").notNull(),
-        title: text("title").notNull(),
+	...tableBaseColumns,
+	isPrivate: integer("is_private", { mode: "boolean" })
+		.notNull()
+		.default(false),
+	password: text("password"),
+	status: text("status", { enum: ["waiting", "active", "finished"] })
+		.notNull()
+		.default("waiting"),
+	timeLimit: integer("time_limit").notNull(),
+	title: text("title").notNull(),
 });
 
 export const gameSchema = createSelectSchema(gameTable);
