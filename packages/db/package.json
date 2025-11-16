@@ -28,10 +28,16 @@
 		"dev:tsup": "tsup --watch",
 		"format": "biome check --fix --unsafe .",
 		"lint": "biome check .",
-		"migrate:dev": "drizzle-kit push",
+		"db:gen": "drizzle-kit generate",
+		"db:migrate:local": "drizzle-kit migrate",
+		"db:drop:local": "drizzle-kit drop",
+		"db:dump": "turso db shell omojan-main-dev .dump > src/dump.sql && cat src/dump.sql | sqlite3 src/local.db",
 		"studio": "drizzle-kit studio",
 		"typecheck": "tsc --noEmit"
 	},
 	"type": "module",
-	"version": "1.0.0"
+	"version": "1.0.0",
+	"dependencies": {
+		"uuidv7": "^1.0.2"
+	}
 }

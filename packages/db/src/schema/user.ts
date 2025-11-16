@@ -1,17 +1,17 @@
-import { pgEnum, pgTable, text } from "drizzle-orm/pg-core";
+import { sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { createSelectSchema } from "drizzle-valibot";
 import type { InferOutput } from "valibot";
 import { tableBaseColumns } from "./common";
 
-export const userStatusEnum = pgEnum("user_status", ["active", "deactivated"]);
-
-export const userTable = pgTable("user", {
+export const userTable = sqliteTable("user", {
 	...tableBaseColumns,
-	email: text().unique().notNull(),
-	image: text(),
-	name: text().notNull(),
-	status: userStatusEnum().notNull().default("active"),
-	sub: text().unique().notNull(),
+	email: text("email").notNull().unique(),
+	image: text("image"),
+	name: text("name").notNull(),
+	status: text("status", { enum: ["active", "deactivated"] })
+		.notNull()
+		.default("active"),
+	sub: text("sub").notNull().unique(),
 });
 
 export const userSchema = createSelectSchema(userTable);

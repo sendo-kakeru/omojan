@@ -20,6 +20,7 @@ export const envSchema = object({
 		literal("production"),
 	]),
 	JWT_SECRET: string(),
+	TURSO_AUTH_TOKEN: string(),
 	WEB_URL: pipe(string(), url()),
 });
 

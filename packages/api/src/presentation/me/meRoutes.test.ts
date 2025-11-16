@@ -3,18 +3,15 @@ import { userTable } from "@repo/db/schema/user";
 import { MOCK_USER } from "@repo/mock/model";
 import type { CreateMeRequestBody } from "@repo/shared/model/me";
 import { eq } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/node-postgres";
 import { Hono } from "hono";
 import { testClient } from "hono/testing";
 import { beforeEach, describe, expect, test } from "vitest";
+import { createTestDbClient } from "../../__tests__/createTestDbClient";
 import type { PrivateRouteContext } from "../../types";
 import { routes } from "./meRoutes";
 
 describe("meRoutes", () => {
-	if (!process.env.DATABASE_URL) {
-		throw new Error("DATABASE_URL is not defined");
-	}
-	const db = drizzle(process.env.DATABASE_URL, { casing: "snake_case" });
+	const db = createTestDbClient();
 	const app = new Hono<PrivateRouteContext>()
 		.use("*", async (c, next) => {
 			c.set("db", db);

@@ -33,7 +33,7 @@
 - State
   - DO で `playerId -> connection` を保持し、重複接続は新規優先（旧接続を 4001 で close）
 - DB
-  - PostgreSQL（Drizzle）
+  - SQLite（Drizzle）
   - `player.gameTokenHash` を UNIQUE で保存（平文は保存しない）
 - Client
   - SPA（`localStorage` に `game_token` を保存）
@@ -41,17 +41,21 @@
 ---
 
 ## 4. データモデル（Drizzle）
-
-    // TypeScript (Drizzle)
-    export const player = pgTable('player', {
-      ...tableBaseColumns,
-      gameId: uuid().notNull().references(() => gameTable.id, { onDelete: 'cascade' }),
-      isHost: boolean().notNull().default(false),
-      playerName: text().notNull(),
-      seat: smallint().notNull(),
-      userId: uuid().references(() => userTable.id, { onDelete: 'set null' }),
-      gameTokenHash: text().notNull().unique(), // ハッシュのみ保存
-    });
+```ts
+export const playerTable = sqliteTable("player", {
+	...tableBaseColumns,
+	gameId: text("game_id")
+		.notNull()
+		.references(() => gameTable.id, { onDelete: "cascade" }),
+	gameTokenHash: text("game_token_hash").notNull().unique(),
+	isHost: integer("is_host", { mode: "boolean" }).notNull().default(false),
+	playerName: text("player_name").notNull(),
+	seat: integer("seat").notNull().$type<1 | 2 | 3 | 4>(),
+	userId: text("user_id").references(() => userTable.id, {
+		onDelete: "set null",
+	}),
+});
+```
 
 ---
 

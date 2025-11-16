@@ -13,7 +13,7 @@ import type {
 } from "@repo/shared/model/room";
 import { and, desc, eq, inArray } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
-import type { DrizzleClient } from "../../libs/drizzle";
+import type { DrizzleClient } from "../../types";
 
 export class RoomService {
 	private readonly encoder = new TextEncoder();

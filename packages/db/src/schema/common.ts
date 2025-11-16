@@ -1,11 +1,25 @@
-import { timestamp, uuid } from "drizzle-orm/pg-core";
+import { customType, text } from "drizzle-orm/sqlite-core";
+import { uuidv7 } from "uuidv7";
+
+const dateTime = customType<{
+	data: Date;
+	driverData: string;
+}>({
+	dataType: (): string => "text",
+	fromDriver: (value: string): Date => new Date(value),
+	toDriver: (value: Date): string => value.toISOString(),
+});
 
 export const tableBaseColumns = {
-	createdAt: timestamp({ mode: "date", withTimezone: true })
+	createdAt: dateTime("created_at")
 		.notNull()
-		.defaultNow(),
-	id: uuid().primaryKey().defaultRandom(),
-	updatedAt: timestamp({ mode: "date", withTimezone: true })
+		.$defaultFn(() => new Date()),
+	id: text("id")
 		.notNull()
-		.defaultNow(),
+		.primaryKey()
+		.$defaultFn(() => uuidv7()),
+	updatedAt: dateTime("updated_at")
+		.notNull()
+		.$defaultFn(() => new Date())
+		.$onUpdateFn(() => new Date()),
 };

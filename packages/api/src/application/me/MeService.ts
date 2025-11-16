@@ -1,14 +1,14 @@
 import { type User, userTable } from "@repo/db/schema/user";
+import { isUniqueConstraintError } from "@repo/shared/error";
 import type {
 	CreateMeRequestBody,
 	CreateMeResponseBody,
 	GetMeResponseBody,
 	Me,
 } from "@repo/shared/model/me";
-import { hasCode } from "@repo/shared/utils";
-import { DrizzleQueryError, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
-import type { DrizzleClient } from "../../libs/drizzle";
+import type { DrizzleClient } from "../../types";
 
 export class MeService {
 	constructor(private readonly db: DrizzleClient) {}
@@ -48,11 +48,7 @@ export class MeService {
 
 			return this.convertUserToMe(createdUser);
 		} catch (error) {
-			if (
-				error instanceof DrizzleQueryError &&
-				hasCode(error.cause) &&
-				error.cause.code === "23505"
-			) {
+			if (isUniqueConstraintError(error)) {
 				throw new HTTPException(409, {
 					message: "ユーザーは既に存在します",
 				});
