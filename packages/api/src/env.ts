@@ -1,12 +1,5 @@
-import {
-	type InferOutput,
-	literal,
-	object,
-	pipe,
-	string,
-	union,
-	url,
-} from "valibot";
+import { envVarSchema } from "@repo/shared/schema";
+import { type InferOutput, object, pipe, string, url } from "valibot";
 
 export const envSchema = object({
 	COGNITO_CLIENT_ID: string(),
@@ -14,11 +7,7 @@ export const envSchema = object({
 	// Cognito認証設定
 	COGNITO_USER_POOL_ID: string(),
 	DATABASE_URL: pipe(string(), url()),
-	ENV: union([
-		literal("development"),
-		literal("staging"),
-		literal("production"),
-	]),
+	ENV: envVarSchema,
 	JWT_SECRET: string(),
 	TURSO_AUTH_TOKEN: string(),
 	WEB_URL: pipe(string(), url()),

@@ -1,6 +1,27 @@
 /// <reference types="node" />
+
+import { envVarSchema } from "@repo/shared/schema";
+import dotenv from "dotenv";
 import { type Config, defineConfig } from "drizzle-kit";
-import { object, pipe, safeParse, string, url } from "valibot";
+import {
+	type InferOutput,
+	object,
+	parse,
+	pipe,
+	safeParse,
+	string,
+	url,
+} from "valibot";
+
+const dotenvFileMap = {
+	development: ".env.local",
+	production: ".env.production",
+	staging: ".env.staging",
+} as const satisfies Record<InferOutput<typeof envVarSchema>, string>;
+
+dotenv.config({
+	path: dotenvFileMap[parse(envVarSchema, process.env.ENV ?? "development")],
+});
 
 const env = safeParse(
 	object({
