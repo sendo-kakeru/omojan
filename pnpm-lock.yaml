@@ -296,8 +296,8 @@ importers:
         specifier: ^1.25.0
         version: 1.25.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       amazon-cognito-identity-js:
-        specifier: ^6.3.15
-        version: 6.3.15(encoding@0.1.13)
+        specifier: ^6.3.16
+        version: 6.3.16(encoding@0.1.13)
       classnames:
         specifier: ^2.5.1
         version: 2.5.1
@@ -401,8 +401,8 @@ packages:
   '@aws-crypto/util@1.2.2':
     resolution: {integrity: sha512-H8PjG5WJ4wz0UXAFXeJjWCW1vkvIJ3qUUD+rGRwJ2/hj+xT58Qle2MTql/2MGzkU+1JLAFuR6aJpLAjHwhmwwg==}
 
-  '@aws-sdk/types@3.893.0':
-    resolution: {integrity: sha512-Aht1nn5SnA0N+Tjv0dzhAY7CQbxVtmq1bBR6xI0MhG7p2XYVh1wXuKTzrldEvQWwA3odOYunAfT9aBiKZx9qIg==}
+  '@aws-sdk/types@3.930.0':
+    resolution: {integrity: sha512-we/vaAgwlEFW7IeftmCLlLMw+6hFs3DzZPJw7lVHbj/5HJ0bz9gndxEsS2lQoeJ1zhiiLqAqvXxmM43s0MBg0A==}
     engines: {node: '>=18.0.0'}
 
   '@aws-sdk/util-utf8-browser@3.259.0':
@@ -2483,8 +2483,8 @@ packages:
     resolution: {integrity: sha512-rO92VvpgMc3kfiTjGT52LEtJ8Yc5kCWhZjLQ3LwlA4pSgPpQO7bVpYXParOD8Jwf+cVQECJo3yP/4I8aZtUQTQ==}
     engines: {node: '>=18'}
 
-  '@smithy/types@4.6.0':
-    resolution: {integrity: sha512-4lI9C8NzRPOv66FaY1LL1O/0v0aLVrq/mXP/keUa9mJOApEeae43LsLd2kZRUJw91gxOQfLIrV3OvqPgWz1YsA==}
+  '@smithy/types@4.9.0':
+    resolution: {integrity: sha512-MvUbdnXDTwykR8cB1WZvNNwqoWVaTRA0RLlLmf/cIFNMM2cKWz01X4Ly6SMC4Kks30r8tT3Cty0jmeWfiuyHTA==}
     engines: {node: '>=18.0.0'}
 
   '@speed-highlight/core@1.2.12':
@@ -2920,8 +2920,8 @@ packages:
     resolution: {integrity: sha512-4I7Td01quW/RpocfNayFdFVk1qSuoh0E7JrbRJ16nH01HhKFQ88INq9Sd+nd72zqRySlr9BmDA8xlEJ6vJMrYA==}
     engines: {node: '>=8'}
 
-  amazon-cognito-identity-js@6.3.15:
-    resolution: {integrity: sha512-G2mzTlGYHKYh9oZDO0Gk94xVQ4iY9GYWBaYScbDYvz05ps6dqi0IvdNx1Lxi7oA3tjS5X+mUN7/svFJJdOB9YA==}
+  amazon-cognito-identity-js@6.3.16:
+    resolution: {integrity: sha512-HPGSBGD6Q36t99puWh0LnptxO/4icnk2kqIQ9cTJ2tFQo5NMUnWQIgtrTAk8nm+caqUbjDzXzG56GBjI2tS6jQ==}
 
   ansi-regex@5.0.1:
     resolution: {integrity: sha512-quJQXlTSUGL2LH9SUXo8VwsY4soanhgo6LNSm84E1LBcE8s3O0wpdiRzyR9z/ZZJMlMWv37qOOb9pdJlMUEKFQ==}
@@ -5512,18 +5512,18 @@ snapshots:
   '@aws-crypto/sha256-js@1.2.2':
     dependencies:
       '@aws-crypto/util': 1.2.2
-      '@aws-sdk/types': 3.893.0
+      '@aws-sdk/types': 3.930.0
       tslib: 1.14.1
 
   '@aws-crypto/util@1.2.2':
     dependencies:
-      '@aws-sdk/types': 3.893.0
+      '@aws-sdk/types': 3.930.0
       '@aws-sdk/util-utf8-browser': 3.259.0
       tslib: 1.14.1
 
-  '@aws-sdk/types@3.893.0':
+  '@aws-sdk/types@3.930.0':
     dependencies:
-      '@smithy/types': 4.6.0
+      '@smithy/types': 4.9.0
       tslib: 2.8.1
 
   '@aws-sdk/util-utf8-browser@3.259.0':
@@ -7379,7 +7379,7 @@ snapshots:
 
   '@sindresorhus/is@7.1.1': {}
 
-  '@smithy/types@4.6.0':
+  '@smithy/types@4.9.0':
     dependencies:
       tslib: 2.8.1
 
@@ -7879,7 +7879,7 @@ snapshots:
       clean-stack: 2.2.0
       indent-string: 4.0.0
 
-  amazon-cognito-identity-js@6.3.15(encoding@0.1.13):
+  amazon-cognito-identity-js@6.3.16(encoding@0.1.13):
     dependencies:
       '@aws-crypto/sha256-js': 1.2.2
       buffer: 4.9.2
