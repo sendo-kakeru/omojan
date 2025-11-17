@@ -20,7 +20,7 @@
 		"@types/node": "^24.10.1",
 		"drizzle-seed": "^0.3.1",
 		"tsx": "^4.20.6",
-		"vitest": "^4.0.8",
+		"vitest": "^4.0.10",
 		"wrangler": "^4.46.0"
 	},
 	"exports": {
