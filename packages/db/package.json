@@ -14,8 +14,13 @@
 	"exports": {
 		"./schema": {
 			"types": "./dist/schema/index.d.ts",
-			"import": "./dist/esm/index.js",
-			"require": "./dist/index.js"
+			"import": "./dist/esm/schema/index.js",
+			"require": "./dist/schema/index.js"
+		},
+		"./model": {
+			"types": "./dist/model/index.d.ts",
+			"import": "./dist/esm/model/index.js",
+			"require": "./dist/model/index.js"
 		}
 	},
 	"license": "UNLICENSED",

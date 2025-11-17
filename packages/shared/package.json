@@ -1,6 +1,5 @@
 {
 	"dependencies": {
-		"@repo/db": "workspace:*",
 		"drizzle-valibot": "^0.4.2",
 		"valibot": "^1.1.0"
 	},

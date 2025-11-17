@@ -1,11 +1,3 @@
-import {
-	gameSchema,
-	gameTable,
-	playerNameSchema,
-	playerSchema,
-	playerTable,
-	userSchema,
-} from "@repo/db/schema";
 import { createSelectSchema } from "drizzle-valibot";
 import {
 	array,
@@ -26,6 +18,14 @@ import {
 	string,
 	variant,
 } from "valibot";
+import {
+	gameSchema,
+	gameTable,
+	playerNameSchema,
+	playerSchema,
+	playerTable,
+	userSchema,
+} from "../schema";
 
 export const roomPasswordSchema = pipe(
 	string("パスワードを入力してください"),

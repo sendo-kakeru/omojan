@@ -5,7 +5,7 @@ import {
 	type GetRoomListResponseBody,
 	type JoinRoomResponseBody,
 	joinRoomRequestBodySchema,
-} from "@repo/shared/model/room";
+} from "@repo/db/model";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { RoomService } from "../../application/room/RoomService";

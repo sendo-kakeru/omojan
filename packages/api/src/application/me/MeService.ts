@@ -1,11 +1,11 @@
-import { type User, userTable } from "@repo/db/schema";
-import { isUniqueConstraintError } from "@repo/shared/error";
 import type {
 	CreateMeRequestBody,
 	CreateMeResponseBody,
 	GetMeResponseBody,
 	Me,
-} from "@repo/shared/model/me";
+} from "@repo/db/model";
+import { type User, userTable } from "@repo/db/schema";
+import { isUniqueConstraintError } from "@repo/shared/error";
 import { eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import type { DrizzleClient } from "../../types";

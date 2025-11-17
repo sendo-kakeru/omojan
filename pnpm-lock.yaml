@@ -169,9 +169,6 @@ importers:
 
   packages/shared:
     dependencies:
-      '@repo/db':
-        specifier: workspace:*
-        version: link:../db
       drizzle-valibot:
         specifier: ^0.4.2
         version: 0.4.2(drizzle-orm@0.44.7(@libsql/client@0.15.15)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@types/pg@8.15.6)(pg@8.16.3)(postgres@3.4.7))(valibot@1.1.0(typescript@5.9.3))

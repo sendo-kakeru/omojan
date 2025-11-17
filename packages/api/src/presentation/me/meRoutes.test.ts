@@ -1,7 +1,7 @@
 import { faker } from "@faker-js/faker";
+import type { CreateMeRequestBody } from "@repo/db/model";
 import { userTable } from "@repo/db/schema";
 import { MOCK_USER } from "@repo/mock/model";
-import type { CreateMeRequestBody } from "@repo/shared/model/me";
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { testClient } from "hono/testing";

@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { sha256 } from "@noble/hashes/sha2.js";
 import { bytesToHex } from "@noble/hashes/utils.js";
+import type { CreateRoomRequestBody } from "@repo/db/model";
 import {
 	gameTable,
 	type PlayerSeat,
@@ -8,7 +9,6 @@ import {
 	userTable,
 } from "@repo/db/schema";
 import { MOCK_USER } from "@repo/mock/model";
-import type { CreateRoomRequestBody } from "@repo/shared/model/room";
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { testClient } from "hono/testing";

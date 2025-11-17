@@ -1,6 +1,13 @@
 import { sha256 } from "@noble/hashes/sha2.js";
 import { bytesToHex } from "@noble/hashes/utils.js";
 import { encodeBase64urlNoPadding } from "@oslojs/encoding";
+import type {
+	CreateRoomRequestBody,
+	CreateRoomResponseBody,
+	GetRoomListResponseBody,
+	JoinRoomRequestBody,
+	JoinRoomResponseBody,
+} from "@repo/db/model";
 import {
 	gameTable,
 	isPlayerSeat,
@@ -8,13 +15,6 @@ import {
 	type User,
 	userTable,
 } from "@repo/db/schema";
-import type {
-	CreateRoomRequestBody,
-	CreateRoomResponseBody,
-	GetRoomListResponseBody,
-	JoinRoomRequestBody,
-	JoinRoomResponseBody,
-} from "@repo/shared/model/room";
 import { and, desc, eq, inArray } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import type { DrizzleClient } from "../../types";

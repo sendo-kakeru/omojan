@@ -1,11 +1,8 @@
 "use client";
 
+import type { JoinRoomRequestBody, Room } from "@repo/db/model";
+import { joinRoomRequestBodySchema, roomPasswordSchema } from "@repo/db/model";
 import { LOCALSTORAGE_OPERATION_FAILED_MESSAGE } from "@repo/shared/error";
-import type { JoinRoomRequestBody, Room } from "@repo/shared/model/room";
-import {
-	joinRoomRequestBodySchema,
-	roomPasswordSchema,
-} from "@repo/shared/model/room";
 import { useForm } from "@tanstack/react-form";
 import { type Dispatch, type SetStateAction, useId, useState } from "react";
 import { FaRegClock } from "react-icons/fa6";

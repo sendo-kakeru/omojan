@@ -1,5 +1,5 @@
 "use client";
-import { createRoomRequestBodySchema } from "@repo/shared/model/room";
+import { createRoomRequestBodySchema } from "@repo/db/model";
 import { useForm } from "@tanstack/react-form";
 import { type Dispatch, type SetStateAction, useId } from "react";
 import { useNavigate } from "react-router";
