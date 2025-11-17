@@ -11,8 +11,8 @@
 		"db:dump": {},
 		"db:gen": {},
 		"db:migrate:local": {},
-		"db:migrate:production": {},
-		"db:migrate:staging": {},
+		"db:migrate:prod": {},
+		"db:migrate:stg": {},
 		"db:push:local": {},
 		"destroy": {},
 		"dev": {
