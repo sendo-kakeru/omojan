@@ -1,4 +1,4 @@
-import { boolean, pgTable, smallint, text, uuid } from "drizzle-orm/pg-core";
+import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { createSelectSchema } from "drizzle-valibot";
 import {
 	type InferOutput,
@@ -14,20 +14,22 @@ import { tableBaseColumns } from "./common";
 import { gameTable } from "./game";
 import { userTable } from "./user";
 
-export const playerTable = pgTable("player", {
+export const playerTable = sqliteTable("player", {
 	...tableBaseColumns,
-	gameId: uuid()
+	gameId: text("game_id")
 		.notNull()
 		.references(() => gameTable.id, { onDelete: "cascade" }),
-	gameTokenHash: text().notNull().unique(),
-	isHost: boolean().notNull().default(false),
+	gameTokenHash: text("game_token_hash").notNull().unique(),
+	isHost: integer("is_host", { mode: "boolean" }).notNull().default(false),
 	// NOTE: ログインユーザーはuserのname
 	// 匿名ユーザーは設定させる or `匿名1`のように割り振る
-	playerName: text().notNull(),
+	playerName: text("player_name").notNull(),
 	// NOTE: 席順 1~4
-	seat: smallint().notNull().$type<1 | 2 | 3 | 4>(),
+	seat: integer("seat").notNull().$type<1 | 2 | 3 | 4>(),
 	// NOTE: 匿名ユーザーの場合はnull
-	userId: uuid().references(() => userTable.id, { onDelete: "set null" }),
+	userId: text("user_id").references(() => userTable.id, {
+		onDelete: "set null",
+	}),
 });
 
 export const playerNameSchema = pipe(

@@ -1,7 +1,7 @@
 {
 	"dependencies": {
 		"@hono/valibot-validator": "^0.5.3",
-		"@neondatabase/serverless": "^1.0.2",
+		"@libsql/client": "^0.15.15",
 		"@noble/hashes": "^2.0.1",
 		"@oslojs/encoding": "^1.1.0",
 		"@repo/db": "workspace:*",
@@ -17,8 +17,9 @@
 		"@repo/mock": "workspace:*",
 		"@repo/tsup-config": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
-		"@types/pg": "^8.15.6",
-		"pg": "^8.16.3",
+		"@types/node": "^24.10.0",
+		"drizzle-seed": "^0.3.1",
+		"tsx": "^4.20.6",
 		"vitest": "^4.0.8",
 		"wrangler": "^4.46.0"
 	},
@@ -40,8 +41,8 @@
 		"dev:wrangler": "wrangler dev",
 		"format": "biome check --fix --unsafe .",
 		"lint": "biome check .",
-		"test": "DATABASE_URL=postgresql://test:test@localhost:5432/test?schema=public vitest",
-		"test:run": "DATABASE_URL=postgresql://test:test@localhost:5432/test?schema=public vitest run",
+		"test": "tsx ./src/__tests__/vitest-with-db.ts",
+		"test:run": "tsx ./src/__tests__/vitest-with-db.ts run",
 		"typecheck": "pnpm run cf-typegen && tsc --noEmit"
 	},
 	"type": "module",

@@ -10,7 +10,7 @@
 		"node": ">=22"
 	},
 	"name": "omojan",
-	"packageManager": "pnpm@10.17.0",
+	"packageManager": "pnpm@10.22.0",
 	"private": true,
 	"scripts": {
 		"ci": "biome ci && turbo run typecheck test:run"

@@ -1,22 +1,18 @@
-import { pgEnum, pgTable, smallint, uuid } from "drizzle-orm/pg-core";
+import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { createSelectSchema } from "drizzle-valibot";
 import type { InferOutput } from "valibot";
 import { tableBaseColumns } from "./common";
 import { gameTable } from "./game";
 
-export const roundStatusEnum = pgEnum("round_status", [
-	"submitting",
-	"voting",
-	"closed",
-]);
-
-export const roundTable = pgTable("round", {
+export const roundTable = sqliteTable("round", {
 	...tableBaseColumns,
-	gameId: uuid()
+	gameId: text("game_id")
 		.notNull()
 		.references(() => gameTable.id, { onDelete: "cascade" }),
-	round_no: smallint().notNull(),
-	status: roundStatusEnum().notNull().default("submitting"),
+	roundNo: integer("round_no").notNull(),
+	status: text("status", { enum: ["submitting", "voting", "closed"] })
+		.notNull()
+		.default("submitting"),
 });
 
 export const roundSchema = createSelectSchema(roundTable);

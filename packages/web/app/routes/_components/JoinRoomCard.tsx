@@ -1,4 +1,4 @@
-import type { Room } from "@repo/shared/model/room";
+import type { Room } from "@repo/db/model";
 import classNames from "classnames";
 import { useState } from "react";
 import { FaRegClock } from "react-icons/fa6";

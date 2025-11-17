@@ -3,7 +3,7 @@ import {
 	type CreateMeResponseBody,
 	createMeRequestBodySchema,
 	type GetMeResponseBody,
-} from "@repo/shared/model/me";
+} from "@repo/db/model";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { MeService } from "../../application/me/MeService";

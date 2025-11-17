@@ -1,16 +1,19 @@
 import { faker } from "@faker-js/faker";
 import { sha256 } from "@noble/hashes/sha2.js";
 import { bytesToHex } from "@noble/hashes/utils.js";
-import { gameTable } from "@repo/db/schema/game";
-import { type PlayerSeat, playerTable } from "@repo/db/schema/player";
-import { userTable } from "@repo/db/schema/user";
+import type { CreateRoomRequestBody } from "@repo/db/model";
+import {
+	gameTable,
+	type PlayerSeat,
+	playerTable,
+	userTable,
+} from "@repo/db/schema";
 import { MOCK_USER } from "@repo/mock/model";
-import type { CreateRoomRequestBody } from "@repo/shared/model/room";
 import { eq } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/node-postgres";
 import { Hono } from "hono";
 import { testClient } from "hono/testing";
 import { beforeEach, describe, expect, test } from "vitest";
+import { createTestDbClient } from "../../__tests__/createTestDbClient";
 import type { HybridRouteContext } from "../../types";
 import { routes } from "./roomRoutes";
 
@@ -21,10 +24,7 @@ const hashGameToken = (token: string): string => {
 };
 
 describe("roomRoutes", () => {
-	if (!process.env.DATABASE_URL) {
-		throw new Error("DATABASE_URL is not defined");
-	}
-	const db = drizzle(process.env.DATABASE_URL, { casing: "snake_case" });
+	const db = createTestDbClient();
 
 	describe("認証済みユーザー", () => {
 		const app = new Hono<HybridRouteContext>()
@@ -142,13 +142,6 @@ describe("roomRoutes", () => {
 
 		describe("GET /rooms", () => {
 			test("待機中のルーム一覧を取得できる", async () => {
-				await db.insert(userTable).values(MOCK_USER);
-
-				const [insertedUser] = await db
-					.select()
-					.from(userTable)
-					.where(eq(userTable.sub, MOCK_USER.sub));
-
 				const gameData = [
 					{
 						isPrivate: false,
@@ -173,42 +166,27 @@ describe("roomRoutes", () => {
 					},
 				];
 
-				const createdGames = await Promise.all(
-					gameData.map(async (data) => {
-						const [game] = await db.insert(gameTable).values(data).returning();
-						return game;
-					}),
-				);
+				for (const data of gameData) {
+					await mockHonoClient.v1.rooms.$post({
+						json: { ...data, playerName: "Player" },
+					});
+				}
 
-				await Promise.all(
-					createdGames.slice(0, 2).map(async (game, index) => {
-						if (!game) return;
-						await db.insert(playerTable).values({
-							gameId: game.id,
-							gameTokenHash: faker.string.uuid(),
-							isHost: true,
-							playerName: `Player ${index + 1}`,
-							seat: 1,
-							userId: insertedUser?.id,
-						});
-					}),
-				);
-
-				const response = await mockHonoClient.v1.rooms.$get({});
+				const response = await mockHonoClient.v1.rooms.$get();
 
 				expect(response.status).toBe(200);
 				const body = await response.json();
-				expect(body.data).toBeDefined();
-				expect(body.data?.length).toBe(2);
+				const rooms = body.data;
+				expect(rooms).toBeDefined();
+				expect(rooms?.length).toBe(3);
 
-				const [room1, room2] = body.data || [];
-				expect(room1?.title).toBe("Room 2");
-				expect(room1?.isPrivate).toBe(true);
-				expect(room1?.players.length).toBe(1);
+				expect(rooms?.[0].title).toBe(gameData[2].title);
+				expect(rooms?.[0].isPrivate).toBe(gameData[2].isPrivate);
+				expect(rooms?.[0].players.length).toBe(1);
 
-				expect(room2?.title).toBe("Room 1");
-				expect(room2?.isPrivate).toBe(false);
-				expect(room2?.players.length).toBe(1);
+				expect(rooms?.[1].title).toBe(gameData[1].title);
+				expect(rooms?.[1].isPrivate).toBe(gameData[1].isPrivate);
+				expect(rooms?.[1].players.length).toBe(1);
 			});
 		});
 

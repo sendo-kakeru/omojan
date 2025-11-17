@@ -1,19 +1,23 @@
 import { sha256 } from "@noble/hashes/sha2.js";
 import { bytesToHex } from "@noble/hashes/utils.js";
 import { encodeBase64urlNoPadding } from "@oslojs/encoding";
-import { gameTable } from "@repo/db/schema/game";
-import { isPlayerSeat, playerTable } from "@repo/db/schema/player";
-import { type User, userTable } from "@repo/db/schema/user";
 import type {
 	CreateRoomRequestBody,
 	CreateRoomResponseBody,
 	GetRoomListResponseBody,
 	JoinRoomRequestBody,
 	JoinRoomResponseBody,
-} from "@repo/shared/model/room";
+} from "@repo/db/model";
+import {
+	gameTable,
+	isPlayerSeat,
+	playerTable,
+	type User,
+	userTable,
+} from "@repo/db/schema";
 import { and, desc, eq, inArray } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
-import type { DrizzleClient } from "../../libs/drizzle";
+import type { DrizzleClient } from "../../types";
 
 export class RoomService {
 	private readonly encoder = new TextEncoder();
