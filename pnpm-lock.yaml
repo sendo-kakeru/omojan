@@ -128,8 +128,8 @@ importers:
   packages/infrastructure:
     devDependencies:
       '@pulumi/aws':
-        specifier: ^7.11.0
-        version: 7.11.0(typescript@5.9.3)
+        specifier: ^7.11.1
+        version: 7.11.1(typescript@5.9.3)
       '@pulumi/pulumi':
         specifier: ^3.207.0
         version: 3.207.0(typescript@5.9.3)
@@ -1844,8 +1844,8 @@ packages:
   '@protobufjs/utf8@1.1.0':
     resolution: {integrity: sha512-Vvn3zZrhQZkkBE8LSuW3em98c0FwgO4nxzv6OdSxPKJIEKY2bGbHn+mhGIPerzI4twdxaP8/0+06HBpwf345Lw==}
 
-  '@pulumi/aws@7.11.0':
-    resolution: {integrity: sha512-LlK11UZRsN3vExnAAz6XRxTf6bQaeoghe9yK+U3eGUdaL7Fl5ifUBl1TvUHe7UhpGANprJHN406YH/RxKQwOQw==}
+  '@pulumi/aws@7.11.1':
+    resolution: {integrity: sha512-2Dy0o2KwxOeeKWyJ7dSFuDpK4d3DU0eYrvMBAnovBvGVFSBRugvlZ6VjswbniLNiwh8ZkGSCWSGCBGKkEH+3qA==}
 
   '@pulumi/pulumi@3.207.0':
     resolution: {integrity: sha512-+23Mx9p2x569WuNw8V9LdiCS0h+8BZzYJoInleBcxB0rGVW4SQX9c9AVcrlhvD+lXFbB5FgX/JfT6dUC68B3TA==}
@@ -6779,7 +6779,7 @@ snapshots:
 
   '@protobufjs/utf8@1.1.0': {}
 
-  '@pulumi/aws@7.11.0(typescript@5.9.3)':
+  '@pulumi/aws@7.11.1(typescript@5.9.3)':
     dependencies:
       '@pulumi/pulumi': 3.207.0(typescript@5.9.3)
       mime: 2.6.0

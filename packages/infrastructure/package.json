@@ -1,6 +1,6 @@
 {
 	"devDependencies": {
-		"@pulumi/aws": "^7.11.0",
+		"@pulumi/aws": "^7.11.1",
 		"@pulumi/pulumi": "^3.207.0",
 		"@repo/typescript-config": "workspace:*",
 		"@types/node": "^24.10.1",
