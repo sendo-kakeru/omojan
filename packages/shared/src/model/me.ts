@@ -1,4 +1,4 @@
-import { userSchema, userTable } from "@repo/db/schema/user";
+import { userSchema, userTable } from "@repo/db/schema";
 import { createInsertSchema } from "drizzle-valibot";
 import { type InferOutput, nullable, object, pick } from "valibot";
 

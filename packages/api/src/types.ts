@@ -1,5 +1,5 @@
 import type { Client } from "@libsql/client";
-import type { User } from "@repo/db/schema/user";
+import type { User } from "@repo/db/schema";
 import type { HttpResponseBody } from "@repo/shared/types";
 import type { LibSQLDatabase } from "drizzle-orm/libsql";
 import type { Env as HonoEnv, TypedResponse } from "hono";

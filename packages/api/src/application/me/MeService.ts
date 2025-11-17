@@ -1,4 +1,4 @@
-import { type User, userTable } from "@repo/db/schema/user";
+import { type User, userTable } from "@repo/db/schema";
 import { isUniqueConstraintError } from "@repo/shared/error";
 import type {
 	CreateMeRequestBody,

@@ -1,10 +1,11 @@
-import { gameSchema, gameTable } from "@repo/db/schema/game";
 import {
+	gameSchema,
+	gameTable,
 	playerNameSchema,
 	playerSchema,
 	playerTable,
-} from "@repo/db/schema/player";
-import { userSchema } from "@repo/db/schema/user";
+	userSchema,
+} from "@repo/db/schema";
 import { createSelectSchema } from "drizzle-valibot";
 import {
 	array,

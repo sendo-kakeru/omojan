@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { userTable } from "@repo/db/schema/user";
+import { userTable } from "@repo/db/schema";
 import { MOCK_USER } from "@repo/mock/model";
 import type { CreateMeRequestBody } from "@repo/shared/model/me";
 import { eq } from "drizzle-orm";

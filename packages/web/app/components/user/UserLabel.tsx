@@ -1,4 +1,4 @@
-import type { User } from "@repo/db/schema/user";
+import type { User } from "@repo/db/schema";
 import classNames from "classnames";
 import type { ComponentProps } from "react";
 import { Avatar } from "../Avatar";

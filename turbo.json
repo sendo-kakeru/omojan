@@ -11,6 +11,7 @@
 		"db:dump": {},
 		"db:gen": {},
 		"db:migrate:local": {},
+		"db:push:local": {},
 		"destroy": {},
 		"dev": {
 			"cache": false,

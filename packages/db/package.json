@@ -10,10 +10,10 @@
 		"valibot": "^1.1.0"
 	},
 	"exports": {
-		"./schema/*": {
-			"types": "./dist/schema/*.d.ts",
-			"import": "./dist/esm/*.js",
-			"require": "./dist/*.js"
+		"./schema": {
+			"types": "./dist/schema/index.d.ts",
+			"import": "./dist/esm/index.js",
+			"require": "./dist/index.js"
 		}
 	},
 	"license": "UNLICENSED",
@@ -31,7 +31,8 @@
 		"db:gen": "drizzle-kit generate",
 		"db:migrate:local": "drizzle-kit migrate",
 		"db:drop:local": "drizzle-kit drop",
-		"db:dump": "turso db shell omojan-main-dev .dump > src/dump.sql && cat src/dump.sql | sqlite3 src/local.db",
+		"db:push:local": "drizzle-kit push",
+		"db:dump": "rm src/dump.sql && rm src/local.db && turso db shell omojan-main-dev .dump > src/dump.sql && cat src/dump.sql | sqlite3 src/local.db",
 		"studio": "drizzle-kit studio",
 		"typecheck": "tsc --noEmit"
 	},
