@@ -8,7 +8,7 @@ import { type User, userTable } from "@repo/db/schema";
 import { isUniqueConstraintError } from "@repo/shared/error";
 import { eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
-import type { DrizzleClient } from "../../types";
+import type { DrizzleClient } from "../../libs/drizzle";
 
 export class MeService {
 	constructor(private readonly db: DrizzleClient) {}

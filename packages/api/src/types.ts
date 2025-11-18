@@ -1,13 +1,9 @@
-import type { Client } from "@libsql/client";
 import type { User } from "@repo/db/schema";
 import type { HttpResponseBody } from "@repo/shared/types";
-import type { LibSQLDatabase } from "drizzle-orm/libsql";
 import type { Env as HonoEnv, TypedResponse } from "hono";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 import type { Env } from "./env";
-export type DrizzleClient = LibSQLDatabase<Record<string, never>> & {
-	$client: Client;
-};
+import type { DrizzleClient } from "./libs/drizzle";
 
 export type HttpRespondReturn<T = null> = Response &
 	TypedResponse<HttpResponseBody<T>, ContentfulStatusCode, "json">;

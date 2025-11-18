@@ -17,7 +17,7 @@ import {
 } from "@repo/db/schema";
 import { and, desc, eq, inArray } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
-import type { DrizzleClient } from "../../types";
+import type { DrizzleClient } from "../../libs/drizzle";
 
 export class RoomService {
 	private readonly encoder = new TextEncoder();
