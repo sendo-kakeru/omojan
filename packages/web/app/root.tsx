@@ -9,7 +9,12 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
+import type { PropsWithChildren } from "react";
+import { AuthHeader } from "./components/auth/AuthHeader";
+import { ToastProvider } from "./components/Toast";
+import { MeProvider } from "./context/me/provider";
 
+// TODO: メタ情報設定
 export const links: Route.LinksFunction = () => [
 	{ href: "https://fonts.googleapis.com", rel: "preconnect" },
 	{
@@ -23,17 +28,17 @@ export const links: Route.LinksFunction = () => [
 	},
 ];
 
-export function Layout({ children }: { children: React.ReactNode }) {
+export function Layout({ children }: PropsWithChildren) {
 	return (
-		<html lang="en">
+		<html lang="ja">
 			<head>
 				<meta charSet="utf-8" />
 				<meta content="width=device-width, initial-scale=1" name="viewport" />
 				<Meta />
 				<Links />
 			</head>
-			<body>
-				{children}
+			<body className="bg-yellow-50 font-[Inter] text-neutral-800">
+				<ToastProvider>{children}</ToastProvider>
 				<ScrollRestoration />
 				<Scripts />
 			</body>
@@ -42,9 +47,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-	return <Outlet />;
+	return (
+		<MeProvider>
+			<div className="mx-auto min-h-svh max-w-800 px-16">
+				<AuthHeader />
+				<Outlet />
+			</div>
+		</MeProvider>
+	);
 }
 
+// TODO: 整備
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
 	let message = "Oops!";
 	let details = "An unexpected error occurred.";

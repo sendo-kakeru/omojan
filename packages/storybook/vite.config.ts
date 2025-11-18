@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import { storybookTest } from "@storybook/addon-vitest/vitest-plugin";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
+import { playwright } from "@vitest/browser-playwright";
 import { defineConfig } from "vite";
 
 const dirname =
@@ -36,7 +37,8 @@ export default defineConfig({
 								browser: "chromium",
 							},
 						],
-						provider: "playwright",
+						// biome-ignore lint/suspicious/noExplicitAny: Type incompatibility between vitest packages
+						provider: playwright() as any,
 					},
 					name: "storybook",
 					setupFiles: [".storybook/vitest.setup.ts"],

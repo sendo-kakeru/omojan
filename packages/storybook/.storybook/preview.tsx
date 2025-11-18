@@ -1,14 +1,26 @@
-import type { Preview } from "@storybook/react-vite";
+import { MOCK_ME } from "@repo/mock/model";
+import type { Decorator, Preview } from "@storybook/react-vite";
 import { BrowserRouter } from "react-router";
+import { ToastProvider } from "../../web/app/components/Toast";
+import { MeContext } from "../../web/app/context/me/provider";
 import "../style.css";
-import type { ReactNode } from "react";
 
-const decorator = (Story: () => ReactNode) => {
+const decorator: Decorator = (Story, context) => {
 	return (
 		<BrowserRouter>
-			<div className="font-[Inter] text-neutral-800">
-				<Story />
-			</div>
+			<MeContext
+				value={{
+					isLoading: false,
+					me: context.parameters.authed ? MOCK_ME : null,
+					mutate: async () => {},
+				}}
+			>
+				<ToastProvider>
+					<div className="font-[Inter] text-neutral-800">
+						<Story />
+					</div>
+				</ToastProvider>
+			</MeContext>
 		</BrowserRouter>
 	);
 };
@@ -18,7 +30,6 @@ const preview: Preview = {
 	initialGlobals: {
 		backgrounds: { value: "Gray" },
 	},
-
 	parameters: {
 		a11y: {
 			// 'todo' - show a11y violations in the test UI only

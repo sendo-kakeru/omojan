@@ -1,0 +1,26 @@
+name: Migration Production
+on:
+  push:
+    branches:
+      - main
+jobs:
+  migration:
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup pnpm
+        uses: ./.github/actions/setup-pnpm
+
+      - name: Build dependencies packages
+        run: |
+          pnpm turbo run build --filter @repo/db
+          pnpm turbo run build --filter @repo/shared
+      - name: Migration
+        working-directory: packages/db
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+        run: pnpm drizzle-kit migrate

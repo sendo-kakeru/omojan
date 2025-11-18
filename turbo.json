@@ -4,10 +4,16 @@
 		"build": {
 			"dependsOn": ["^build"],
 			"inputs": ["$TURBO_DEFAULT$", ".env*"],
-			"outputs": [".next/**", "!.next/cache/**"]
+			"outputs": ["dist/**"]
 		},
 		"cf-typegen": {},
-		"check-types": {},
+		"db:drop:local": {},
+		"db:dump": {},
+		"db:gen": {},
+		"db:migrate:local": {},
+		"db:migrate:prod": {},
+		"db:migrate:stg": {},
+		"db:push:local": {},
 		"destroy": {},
 		"dev": {
 			"cache": false,
@@ -15,7 +21,6 @@
 		},
 		"format": {},
 		"lint": {},
-		"migrate": {},
 		"storybook": {
 			"with": ["storybook:styles"]
 		},
@@ -24,7 +29,9 @@
 			"persistent": true
 		},
 		"studio": {},
+		"test": {},
+		"test:run": {},
+		"typecheck": {},
 		"up": {}
-	},
-	"ui": "tui"
+	}
 }

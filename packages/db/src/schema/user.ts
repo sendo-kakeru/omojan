@@ -1,27 +1,19 @@
-import { sql } from "drizzle-orm";
-import { boolean, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { createSelectSchema } from "drizzle-valibot";
-import { type InferOutput, omit } from "valibot";
+import type { InferOutput } from "valibot";
+import { tableBaseColumns } from "./common";
 
-// TODO: スキーマ整備
-export const userTable = pgTable("user", {
-	avatarUrl: text(),
-	createdAt: timestamp("created_at").notNull().defaultNow(),
-	email: text().unique().notNull(),
-	id: uuid().primaryKey().defaultRandom(),
-	isActive: boolean().default(true).notNull(),
-	name: text().notNull(),
-	sub: text().unique().notNull(),
-	updatedAt: timestamp("updated_at")
+export const userTable = sqliteTable("user", {
+	...tableBaseColumns,
+	email: text("email").notNull().unique(),
+	image: text("image"),
+	name: text("name").notNull(),
+	status: text("status", { enum: ["active", "deactivated"] })
 		.notNull()
-		.defaultNow()
-		.$onUpdate(() => sql`now()`),
+		.default("active"),
+	sub: text("sub").notNull().unique(),
 });
 
-// model
-export const userSchema = omit(createSelectSchema(userTable), [
-	"createdAt",
-	"updatedAt",
-]);
+export const userSchema = createSelectSchema(userTable);
 
 export type User = InferOutput<typeof userSchema>;

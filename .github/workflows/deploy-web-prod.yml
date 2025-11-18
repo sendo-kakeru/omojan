@@ -22,10 +22,9 @@ jobs:
 
       - name: Build dependencies packages
         run: |
-          pnpm --filter @repo/env run build
-          pnpm --filter @repo/db run build
-          pnpm --filter @repo/shared run build
-          pnpm --filter @repo/api run build
+          pnpm turbo run build --filter @repo/db
+          pnpm turbo run build --filter @repo/shared
+          pnpm turbo run build --filter @repo/api
 
       - name: Build
         run: pnpm run build
