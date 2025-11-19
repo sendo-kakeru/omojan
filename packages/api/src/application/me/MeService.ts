@@ -4,7 +4,7 @@ import type {
 	GetMeResponseBody,
 	Me,
 } from "@repo/db/model";
-import { type User, userTable } from "@repo/db/schema";
+import { type User, type UserId, userTable } from "@repo/db/schema";
 import { isUniqueConstraintError } from "@repo/shared/error";
 import { eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
@@ -58,7 +58,7 @@ export class MeService {
 	}
 
 	private convertUserToMe(
-		user: Pick<User, "id" | "email" | "name" | "image">,
+		user: Pick<User, "email" | "name" | "image"> & { id: UserId },
 	): Me {
 		return {
 			email: user.email,

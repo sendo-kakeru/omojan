@@ -1,10 +1,17 @@
 import { createInsertSchema } from "drizzle-valibot";
-import { type InferOutput, nullable, object, pick } from "valibot";
-import { userSchema, userTable } from "../schema";
+import {
+	type BrandSymbol,
+	type InferOutput,
+	nullable,
+	object,
+	pick,
+} from "valibot";
+import { userIdSchema, userSchema, userTable } from "../schema";
+export type { BrandSymbol };
 
 export const meSchema = object({
 	...pick(userSchema, ["email", "name", "image"]).entries,
-	userId: userSchema.entries.id,
+	userId: userIdSchema,
 });
 export type Me = InferOutput<typeof meSchema>;
 

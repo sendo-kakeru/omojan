@@ -1,6 +1,7 @@
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { createSelectSchema } from "drizzle-valibot";
 import {
+	brand,
 	type InferOutput,
 	is,
 	literal,
@@ -9,17 +10,23 @@ import {
 	pipe,
 	string,
 	union,
+	uuid,
 } from "valibot";
-import { tableBaseColumns } from "./common";
-import { gameTable } from "./game";
-import { userTable } from "./user";
+import { idBaseColumn, tableBaseColumns } from "./common";
+import { type GameId, gameTable } from "./game";
+import { type UserId, userTable } from "./user";
+
+export const playerIdSchema = pipe(string(), uuid(), brand("player_id"));
+export type PlayerId = InferOutput<typeof playerIdSchema>;
 
 export const playerTable = sqliteTable("player", {
 	...tableBaseColumns,
 	gameId: text("game_id")
 		.notNull()
+		.$type<GameId>()
 		.references(() => gameTable.id, { onDelete: "cascade" }),
 	gameTokenHash: text("game_token_hash").notNull().unique(),
+	id: idBaseColumn.$type<PlayerId>(),
 	isHost: integer("is_host", { mode: "boolean" }).notNull().default(false),
 	// NOTE: ログインユーザーはuserのname
 	// 匿名ユーザーは設定させる or `匿名1`のように割り振る
@@ -27,9 +34,11 @@ export const playerTable = sqliteTable("player", {
 	// NOTE: 席順 1~4
 	seat: integer("seat").notNull().$type<1 | 2 | 3 | 4>(),
 	// NOTE: 匿名ユーザーの場合はnull
-	userId: text("user_id").references(() => userTable.id, {
-		onDelete: "set null",
-	}),
+	userId: text("user_id")
+		.$type<UserId | null>()
+		.references(() => userTable.id, {
+			onDelete: "set null",
+		}),
 });
 
 export const playerNameSchema = pipe(

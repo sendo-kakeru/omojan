@@ -1,14 +1,19 @@
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { createSelectSchema } from "drizzle-valibot";
-import type { InferOutput } from "valibot";
-import { tableBaseColumns } from "./common";
-import { gameTable } from "./game";
+import { brand, type InferOutput, pipe, string, uuid } from "valibot";
+import { idBaseColumn, tableBaseColumns } from "./common";
+import { type GameId, gameTable } from "./game";
+
+export const roundIdSchema = pipe(string(), uuid(), brand("round_id"));
+export type RoundId = InferOutput<typeof roundIdSchema>;
 
 export const roundTable = sqliteTable("round", {
 	...tableBaseColumns,
 	gameId: text("game_id")
 		.notNull()
+		.$type<GameId>()
 		.references(() => gameTable.id, { onDelete: "cascade" }),
+	id: idBaseColumn.$type<RoundId>(),
 	roundNo: integer("round_no").notNull(),
 	status: text("status", { enum: ["submitting", "voting", "closed"] })
 		.notNull()

@@ -6,6 +6,7 @@ import {
 	type JoinRoomResponseBody,
 	joinRoomRequestBodySchema,
 } from "@repo/db/model";
+import { gameIdRequestParamSchema } from "@repo/db/schema";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { RoomService } from "../../application/room/RoomService";
@@ -69,10 +70,11 @@ export const routes = new Hono<
 	.post(
 		"/:gameId/join",
 		vValidator("json", joinRoomRequestBodySchema, routeValidateCallback),
+		vValidator("param", gameIdRequestParamSchema, routeValidateCallback),
 		async (c): Promise<HttpRespondReturn<JoinRoomResponseBody>> => {
 			const { roomService, sub } = c.var;
 			const body = c.req.valid("json");
-			const { gameId } = c.req.param();
+			const { gameId } = c.req.valid("param");
 
 			try {
 				const playerToken = await roomService.join({
