@@ -9,6 +9,7 @@ import type {
 	JoinRoomResponseBody,
 } from "@repo/db/model";
 import {
+	type GameId,
 	gameTable,
 	isPlayerSeat,
 	playerTable,
@@ -148,7 +149,7 @@ export class RoomService {
 		sub,
 		heldToken,
 	}: {
-		gameId: string;
+		gameId: GameId;
 	} & JoinRoomRequestBody & {
 			sub: User["sub"] | null;
 		}): Promise<JoinRoomResponseBody> {
