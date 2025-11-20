@@ -12,5 +12,7 @@ export const wordTable = sqliteTable("word", {
 	text: text("text").notNull().unique(),
 });
 
-export const wordSchema = createSelectSchema(wordTable);
+export const wordSchema = createSelectSchema(wordTable, {
+	id: wordIdSchema,
+});
 export type Word = InferOutput<typeof wordSchema>;

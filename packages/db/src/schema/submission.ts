@@ -2,8 +2,8 @@ import { sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { createSelectSchema } from "drizzle-valibot";
 import { brand, type InferOutput, pipe, string, uuid } from "valibot";
 import { idBaseColumn, tableBaseColumns } from "./common";
-import { type PlayerId, playerTable } from "./player";
-import { type RoundId, roundTable } from "./round";
+import { type PlayerId, playerIdSchema, playerTable } from "./player";
+import { type RoundId, roundIdSchema, roundTable } from "./round";
 
 export const submissionIdSchema = pipe(
 	string(),
@@ -26,5 +26,9 @@ export const submissionTable = sqliteTable("submission", {
 		.references(() => roundTable.id, { onDelete: "cascade" }),
 });
 
-export const submissionSchema = createSelectSchema(submissionTable);
+export const submissionSchema = createSelectSchema(submissionTable, {
+	id: submissionIdSchema,
+	playerId: playerIdSchema,
+	roundId: roundIdSchema,
+});
 export type Submission = InferOutput<typeof submissionSchema>;

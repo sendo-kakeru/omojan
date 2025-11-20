@@ -2,7 +2,7 @@ import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { createSelectSchema } from "drizzle-valibot";
 import { brand, type InferOutput, pipe, string, uuid } from "valibot";
 import { idBaseColumn, tableBaseColumns } from "./common";
-import { type GameId, gameTable } from "./game";
+import { type GameId, gameIdSchema, gameTable } from "./game";
 
 export const roundIdSchema = pipe(string(), uuid(), brand("round_id"));
 export type RoundId = InferOutput<typeof roundIdSchema>;
@@ -20,5 +20,8 @@ export const roundTable = sqliteTable("round", {
 		.default("submitting"),
 });
 
-export const roundSchema = createSelectSchema(roundTable);
+export const roundSchema = createSelectSchema(roundTable, {
+	gameId: gameIdSchema,
+	id: roundIdSchema,
+});
 export type Round = InferOutput<typeof roundSchema>;

@@ -2,10 +2,14 @@ import { sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { createSelectSchema } from "drizzle-valibot";
 import { brand, type InferOutput, pipe, string, uuid } from "valibot";
 import { idBaseColumn, tableBaseColumns } from "./common";
-import { type PlayerId, playerTable } from "./player";
-import { type RoundId, roundTable } from "./round";
-import { type SubmissionId, submissionTable } from "./submission";
-import { type WordId, wordTable } from "./word";
+import { type PlayerId, playerIdSchema, playerTable } from "./player";
+import { type RoundId, roundIdSchema, roundTable } from "./round";
+import {
+	type SubmissionId,
+	submissionIdSchema,
+	submissionTable,
+} from "./submission";
+import { type WordId, wordIdSchema, wordTable } from "./word";
 
 export const playerCardIdSchema = pipe(
 	string(),
@@ -35,5 +39,11 @@ export const playerCardTable = sqliteTable("player_card", {
 		.references(() => wordTable.id, { onDelete: "cascade" }),
 });
 
-export const playerCardSchema = createSelectSchema(playerCardTable);
+export const playerCardSchema = createSelectSchema(playerCardTable, {
+	id: playerCardIdSchema,
+	playerId: playerIdSchema,
+	roundId: roundIdSchema,
+	submissionId: submissionIdSchema,
+	wordId: wordIdSchema,
+});
 export type PlayerCard = InferOutput<typeof playerCardSchema>;

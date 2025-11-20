@@ -2,8 +2,8 @@ import { sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { createSelectSchema } from "drizzle-valibot";
 import { brand, type InferOutput, pipe, string, uuid } from "valibot";
 import { idBaseColumn, tableBaseColumns } from "./common";
-import { type PlayerId, playerTable } from "./player";
-import { type RoundId, roundTable } from "./round";
+import { type PlayerId, playerIdSchema, playerTable } from "./player";
+import { type RoundId, roundIdSchema, roundTable } from "./round";
 
 export const roundWinnerIdSchema = pipe(
 	string(),
@@ -25,5 +25,9 @@ export const roundWinnerTable = sqliteTable("round_winner", {
 		.references(() => roundTable.id, { onDelete: "cascade" }),
 });
 
-export const roundWinnerSchema = createSelectSchema(roundWinnerTable);
+export const roundWinnerSchema = createSelectSchema(roundWinnerTable, {
+	id: roundWinnerIdSchema,
+	playerId: playerIdSchema,
+	roundId: roundIdSchema,
+});
 export type RoundWinner = InferOutput<typeof roundWinnerSchema>;
