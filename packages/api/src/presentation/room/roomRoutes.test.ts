@@ -3,6 +3,7 @@ import { sha256 } from "@noble/hashes/sha2.js";
 import { bytesToHex } from "@noble/hashes/utils.js";
 import type { CreateRoomRequestBody } from "@repo/db/model";
 import {
+	type GameId,
 	gameTable,
 	type PlayerSeat,
 	playerTable,
@@ -70,7 +71,7 @@ describe("roomRoutes", () => {
 				const [createdGame] = await db
 					.select()
 					.from(gameTable)
-					.where(eq(gameTable.id, body.data?.gameId ?? ""));
+					.where(eq(gameTable.id, body.data?.gameId as GameId));
 				expect(createdGame).toBeDefined();
 				expect(createdGame?.title).toBe(MOCK_REQUEST_BODY.title);
 				expect(createdGame?.timeLimit).toBe(MOCK_REQUEST_BODY.timeLimit);
@@ -80,10 +81,9 @@ describe("roomRoutes", () => {
 				const [createdPlayer] = await db
 					.select()
 					.from(playerTable)
-					.where(eq(playerTable.gameId, body.data?.gameId ?? ""));
+					.where(eq(playerTable.gameId, body.data?.gameId as GameId));
 				expect(createdPlayer).toBeDefined();
 				expect(createdPlayer?.playerName).toBe(MOCK_REQUEST_BODY.playerName);
-				expect(createdPlayer?.isHost).toBe(true);
 				expect(createdPlayer?.seat).toBe(1);
 				expect(createdPlayer?.userId).toBe(insertedUser?.id);
 				const expectedHash = hashGameToken(body.data?.token ?? "");
@@ -109,7 +109,7 @@ describe("roomRoutes", () => {
 				const [createdGame] = await db
 					.select()
 					.from(gameTable)
-					.where(eq(gameTable.id, body.data?.gameId ?? ""));
+					.where(eq(gameTable.id, body.data?.gameId as GameId));
 				expect(createdGame?.isPrivate).toBe(true);
 				expect(createdGame?.password).toBeTypeOf("string");
 			});
@@ -212,7 +212,6 @@ describe("roomRoutes", () => {
 				await db.insert(playerTable).values({
 					gameId: createdGame.id,
 					gameTokenHash: hostTokenHash,
-					isHost: true,
 					playerName: "Host",
 					seat: 1,
 					userId: insertedUser?.id ?? null,
@@ -253,7 +252,6 @@ describe("roomRoutes", () => {
 				await db.insert(playerTable).values({
 					gameId: createdGame.id,
 					gameTokenHash: hostTokenHash,
-					isHost: true,
 					playerName: "Host",
 					seat: 1,
 					userId: null,
@@ -262,7 +260,6 @@ describe("roomRoutes", () => {
 				await db.insert(playerTable).values({
 					gameId: createdGame.id,
 					gameTokenHash: heldTokenHash,
-					isHost: false,
 					playerName: "Existing Player",
 					seat: 2,
 					userId: insertedUser?.id ?? null,
@@ -319,17 +316,16 @@ describe("roomRoutes", () => {
 				const [createdGame] = await db
 					.select()
 					.from(gameTable)
-					.where(eq(gameTable.id, body.data?.gameId ?? ""));
+					.where(eq(gameTable.id, body.data?.gameId as GameId));
 				expect(createdGame).toBeDefined();
 				expect(createdGame?.title).toBe(MOCK_REQUEST_BODY.title);
 
 				const [createdPlayer] = await db
 					.select()
 					.from(playerTable)
-					.where(eq(playerTable.gameId, body.data?.gameId ?? ""));
+					.where(eq(playerTable.gameId, body.data?.gameId as GameId));
 				expect(createdPlayer).toBeDefined();
 				expect(createdPlayer?.playerName).toBe(MOCK_REQUEST_BODY.playerName);
-				expect(createdPlayer?.isHost).toBe(true);
 				expect(createdPlayer?.seat).toBe(1);
 				expect(createdPlayer?.userId).toBeNull();
 				const expectedHash = hashGameToken(body.data?.token ?? "");
@@ -353,7 +349,6 @@ describe("roomRoutes", () => {
 				await db.insert(playerTable).values({
 					gameId: createdGame.id,
 					gameTokenHash: hashGameToken("host-token"),
-					isHost: true,
 					playerName: "Host",
 					seat: 1,
 					userId: null,
@@ -405,7 +400,6 @@ describe("roomRoutes", () => {
 				await db.insert(playerTable).values({
 					gameId: createdGame.id,
 					gameTokenHash: hashGameToken("host-token"),
-					isHost: true,
 					playerName: "Host",
 					seat: 1,
 					userId: null,
@@ -438,7 +432,6 @@ describe("roomRoutes", () => {
 				await db.insert(playerTable).values({
 					gameId: createdGame.id,
 					gameTokenHash: hashGameToken("host-token"),
-					isHost: true,
 					playerName: "Host",
 					seat: 1,
 					userId: null,
@@ -473,7 +466,6 @@ describe("roomRoutes", () => {
 						await db.insert(playerTable).values({
 							gameId: createdGame.id,
 							gameTokenHash,
-							isHost: index === 0,
 							playerName: `Player ${index + 1}`,
 							seat: (index + 1) as PlayerSeat,
 							userId: null,
@@ -519,7 +511,6 @@ describe("roomRoutes", () => {
 				await db.insert(playerTable).values({
 					gameId: createdGame.id,
 					gameTokenHash: hashGameToken("host-token"),
-					isHost: true,
 					playerName: "Host",
 					seat: 1,
 					userId: null,

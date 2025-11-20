@@ -41,7 +41,7 @@ export const roomSchema = object({
 	gameId: gameIdSchema,
 	players: array(
 		object({
-			...pick(playerSchema, ["playerName", "isHost", "seat"]).entries,
+			...pick(playerSchema, ["playerName", "seat"]).entries,
 			id: playerIdSchema,
 			image: nullable(userSchema.entries.image),
 		}),
