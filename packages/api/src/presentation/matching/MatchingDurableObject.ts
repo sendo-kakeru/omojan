@@ -139,16 +139,12 @@ export class MatchingDurableObject extends DurableObject<Env> {
 		gameId,
 	}: {
 		gameId: GameId;
-	}): Promise<
-		(Pick<Player, "id" | "playerName"> & { user: Pick<User, "image"> | null })[]
-	> {
+	}): Promise<(Pick<Player, "id" | "playerName"> & Pick<User, "image">)[]> {
 		const players = await this.db
 			.select({
 				id: playerTable.id,
+				image: userTable.image,
 				playerName: playerTable.playerName,
-				user: {
-					image: userTable.image,
-				},
 			})
 			.from(playerTable)
 			.leftJoin(userTable, eq(playerTable.userId, userTable.id))
