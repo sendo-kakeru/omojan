@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS "__drizzle_migrations" (
 			hash text NOT NULL,
 			created_at numeric
 		);
-INSERT INTO __drizzle_migrations VALUES(NULL,'05f08e65e51151aa1674737830f7c0ccb3f6161941cdaf16e9cc39cc998ce645',1763373653686);
+INSERT INTO __drizzle_migrations VALUES(NULL,'05f08e65e51151aa1674737830f7c0ccb3f6161941cdaf16e9cc39cc998ce645',1763384773458);
 CREATE TABLE IF NOT EXISTS `game` (
 	`created_at` text NOT NULL,
 	`id` text PRIMARY KEY NOT NULL,

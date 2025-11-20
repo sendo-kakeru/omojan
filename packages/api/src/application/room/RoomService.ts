@@ -51,7 +51,6 @@ export class RoomService {
 					gameId: playerTable.gameId,
 					id: playerTable.id,
 					image: userTable.image,
-					isHost: playerTable.isHost,
 					playerName: playerTable.playerName,
 					seat: playerTable.seat,
 				})
@@ -81,7 +80,6 @@ export class RoomService {
 					.map((player) => ({
 						id: player.id,
 						image: player.image,
-						isHost: player.isHost,
 						playerName: player.playerName,
 						seat: player.seat,
 					})),
@@ -133,7 +131,6 @@ export class RoomService {
 			await tx.insert(playerTable).values({
 				gameId: createdGame.id,
 				gameTokenHash,
-				isHost: true,
 				playerName: dto.playerName,
 				seat: 1,
 				userId: authUser?.id ?? null,
@@ -267,7 +264,6 @@ export class RoomService {
 			await tx.insert(playerTable).values({
 				gameId: findGame.id,
 				gameTokenHash,
-				isHost: false,
 				playerName,
 				seat,
 				userId: authUser?.id,
