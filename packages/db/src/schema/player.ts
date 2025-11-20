@@ -13,8 +13,8 @@ import {
 	uuid,
 } from "valibot";
 import { idBaseColumn, tableBaseColumns } from "./common";
-import { type GameId, gameTable } from "./game";
-import { type UserId, userTable } from "./user";
+import { type GameId, gameIdSchema, gameTable } from "./game";
+import { type UserId, userIdSchema, userTable } from "./user";
 
 export const playerIdSchema = pipe(string(), uuid(), brand("player_id"));
 export type PlayerId = InferOutput<typeof playerIdSchema>;
@@ -55,8 +55,11 @@ export const playerSeatSchema = union([
 ]);
 
 export const playerSchema = createSelectSchema(playerTable, {
+	gameId: gameIdSchema,
+	id: playerIdSchema,
 	playerName: playerNameSchema,
 	seat: playerSeatSchema,
+	userId: userIdSchema,
 });
 export type PlayerSeat = InferOutput<typeof playerSeatSchema>;
 export function isPlayerSeat(seat: number): seat is PlayerSeat {

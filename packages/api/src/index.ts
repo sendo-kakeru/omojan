@@ -5,7 +5,9 @@ import { createDrizzleClient } from "./libs/drizzle";
 import { routes } from "./presentation/routes";
 import type { BaseContext, HttpRespondReturn } from "./types";
 
-const app = new Hono<BaseContext>()
+export { MatchingDurableObject } from "./presentation/matching/MatchingDurableObject";
+
+export const app = new Hono<BaseContext>()
 	.use((c, next) => {
 		c.set("db", createDrizzleClient(c.env));
 		const corsMiddleware = cors({

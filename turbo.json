@@ -14,6 +14,7 @@
 		"db:migrate:prod": {},
 		"db:migrate:stg": {},
 		"db:push:local": {},
+		"db:reset:local": {},
 		"destroy": {},
 		"dev": {
 			"cache": false,

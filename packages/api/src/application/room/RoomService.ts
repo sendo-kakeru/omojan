@@ -301,7 +301,7 @@ export class RoomService {
 		return { gameToken, gameTokenHash: this.hashGameToken(gameToken) };
 	}
 
-	private hashGameToken(gameToken: string): string {
+	hashGameToken(gameToken: string): string {
 		const hash = sha256(this.encoder.encode(gameToken)); // Uint8Array
 		return bytesToHex(hash);
 	}
