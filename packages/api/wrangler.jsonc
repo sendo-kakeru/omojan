@@ -45,7 +45,7 @@
 	"main": "src/index.ts",
 	"migrations": [
 		{
-			"new_classes": ["MatchingDurableObject"],
+			"new_sqlite_classes": ["MatchingDurableObject"],
 			"tag": "v1"
 		}
 	],
