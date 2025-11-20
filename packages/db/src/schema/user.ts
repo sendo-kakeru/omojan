@@ -18,6 +18,8 @@ export const userTable = sqliteTable("user", {
 	sub: text("sub").notNull().unique(),
 });
 
-export const userSchema = createSelectSchema(userTable);
+export const userSchema = createSelectSchema(userTable, {
+	id: userIdSchema,
+});
 
 export type User = InferOutput<typeof userSchema>;

@@ -33,7 +33,9 @@ export const gameTable = sqliteTable("game", {
 	title: text("title").notNull(),
 });
 
-export const gameSchema = createSelectSchema(gameTable);
+export const gameSchema = createSelectSchema(gameTable, {
+	id: gameIdSchema,
+});
 export type Game = InferOutput<typeof gameSchema>;
 
 export const gameIdRequestParamSchema = object({ gameId: gameIdSchema });
