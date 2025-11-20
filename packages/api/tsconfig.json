@@ -4,7 +4,6 @@
 		"outDir": "./dist",
 		"rootDir": "./src"
 	},
-	"exclude": ["**/*.test.ts", "**/*.test.tsx"],
-	"extends": "@repo/typescript-config/base.json",
-	"include": ["src"]
+	"exclude": ["dist", "vitest.config.ts", "**/*.test.ts", "**/*.test.tsx"],
+	"extends": "@repo/typescript-config/base.json"
 }

@@ -18,7 +18,7 @@ import {
 } from "@repo/db/schema";
 import { and, desc, eq, inArray } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
-import type { DrizzleClient } from "../../types";
+import type { DrizzleClient } from "../../libs/drizzle";
 
 export class RoomService {
 	private readonly encoder = new TextEncoder();
@@ -301,7 +301,7 @@ export class RoomService {
 		return { gameToken, gameTokenHash: this.hashGameToken(gameToken) };
 	}
 
-	private hashGameToken(gameToken: string): string {
+	hashGameToken(gameToken: string): string {
 		const hash = sha256(this.encoder.encode(gameToken)); // Uint8Array
 		return bytesToHex(hash);
 	}
