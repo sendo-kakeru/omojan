@@ -1,5 +1,10 @@
 import { DurableObject } from "cloudflare:workers";
 import {
+	type MatchingClientMessage,
+	type MatchingServerParticipantsMessage,
+	matchingClientMessageSchema,
+} from "@repo/db/model";
+import {
 	type GameId,
 	gameTable,
 	isGameId,
@@ -11,6 +16,7 @@ import {
 } from "@repo/db/schema";
 import { and, asc, eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
+import { safeParse } from "valibot";
 import { RoomService } from "../../application/room/RoomService";
 import type { Env } from "../../env";
 import { createDrizzleClient, type DrizzleClient } from "../../libs/drizzle";
@@ -44,8 +50,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 
 		// WS リクエストをアップグレードし、参加者一覧を即時配信する。
 		const player = await this.verifyPlayer({ gameId, token });
-		const { client, server } =
-			this.webSocketService.createAcceptedWebSocketPair();
+		const [client, server] = Object.values(new WebSocketPair());
 
 		if (!client || !server) {
 			throw new HTTPException(500, {
@@ -58,6 +63,9 @@ export class MatchingDurableObject extends DurableObject<Env> {
 			existingConnection.close(4001, "新しい接続に置き換えられました。");
 		}
 
+		// Durable Object の context で WebSocket を accept する
+		this.ctx.acceptWebSocket(server);
+
 		this.connections.set(player.id, server);
 		await this.broadcastParticipants({ gameId });
 
@@ -67,11 +75,11 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	/**
 	 * WS 切断時に接続情報を破棄し、残りの参加者に最新状態を通知する。
 	 */
-	async webSocketClose(web: WebSocket): Promise<void> {
+	async webSocketClose(ws: WebSocket): Promise<void> {
 		let removedPlayerId: PlayerId | null = null;
 
-		for (const [playerId, socket] of this.connections.entries()) {
-			if (socket === web) {
+		for (const [playerId, connectingWs] of this.connections.entries()) {
+			if (connectingWs === ws) {
 				this.connections.delete(playerId);
 				removedPlayerId = playerId;
 				break;
@@ -89,15 +97,105 @@ export class MatchingDurableObject extends DurableObject<Env> {
 		const participants = await this.fetchParticipants({ gameId: this.gameId });
 
 		if (participants.length === 0) {
-			await this.db.delete(gameTable).where(eq(gameTable.id, this.gameId));
-			for (const socket of this.connections.values()) {
-				socket.close(1000, "部屋が解散されました");
-			}
-			this.connections.clear();
+			await this.deleteRoom({ gameId: this.gameId });
 			return;
 		}
 
 		await this.broadcastParticipants({ gameId: this.gameId });
+	}
+
+	/**
+	 * WS メッセージ受信時の処理
+	 */
+	async webSocketMessage(ws: WebSocket, message: string): Promise<void> {
+		if (!this.gameId) return;
+
+		let playerId: PlayerId | null = null;
+		for (const [id, connectingWs] of this.connections.entries()) {
+			if (connectingWs === ws) {
+				playerId = id;
+				break;
+			}
+		}
+
+		if (!playerId) {
+			ws.close(4409, "接続が見つかりません");
+			return;
+		}
+
+		const parsedMessage = this.parseClientMessage({ message, ws });
+		if (!parsedMessage) return;
+
+		switch (parsedMessage.type) {
+			case "LEAVE":
+				await this.handleLeave({ playerId, ws });
+				break;
+		}
+	}
+
+	/**
+	 * プレイヤーの退出処理を行う
+	 */
+	private async handleLeave({
+		playerId,
+		ws,
+	}: {
+		playerId: PlayerId;
+		ws: WebSocket;
+	}): Promise<void> {
+		if (!this.gameId) return;
+
+		this.connections.delete(playerId);
+
+		await this.db.delete(playerTable).where(eq(playerTable.id, playerId));
+
+		ws.close(1000, "退出しました");
+
+		const participants = await this.fetchParticipants({ gameId: this.gameId });
+
+		if (participants.length === 0) {
+			await this.deleteRoom({ gameId: this.gameId });
+			return;
+		}
+
+		await this.broadcastParticipants({ gameId: this.gameId });
+	}
+
+	/**
+	 * 部屋を削除し、全接続をクローズする
+	 */
+	private async deleteRoom({ gameId }: { gameId: GameId }): Promise<void> {
+		await this.db.delete(gameTable).where(eq(gameTable.id, gameId));
+		for (const connectingWs of this.connections.values()) {
+			connectingWs.close(1000, "部屋が削除されました");
+		}
+		this.connections.clear();
+	}
+
+	/**
+	 * クライアントメッセージをパースして検証する
+	 */
+	private parseClientMessage({
+		ws,
+		message,
+	}: {
+		ws: WebSocket;
+		message: string;
+	}): MatchingClientMessage | null {
+		try {
+			const json = JSON.parse(message);
+			const result = safeParse(matchingClientMessageSchema, json);
+
+			if (!result.success) {
+				ws.close(4400, "メッセージの形式が正しくありません");
+				return null;
+			}
+
+			return result.output;
+		} catch {
+			ws.close(4400, "メッセージのパースに失敗しました");
+			return null;
+		}
 	}
 
 	/**
@@ -163,7 +261,10 @@ export class MatchingDurableObject extends DurableObject<Env> {
 		if (participants.length === 0) return;
 
 		this.webSocketService.broadcastJson({
-			payload: participants,
+			payload: {
+				participants,
+				type: "PARTICIPANTS",
+			} satisfies MatchingServerParticipantsMessage,
 			sockets: this.connections.values(),
 		});
 	}
