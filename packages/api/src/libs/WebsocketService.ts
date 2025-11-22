@@ -3,19 +3,6 @@
  */
 export class WebSocketService {
 	/**
-	 * WebSocketPair を生成し、サーバー側を accept 済みで返す。
-	 */
-	createAcceptedWebSocketPair(): { client?: WebSocket; server?: WebSocket } {
-		const pair = new WebSocketPair();
-		const [client, server] = Object.values(pair);
-
-		if (!client || !server) return { client, server };
-
-		server.accept();
-		return { client, server };
-	}
-
-	/**
 	 * 受け付け済みソケットを指定して 101 Switching Protocols を返す。
 	 */
 	upgradeResponse({ client }: { client: WebSocket }): Response {
