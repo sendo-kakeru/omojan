@@ -7,6 +7,10 @@ import {
 	variant,
 } from "valibot";
 import { playerIdSchema, playerNameSchema, userSchema } from "../schema";
+import {
+	heartbeatPingMessageSchema,
+	heartbeatPongMessageSchema,
+} from "./heartbeat";
 
 /**
  * クライアントからサーバーへのメッセージ
@@ -24,6 +28,7 @@ export const matchingClientLeaveMessageSchema = object({
  */
 export const matchingClientMessageSchema = variant("type", [
 	matchingClientLeaveMessageSchema,
+	heartbeatPongMessageSchema,
 ]);
 
 export type MatchingClientMessage = InferOutput<
@@ -62,6 +67,7 @@ export type MatchingServerParticipantsMessage = InferOutput<
  */
 export const matchingServerMessageSchema = variant("type", [
 	matchingServerParticipantsMessageSchema,
+	heartbeatPingMessageSchema,
 ]);
 
 export type MatchingServerMessage = InferOutput<

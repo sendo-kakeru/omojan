@@ -6,6 +6,7 @@
 - forEachは使わず、for ofを使用
 - any、as、Non-Null Assertion Operatorによる型の誤魔化しは最小にし、できるだけ適切に型付けする。as constの使用は問題ない。
 - 関数の引数が複数あるものは基本的にオブジェクトで渡す。
+- 型定義はinterfaceではなくtype
 
 ### api
 - コンテキスト変数の参照は`c.var.*`を使う。`c.get("*")`は使わない

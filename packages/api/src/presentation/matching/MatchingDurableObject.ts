@@ -18,13 +18,22 @@ import { and, asc, eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import { safeParse } from "valibot";
 import { RoomService } from "../../application/room/RoomService";
+import { HeartbeatManager } from "../../application/websocket/HeartbeatManager";
+import { WebSocketService } from "../../application/websocket/WebsocketService";
 import type { Env } from "../../env";
 import { createDrizzleClient, type DrizzleClient } from "../../libs/drizzle";
-import { WebSocketService } from "../../libs/WebsocketService";
+
+/** ハートビート間隔（ミリ秒） */
+const HEARTBEAT_INTERVAL_MS = 10_000 as const;
+/** PONG応答のタイムアウト（ミリ秒） */
+const HEARTBEAT_TIMEOUT_MS = 30_000 as const;
+/** 初回接続時の猶予期間（ミリ秒） - React StrictMode等の再接続に対応 */
+const HEARTBEAT_GRACE_PERIOD_MS = 3_000 as const;
 
 export class MatchingDurableObject extends DurableObject<Env> {
 	private readonly connections = new Map<PlayerId, WebSocket>();
 	private readonly db: DrizzleClient;
+	private readonly heartbeatManager = new HeartbeatManager<PlayerId>();
 	private readonly roomService: RoomService;
 	private readonly webSocketService = new WebSocketService();
 	private gameId: GameId | null = null;
@@ -67,42 +76,25 @@ export class MatchingDurableObject extends DurableObject<Env> {
 		this.ctx.acceptWebSocket(server);
 
 		this.connections.set(player.id, server);
+
+		// ハートビート管理に登録
+		this.heartbeatManager.register(player.id);
+
+		// ハートビートアラームを開始（既に設定されていなければ）
+		const currentAlarm = await this.ctx.storage.getAlarm();
+		if (currentAlarm === null) {
+			await this.ctx.storage.setAlarm(Date.now() + HEARTBEAT_INTERVAL_MS);
+		}
+
 		await this.broadcastParticipants({ gameId });
 
 		return this.webSocketService.upgradeResponse({ client });
 	}
 
 	/**
-	 * WS 切断時に接続情報を破棄し、残りの参加者に最新状態を通知する。
+	 * 必要であれば実装
 	 */
-	async webSocketClose(ws: WebSocket): Promise<void> {
-		let removedPlayerId: PlayerId | null = null;
-
-		for (const [playerId, connectingWs] of this.connections.entries()) {
-			if (connectingWs === ws) {
-				this.connections.delete(playerId);
-				removedPlayerId = playerId;
-				break;
-			}
-		}
-
-		if (!this.gameId) return;
-
-		if (removedPlayerId) {
-			await this.db
-				.delete(playerTable)
-				.where(eq(playerTable.id, removedPlayerId));
-		}
-
-		const participants = await this.fetchParticipants({ gameId: this.gameId });
-
-		if (participants.length === 0) {
-			await this.deleteRoom({ gameId: this.gameId });
-			return;
-		}
-
-		await this.broadcastParticipants({ gameId: this.gameId });
-	}
+	// async webSocketClose(ws: WebSocket): Promise<void> {}
 
 	/**
 	 * WS メッセージ受信時の処理
@@ -130,6 +122,68 @@ export class MatchingDurableObject extends DurableObject<Env> {
 			case "LEAVE":
 				await this.handleLeave({ playerId, ws });
 				break;
+			case "PONG":
+				// ハートビート応答を記録
+				this.heartbeatManager.recordPong(playerId);
+				break;
+		}
+	}
+
+	/**
+	 * Durable Object アラームハンドラ
+	 * 定期的にPINGを送信し、切断されたプレイヤーをクリーンアップする
+	 */
+	async alarm(): Promise<void> {
+		if (!this.gameId) return;
+
+		// 全接続にPINGを送信
+		this.heartbeatManager.sendPingToAll(this.connections.values());
+
+		// DBから現在のプレイヤー一覧を取得
+		const players = await this.fetchParticipants({ gameId: this.gameId });
+
+		// 接続がなく、タイムアウトしたプレイヤーを格納
+		const disconnectedPlayerIds: PlayerId[] = [];
+
+		for (const player of players) {
+			// 接続が存在する場合はスキップ
+			if (this.connections.has(player.id)) continue;
+
+			// 接続がない場合、タイムアウトをチェック
+			const isTimedOut = this.heartbeatManager.isTimedOut({
+				gracePeriodMs: HEARTBEAT_GRACE_PERIOD_MS,
+				id: player.id,
+				timeoutMs: HEARTBEAT_TIMEOUT_MS,
+			});
+
+			if (isTimedOut) {
+				disconnectedPlayerIds.push(player.id);
+			}
+		}
+
+		// タイムアウトしたプレイヤーを削除
+		for (const playerId of disconnectedPlayerIds) {
+			await this.db.delete(playerTable).where(eq(playerTable.id, playerId));
+		}
+
+		// 残りのプレイヤーを確認
+		const remainingParticipants = await this.fetchParticipants({
+			gameId: this.gameId,
+		});
+
+		if (remainingParticipants.length === 0) {
+			await this.deleteRoom({ gameId: this.gameId });
+			return;
+		}
+
+		// プレイヤーが削除された場合、参加者一覧を更新
+		if (disconnectedPlayerIds.length > 0) {
+			await this.broadcastParticipants({ gameId: this.gameId });
+		}
+
+		// 接続が残っている場合は次のアラームを設定
+		if (this.connections.size > 0) {
+			await this.ctx.storage.setAlarm(Date.now() + HEARTBEAT_INTERVAL_MS);
 		}
 	}
 
@@ -146,6 +200,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 		if (!this.gameId) return;
 
 		this.connections.delete(playerId);
+		this.heartbeatManager.unregister(playerId);
 
 		await this.db.delete(playerTable).where(eq(playerTable.id, playerId));
 
@@ -166,8 +221,9 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	 */
 	private async deleteRoom({ gameId }: { gameId: GameId }): Promise<void> {
 		await this.db.delete(gameTable).where(eq(gameTable.id, gameId));
-		for (const connectingWs of this.connections.values()) {
+		for (const [playerId, connectingWs] of this.connections.entries()) {
 			connectingWs.close(1000, "部屋が削除されました");
+			this.heartbeatManager.unregister(playerId);
 		}
 		this.connections.clear();
 	}
