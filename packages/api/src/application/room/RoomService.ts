@@ -5,6 +5,7 @@ import type {
 	CreateRoomRequestBody,
 	CreateRoomResponseBody,
 	GetRoomListResponseBody,
+	GetRoomResponseBody,
 	JoinRoomRequestBody,
 	JoinRoomResponseBody,
 } from "@repo/db/model";
@@ -24,6 +25,23 @@ export class RoomService {
 	private readonly encoder = new TextEncoder();
 
 	constructor(private readonly db: DrizzleClient) {}
+
+	/**
+	 * ルームを単体取得する
+	 */
+	async findByGameId(gameId: GameId): Promise<GetRoomResponseBody | null> {
+		const [game] = await this.db
+			.select({
+				isPrivate: gameTable.isPrivate,
+				password: gameTable.password,
+				timeLimit: gameTable.timeLimit,
+				title: gameTable.title,
+			})
+			.from(gameTable)
+			.where(eq(gameTable.id, gameId));
+
+		return game ?? null;
+	}
 
 	/**
 	 * 募集中のルーム一覧を取得する

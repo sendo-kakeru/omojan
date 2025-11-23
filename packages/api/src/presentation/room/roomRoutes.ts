@@ -3,6 +3,7 @@ import {
 	type CreateRoomResponseBody,
 	createRoomRequestBodySchema,
 	type GetRoomListResponseBody,
+	type GetRoomResponseBody,
 	type JoinRoomResponseBody,
 	joinRoomRequestBodySchema,
 } from "@repo/db/model";
@@ -64,6 +65,35 @@ export const routes = new Hono<
 				if (error instanceof HTTPException) throw error;
 
 				throw new HTTPException(500, { message: "Roomの作成に失敗しました" });
+			}
+		},
+	)
+	.get(
+		"/:gameId",
+		vValidator("param", gameIdRequestParamSchema, routeValidateCallback),
+		async (c): Promise<HttpRespondReturn<GetRoomResponseBody>> => {
+			const { roomService } = c.var;
+			const { gameId } = c.req.valid("param");
+
+			try {
+				const room = await roomService.findByGameId(gameId);
+				if (!room) {
+					throw new HTTPException(404, {
+						message: "指定された部屋が存在しません",
+					});
+				}
+				return c.json(
+					{
+						data: room,
+						message: "OK",
+					},
+					200,
+				);
+			} catch (error) {
+				console.error("Roomの取得に失敗しました:", error);
+				if (error instanceof HTTPException) throw error;
+
+				throw new HTTPException(500, { message: "Roomの取得に失敗しました" });
 			}
 		},
 	)

@@ -57,6 +57,15 @@ export type GetRoomListResponseBody = InferOutput<
 	typeof getRoomListResponseBodySchema
 >;
 
+// find one
+export const getRoomResponseBodySchema = pick(roomSchema, [
+	"title",
+	"isPrivate",
+	"password",
+	"timeLimit",
+]);
+export type GetRoomResponseBody = InferOutput<typeof getRoomResponseBodySchema>;
+
 // join
 export const joinRoomRequestBodySchema = object({
 	/**

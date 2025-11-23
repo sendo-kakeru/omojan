@@ -140,6 +140,65 @@ describe("roomRoutes", () => {
 			});
 		});
 
+		describe("GET /rooms/:gameId", () => {
+			test("ルームを単体取得できる", async () => {
+				const [createdGame] = await db
+					.insert(gameTable)
+					.values({
+						isPrivate: false,
+						password: null,
+						status: "waiting",
+						timeLimit: 30,
+						title: "Test Room",
+					})
+					.returning();
+
+				const response = await mockHonoClient.v1.rooms[":gameId"].$get({
+					param: { gameId: createdGame.id },
+				});
+
+				expect(response.status).toBe(200);
+				const body = await response.json();
+				expect(body.data).toBeDefined();
+				expect(body.data?.title).toBe("Test Room");
+				expect(body.data?.timeLimit).toBe(30);
+				expect(body.data?.isPrivate).toBe(false);
+				expect(body.data?.password).toBeNull();
+			});
+
+			test("プライベートルームのパスワードを取得できる", async () => {
+				const [createdGame] = await db
+					.insert(gameTable)
+					.values({
+						isPrivate: true,
+						password: "secret",
+						status: "waiting",
+						timeLimit: 60,
+						title: "Private Room",
+					})
+					.returning();
+
+				const response = await mockHonoClient.v1.rooms[":gameId"].$get({
+					param: { gameId: createdGame.id },
+				});
+
+				expect(response.status).toBe(200);
+				const body = await response.json();
+				expect(body.data).toBeDefined();
+				expect(body.data?.title).toBe("Private Room");
+				expect(body.data?.isPrivate).toBe(true);
+				expect(body.data?.password).toBe("secret");
+			});
+
+			test("存在しないルームIDの場合は404を返す", async () => {
+				const response = await mockHonoClient.v1.rooms[":gameId"].$get({
+					param: { gameId: faker.string.uuid() },
+				});
+
+				expect(response.status).toBe(404);
+			});
+		});
+
 		describe("GET /rooms", () => {
 			test("待機中のルーム一覧を取得できる", async () => {
 				const gameData = [
