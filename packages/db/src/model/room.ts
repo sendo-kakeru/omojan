@@ -57,6 +57,15 @@ export type GetRoomListResponseBody = InferOutput<
 	typeof getRoomListResponseBodySchema
 >;
 
+// find one
+export const getRoomResponseBodySchema = pick(roomSchema, [
+	"title",
+	"isPrivate",
+	"password",
+	"timeLimit",
+]);
+export type GetRoomResponseBody = InferOutput<typeof getRoomResponseBodySchema>;
+
 // join
 export const joinRoomRequestBodySchema = object({
 	/**
@@ -136,4 +145,9 @@ export type CreateRoomResponseBody = InferOutput<
 // verify token
 export const verifyRoomTokenRequestQuerySchema = object({
 	token: string(),
+});
+
+// game token header (X-Game-Token)
+export const gameTokenHeaderSchema = object({
+	"x-game-token": string(),
 });

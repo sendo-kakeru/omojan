@@ -5,6 +5,7 @@ import type {
 	CreateRoomRequestBody,
 	CreateRoomResponseBody,
 	GetRoomListResponseBody,
+	GetRoomResponseBody,
 	JoinRoomRequestBody,
 	JoinRoomResponseBody,
 } from "@repo/db/model";
@@ -24,6 +25,49 @@ export class RoomService {
 	private readonly encoder = new TextEncoder();
 
 	constructor(private readonly db: DrizzleClient) {}
+
+	/**
+	 * ルームを単体取得する
+	 */
+	async findByGameId({
+		gameId,
+		gameToken,
+	}: {
+		gameId: GameId;
+		gameToken: string;
+	}): Promise<GetRoomResponseBody> {
+		const gameTokenHash = this.hashGameToken(gameToken);
+
+		const [game] = await this.db
+			.select({
+				isPrivate: gameTable.isPrivate,
+				password: gameTable.password,
+				timeLimit: gameTable.timeLimit,
+				title: gameTable.title,
+			})
+			.from(gameTable)
+			.where(eq(gameTable.id, gameId));
+
+		if (!game) {
+			throw new HTTPException(404, { message: "指定された部屋が存在しません" });
+		}
+
+		const players = await this.db
+			.select({
+				gameTokenHash: playerTable.gameTokenHash,
+			})
+			.from(playerTable)
+			.where(eq(playerTable.gameId, gameId));
+
+		if (players.some((player) => player.gameTokenHash !== gameTokenHash)) {
+			throw new HTTPException(403, {
+				message: "部屋情報の取得権限がありません。",
+			});
+		}
+
+		// 検証に使ったgameTokenを省いて返す
+		return game;
+	}
 
 	/**
 	 * 募集中のルーム一覧を取得する

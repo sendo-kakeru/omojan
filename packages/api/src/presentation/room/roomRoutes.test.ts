@@ -140,6 +140,143 @@ describe("roomRoutes", () => {
 			});
 		});
 
+		describe("GET /rooms/:gameId", () => {
+			test("有効なトークンでルームを単体取得できる", async () => {
+				const gameToken = "valid-game-token";
+				const gameTokenHash = hashGameToken(gameToken);
+
+				const [createdGame] = await db
+					.insert(gameTable)
+					.values({
+						isPrivate: false,
+						password: null,
+						status: "waiting",
+						timeLimit: 30,
+						title: "Test Room",
+					})
+					.returning();
+
+				await db.insert(playerTable).values({
+					gameId: createdGame.id,
+					gameTokenHash,
+					playerName: "Player",
+					seat: 1,
+					userId: null,
+				});
+
+				const response = await mockHonoClient.v1.rooms[":gameId"].$get({
+					header: { "x-game-token": gameToken },
+					param: { gameId: createdGame.id },
+				});
+
+				expect(response.status).toBe(200);
+				const body = await response.json();
+				expect(body.data).toBeDefined();
+				expect(body.data?.title).toBe("Test Room");
+				expect(body.data?.timeLimit).toBe(30);
+				expect(body.data?.isPrivate).toBe(false);
+				expect(body.data?.password).toBeNull();
+			});
+
+			test("有効なトークンでプライベートルームのパスワードを取得できる", async () => {
+				const gameToken = "valid-game-token";
+				const gameTokenHash = hashGameToken(gameToken);
+
+				const [createdGame] = await db
+					.insert(gameTable)
+					.values({
+						isPrivate: true,
+						password: "secret",
+						status: "waiting",
+						timeLimit: 60,
+						title: "Private Room",
+					})
+					.returning();
+
+				await db.insert(playerTable).values({
+					gameId: createdGame.id,
+					gameTokenHash,
+					playerName: "Player",
+					seat: 1,
+					userId: null,
+				});
+
+				const response = await mockHonoClient.v1.rooms[":gameId"].$get({
+					header: { "x-game-token": gameToken },
+					param: { gameId: createdGame.id },
+				});
+
+				expect(response.status).toBe(200);
+				const body = await response.json();
+				expect(body.data).toBeDefined();
+				expect(body.data?.title).toBe("Private Room");
+				expect(body.data?.isPrivate).toBe(true);
+				expect(body.data?.password).toBe("secret");
+			});
+
+			test("無効なトークンの場合は403を返す", async () => {
+				const validGameToken = "valid-game-token";
+				const invalidGameToken = "invalid-game-token";
+				const gameTokenHash = hashGameToken(validGameToken);
+
+				const [createdGame] = await db
+					.insert(gameTable)
+					.values({
+						isPrivate: false,
+						password: null,
+						status: "waiting",
+						timeLimit: 30,
+						title: "Test Room",
+					})
+					.returning();
+
+				await db.insert(playerTable).values({
+					gameId: createdGame.id,
+					gameTokenHash,
+					playerName: "Player",
+					seat: 1,
+					userId: null,
+				});
+
+				const response = await mockHonoClient.v1.rooms[":gameId"].$get({
+					header: { "x-game-token": invalidGameToken },
+					param: { gameId: createdGame.id },
+				});
+
+				expect(response.status).toBe(403);
+			});
+
+			test("存在しないルームIDの場合は404を返す", async () => {
+				const gameToken = "some-token";
+
+				const response = await mockHonoClient.v1.rooms[":gameId"].$get({
+					header: { "x-game-token": gameToken },
+					param: { gameId: faker.string.uuid() },
+				});
+
+				expect(response.status).toBe(404);
+			});
+
+			test("X-Game-Tokenヘッダーがない場合は400を返す", async () => {
+				const [createdGame] = await db
+					.insert(gameTable)
+					.values({
+						isPrivate: false,
+						password: null,
+						status: "waiting",
+						timeLimit: 30,
+						title: "Test Room",
+					})
+					.returning();
+
+				const response = await app.request(`/v1/rooms/${createdGame.id}`, {
+					method: "GET",
+				});
+
+				expect(response.status).toBe(400);
+			});
+		});
+
 		describe("GET /rooms", () => {
 			test("待機中のルーム一覧を取得できる", async () => {
 				const gameData = [
