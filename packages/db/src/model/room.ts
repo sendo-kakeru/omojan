@@ -146,3 +146,8 @@ export type CreateRoomResponseBody = InferOutput<
 export const verifyRoomTokenRequestQuerySchema = object({
 	token: string(),
 });
+
+// game token header (X-Game-Token)
+export const gameTokenHeaderSchema = object({
+	"x-game-token": string(),
+});

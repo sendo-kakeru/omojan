@@ -4,6 +4,7 @@ import {
 	createRoomRequestBodySchema,
 	type GetRoomListResponseBody,
 	type GetRoomResponseBody,
+	gameTokenHeaderSchema,
 	type JoinRoomResponseBody,
 	joinRoomRequestBodySchema,
 } from "@repo/db/model";
@@ -71,17 +72,15 @@ export const routes = new Hono<
 	.get(
 		"/:gameId",
 		vValidator("param", gameIdRequestParamSchema, routeValidateCallback),
+		vValidator("header", gameTokenHeaderSchema, routeValidateCallback),
 		async (c): Promise<HttpRespondReturn<GetRoomResponseBody>> => {
 			const { roomService } = c.var;
 			const { gameId } = c.req.valid("param");
+			const { "x-game-token": gameToken } = c.req.valid("header");
 
 			try {
-				const room = await roomService.findByGameId(gameId);
-				if (!room) {
-					throw new HTTPException(404, {
-						message: "指定された部屋が存在しません",
-					});
-				}
+				const room = await roomService.findByGameId({ gameId, gameToken });
+
 				return c.json(
 					{
 						data: room,
