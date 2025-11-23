@@ -9,7 +9,6 @@ export class ConnectionService {
 		PlayerId,
 		{
 			lastPongAt: number;
-			pendingInitialPong: boolean;
 			socket: WebSocket | null;
 		}
 	>();
@@ -20,7 +19,6 @@ export class ConnectionService {
 	register({ id, socket }: { id: PlayerId; socket: WebSocket }): void {
 		this.connections.set(id, {
 			lastPongAt: Date.now(),
-			pendingInitialPong: true,
 			socket,
 		});
 	}
@@ -111,34 +109,19 @@ export class ConnectionService {
 	recordPong(id: PlayerId): void {
 		const state = this.connections.get(id);
 		if (state) {
-			state.pendingInitialPong = false;
 			state.lastPongAt = Date.now();
 		}
 	}
 
 	/**
 	 * 接続がタイムアウトしているかどうかを判定する
-	 * 初回PONG待ちの接続は猶予期間内であればタイムアウトとしない
 	 */
-	isTimedOut({
-		id,
-		timeoutMs,
-		gracePeriodMs,
-	}: {
-		gracePeriodMs: number;
-		id: PlayerId;
-		timeoutMs: number;
-	}): boolean {
+	isTimedOut({ id, timeoutMs }: { id: PlayerId; timeoutMs: number }): boolean {
 		const state = this.connections.get(id);
 		if (!state) return true;
 
 		const now = Date.now();
 		const elapsed = now - state.lastPongAt;
-
-		// 初回PONG待ちの場合は猶予期間を使用
-		if (state.pendingInitialPong) {
-			return elapsed > gracePeriodMs;
-		}
 
 		return elapsed > timeoutMs;
 	}
@@ -156,6 +139,7 @@ export class ConnectionService {
 				state.socket.send(payload);
 			} catch (error) {
 				console.error("PINGの送信に失敗しました:", error);
+				state.socket = null;
 			}
 		}
 	}

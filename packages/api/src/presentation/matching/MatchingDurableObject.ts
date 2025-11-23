@@ -24,11 +24,9 @@ import type { Env } from "../../env";
 import { createDrizzleClient, type DrizzleClient } from "../../libs/drizzle";
 
 /** ハートビート間隔（ミリ秒） */
-const HEARTBEAT_INTERVAL_MS = 10_000 as const;
+const HEARTBEAT_INTERVAL_MS = 5_000 as const;
 /** PONG応答のタイムアウト（ミリ秒）。この期間内に戻って来られれば再開可能 */
-const HEARTBEAT_TIMEOUT_MS = 30_000 as const;
-/** 初回接続時の猶予期間（ミリ秒） - React StrictMode等の再接続に対応 */
-const HEARTBEAT_GRACE_PERIOD_MS = 3_000 as const;
+const HEARTBEAT_TIMEOUT_MS = 10_000 as const;
 
 export class MatchingDurableObject extends DurableObject<Env> {
 	private readonly connectionService = new ConnectionService();
@@ -140,18 +138,25 @@ export class MatchingDurableObject extends DurableObject<Env> {
 
 		for (const player of players) {
 			const isTimedOut = this.connectionService.isTimedOut({
-				gracePeriodMs: HEARTBEAT_GRACE_PERIOD_MS,
 				id: player.id,
 				timeoutMs: HEARTBEAT_TIMEOUT_MS,
 			});
 
-			if (!isTimedOut) continue;
+			if (isTimedOut) {
+				// タイムアウトしていたら、接続解除
+				const ws = this.connectionService.get(player.id);
+				if (ws) {
+					try {
+						ws.close(4408, "ハートビートタイムアウト");
+					} catch {
+						// noop
+						console.log("websocketのcloseに失敗しました。");
+					}
+				}
 
-			// タイムアウトしていたら、接続解除
-			const ws = this.connectionService.get(player.id);
-			ws?.close(4408, "ハートビートタイムアウト");
-			this.connectionService.unregister(player.id);
-			disconnectedPlayerIds.push(player.id);
+				this.connectionService.unregister(player.id);
+				disconnectedPlayerIds.push(player.id);
+			}
 		}
 
 		// タイムアウトしたプレイヤーを削除
