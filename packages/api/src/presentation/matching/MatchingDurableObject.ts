@@ -18,12 +18,18 @@ import { and, asc, eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import { safeParse } from "valibot";
 import { RoomService } from "../../application/room/RoomService";
+import { ConnectionService } from "../../application/websocket/ConnectionService";
+import { WebSocketService } from "../../application/websocket/WebsocketService";
 import type { Env } from "../../env";
 import { createDrizzleClient, type DrizzleClient } from "../../libs/drizzle";
-import { WebSocketService } from "../../libs/WebsocketService";
+
+/** ハートビート間隔（ミリ秒） */
+const HEARTBEAT_INTERVAL_MS = 5_000 as const;
+/** PONG応答のタイムアウト（ミリ秒）。この期間内に戻って来られれば再開可能 */
+const HEARTBEAT_TIMEOUT_MS = 10_000 as const;
 
 export class MatchingDurableObject extends DurableObject<Env> {
-	private readonly connections = new Map<PlayerId, WebSocket>();
+	private readonly connectionService = new ConnectionService();
 	private readonly db: DrizzleClient;
 	private readonly roomService: RoomService;
 	private readonly webSocketService = new WebSocketService();
@@ -58,7 +64,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 			});
 		}
 
-		const existingConnection = this.connections.get(player.id);
+		const existingConnection = this.connectionService.get(player.id);
 		if (existingConnection) {
 			existingConnection.close(4001, "新しい接続に置き換えられました。");
 		}
@@ -66,42 +72,26 @@ export class MatchingDurableObject extends DurableObject<Env> {
 		// Durable Object の context で WebSocket を accept する
 		this.ctx.acceptWebSocket(server);
 
-		this.connections.set(player.id, server);
+		// 接続を登録（ハートビート管理も含む）
+		this.connectionService.register({ id: player.id, socket: server });
+
+		// ハートビートアラームを開始（既に設定されていなければ）
+		const currentAlarm = await this.ctx.storage.getAlarm();
+		if (currentAlarm === null) {
+			await this.ctx.storage.setAlarm(Date.now() + HEARTBEAT_INTERVAL_MS);
+		}
+
 		await this.broadcastParticipants({ gameId });
 
 		return this.webSocketService.upgradeResponse({ client });
 	}
 
 	/**
-	 * WS 切断時に接続情報を破棄し、残りの参加者に最新状態を通知する。
+	 * WS 切断時に接続を切断状態にする。
+	 * ハートビート情報は保持し、再接続の猶予を与える
 	 */
 	async webSocketClose(ws: WebSocket): Promise<void> {
-		let removedPlayerId: PlayerId | null = null;
-
-		for (const [playerId, connectingWs] of this.connections.entries()) {
-			if (connectingWs === ws) {
-				this.connections.delete(playerId);
-				removedPlayerId = playerId;
-				break;
-			}
-		}
-
-		if (!this.gameId) return;
-
-		if (removedPlayerId) {
-			await this.db
-				.delete(playerTable)
-				.where(eq(playerTable.id, removedPlayerId));
-		}
-
-		const participants = await this.fetchParticipants({ gameId: this.gameId });
-
-		if (participants.length === 0) {
-			await this.deleteRoom({ gameId: this.gameId });
-			return;
-		}
-
-		await this.broadcastParticipants({ gameId: this.gameId });
+		this.connectionService.disconnect(ws);
 	}
 
 	/**
@@ -110,13 +100,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	async webSocketMessage(ws: WebSocket, message: string): Promise<void> {
 		if (!this.gameId) return;
 
-		let playerId: PlayerId | null = null;
-		for (const [id, connectingWs] of this.connections.entries()) {
-			if (connectingWs === ws) {
-				playerId = id;
-				break;
-			}
-		}
+		const playerId = this.connectionService.findIdBySocket(ws);
 
 		if (!playerId) {
 			ws.close(4409, "接続が見つかりません");
@@ -130,6 +114,74 @@ export class MatchingDurableObject extends DurableObject<Env> {
 			case "LEAVE":
 				await this.handleLeave({ playerId, ws });
 				break;
+			case "PONG":
+				this.connectionService.recordPong(playerId);
+				break;
+		}
+	}
+
+	/**
+	 * Durable Object アラームハンドラ
+	 * 定期的にPINGを送信し、切断されたプレイヤーをクリーンアップする
+	 */
+	async alarm(): Promise<void> {
+		if (!this.gameId) return;
+
+		// 全接続にPINGを送信
+		this.connectionService.sendPingToAll();
+
+		// DBから現在のプレイヤー一覧を取得
+		const players = await this.fetchParticipants({ gameId: this.gameId });
+
+		// 接続がなく、タイムアウトしたプレイヤーを格納
+		const disconnectedPlayerIds: PlayerId[] = [];
+
+		for (const player of players) {
+			const isTimedOut = this.connectionService.isTimedOut({
+				id: player.id,
+				timeoutMs: HEARTBEAT_TIMEOUT_MS,
+			});
+
+			if (isTimedOut) {
+				// タイムアウトしていたら、接続解除
+				const ws = this.connectionService.get(player.id);
+				if (ws) {
+					try {
+						ws.close(4408, "ハートビートタイムアウト");
+					} catch {
+						// noop
+						console.log("websocketのcloseに失敗しました。");
+					}
+				}
+
+				this.connectionService.unregister(player.id);
+				disconnectedPlayerIds.push(player.id);
+			}
+		}
+
+		// タイムアウトしたプレイヤーを削除
+		for (const playerId of disconnectedPlayerIds) {
+			await this.db.delete(playerTable).where(eq(playerTable.id, playerId));
+		}
+
+		// 残りのプレイヤーを確認
+		const remainingParticipants = await this.fetchParticipants({
+			gameId: this.gameId,
+		});
+
+		if (remainingParticipants.length === 0) {
+			await this.deleteRoom({ gameId: this.gameId });
+			return;
+		}
+
+		// プレイヤーが削除された場合、参加者一覧を更新
+		if (disconnectedPlayerIds.length > 0) {
+			await this.broadcastParticipants({ gameId: this.gameId });
+		}
+
+		// 接続が残っている場合は次のアラームを設定
+		if (this.connectionService.size > 0 || remainingParticipants.length > 0) {
+			await this.ctx.storage.setAlarm(Date.now() + HEARTBEAT_INTERVAL_MS);
 		}
 	}
 
@@ -145,7 +197,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	}): Promise<void> {
 		if (!this.gameId) return;
 
-		this.connections.delete(playerId);
+		this.connectionService.unregister(playerId);
 
 		await this.db.delete(playerTable).where(eq(playerTable.id, playerId));
 
@@ -166,10 +218,10 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	 */
 	private async deleteRoom({ gameId }: { gameId: GameId }): Promise<void> {
 		await this.db.delete(gameTable).where(eq(gameTable.id, gameId));
-		for (const connectingWs of this.connections.values()) {
-			connectingWs.close(1000, "部屋が削除されました");
+		for (const socket of this.connectionService.getSockets()) {
+			socket.close(1000, "部屋が削除されました");
 		}
-		this.connections.clear();
+		this.connectionService.clear();
 	}
 
 	/**
@@ -265,7 +317,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 				participants,
 				type: "PARTICIPANTS",
 			} satisfies MatchingServerParticipantsMessage,
-			sockets: this.connections.values(),
+			sockets: this.connectionService.getSockets(),
 		});
 	}
 
