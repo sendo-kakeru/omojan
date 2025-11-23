@@ -9,7 +9,7 @@ async function fetcher(
 	return response.json();
 }
 
-export function useGameListSWR() {
+export function useRoomListSWR() {
 	return useSWR("/rooms", fetcher, {
 		revalidateOnFocus: false,
 	});
