@@ -1,5 +1,6 @@
 "use client";
 import { createRoomRequestBodySchema } from "@repo/db/model";
+import { LOCALSTORAGE_OPERATION_FAILED_MESSAGE } from "@repo/shared/error";
 import { useForm } from "@tanstack/react-form";
 import { type Dispatch, type SetStateAction, useId } from "react";
 import { useNavigate } from "react-router";
@@ -49,7 +50,12 @@ export function CreateRoomDialog({
 					throw new Error(message);
 				}
 
-				gameTokenLocalStorage.set(data.token);
+				gameTokenLocalStorage.set(data.token, {
+					onError() {
+						alert(LOCALSTORAGE_OPERATION_FAILED_MESSAGE);
+						void navigate("/");
+					},
+				});
 				void navigate(`/matching/${data.gameId}`);
 
 				setIsOpen(false);

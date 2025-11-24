@@ -1,15 +1,38 @@
 const KEY = "omojan_game_token";
 
-function get(): string | null {
-	return localStorage.getItem(KEY);
+type Options = {
+	onError?: (error: unknown) => void;
+};
+
+function get(options?: Options): string | null {
+	if (typeof window === "undefined") return null;
+
+	try {
+		return localStorage.getItem(KEY);
+	} catch (error) {
+		options?.onError?.(error);
+		return null;
+	}
 }
 
-function set(token: string): void {
-	localStorage.setItem(KEY, token);
+function set(token: string, options?: Options): void {
+	if (typeof window === "undefined") return;
+
+	try {
+		localStorage.setItem(KEY, token);
+	} catch (error) {
+		options?.onError?.(error);
+	}
 }
 
-function remove(): void {
-	localStorage.removeItem(KEY);
+function remove(options?: Options): void {
+	if (typeof window === "undefined") return;
+
+	try {
+		localStorage.removeItem(KEY);
+	} catch (error) {
+		options?.onError?.(error);
+	}
 }
 
 export const gameTokenLocalStorage = {
