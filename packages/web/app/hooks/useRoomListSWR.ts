@@ -1,16 +1,8 @@
-import type { InferRequestType } from "hono";
 import useSWR from "swr";
-import { honoClient } from "~/libs/apiClient.client";
-
-async function fetcher(
-	args: InferRequestType<typeof honoClient.v1.rooms.$get>,
-) {
-	const response = await honoClient.v1.rooms.$get(args);
-	return response.json();
-}
+import { honoClient, honoFetcher } from "~/libs/apiClient.client";
 
 export function useRoomListSWR() {
-	return useSWR("/rooms", fetcher, {
+	return useSWR("/rooms", () => honoFetcher(() => honoClient.v1.rooms.$get()), {
 		revalidateOnFocus: false,
 	});
 }
