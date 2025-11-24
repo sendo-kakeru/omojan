@@ -37,16 +37,14 @@ export function JoinRoomDialog({
 	const [passwordError, setPasswordError] = useState<string | undefined>();
 
 	const defaultValues: JoinRoomRequestBody = (() => {
-		let gameToken: string | null = null;
-
-		try {
-			gameToken = gameTokenLocalStorage.get();
-		} catch {
-			showToast({
-				title: LOCALSTORAGE_OPERATION_FAILED_MESSAGE,
-				type: "error",
-			});
-		}
+		const gameToken = gameTokenLocalStorage.get({
+			onError() {
+				showToast({
+					title: LOCALSTORAGE_OPERATION_FAILED_MESSAGE,
+					type: "error",
+				});
+			},
+		});
 
 		return {
 			heldToken: gameToken,

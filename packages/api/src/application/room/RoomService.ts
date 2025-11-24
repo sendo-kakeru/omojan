@@ -59,7 +59,7 @@ export class RoomService {
 			.from(playerTable)
 			.where(eq(playerTable.gameId, gameId));
 
-		if (players.some((player) => player.gameTokenHash !== gameTokenHash)) {
+		if (!players.some((player) => player.gameTokenHash === gameTokenHash)) {
 			throw new HTTPException(403, {
 				message: "部屋情報の取得権限がありません。",
 			});

@@ -2,13 +2,13 @@ import { useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { Button } from "~/components/button/Button";
 import { Spinner } from "~/components/Spinner";
-import { useGameListSWR } from "~/hooks/useGameListSWR";
+import { useRoomListSWR } from "~/hooks/useRoomListSWR";
 import { CreateRoomDialog } from "./_components/CreateRoomDialog";
 import { JoinRoomCard } from "./_components/JoinRoomCard";
 
 export default function () {
 	const [isOpen, setIsOpen] = useState(false);
-	const { data, error, isLoading } = useGameListSWR();
+	const { data, error, isLoading } = useRoomListSWR();
 	const gameList = data?.data;
 
 	return (

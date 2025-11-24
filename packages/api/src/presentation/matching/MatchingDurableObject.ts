@@ -111,8 +111,8 @@ export class MatchingDurableObject extends DurableObject<Env> {
 		if (!parsedMessage) return;
 
 		switch (parsedMessage.type) {
-			case "LEAVE":
-				await this.handleLeave({ playerId, ws });
+			case "EXIT":
+				await this.handleExit({ playerId, ws });
 				break;
 			case "PONG":
 				this.connectionService.recordPong(playerId);
@@ -188,7 +188,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	/**
 	 * プレイヤーの退出処理を行う
 	 */
-	private async handleLeave({
+	private async handleExit({
 		playerId,
 		ws,
 	}: {

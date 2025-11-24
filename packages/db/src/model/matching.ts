@@ -16,18 +16,18 @@ import {
  * クライアントからサーバーへのメッセージ
  */
 
-export const matchingClientLeaveMessageSchema = object({
+export const matchingClientExitMessageSchema = object({
 	/**
 	 * プレイヤーが明示的に退出する
 	 */
-	type: literal("LEAVE"),
+	type: literal("EXIT"),
 });
 
 /**
  * マッチング用WebSocketメッセージのスキーマ
  */
 export const matchingClientMessageSchema = variant("type", [
-	matchingClientLeaveMessageSchema,
+	matchingClientExitMessageSchema,
 	heartbeatPongMessageSchema,
 ]);
 
