@@ -85,7 +85,7 @@ export const playerTable = sqliteTable("player", {
 ## 7. 発行タイミングと API
 - ホスト作成: `POST /v1/rooms` → `game_token` を返却。
 - 参加: `POST /v1/rooms/{roomId}/join` → `game_token` を返却。
-- 退室（募集中のみ）: `POST /v1/rooms/{roomId}/leave` → `player` 失効。
+- 退室（募集中のみ）: WebSocket で `{ type: "EXIT" }` メッセージ送信 → `player` 失効。
 
 ### 7.1 レスポンス例
 
