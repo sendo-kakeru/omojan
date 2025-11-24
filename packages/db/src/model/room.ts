@@ -148,6 +148,7 @@ export const verifyRoomTokenRequestQuerySchema = object({
 });
 
 // game token header (X-Game-Token)
+// NOTE: HTTPヘッダーはHonoで小文字に正規化されるため、スキーマは小文字で定義
 export const gameTokenHeaderSchema = object({
 	"x-game-token": string(),
 });

@@ -11,7 +11,7 @@ export const app = new Hono<BaseContext>()
 	.use((c, next) => {
 		c.set("db", createDrizzleClient(c.env));
 		const corsMiddleware = cors({
-			allowHeaders: ["Content-Type", "Authorization"],
+			allowHeaders: ["Content-Type", "Authorization", "X-Game-Token"],
 			allowMethods: [
 				"GET",
 				"POST",
