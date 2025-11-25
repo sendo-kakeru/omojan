@@ -68,9 +68,12 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 			);
 			// なくても問題なく動いているのでコメントアウト
 			// url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
-			if (gameToken) url.searchParams.set("token", gameToken);
-
-			wsRef.current = new WebSocket(url.toString());
+			if (gameToken) {
+				url.searchParams.set("token", gameToken);
+			}
+			if (participantsState.status === "loading") {
+				wsRef.current = new WebSocket(url.toString());
+			}
 		} catch (error) {
 			console.error("WebSocketの初期化に失敗しました:", error);
 			setParticipantsState({ error, status: "error" });
@@ -108,9 +111,12 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 				error: new Error("接続に失敗しました。"),
 				status: "error",
 			});
+			wsRef.current?.close(4500, "接続を終了します。");
 		};
 
 		const handleClose = (event: CloseEvent) => {
+			if (exitTimeoutRef.current) clearTimeout(exitTimeoutRef.current);
+			stopExiting();
 			// 正常な退出の場合はトップページへ
 			if (event.code !== 1000) {
 				console.error("接続が閉じられました。", event);
@@ -118,16 +124,15 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 					error: "エラーが発生しました。時間をおいて再度接続してください。",
 					status: "error",
 				});
+				return;
 			}
 
-			if (exitTimeoutRef.current) clearTimeout(exitTimeoutRef.current);
 			void navigate("/");
-			stopExiting();
 		};
 
-		wsRef.current.addEventListener("message", handleMessage);
-		wsRef.current.addEventListener("error", handleError);
-		wsRef.current.addEventListener("close", handleClose);
+		wsRef.current?.addEventListener("message", handleMessage);
+		wsRef.current?.addEventListener("error", handleError);
+		wsRef.current?.addEventListener("close", handleClose);
 
 		return () => {
 			wsRef.current?.removeEventListener("message", handleMessage);
@@ -136,7 +141,7 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 			wsRef.current?.close(1000, "接続を終了します。");
 			wsRef.current = null;
 		};
-	}, [gameId, navigate, gameToken, stopExiting]);
+	}, [gameId, navigate, gameToken, stopExiting, participantsState.status]);
 
 	const handleExit = () => {
 		if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
@@ -166,19 +171,24 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 	};
 
 	if (roomMetaResult.error || participantsState.status === "error") {
+		wsRef.current?.close(4500, "接続を終了します。");
+
 		const isNotFound =
 			roomMetaResult.error instanceof DetailedError &&
 			roomMetaResult.error.statusCode === 404;
 		const isForbidden =
 			roomMetaResult.error instanceof DetailedError &&
 			roomMetaResult.error.statusCode === 403;
+		const isUnauthorized =
+			roomMetaResult.error instanceof DetailedError &&
+			roomMetaResult.error.statusCode === 401;
 
 		return (
 			<div className="grid place-items-center gap-y-12">
 				<h2 className="font-bold text-xl">
 					{isNotFound
 						? "この部屋は削除されています。"
-						: isForbidden
+						: isForbidden || isUnauthorized
 							? "入室権限がありません。"
 							: "部屋の接続に失敗しました。"}
 				</h2>

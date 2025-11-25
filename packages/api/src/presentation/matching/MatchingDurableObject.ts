@@ -274,7 +274,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 			);
 
 		if (!player) {
-			throw new HTTPException(401, {
+			throw new HTTPException(403, {
 				message: "入室トークンが正しくありません",
 			});
 		}
