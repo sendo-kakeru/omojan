@@ -80,8 +80,8 @@ export class MatchingDurableObject extends DurableObject<Env> {
 		if (currentAlarm === null) {
 			await this.ctx.storage.setAlarm(Date.now() + HEARTBEAT_INTERVAL_MS);
 		}
-
-		await this.broadcastParticipants({ gameId });
+		const participants = await this.fetchParticipants({ gameId });
+		await this.broadcastParticipants({ participants });
 
 		return this.webSocketService.upgradeResponse({ client });
 	}
@@ -176,7 +176,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 
 		// プレイヤーが削除された場合、参加者一覧を更新
 		if (disconnectedPlayerIds.length > 0) {
-			await this.broadcastParticipants({ gameId: this.gameId });
+			await this.broadcastParticipants({ participants: remainingParticipants });
 		}
 
 		// 接続が残っている場合は次のアラームを設定
@@ -210,7 +210,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 			return;
 		}
 
-		await this.broadcastParticipants({ gameId: this.gameId });
+		await this.broadcastParticipants({ participants });
 	}
 
 	/**
@@ -307,9 +307,11 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	/**
 	 * 現在の参加者スナップショットを全接続に JSON で配信する。
 	 */
-	private async broadcastParticipants({ gameId }: { gameId: GameId }) {
-		const participants = await this.fetchParticipants({ gameId });
-
+	private async broadcastParticipants({
+		participants,
+	}: {
+		participants: (Pick<Player, "id" | "playerName"> & Pick<User, "image">)[];
+	}): Promise<void> {
 		if (participants.length === 0) return;
 
 		this.webSocketService.broadcastJson({
