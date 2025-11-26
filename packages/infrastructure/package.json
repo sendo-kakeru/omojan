@@ -6,7 +6,7 @@
 		"@types/node": "^24.10.1",
 		"dotenv": "^17.2.3",
 		"typescript": "^5.9.3",
-		"valibot": "^1.1.0"
+		"valibot": "^1.2.0"
 	},
 	"license": "UNLICENSED",
 	"main": "index.ts",

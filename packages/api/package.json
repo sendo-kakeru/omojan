@@ -10,7 +10,7 @@
 		"drizzle-orm": "^0.44.7",
 		"drizzle-valibot": "^0.4.2",
 		"hono": "^4.10.6",
-		"valibot": "^1.1.0"
+		"valibot": "^1.2.0"
 	},
 	"devDependencies": {
 		"@faker-js/faker": "^10.1.0",
