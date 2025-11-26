@@ -22,12 +22,15 @@ export function useMatchingSubscriptionSWR({
 	gameId,
 	gameToken,
 	onClose,
+	onCompleted,
 }: {
 	gameId: string;
 	gameToken: string | null;
 	onClose: (event: CloseEvent) => void;
+	onCompleted: () => void;
 }) {
 	const wsRef = useRef<WebSocket | null>(null);
+	const matchingCompletedTimeoutRef = useRef<number | null>(null);
 
 	const url = getUrl({ gameId });
 	// なくても問題なく動いているのでコメントアウト
@@ -67,6 +70,17 @@ export function useMatchingSubscriptionSWR({
 					}
 
 					if (message.type === "PARTICIPANTS") {
+						if (message.participants.length === 4) {
+							matchingCompletedTimeoutRef.current = window.setTimeout(() => {
+								onCompleted();
+								ws.close(1000, "マッチングが完了しました。");
+							}, 5000);
+						} else {
+							if (matchingCompletedTimeoutRef.current) {
+								clearTimeout(matchingCompletedTimeoutRef.current);
+								matchingCompletedTimeoutRef.current = null;
+							}
+						}
 						next(null, message.participants);
 					}
 				} catch (error) {
@@ -87,11 +101,15 @@ export function useMatchingSubscriptionSWR({
 			};
 
 			const handleClose = (event: CloseEvent) => {
-				if (event.code !== 1000) {
+				if (event.code !== 1000 && event.code !== 4204 && event.code !== 4410) {
 					console.error("接続が閉じられました。", event);
 					next(
 						new Error("接続が切断されました。時間をおいて再接続してください。"),
 					);
+				}
+				if (matchingCompletedTimeoutRef.current) {
+					clearTimeout(matchingCompletedTimeoutRef.current);
+					matchingCompletedTimeoutRef.current = null;
 				}
 				onClose(event);
 			};
@@ -104,7 +122,7 @@ export function useMatchingSubscriptionSWR({
 				ws.removeEventListener("message", handleMessage);
 				ws.removeEventListener("error", handleError);
 				ws.removeEventListener("close", handleClose);
-				ws.close(1000, "接続を終了します。");
+				ws.close(4204, "接続を終了します。");
 				if (wsRef.current === ws) {
 					wsRef.current = null;
 				}
@@ -129,6 +147,7 @@ export function useMatchingSubscriptionSWR({
 
 	return {
 		...subscription,
+		matchingCompletedTimeoutRef,
 		sendExit,
 		wsRef,
 	};

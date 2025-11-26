@@ -17,11 +17,11 @@ import {
 import { and, asc, eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import { safeParse } from "valibot";
-import { RoomService } from "../../application/room/RoomService";
-import { ConnectionService } from "../../application/websocket/ConnectionService";
-import { WebSocketService } from "../../application/websocket/WebsocketService";
 import type { Env } from "../../env";
 import { createDrizzleClient, type DrizzleClient } from "../../libs/drizzle";
+import { RoomService } from "../room/RoomService";
+import { ConnectionService } from "../websocket/ConnectionService";
+import { WebSocketService } from "../websocket/WebsocketService";
 
 /** ハートビート間隔（ミリ秒） */
 const HEARTBEAT_INTERVAL_MS = 5_000 as const;
@@ -201,7 +201,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 
 		await this.db.delete(playerTable).where(eq(playerTable.id, playerId));
 
-		ws.close(1000, "退出しました");
+		ws.close(4204, "退出しました");
 
 		const participants = await this.fetchParticipants({ gameId: this.gameId });
 
@@ -219,7 +219,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	private async deleteRoom({ gameId }: { gameId: GameId }): Promise<void> {
 		await this.db.delete(gameTable).where(eq(gameTable.id, gameId));
 		for (const socket of this.connectionService.getSockets()) {
-			socket.close(1000, "部屋が削除されました");
+			socket.close(4410, "部屋が削除されました");
 		}
 		this.connectionService.clear();
 	}

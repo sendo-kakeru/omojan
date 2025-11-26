@@ -42,6 +42,7 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 		error: matchingError,
 		wsRef,
 		sendExit,
+		matchingCompletedTimeoutRef,
 	} = useMatchingSubscriptionSWR({
 		gameId,
 		gameToken,
@@ -52,9 +53,14 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 			}
 
 			stopExiting();
-			if (event.code === 1000) {
+
+			if (event.code === 4204 || event.code === 4410) {
+				// NOTE: 退出時、部屋削除時はページ遷移
 				void navigate("/");
 			}
+		},
+		onCompleted() {
+			void navigate(`/game/${gameId}`);
 		},
 	});
 
@@ -135,7 +141,17 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 	}
 
 	return (
-		<div className="grid gap-y-16 rounded-lg border border-gray-200 bg-white p-16">
+		<div className="relative grid gap-y-16 rounded-lg border border-gray-200 bg-white p-16">
+			{!!matchingCompletedTimeoutRef.current && (
+				<div className="absolute inset-0 z-10 grid place-items-center bg-gray-200/70 backdrop-blur-sm">
+					<div className="grid gap-y-6 text-center text-gray-700">
+						<Spinner className="mx-auto size-32" />
+						<p className="font-semibold">
+							参加者が集まりました。5秒後にゲーム画面へ移動します。
+						</p>
+					</div>
+				</div>
+			)}
 			{/* メタセクション */}
 			<section className="grid gap-y-16 py-16">
 				<div className="grid gap-y-8">
