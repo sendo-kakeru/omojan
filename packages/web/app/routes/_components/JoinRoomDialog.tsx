@@ -206,20 +206,6 @@ export function JoinRoomDialog({
 											label="パスワード"
 											note="共有された6文字のパスワードを入力してください。"
 										>
-											{/* <Input
-												autoComplete="off"
-												disabled={isLoading}
-												id={id}
-												onBlur={field.handleBlur}
-												onChange={(e) => {
-													if (passwordError) {
-														setPasswordError(undefined);
-													}
-													field.handleChange(e.target.value.trim());
-												}}
-												type="password"
-												value={field.state.value}
-												/> */}
 											<InputOTP
 												autoComplete="off"
 												disabled={isLoading}
