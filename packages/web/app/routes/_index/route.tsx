@@ -2,9 +2,9 @@ import { useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { Button } from "~/components/button/Button";
 import { Spinner } from "~/components/Spinner";
-import { useRoomListSWR } from "~/hooks/useRoomListSWR";
-import { CreateRoomDialog } from "./_components/CreateRoomDialog";
-import { JoinRoomCard } from "./_components/JoinRoomCard";
+import { useRoomListSWR } from "~/routes/_index/hooks/useRoomListSWR";
+import { CreateRoomDialog } from "./components/CreateRoomDialog";
+import { JoinRoomCard } from "./components/JoinRoomCard";
 
 export default function () {
 	const [isOpen, setIsOpen] = useState(false);
