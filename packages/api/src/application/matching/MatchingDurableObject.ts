@@ -95,6 +95,14 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	}
 
 	/**
+	 * WS エラー発生時に接続を切断状態にし、ログを出力する。
+	 */
+	async webSocketError(ws: WebSocket, error: unknown): Promise<void> {
+		ws.close(1011, "サーバーエラーが発生しました");
+		console.error("WebSocketでエラーが発生しました:", error);
+	}
+
+	/**
 	 * WS メッセージ受信時の処理
 	 */
 	async webSocketMessage(ws: WebSocket, message: string): Promise<void> {
