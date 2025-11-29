@@ -1,4 +1,3 @@
-import { vValidator } from "@hono/valibot-validator";
 import {
 	type CreateMeResponseBody,
 	createMeRequestBodySchema,
@@ -7,7 +6,7 @@ import {
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { MeService } from "../../application/me/MeService";
-import { routeValidateCallback } from "../../libs/validation";
+import { vValidator } from "../../libs/vValidator";
 import type { HttpRespondReturn, PrivateRouteContext } from "../../types";
 
 export const routes = new Hono<
@@ -50,7 +49,7 @@ export const routes = new Hono<
 	})
 	.post(
 		"/",
-		vValidator("json", createMeRequestBodySchema, routeValidateCallback),
+		vValidator("json", createMeRequestBodySchema),
 		async (c): Promise<HttpRespondReturn<CreateMeResponseBody>> => {
 			const body = c.req.valid("json");
 			const { db, sub } = c.var;

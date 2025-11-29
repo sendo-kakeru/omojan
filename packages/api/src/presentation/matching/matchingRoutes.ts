@@ -1,14 +1,13 @@
-import { vValidator } from "@hono/valibot-validator";
 import { verifyRoomTokenRequestQuerySchema } from "@repo/db/model";
 import { gameIdRequestParamSchema } from "@repo/db/schema";
 import { Hono } from "hono";
-import { routeValidateCallback } from "../../libs/validation";
+import { vValidator } from "../../libs/vValidator";
 import type { BaseContext } from "../../types";
 
 export const routes = new Hono<BaseContext>().get(
 	"/:gameId",
-	vValidator("query", verifyRoomTokenRequestQuerySchema, routeValidateCallback),
-	vValidator("param", gameIdRequestParamSchema, routeValidateCallback),
+	vValidator("query", verifyRoomTokenRequestQuerySchema),
+	vValidator("param", gameIdRequestParamSchema),
 	async (c) => {
 		const { gameId } = c.req.valid("param");
 		const { token } = c.req.valid("query");

@@ -1,6 +1,5 @@
 {
 	"dependencies": {
-		"@hono/valibot-validator": "^0.5.3",
 		"@libsql/client": "^0.15.15",
 		"@noble/hashes": "^2.0.1",
 		"@oslojs/encoding": "^1.1.0",
