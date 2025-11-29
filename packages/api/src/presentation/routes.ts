@@ -27,7 +27,7 @@ const privateRoutes = new Hono<PrivateRouteContext>()
 	.route("/v1/me", meRoutes);
 
 // Aggregate
-export const routes = new Hono<BaseContext>()
+export const routes = new Hono()
 	.use(logger())
 	.route("", publicRoutes)
 	.route("", hybridRoutes)
