@@ -13,9 +13,9 @@ import { UserLabel } from "~/components/user/UserLabel";
 import { useClipboard } from "~/hooks/useClipboard";
 import { useIsLoading } from "~/hooks/useIsLoading";
 import { gameTokenLocalStorage } from "~/libs/gameTokenLocalStorage";
-import { useMatchingSubscriptionSWR } from "./_hooks/useMatchingSubscriptionSWR";
-import { useRoomSWR } from "./_hooks/useRoomSWR";
-import type { Route } from "./+types/page";
+import type { Route } from "./+types/route";
+import { useMatchingSubscriptionSWR } from "./hooks/useMatchingSubscriptionSWR";
+import { useRoomSWR } from "./hooks/useRoomSWR";
 
 export default function ({ params: { gameId } }: Route.ComponentProps) {
 	const navigate = useNavigate();

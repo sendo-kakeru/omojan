@@ -1,9 +1,6 @@
-// import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-// import { honoClient } from "~/libs/apiClient.client";
-
 import { honoClient } from "~/libs/apiClient.client";
 import { cognito } from "~/libs/cognito";
-import type { Route } from "./+types/page";
+import type { Route } from "./+types/route";
 
 // TODO: UI
 export async function clientLoader({ request }: Route.LoaderArgs) {
@@ -63,7 +60,7 @@ export function HydrateFallback() {
 	);
 }
 
-export default function CallbackPage() {
+export default function () {
 	return (
 		<div className="flex min-h-screen items-center justify-center">
 			<p>認証中...</p>
