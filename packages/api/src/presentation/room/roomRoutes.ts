@@ -1,4 +1,3 @@
-import { vValidator } from "@hono/valibot-validator";
 import {
 	type CreateRoomResponseBody,
 	createRoomRequestBodySchema,
@@ -12,7 +11,7 @@ import { gameIdRequestParamSchema } from "@repo/db/schema";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { RoomService } from "../../application/room/RoomService";
-import { routeValidateCallback } from "../../libs/validation";
+import { vValidator } from "../../libs/vValidator";
 import type { HttpRespondReturn, HybridRouteContext } from "../../types";
 
 export const routes = new Hono<
@@ -44,7 +43,7 @@ export const routes = new Hono<
 	})
 	.post(
 		"/",
-		vValidator("json", createRoomRequestBodySchema, routeValidateCallback),
+		vValidator("json", createRoomRequestBodySchema),
 		async (c): Promise<HttpRespondReturn<CreateRoomResponseBody>> => {
 			const { roomService, sub } = c.var;
 			const body = c.req.valid("json");
@@ -71,8 +70,8 @@ export const routes = new Hono<
 	)
 	.get(
 		"/:gameId",
-		vValidator("param", gameIdRequestParamSchema, routeValidateCallback),
-		vValidator("header", gameTokenHeaderSchema, routeValidateCallback),
+		vValidator("param", gameIdRequestParamSchema),
+		vValidator("header", gameTokenHeaderSchema),
 		async (c): Promise<HttpRespondReturn<GetRoomResponseBody>> => {
 			const { roomService } = c.var;
 			const { gameId } = c.req.valid("param");
@@ -98,8 +97,8 @@ export const routes = new Hono<
 	)
 	.post(
 		"/:gameId/join",
-		vValidator("json", joinRoomRequestBodySchema, routeValidateCallback),
-		vValidator("param", gameIdRequestParamSchema, routeValidateCallback),
+		vValidator("json", joinRoomRequestBodySchema),
+		vValidator("param", gameIdRequestParamSchema),
 		async (c): Promise<HttpRespondReturn<JoinRoomResponseBody>> => {
 			const { roomService, sub } = c.var;
 			const body = c.req.valid("json");
