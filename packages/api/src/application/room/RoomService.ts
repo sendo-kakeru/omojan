@@ -11,6 +11,7 @@ import type {
 	JoinRoomResponseBody,
 } from "@repo/db/model";
 import {
+	type Game,
 	type GameId,
 	gameTable,
 	isPlayerSeat,
@@ -399,6 +400,26 @@ export class RoomService {
 			if (!seats.includes(seat)) {
 				return seat;
 			}
+		}
+	}
+
+	async getStatus(gameId: GameId): Promise<Game["status"] | null> {
+		try {
+			const [game] = await this.db
+				.select({
+					status: gameTable.status,
+				})
+				.from(gameTable)
+				.where(eq(gameTable.id, gameId));
+
+			if (!game) {
+				throw new HTTPException(404, {
+					message: "指定された部屋が存在しません",
+				});
+			}
+			return game.status;
+		} catch {
+			return null;
 		}
 	}
 }
