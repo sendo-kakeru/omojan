@@ -1,3 +1,4 @@
+import type { ResultSet } from "@libsql/client";
 import { sha256 } from "@noble/hashes/sha2.js";
 import { bytesToHex } from "@noble/hashes/utils.js";
 import { encodeBase64urlNoPadding } from "@oslojs/encoding";
@@ -17,7 +18,14 @@ import {
 	type User,
 	userTable,
 } from "@repo/db/schema";
-import { and, desc, eq, inArray } from "drizzle-orm";
+import {
+	and,
+	desc,
+	type ExtractTablesWithRelations,
+	eq,
+	inArray,
+} from "drizzle-orm";
+import type { SQLiteTransaction } from "drizzle-orm/sqlite-core";
 import { HTTPException } from "hono/http-exception";
 import type { DrizzleClient } from "../../libs/drizzle";
 
@@ -242,6 +250,13 @@ export class RoomService {
 				.from(playerTable)
 				.where(eq(playerTable.gameId, findGame.id));
 
+			if (participatingPlayers.length >= 4 && findGame.status === "waiting") {
+				await this.activate({
+					db: tx,
+					gameId: findGame.id,
+				});
+			}
+
 			// クライアントが保持しているトークンのプレイヤーが参加済み
 			if (heldToken) {
 				const heldTokenHash = this.hashGameToken(heldToken);
@@ -313,6 +328,16 @@ export class RoomService {
 				userId: authUser?.id,
 			});
 
+			if (
+				participatingPlayers.length + 1 >= 4 &&
+				findGame.status === "waiting"
+			) {
+				await this.activate({
+					db: tx,
+					gameId: findGame.id,
+				});
+			}
+
 			return { state: "USUAL", token: gameToken };
 		});
 	}
@@ -344,6 +369,29 @@ export class RoomService {
 	hashGameToken(gameToken: string): string {
 		const hash = sha256(this.encoder.encode(gameToken)); // Uint8Array
 		return bytesToHex(hash);
+	}
+
+	/**
+	 * gameのステータスをactiveにする
+	 */
+	private async activate({
+		db,
+		gameId,
+	}: {
+		db:
+			| DrizzleClient
+			| SQLiteTransaction<
+					"async",
+					ResultSet,
+					Record<string, never>,
+					ExtractTablesWithRelations<Record<string, never>>
+			  >;
+		gameId: GameId;
+	}): Promise<void> {
+		await db
+			.update(gameTable)
+			.set({ status: "active" })
+			.where(eq(gameTable.id, gameId));
 	}
 
 	private assignSeat(seats: number[]): number | undefined {
