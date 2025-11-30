@@ -95,6 +95,14 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	}
 
 	/**
+	 * WS エラー発生時に接続を切断状態にし、ログを出力する。
+	 */
+	async webSocketError(ws: WebSocket, error: unknown): Promise<void> {
+		ws.close(1011, "サーバーエラーが発生しました");
+		console.error("WebSocketでエラーが発生しました:", error);
+	}
+
+	/**
 	 * WS メッセージ受信時の処理
 	 */
 	async webSocketMessage(ws: WebSocket, message: string): Promise<void> {
@@ -126,6 +134,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	 */
 	async alarm(): Promise<void> {
 		if (!this.gameId) return;
+		const gameStatus = await this.roomService.getStatus(this.gameId);
 
 		// 全接続にPINGを送信
 		this.connectionService.sendPingToAll();
@@ -160,8 +169,10 @@ export class MatchingDurableObject extends DurableObject<Env> {
 		}
 
 		// タイムアウトしたプレイヤーを削除
-		for (const playerId of disconnectedPlayerIds) {
-			await this.db.delete(playerTable).where(eq(playerTable.id, playerId));
+		if (gameStatus === "waiting") {
+			for (const playerId of disconnectedPlayerIds) {
+				await this.db.delete(playerTable).where(eq(playerTable.id, playerId));
+			}
 		}
 
 		// 残りのプレイヤーを確認
@@ -197,9 +208,13 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	}): Promise<void> {
 		if (!this.gameId) return;
 
-		this.connectionService.unregister(playerId);
+		const gameStatus = await this.roomService.getStatus(this.gameId);
 
-		await this.db.delete(playerTable).where(eq(playerTable.id, playerId));
+		// NOTE: 既に4人メンバーが確定し、activeになっていたら接続だけ解除。（確定からゲーム移動までの時間は退出操作不可なので、通常は発生し得ない）
+		this.connectionService.unregister(playerId);
+		if (gameStatus === "waiting") {
+			await this.db.delete(playerTable).where(eq(playerTable.id, playerId));
+		}
 
 		ws.close(4204, "退出しました");
 

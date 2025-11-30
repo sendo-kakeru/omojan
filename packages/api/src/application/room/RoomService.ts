@@ -1,3 +1,4 @@
+import type { ResultSet } from "@libsql/client";
 import { sha256 } from "@noble/hashes/sha2.js";
 import { bytesToHex } from "@noble/hashes/utils.js";
 import { encodeBase64urlNoPadding } from "@oslojs/encoding";
@@ -10,6 +11,7 @@ import type {
 	JoinRoomResponseBody,
 } from "@repo/db/model";
 import {
+	type Game,
 	type GameId,
 	gameTable,
 	isPlayerSeat,
@@ -17,7 +19,14 @@ import {
 	type User,
 	userTable,
 } from "@repo/db/schema";
-import { and, desc, eq, inArray } from "drizzle-orm";
+import {
+	and,
+	desc,
+	type ExtractTablesWithRelations,
+	eq,
+	inArray,
+} from "drizzle-orm";
+import type { SQLiteTransaction } from "drizzle-orm/sqlite-core";
 import { HTTPException } from "hono/http-exception";
 import type { DrizzleClient } from "../../libs/drizzle";
 
@@ -298,6 +307,12 @@ export class RoomService {
 				participatingPlayers.map((player) => player.seat),
 			);
 			if (participatingPlayers.length >= 4) {
+				if (findGame.status === "waiting") {
+					await this.activate({
+						db: tx,
+						gameId: findGame.id,
+					});
+				}
 				throw new HTTPException(409, { message: "この部屋は満員です" });
 			}
 			if (!seat || !isPlayerSeat(seat)) {
@@ -312,6 +327,16 @@ export class RoomService {
 				seat,
 				userId: authUser?.id,
 			});
+
+			if (
+				participatingPlayers.length + 1 >= 4 &&
+				findGame.status === "waiting"
+			) {
+				await this.activate({
+					db: tx,
+					gameId: findGame.id,
+				});
+			}
 
 			return { state: "USUAL", token: gameToken };
 		});
@@ -346,11 +371,49 @@ export class RoomService {
 		return bytesToHex(hash);
 	}
 
+	/**
+	 * gameのステータスをactiveにする
+	 */
+	private async activate({
+		db,
+		gameId,
+	}: {
+		db:
+			| DrizzleClient
+			| SQLiteTransaction<
+					"async",
+					ResultSet,
+					Record<string, never>,
+					ExtractTablesWithRelations<Record<string, never>>
+			  >;
+		gameId: GameId;
+	}): Promise<void> {
+		await db
+			.update(gameTable)
+			.set({ status: "active" })
+			.where(eq(gameTable.id, gameId));
+	}
+
 	private assignSeat(seats: number[]): number | undefined {
 		for (let seat = 1; seat <= 4; seat++) {
 			if (!seats.includes(seat)) {
 				return seat;
 			}
+		}
+	}
+
+	async getStatus(gameId: GameId): Promise<Game["status"] | null> {
+		try {
+			const [game] = await this.db
+				.select({
+					status: gameTable.status,
+				})
+				.from(gameTable)
+				.where(eq(gameTable.id, gameId));
+
+			return game?.status ?? null;
+		} catch {
+			return null;
 		}
 	}
 }

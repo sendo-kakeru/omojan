@@ -522,6 +522,48 @@ describe("roomRoutes", () => {
 				expect(guestPlayer?.seat).toBe(2);
 			});
 
+			test("4人目が参加したらゲームステータスがactiveになる", async () => {
+				const [createdGame] = await db
+					.insert(gameTable)
+					.values({
+						isPrivate: false,
+						password: null,
+						status: "waiting",
+						timeLimit: 30,
+						title: "Full Room",
+					})
+					.returning();
+
+				await Promise.all(
+					["Host", "Guest 1", "Guest 2"].map(async (playerName, index) => {
+						await db.insert(playerTable).values({
+							gameId: createdGame.id,
+							gameTokenHash: hashGameToken(`token-${index}`),
+							playerName,
+							seat: (index + 1) as PlayerSeat,
+							userId: null,
+						});
+					}),
+				);
+
+				const response = await mockHonoClient.v1.rooms[":gameId"].join.$post({
+					json: {
+						heldToken: null,
+						playerName: "Guest 3",
+					},
+					param: { gameId: createdGame.id },
+				});
+
+				expect(response.status).toBe(201);
+
+				const [updatedGame] = await db
+					.select({ status: gameTable.status })
+					.from(gameTable)
+					.where(eq(gameTable.id, createdGame.id));
+
+				expect(updatedGame?.status).toBe("active");
+			});
+
 			test("プライベートルームで誤ったパスワードを送信すると403を返す", async () => {
 				const [createdGame] = await db
 					.insert(gameTable)
