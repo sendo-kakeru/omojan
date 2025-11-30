@@ -251,13 +251,6 @@ export class RoomService {
 				.from(playerTable)
 				.where(eq(playerTable.gameId, findGame.id));
 
-			if (participatingPlayers.length >= 4 && findGame.status === "waiting") {
-				await this.activate({
-					db: tx,
-					gameId: findGame.id,
-				});
-			}
-
 			// クライアントが保持しているトークンのプレイヤーが参加済み
 			if (heldToken) {
 				const heldTokenHash = this.hashGameToken(heldToken);
@@ -314,6 +307,12 @@ export class RoomService {
 				participatingPlayers.map((player) => player.seat),
 			);
 			if (participatingPlayers.length >= 4) {
+				if (findGame.status === "waiting") {
+					await this.activate({
+						db: tx,
+						gameId: findGame.id,
+					});
+				}
 				throw new HTTPException(409, { message: "この部屋は満員です" });
 			}
 			if (!seat || !isPlayerSeat(seat)) {
@@ -412,12 +411,7 @@ export class RoomService {
 				.from(gameTable)
 				.where(eq(gameTable.id, gameId));
 
-			if (!game) {
-				throw new HTTPException(404, {
-					message: "指定された部屋が存在しません",
-				});
-			}
-			return game.status;
+			return game?.status ?? null;
 		} catch {
 			return null;
 		}
