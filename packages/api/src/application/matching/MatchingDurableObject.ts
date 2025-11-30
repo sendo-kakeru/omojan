@@ -135,6 +135,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	async alarm(): Promise<void> {
 		if (!this.gameId) return;
 		const gameStatus = await this.roomService.getStatus(this.gameId);
+		if (gameStatus && gameStatus !== "waiting") return;
 
 		// 全接続にPINGを送信
 		this.connectionService.sendPingToAll();
@@ -169,10 +170,8 @@ export class MatchingDurableObject extends DurableObject<Env> {
 		}
 
 		// タイムアウトしたプレイヤーを削除
-		if (gameStatus === "waiting") {
-			for (const playerId of disconnectedPlayerIds) {
-				await this.db.delete(playerTable).where(eq(playerTable.id, playerId));
-			}
+		for (const playerId of disconnectedPlayerIds) {
+			await this.db.delete(playerTable).where(eq(playerTable.id, playerId));
 		}
 
 		// 残りのプレイヤーを確認
