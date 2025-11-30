@@ -15,7 +15,7 @@ if (repoRoot.status !== 0) {
 const root = repoRoot.stdout.trim();
 const packageRoot = resolve(root, "packages/api");
 const sourceDbPath = resolve(root, "packages/db/src/local.db");
-const copyDir = mkdtempSync(join(tmpdir(), "test-db"));
+const copyDir = mkdtempSync(join(tmpdir(), "vitest"));
 const testDbFile = join(copyDir, "local.db");
 
 cpSync(sourceDbPath, testDbFile);

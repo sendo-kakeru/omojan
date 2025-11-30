@@ -11,6 +11,20 @@
 		]
 	},
 	"env": {
+		"e2e": {
+			"durable_objects": {
+				"bindings": [
+					{
+						"class_name": "MatchingDurableObject",
+						"name": "MATCHING_DURABLE_OBJECT"
+					}
+				]
+			},
+			"vars": {
+				"ENV": "test",
+				"WEB_URL": "https://localhost:5173"
+			}
+		},
 		"production": {
 			"durable_objects": {
 				"bindings": [

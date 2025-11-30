@@ -15,6 +15,7 @@ import {
 
 const dotenvFileMap = {
 	development: ".env.local",
+	e2e: ".env.e2e",
 	production: ".env.production",
 	staging: ".env.staging",
 } as const satisfies Record<InferOutput<typeof envVarSchema>, string>;

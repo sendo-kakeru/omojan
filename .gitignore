@@ -6,14 +6,18 @@ node_modules
 # Local env files
 .env
 .dev.vars
+.dev.vars.e2e
 .env.development
 .env.test
 .env.production
 .env.staging
+.env.e2e
 *.local
 
 # Testing
 coverage
+playwright-report
+test-results
 
 # Wrangler
 worker-configuration.d.ts
