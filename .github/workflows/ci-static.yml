@@ -1,0 +1,30 @@
+name: CI Static
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    env:
+      VITE_API_URL: http://temp@example.com
+      VITE_COGNITO_CLIENT_ID: temp-client-id
+      VITE_COGNITO_DOMAIN: http://temp@example.com
+      VITE_COGNITO_USER_POOL_ID: temp-user-pool-id
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: ./.github/actions/setup-pnpm
+
+      - name: Build dependencies packages
+        run: |
+          pnpm turbo run build --filter @repo/db
+          pnpm turbo run build --filter @repo/shared
+          pnpm turbo run build --filter @repo/api
+
+      - name: Run CI
+        run: pnpm biome ci && pnpm turbo run typecheck --concurrency=100%
