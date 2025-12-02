@@ -10,9 +10,9 @@ jobs:
   ci:
     runs-on: ubuntu-latest
     env:
-      VITE_API_URL: http://temp@example.com
+      VITE_API_URL: http://temp.com
       VITE_COGNITO_CLIENT_ID: temp-client-id
-      VITE_COGNITO_DOMAIN: http://temp@example.com
+      VITE_COGNITO_DOMAIN: http://temp.com
       VITE_COGNITO_USER_POOL_ID: temp-user-pool-id
     steps:
       - uses: actions/checkout@v6

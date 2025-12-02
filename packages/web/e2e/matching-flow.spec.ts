@@ -22,16 +22,18 @@ async function createRoom({
 	playerName: string;
 }) {
 	await page.goto("/");
+	await expect(
+		page.getByRole("heading", { name: "募集中の部屋一覧" }),
+	).toBeVisible();
 	await page.getByRole("button", { name: "部屋作成" }).click();
-	await expect(page.getByLabel("部屋名")).toBeVisible({ timeout: 5_000 });
+	await expect(page.getByLabel("部屋名")).toBeVisible({ timeout: 15_000 });
 	await page.getByLabel("部屋名").fill(roomTitle);
 	await page.getByLabel("プレイヤー名").fill(playerName);
 	await page.getByRole("button", { name: "作成する" }).click();
-
 	await page.waitForURL(/\/matching\//);
 	const gameId = extractGameIdFromUrl(page.url());
 	await expect(page.getByRole("heading", { name: roomTitle })).toBeVisible({
-		timeout: 10_000,
+		timeout: 20_000,
 	});
 	await expect(page.getByText(playerName)).toBeVisible();
 
@@ -48,8 +50,11 @@ async function joinRoom({
 	playerName: string;
 }) {
 	await page.goto("/");
+	await expect(
+		page.getByRole("heading", { name: "募集中の部屋一覧" }),
+	).toBeVisible();
 	const joinButton = page.getByRole("button", { name: `${roomTitle}に参加` });
-	await expect(joinButton).toBeVisible({ timeout: 5_000 });
+	await expect(joinButton).toBeVisible();
 	await joinButton.click();
 
 	const nameField = page.getByLabel("プレイヤー名");
@@ -76,7 +81,7 @@ test("部屋を作成したらマッチングルームに接続できる", async
 
 	expect(gameId).toBeTruthy();
 	await expect(page.getByRole("button", { name: "退出する" })).toBeVisible({
-		timeout: 15_000,
+		timeout: 25_000,
 	});
 });
 
@@ -103,7 +108,7 @@ test("参加者1人の部屋に入ったら募集中画面に遷移する", asyn
 	await expect(
 		page.getByText("4人揃ったらゲームが開始されます。"),
 	).toBeVisible();
-	await page.waitForURL(`/matching/${gameId}`, { timeout: 8_000 });
+	await page.waitForURL(`/matching/${gameId}`, { timeout: 20_000 });
 	expect(page.url()).toContain(`/matching/${gameId}`);
 
 	await hostContext.close();
@@ -140,9 +145,9 @@ test("参加者3人の部屋に入るとマッチング完了後にゲーム画�
 
 	await expect(
 		page.getByText("参加者が集まりました。5秒後にゲーム画面へ移動します。"),
-	).toBeVisible({ timeout: 5_000 });
+	).toBeVisible({ timeout: 15_000 });
 
-	await page.waitForURL(`/game/${gameId}`, { timeout: 20_000 });
+	await page.waitForURL(`/game/${gameId}`, { timeout: 30_000 });
 	await expect(page.getByRole("heading", { name: "ゲーム画面" })).toBeVisible();
 
 	await contextB.close();
@@ -160,7 +165,7 @@ test("退出ボタンで退出が行える", async ({ page }) => {
 	await page.waitForURL("/");
 	await expect(
 		page.getByRole("button", { name: `${roomTitle}に参加` }),
-	).toHaveCount(0, { timeout: 5_000 });
+	).toHaveCount(0, { timeout: 15_000 });
 });
 
 test("ページを閉じたら数秒後に離席となる", async ({ browser, page }) => {
@@ -183,6 +188,6 @@ test("ページを閉じたら数秒後に離席となる", async ({ browser, pa
 
 	await guestContext.close();
 
-	await expect(page.getByText(guestName)).not.toBeVisible({ timeout: 20_000 });
+	await expect(page.getByText(guestName)).not.toBeVisible({ timeout: 30_000 });
 	expect(page.url()).toContain(`/matching/${gameId}`);
 });

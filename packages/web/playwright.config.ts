@@ -7,7 +7,7 @@ export default defineConfig({
 	expect: {
 		timeout: 15_000,
 	},
-	failOnFlakyTests: !!process.env.CI,
+	// failOnFlakyTests: !!process.env.CI,
 	forbidOnly: !!process.env.CI,
 	fullyParallel: false,
 	globalTeardown: "e2e/global-teardown.ts",

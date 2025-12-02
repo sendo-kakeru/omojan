@@ -31,7 +31,6 @@
 		},
 		"studio": {},
 		"test": {},
-		"test:e2e": {},
 		"test:run": {},
 		"typecheck": {},
 		"up": {}

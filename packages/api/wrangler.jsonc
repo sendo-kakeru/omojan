@@ -21,8 +21,8 @@
 				]
 			},
 			"vars": {
-				"ENV": "test",
-				"WEB_URL": "https://localhost:5173"
+				"ENV": "e2e",
+				"WEB_URL": "http://localhost:5173"
 			}
 		},
 		"production": {
