@@ -5,7 +5,9 @@
 - クライアント: Cloudflare Workers / React Router
 - DB: SQLite
   - 本番/STG/Local: Turso
-  - Test: `local.db`ローカルファイル
+  - Test:
+    - E2E: Turso `omojan-main-e2e`
+    - Unit: `local.db`ローカルファイル
 - 認証: AWS Cognito(Google OAuth)
 - オブジェクトストレージ: Cloudflare R2
 

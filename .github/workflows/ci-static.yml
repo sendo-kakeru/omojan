@@ -1,4 +1,4 @@
-name: CI
+name: CI Static
 
 on:
   pull_request:
@@ -9,7 +9,11 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
-    environment: staging
+    env:
+      VITE_API_URL: http://temp.com
+      VITE_COGNITO_CLIENT_ID: temp-client-id
+      VITE_COGNITO_DOMAIN: http://temp.com
+      VITE_COGNITO_USER_POOL_ID: temp-user-pool-id
     steps:
       - uses: actions/checkout@v6
 
@@ -19,13 +23,8 @@ jobs:
       - name: Build dependencies packages
         run: |
           pnpm turbo run build --filter @repo/db
-          pnpm turbo run build --filter @repo/mock
           pnpm turbo run build --filter @repo/shared
           pnpm turbo run build --filter @repo/api
+
       - name: Run CI
-        run: pnpm run ci --concurrency=100%
-        env:
-          VITE_API_URL: ${{ vars.VITE_API_URL }}
-          VITE_COGNITO_CLIENT_ID: ${{ vars.VITE_COGNITO_CLIENT_ID }}
-          VITE_COGNITO_DOMAIN: ${{ vars.VITE_COGNITO_DOMAIN }}
-          VITE_COGNITO_USER_POOL_ID: ${{ vars.VITE_COGNITO_USER_POOL_ID }}
+        run: pnpm biome ci && pnpm turbo run typecheck --concurrency=100%

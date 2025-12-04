@@ -26,6 +26,9 @@
 		"vite-plugin-valibot-env": "^1.0.1"
 	},
 	"devDependencies": {
+		"drizzle-orm": "^0.44.7",
+		"drizzle-seed": "^0.3.1",
+		"@playwright/test": "^1.57.0",
 		"@react-router/dev": "^7.9.6",
 		"@react-router/remix-routes-option-adapter": "^7.9.6",
 		"@repo/api": "workspace:*",
@@ -35,6 +38,7 @@
 		"@storybook/react-vite": "^10.1.0",
 		"@tailwindcss/cli": "^4.1.17",
 		"@tailwindcss/vite": "^4.1.17",
+		"dotenv": "^17.2.3",
 		"@types/node": "^24.10.1",
 		"@types/react": "^19.2.7",
 		"@types/react-dom": "^19.2.3",
@@ -63,6 +67,7 @@
 		"preview": "pnpm run build && vite preview",
 		"start": "react-router-serve ./build/server/index.js",
 		"storybook:styles": "tailwindcss -i ./app/app.css -o ./dist/index.css --watch",
+		"test:e2e": "playwright test",
 		"typecheck": "pnpm run cf-typegen && react-router typegen && tsc --noEmit"
 	},
 	"type": "module",

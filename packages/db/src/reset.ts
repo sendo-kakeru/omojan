@@ -15,6 +15,7 @@ import * as schema from "./schema";
 
 const dotenvFileMap = {
 	development: ".env.local",
+	e2e: ".env.e2e",
 	production: ".env.production",
 	staging: ".env.staging",
 } as const satisfies Record<InferOutput<typeof envVarSchema>, string>;
@@ -23,12 +24,12 @@ dotenv.config({
 	path: dotenvFileMap[parse(envVarSchema, process.env.ENV ?? "development")],
 });
 
-export const envSchema = object({
+const envSchema = object({
 	DATABASE_URL: pipe(string(), url()),
 	TURSO_AUTH_TOKEN: string(),
 });
 
-export async function clearDatabase() {
+async function clearDatabase() {
 	const env = safeParse(envSchema, process.env);
 
 	if (!env.success) {

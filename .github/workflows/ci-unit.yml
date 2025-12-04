@@ -1,0 +1,25 @@
+name: CI Unit
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: ./.github/actions/setup-pnpm
+
+      - name: Build dependencies packages
+        run: |
+          pnpm turbo run build --filter @repo/db
+          pnpm turbo run build --filter @repo/mock
+          pnpm turbo run build --filter @repo/shared
+          pnpm turbo run build --filter @repo/api
+      - name: Run CI
+        run: pnpm turbo run test:run --concurrency=100%
