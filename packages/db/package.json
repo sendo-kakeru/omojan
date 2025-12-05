@@ -52,6 +52,6 @@
 	"type": "module",
 	"version": "1.0.0",
 	"dependencies": {
-		"uuidv7": "^1.0.2"
+		"uuidv7": "^1.1.0"
 	}
 }
