@@ -60,7 +60,7 @@ jobs:
         working-directory: packages/web
         run: pnpm playwright test
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         if: ${{ !cancelled() }}
         with:
           name: playwright-report
