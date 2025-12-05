@@ -6,7 +6,7 @@
 		"@types/node": "^24.10.1",
 		"drizzle-kit": "^0.31.7",
 		"dotenv": "^17.2.3",
-		"drizzle-orm": "^0.44.7",
+		"drizzle-orm": "^0.45.0",
 		"drizzle-valibot": "^0.4.2",
 		"drizzle-seed": "^0.3.1",
 		"pg": "^8.16.3",

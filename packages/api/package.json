@@ -6,7 +6,7 @@
 		"@repo/db": "workspace:*",
 		"@repo/shared": "workspace:*",
 		"aws-jwt-verify": "^5.1.1",
-		"drizzle-orm": "^0.44.7",
+		"drizzle-orm": "^0.45.0",
 		"drizzle-valibot": "^0.4.2",
 		"hono": "^4.10.7",
 		"valibot": "^1.2.0"
