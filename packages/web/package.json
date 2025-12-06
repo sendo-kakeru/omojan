@@ -15,8 +15,8 @@
 		"input-otp": "^1.4.2",
 		"isbot": "^5.1.32",
 		"jwt-decode": "^4.0.0",
-		"react": "^19.2.0",
-		"react-dom": "^19.2.0",
+		"react": "^19.2.1",
+		"react-dom": "^19.2.1",
 		"react-icons": "^5.5.0",
 		"react-router": "^7.9.6",
 		"swr": "^2.3.6",
@@ -26,7 +26,7 @@
 		"vite-plugin-valibot-env": "^1.0.1"
 	},
 	"devDependencies": {
-		"drizzle-orm": "^0.44.7",
+		"drizzle-orm": "^0.45.0",
 		"drizzle-seed": "^0.3.1",
 		"@playwright/test": "^1.57.0",
 		"@react-router/dev": "^7.9.6",
@@ -35,7 +35,7 @@
 		"@repo/db": "workspace:*",
 		"@repo/mock": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
-		"@storybook/react-vite": "^10.1.0",
+		"@storybook/react-vite": "^10.1.4",
 		"@tailwindcss/cli": "^4.1.17",
 		"@tailwindcss/vite": "^4.1.17",
 		"dotenv": "^17.2.3",

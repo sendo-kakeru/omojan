@@ -1,7 +1,7 @@
 {
 	"dependencies": {
-		"react": "^19.2.0",
-		"react-dom": "^19.2.0",
+		"react": "^19.2.1",
+		"react-dom": "^19.2.1",
 		"react-router": "^7.9.6"
 	},
 	"devDependencies": {
@@ -9,10 +9,10 @@
 		"@repo/mock": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
 		"@repo/web": "workspace:*",
-		"@storybook/addon-a11y": "^10.1.0",
-		"@storybook/addon-docs": "^10.1.0",
-		"@storybook/addon-vitest": "^10.1.0",
-		"@storybook/react-vite": "^10.1.0",
+		"@storybook/addon-a11y": "^10.1.4",
+		"@storybook/addon-docs": "^10.1.4",
+		"@storybook/addon-vitest": "^10.1.4",
+		"@storybook/react-vite": "^10.1.4",
 		"@tailwindcss/vite": "^4.1.17",
 		"@types/react": "^19.2.7",
 		"@types/react-dom": "^19.2.3",
@@ -22,7 +22,7 @@
 		"@vitest/coverage-v8": "^4.0.14",
 		"globals": "^16.5.0",
 		"playwright": "^1.57.0",
-		"storybook": "^10.1.0",
+		"storybook": "^10.1.4",
 		"tailwindcss": "^4.1.17",
 		"typescript": "~5.9.3",
 		"vite": "^7.2.4",
