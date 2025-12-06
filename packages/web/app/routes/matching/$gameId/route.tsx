@@ -102,7 +102,7 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 			roomMetaResult.error.statusCode === 401;
 
 		return (
-			<div className="grid place-items-center gap-y-12">
+			<main className="grid place-items-center gap-y-12">
 				<h2 className="font-bold text-xl">
 					{isNotFound
 						? "この部屋は削除されています。"
@@ -113,7 +113,7 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 				<Button as="link" className="w-fit" to="/">
 					トップに戻る
 				</Button>
-			</div>
+			</main>
 		);
 	}
 
@@ -124,24 +124,24 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 		!participants
 	) {
 		return (
-			<div className="grid place-items-center gap-y-4 pt-24 text-gray-500">
+			<main className="grid place-items-center gap-y-4 pt-24 text-gray-500">
 				<Spinner className="size-32" />
 				<p className="text-center">接続しています...</p>
-			</div>
+			</main>
 		);
 	}
 
 	if (isExiting) {
 		return (
-			<div className="grid place-items-center gap-y-4 pt-24 text-gray-500">
+			<main className="grid place-items-center gap-y-4 pt-24 text-gray-500">
 				<Spinner className="size-32" />
 				<p className="text-center">退出しています...</p>
-			</div>
+			</main>
 		);
 	}
 
 	return (
-		<div className="relative my-24 grid gap-y-16 rounded-lg border border-gray-200 bg-white p-16">
+		<main className="relative my-24 grid gap-y-16 rounded-lg border border-gray-200 bg-white p-16">
 			{!!matchingCompletedTimeoutRef.current && (
 				<div className="absolute inset-0 z-10 grid place-items-center bg-gray-200/70 backdrop-blur-sm">
 					<div className="grid gap-y-6 text-center text-gray-700">
@@ -237,6 +237,6 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 					))}
 				</ul>
 			</section>
-		</div>
+		</main>
 	);
 }
