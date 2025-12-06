@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { FaPlus } from "react-icons/fa";
+import { AuthHeader } from "~/components/auth/AuthHeader";
 import { Button } from "~/components/button/Button";
 import { Spinner } from "~/components/Spinner";
 import { useRoomListSWR } from "~/routes/_index/hooks/useRoomListSWR";
@@ -13,7 +14,8 @@ export default function () {
 
 	return (
 		<>
-			<div className="grid gap-y-16">
+			<AuthHeader />
+			<main className="grid gap-y-16">
 				<div className="flex items-center justify-between">
 					<h2 className="font-bold text-lg">募集中の部屋一覧</h2>
 					<Button
@@ -54,7 +56,7 @@ export default function () {
 						</div>
 					)}
 				</div>
-			</div>
+			</main>
 			<CreateRoomDialog isOpen={isOpen} setIsOpen={setIsOpen} />
 		</>
 	);
