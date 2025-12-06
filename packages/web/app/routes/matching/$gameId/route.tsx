@@ -124,7 +124,7 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 		!participants
 	) {
 		return (
-			<main className="grid place-items-center gap-y-4 pt-24 text-gray-500">
+			<main className="grid place-items-center gap-y-4 py-24 text-gray-500">
 				<Spinner className="size-32" />
 				<p className="text-center">接続しています...</p>
 			</main>
@@ -133,7 +133,7 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 
 	if (isExiting) {
 		return (
-			<main className="grid place-items-center gap-y-4 pt-24 text-gray-500">
+			<main className="grid place-items-center gap-y-4 py-24 text-gray-500">
 				<Spinner className="size-32" />
 				<p className="text-center">退出しています...</p>
 			</main>

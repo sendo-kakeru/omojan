@@ -48,7 +48,7 @@ export function Layout({ children }: PropsWithChildren) {
 export default function App() {
 	return (
 		<MeProvider>
-			<div className="mx-auto grid min-h-svh max-w-800 px-16 pb-24">
+			<div className="mx-auto grid min-h-svh max-w-800 px-16">
 				<div>
 					<Outlet />
 				</div>
