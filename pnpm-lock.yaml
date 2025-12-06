@@ -88,8 +88,8 @@ importers:
   packages/db:
     dependencies:
       uuidv7:
-        specifier: ^1.0.2
-        version: 1.0.2
+        specifier: ^1.1.0
+        version: 1.1.0
     devDependencies:
       '@repo/shared':
         specifier: workspace:*
@@ -5301,8 +5301,8 @@ packages:
     resolution: {integrity: sha512-pMZTvIkT1d+TFGvDOqodOclx0QWkkgi6Tdoa8gC8ffGAAqz9pzPTZWAybbsHHoED/ztMtkv/VoYTYyShUn81hA==}
     engines: {node: '>= 0.4.0'}
 
-  uuidv7@1.0.2:
-    resolution: {integrity: sha512-8JQkH4ooXnm1JCIhqTMbtmdnYEn6oKukBxHn1Ic9878jMkL7daTI7anTExfY18VRCX7tcdn5quzvCb6EWrR8PA==}
+  uuidv7@1.1.0:
+    resolution: {integrity: sha512-2VNnOC0+XQlwogChUDzy6pe8GQEys9QFZBGOh54l6qVfwoCUwwRvk7rDTgaIsRgsF5GFa5oiNg8LqXE3jofBBg==}
     hasBin: true
 
   valibot@1.2.0:
@@ -10193,7 +10193,7 @@ snapshots:
 
   utils-merge@1.0.1: {}
 
-  uuidv7@1.0.2: {}
+  uuidv7@1.1.0: {}
 
   valibot@1.2.0(typescript@5.9.3):
     optionalDependencies:
