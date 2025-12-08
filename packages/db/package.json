@@ -46,6 +46,7 @@
 		"db:push:local": "drizzle-kit push",
 		"db:dump": "rm src/dump.sql && rm src/local.db && turso db shell omojan-main-stg .dump > src/dump.sql && cat src/dump.sql | sqlite3 src/local.db",
 		"db:reset:local": "tsx ./src/reset.ts",
+		"db:changed": "pnpm run db:gen && pnpm run db:migrate:local && pnpm run db:migrate:e2e && pnpm run db:dump",
 		"studio": "drizzle-kit studio",
 		"typecheck": "tsc --noEmit"
 	},
