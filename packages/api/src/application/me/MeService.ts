@@ -4,11 +4,11 @@ import type {
 	GetMeResponseBody,
 	Me,
 } from "@repo/db/model";
-import { type User, userTable } from "@repo/db/schema";
+import { type User, type UserId, userTable } from "@repo/db/schema";
 import { isUniqueConstraintError } from "@repo/shared/error";
 import { eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
-import type { DrizzleClient } from "../../types";
+import type { DrizzleClient } from "../../libs/drizzle";
 
 export class MeService {
 	constructor(private readonly db: DrizzleClient) {}
@@ -58,7 +58,7 @@ export class MeService {
 	}
 
 	private convertUserToMe(
-		user: Pick<User, "id" | "email" | "name" | "image">,
+		user: Pick<User, "email" | "name" | "image"> & { id: UserId },
 	): Me {
 		return {
 			email: user.email,

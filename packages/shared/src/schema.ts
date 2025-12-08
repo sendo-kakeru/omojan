@@ -12,4 +12,5 @@ export const envVarSchema = union([
 	literal("development"),
 	literal("staging"),
 	literal("production"),
+	literal("e2e"),
 ]);

@@ -1,11 +1,11 @@
 import { faker } from "@faker-js/faker";
 import type { Me } from "@repo/db/model";
-import type { User } from "@repo/db/schema";
+import type { User, UserId } from "@repo/db/schema";
 
 export const MOCK_USER: User = {
 	createdAt: new Date(),
 	email: faker.internet.email(),
-	id: faker.string.uuid(),
+	id: faker.string.uuid() as UserId,
 	image: faker.image.avatar(),
 	name: faker.person.fullName(),
 	status: "active",

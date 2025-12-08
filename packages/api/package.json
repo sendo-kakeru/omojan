@@ -1,15 +1,14 @@
 {
 	"dependencies": {
-		"@hono/valibot-validator": "^0.5.3",
 		"@libsql/client": "^0.15.15",
 		"@noble/hashes": "^2.0.1",
 		"@oslojs/encoding": "^1.1.0",
 		"@repo/db": "workspace:*",
 		"@repo/shared": "workspace:*",
 		"aws-jwt-verify": "^5.1.1",
-		"drizzle-orm": "^0.44.7",
+		"drizzle-orm": "^0.45.0",
 		"drizzle-valibot": "^0.4.2",
-		"hono": "^4.10.6",
+		"hono": "^4.10.7",
 		"valibot": "^1.1.0"
 	},
 	"devDependencies": {
@@ -20,8 +19,8 @@
 		"@types/node": "^24.10.1",
 		"drizzle-seed": "^0.3.1",
 		"tsx": "^4.20.6",
-		"vitest": "^4.0.10",
-		"wrangler": "^4.47.0"
+		"vitest": "^4.0.15",
+		"wrangler": "^4.51.0"
 	},
 	"exports": {
 		".": "./dist/index.d.ts"
@@ -39,6 +38,7 @@
 		"dev:tsc": "tsc --watch",
 		"dev:tsup": "tsup --watch",
 		"dev:wrangler": "wrangler dev",
+		"dev:e2e": "wrangler dev --env e2e",
 		"format": "biome check --fix --unsafe .",
 		"lint": "biome check .",
 		"test": "tsx ./src/__tests__/vitest-with-db.ts",

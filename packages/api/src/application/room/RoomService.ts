@@ -1,3 +1,4 @@
+import type { ResultSet } from "@libsql/client";
 import { sha256 } from "@noble/hashes/sha2.js";
 import { bytesToHex } from "@noble/hashes/utils.js";
 import { encodeBase64urlNoPadding } from "@oslojs/encoding";
@@ -5,24 +6,77 @@ import type {
 	CreateRoomRequestBody,
 	CreateRoomResponseBody,
 	GetRoomListResponseBody,
+	GetRoomResponseBody,
 	JoinRoomRequestBody,
 	JoinRoomResponseBody,
 } from "@repo/db/model";
 import {
+	type Game,
+	type GameId,
 	gameTable,
 	isPlayerSeat,
 	playerTable,
 	type User,
 	userTable,
 } from "@repo/db/schema";
-import { and, desc, eq, inArray } from "drizzle-orm";
+import {
+	and,
+	desc,
+	type ExtractTablesWithRelations,
+	eq,
+	inArray,
+} from "drizzle-orm";
+import type { SQLiteTransaction } from "drizzle-orm/sqlite-core";
 import { HTTPException } from "hono/http-exception";
-import type { DrizzleClient } from "../../types";
+import type { DrizzleClient } from "../../libs/drizzle";
 
 export class RoomService {
 	private readonly encoder = new TextEncoder();
 
 	constructor(private readonly db: DrizzleClient) {}
+
+	/**
+	 * ルームを単体取得する
+	 */
+	async findByGameId({
+		gameId,
+		gameToken,
+	}: {
+		gameId: GameId;
+		gameToken: string;
+	}): Promise<GetRoomResponseBody> {
+		const gameTokenHash = this.hashGameToken(gameToken);
+
+		const [game] = await this.db
+			.select({
+				isPrivate: gameTable.isPrivate,
+				password: gameTable.password,
+				timeLimit: gameTable.timeLimit,
+				title: gameTable.title,
+			})
+			.from(gameTable)
+			.where(eq(gameTable.id, gameId));
+
+		if (!game) {
+			throw new HTTPException(404, { message: "指定された部屋が存在しません" });
+		}
+
+		const players = await this.db
+			.select({
+				gameTokenHash: playerTable.gameTokenHash,
+			})
+			.from(playerTable)
+			.where(eq(playerTable.gameId, gameId));
+
+		if (!players.some((player) => player.gameTokenHash === gameTokenHash)) {
+			throw new HTTPException(403, {
+				message: "部屋情報の取得権限がありません。",
+			});
+		}
+
+		// 検証に使ったgameTokenを省いて返す
+		return game;
+	}
 
 	/**
 	 * 募集中のルーム一覧を取得する
@@ -50,7 +104,6 @@ export class RoomService {
 					gameId: playerTable.gameId,
 					id: playerTable.id,
 					image: userTable.image,
-					isHost: playerTable.isHost,
 					playerName: playerTable.playerName,
 					seat: playerTable.seat,
 				})
@@ -80,7 +133,6 @@ export class RoomService {
 					.map((player) => ({
 						id: player.id,
 						image: player.image,
-						isHost: player.isHost,
 						playerName: player.playerName,
 						seat: player.seat,
 					})),
@@ -132,7 +184,6 @@ export class RoomService {
 			await tx.insert(playerTable).values({
 				gameId: createdGame.id,
 				gameTokenHash,
-				isHost: true,
 				playerName: dto.playerName,
 				seat: 1,
 				userId: authUser?.id ?? null,
@@ -148,7 +199,7 @@ export class RoomService {
 		sub,
 		heldToken,
 	}: {
-		gameId: string;
+		gameId: GameId;
 	} & JoinRoomRequestBody & {
 			sub: User["sub"] | null;
 		}): Promise<JoinRoomResponseBody> {
@@ -256,6 +307,12 @@ export class RoomService {
 				participatingPlayers.map((player) => player.seat),
 			);
 			if (participatingPlayers.length >= 4) {
+				if (findGame.status === "waiting") {
+					await this.activate({
+						db: tx,
+						gameId: findGame.id,
+					});
+				}
 				throw new HTTPException(409, { message: "この部屋は満員です" });
 			}
 			if (!seat || !isPlayerSeat(seat)) {
@@ -266,11 +323,20 @@ export class RoomService {
 			await tx.insert(playerTable).values({
 				gameId: findGame.id,
 				gameTokenHash,
-				isHost: false,
 				playerName,
 				seat,
 				userId: authUser?.id,
 			});
+
+			if (
+				participatingPlayers.length + 1 >= 4 &&
+				findGame.status === "waiting"
+			) {
+				await this.activate({
+					db: tx,
+					gameId: findGame.id,
+				});
+			}
 
 			return { state: "USUAL", token: gameToken };
 		});
@@ -300,9 +366,32 @@ export class RoomService {
 		return { gameToken, gameTokenHash: this.hashGameToken(gameToken) };
 	}
 
-	private hashGameToken(gameToken: string): string {
+	hashGameToken(gameToken: string): string {
 		const hash = sha256(this.encoder.encode(gameToken)); // Uint8Array
 		return bytesToHex(hash);
+	}
+
+	/**
+	 * gameのステータスをactiveにする
+	 */
+	private async activate({
+		db,
+		gameId,
+	}: {
+		db:
+			| DrizzleClient
+			| SQLiteTransaction<
+					"async",
+					ResultSet,
+					Record<string, never>,
+					ExtractTablesWithRelations<Record<string, never>>
+			  >;
+		gameId: GameId;
+	}): Promise<void> {
+		await db
+			.update(gameTable)
+			.set({ status: "active" })
+			.where(eq(gameTable.id, gameId));
 	}
 
 	private assignSeat(seats: number[]): number | undefined {
@@ -310,6 +399,21 @@ export class RoomService {
 			if (!seats.includes(seat)) {
 				return seat;
 			}
+		}
+	}
+
+	async getStatus(gameId: GameId): Promise<Game["status"] | null> {
+		try {
+			const [game] = await this.db
+				.select({
+					status: gameTable.status,
+				})
+				.from(gameTable)
+				.where(eq(gameTable.id, gameId));
+
+			return game?.status ?? null;
+		} catch {
+			return null;
 		}
 	}
 }

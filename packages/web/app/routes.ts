@@ -1,7 +1,8 @@
-import { index, type RouteConfig, route } from "@react-router/dev/routes";
+import { remixRoutesOptionAdapter } from "@react-router/remix-routes-option-adapter";
+import { flatRoutes } from "remix-flat-routes";
 
-export default [
-	index("routes/page.tsx"),
-	route("auth/callback", "routes/auth/callback/page.tsx"),
-	route("matching/:gameId", "routes/matching/[gameId]/page.tsx"),
-] satisfies RouteConfig;
+export default remixRoutesOptionAdapter((defineRoutes) => {
+	return flatRoutes("routes", defineRoutes, {
+		ignoredRouteFiles: ["**/.*"],
+	});
+});

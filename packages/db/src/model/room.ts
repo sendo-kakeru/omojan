@@ -1,6 +1,7 @@
 import { createSelectSchema } from "drizzle-valibot";
 import {
 	array,
+	type BrandSymbol,
 	type InferOutput,
 	length,
 	literal,
@@ -19,13 +20,16 @@ import {
 	variant,
 } from "valibot";
 import {
+	gameIdSchema,
 	gameSchema,
 	gameTable,
+	playerIdSchema,
 	playerNameSchema,
 	playerSchema,
 	playerTable,
 	userSchema,
 } from "../schema";
+export type { BrandSymbol };
 
 export const roomPasswordSchema = pipe(
 	string("パスワードを入力してください"),
@@ -34,10 +38,11 @@ export const roomPasswordSchema = pipe(
 
 export const roomSchema = object({
 	...pick(gameSchema, ["title", "isPrivate", "password", "timeLimit"]).entries,
-	gameId: gameSchema.entries.id,
+	gameId: gameIdSchema,
 	players: array(
 		object({
-			...pick(playerSchema, ["id", "playerName", "isHost", "seat"]).entries,
+			...pick(playerSchema, ["playerName", "seat"]).entries,
+			id: playerIdSchema,
 			image: nullable(userSchema.entries.image),
 		}),
 	),
@@ -51,6 +56,15 @@ export const getRoomListResponseBodySchema = array(
 export type GetRoomListResponseBody = InferOutput<
 	typeof getRoomListResponseBodySchema
 >;
+
+// find one
+export const getRoomResponseBodySchema = pick(roomSchema, [
+	"title",
+	"isPrivate",
+	"password",
+	"timeLimit",
+]);
+export type GetRoomResponseBody = InferOutput<typeof getRoomResponseBodySchema>;
 
 // join
 export const joinRoomRequestBodySchema = object({
@@ -121,7 +135,7 @@ export type CreateRoomRequestBody = InferOutput<
 	typeof createRoomRequestBodySchema
 >;
 export const createRoomResponseBodySchema = object({
-	gameId: gameSchema.entries.id,
+	gameId: gameIdSchema,
 	token: playerSchema.entries.gameTokenHash,
 });
 export type CreateRoomResponseBody = InferOutput<
@@ -131,4 +145,10 @@ export type CreateRoomResponseBody = InferOutput<
 // verify token
 export const verifyRoomTokenRequestQuerySchema = object({
 	token: string(),
+});
+
+// game token header (X-Game-Token)
+// NOTE: HTTPヘッダーはHonoで小文字に正規化されるため、スキーマは小文字で定義
+export const gameTokenHeaderSchema = object({
+	"x-game-token": string(),
 });

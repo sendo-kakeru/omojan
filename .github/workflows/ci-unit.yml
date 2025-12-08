@@ -1,4 +1,4 @@
-name: CI
+name: CI Unit
 
 on:
   pull_request:
@@ -9,9 +9,8 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
-    environment: staging
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Setup pnpm
         uses: ./.github/actions/setup-pnpm
@@ -23,9 +22,4 @@ jobs:
           pnpm turbo run build --filter @repo/shared
           pnpm turbo run build --filter @repo/api
       - name: Run CI
-        run: pnpm run ci --concurrency=100%
-        env:
-          VITE_API_URL: ${{ vars.VITE_API_URL }}
-          VITE_COGNITO_CLIENT_ID: ${{ vars.VITE_COGNITO_CLIENT_ID }}
-          VITE_COGNITO_DOMAIN: ${{ vars.VITE_COGNITO_DOMAIN }}
-          VITE_COGNITO_USER_POOL_ID: ${{ vars.VITE_COGNITO_USER_POOL_ID }}
+        run: pnpm turbo run test:run --concurrency=100%

@@ -13,6 +13,11 @@ import { Button } from "~/components/button/Button";
 import { Dialog } from "~/components/Dialog";
 import { FieldItem } from "~/components/form/FieldItem";
 import { Input } from "~/components/form/Input";
+import {
+	InputOTP,
+	InputOTPGroup,
+	InputOTPSlot,
+} from "~/components/form/InputOTP";
 import { Spinner } from "~/components/Spinner";
 import { useToast } from "~/components/Toast";
 import { UserLabel } from "~/components/user/UserLabel";
@@ -37,16 +42,14 @@ export function JoinRoomDialog({
 	const [passwordError, setPasswordError] = useState<string | undefined>();
 
 	const defaultValues: JoinRoomRequestBody = (() => {
-		let gameToken: string | null = null;
-
-		try {
-			gameToken = gameTokenLocalStorage.get();
-		} catch {
-			showToast({
-				title: LOCALSTORAGE_OPERATION_FAILED_MESSAGE,
-				type: "error",
-			});
-		}
+		const gameToken = gameTokenLocalStorage.get({
+			onError() {
+				showToast({
+					title: LOCALSTORAGE_OPERATION_FAILED_MESSAGE,
+					type: "error",
+				});
+			},
+		});
 
 		return {
 			heldToken: gameToken,
@@ -203,20 +206,30 @@ export function JoinRoomDialog({
 											label="パスワード"
 											note="共有された6文字のパスワードを入力してください。"
 										>
-											<Input
+											<InputOTP
 												autoComplete="off"
 												disabled={isLoading}
 												id={id}
+												maxLength={6}
 												onBlur={field.handleBlur}
-												onChange={(e) => {
+												onChange={(value) => {
 													if (passwordError) {
 														setPasswordError(undefined);
 													}
-													field.handleChange(e.target.value.trim());
+													field.handleChange(value.trim());
 												}}
 												type="password"
 												value={field.state.value}
-											/>
+											>
+												<InputOTPGroup>
+													<InputOTPSlot index={0} />
+													<InputOTPSlot index={1} />
+													<InputOTPSlot index={2} />
+													<InputOTPSlot index={3} />
+													<InputOTPSlot index={4} />
+													<InputOTPSlot index={5} />
+												</InputOTPGroup>
+											</InputOTP>
 										</FieldItem>
 									);
 								}}

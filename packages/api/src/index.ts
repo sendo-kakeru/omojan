@@ -1,23 +1,17 @@
-import { drizzle } from "drizzle-orm/libsql";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { HTTPException } from "hono/http-exception";
+import { createDrizzleClient } from "./libs/drizzle";
 import { routes } from "./presentation/routes";
 import type { BaseContext, HttpRespondReturn } from "./types";
 
-const app = new Hono<BaseContext>()
+export { MatchingDurableObject } from "./application/matching/MatchingDurableObject";
+
+export const app = new Hono<BaseContext>()
 	.use((c, next) => {
-		c.set(
-			"db",
-			drizzle({
-				connection: {
-					authToken: c.env.TURSO_AUTH_TOKEN,
-					url: c.env.DATABASE_URL,
-				},
-			}),
-		);
+		c.set("db", createDrizzleClient(c.env));
 		const corsMiddleware = cors({
-			allowHeaders: ["Content-Type", "Authorization"],
+			allowHeaders: ["Content-Type", "Authorization", "X-Game-Token"],
 			allowMethods: [
 				"GET",
 				"POST",

@@ -10,14 +10,15 @@ const dateTime = customType<{
 	toDriver: (value: Date): string => value.toISOString(),
 });
 
+export const idBaseColumn = text("id")
+	.notNull()
+	.primaryKey()
+	.$defaultFn(() => uuidv7());
+
 export const tableBaseColumns = {
 	createdAt: dateTime("created_at")
 		.notNull()
 		.$defaultFn(() => new Date()),
-	id: text("id")
-		.notNull()
-		.primaryKey()
-		.$defaultFn(() => uuidv7()),
 	updatedAt: dateTime("updated_at")
 		.notNull()
 		.$defaultFn(() => new Date())

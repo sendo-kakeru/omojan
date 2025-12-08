@@ -2,24 +2,38 @@
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"compatibility_date": "2025-09-22",
 	"compatibility_flags": ["nodejs_compat"],
-	// "durable_objects": {
-	// 	"bindings": [
-	// 		{
-	// 			"class_name": "Room",
-	// 			"name": "ROOM"
-	// 		}
-	// 	]
-	// },
+	"durable_objects": {
+		"bindings": [
+			{
+				"class_name": "MatchingDurableObject",
+				"name": "MATCHING_DURABLE_OBJECT"
+			}
+		]
+	},
 	"env": {
+		"e2e": {
+			"durable_objects": {
+				"bindings": [
+					{
+						"class_name": "MatchingDurableObject",
+						"name": "MATCHING_DURABLE_OBJECT"
+					}
+				]
+			},
+			"vars": {
+				"ENV": "e2e",
+				"WEB_URL": "http://localhost:5173"
+			}
+		},
 		"production": {
-			// "durable_objects": {
-			// 	"bindings": [
-			// 		{
-			// 			"class_name": "Room",
-			// 			"name": "ROOM"
-			// 		}
-			// 	]
-			// },
+			"durable_objects": {
+				"bindings": [
+					{
+						"class_name": "MatchingDurableObject",
+						"name": "MATCHING_DURABLE_OBJECT"
+					}
+				]
+			},
 			"routes": [{ "custom_domain": true, "pattern": "api.omojan.com" }],
 			"vars": {
 				"ENV": "production",
@@ -27,14 +41,14 @@
 			}
 		},
 		"staging": {
-			// "durable_objects": {
-			// 	"bindings": [
-			// 		{
-			// 			"class_name": "Room",
-			// 			"name": "ROOM"
-			// 		}
-			// 	]
-			// },
+			"durable_objects": {
+				"bindings": [
+					{
+						"class_name": "MatchingDurableObject",
+						"name": "MATCHING_DURABLE_OBJECT"
+					}
+				]
+			},
 			"routes": [{ "custom_domain": true, "pattern": "api-stg.omojan.com" }],
 			"vars": {
 				"ENV": "staging",
@@ -43,12 +57,12 @@
 		}
 	},
 	"main": "src/index.ts",
-	// "migrations": [
-	// 	{
-	// 		"new_sqlite_classes": ["Room"],
-	// 		"tag": "v1"
-	// 	}
-	// ],
+	"migrations": [
+		{
+			"new_sqlite_classes": ["MatchingDurableObject"],
+			"tag": "v1"
+		}
+	],
 	"name": "api",
 	"observability": {
 		"enabled": true

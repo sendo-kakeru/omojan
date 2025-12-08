@@ -48,7 +48,6 @@ export const playerTable = sqliteTable("player", {
 		.notNull()
 		.references(() => gameTable.id, { onDelete: "cascade" }),
 	gameTokenHash: text("game_token_hash").notNull().unique(),
-	isHost: integer("is_host", { mode: "boolean" }).notNull().default(false),
 	playerName: text("player_name").notNull(),
 	seat: integer("seat").notNull().$type<1 | 2 | 3 | 4>(),
 	userId: text("user_id").references(() => userTable.id, {
@@ -83,9 +82,9 @@ export const playerTable = sqliteTable("player", {
 ---
 
 ## 7. 発行タイミングと API
-- ホスト作成: `POST /v1/rooms` → `game_token` を返却。
+- 部屋作成: `POST /v1/rooms` → `game_token` を返却。
 - 参加: `POST /v1/rooms/{roomId}/join` → `game_token` を返却。
-- 退室（募集中のみ）: `POST /v1/rooms/{roomId}/leave` → `player` 失効。
+- 退室（募集中のみ）: WebSocket で `{ type: "EXIT" }` メッセージ送信 → `player` 失効。
 
 ### 7.1 レスポンス例
 
@@ -108,7 +107,7 @@ export const playerTable = sqliteTable("player", {
 ---
 
 ## 9. 代表的フロー
-- ホスト作成 → `game_token` 受領 → `wss://.../v1/ws/<gameId>?token=...` で接続。
+- 部屋作成 → `game_token` 受領 → `wss://.../v1/ws/<gameId>?token=...` で接続。
 - 参加 → `game_token` 受領 → 同上。
 - 再接続 → 同トークンで接続、DO が旧接続を **4001 replaced** で排他。
 - 募集中退室 → 該当 `player` 失効 → そのトークンでは以後接続不可。

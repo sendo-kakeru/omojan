@@ -1,15 +1,17 @@
-import { vValidator } from "@hono/valibot-validator";
 import {
 	type CreateRoomResponseBody,
 	createRoomRequestBodySchema,
 	type GetRoomListResponseBody,
+	type GetRoomResponseBody,
+	gameTokenHeaderSchema,
 	type JoinRoomResponseBody,
 	joinRoomRequestBodySchema,
 } from "@repo/db/model";
+import { gameIdRequestParamSchema } from "@repo/db/schema";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { RoomService } from "../../application/room/RoomService";
-import { routeValidateCallback } from "../../libs/validation";
+import { vValidator } from "../../libs/vValidator";
 import type { HttpRespondReturn, HybridRouteContext } from "../../types";
 
 export const routes = new Hono<
@@ -41,7 +43,7 @@ export const routes = new Hono<
 	})
 	.post(
 		"/",
-		vValidator("json", createRoomRequestBodySchema, routeValidateCallback),
+		vValidator("json", createRoomRequestBodySchema),
 		async (c): Promise<HttpRespondReturn<CreateRoomResponseBody>> => {
 			const { roomService, sub } = c.var;
 			const body = c.req.valid("json");
@@ -66,13 +68,41 @@ export const routes = new Hono<
 			}
 		},
 	)
+	.get(
+		"/:gameId",
+		vValidator("param", gameIdRequestParamSchema),
+		vValidator("header", gameTokenHeaderSchema),
+		async (c): Promise<HttpRespondReturn<GetRoomResponseBody>> => {
+			const { roomService } = c.var;
+			const { gameId } = c.req.valid("param");
+			const { "x-game-token": gameToken } = c.req.valid("header");
+
+			try {
+				const room = await roomService.findByGameId({ gameId, gameToken });
+
+				return c.json(
+					{
+						data: room,
+						message: "OK",
+					},
+					200,
+				);
+			} catch (error) {
+				console.error("Roomの取得に失敗しました:", error);
+				if (error instanceof HTTPException) throw error;
+
+				throw new HTTPException(500, { message: "Roomの取得に失敗しました" });
+			}
+		},
+	)
 	.post(
 		"/:gameId/join",
-		vValidator("json", joinRoomRequestBodySchema, routeValidateCallback),
+		vValidator("json", joinRoomRequestBodySchema),
+		vValidator("param", gameIdRequestParamSchema),
 		async (c): Promise<HttpRespondReturn<JoinRoomResponseBody>> => {
 			const { roomService, sub } = c.var;
 			const body = c.req.valid("json");
-			const { gameId } = c.req.param();
+			const { gameId } = c.req.valid("param");
 
 			try {
 				const playerToken = await roomService.join({

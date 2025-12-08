@@ -1,19 +1,21 @@
 import { useState } from "react";
 import { FaPlus } from "react-icons/fa";
+import { AuthHeader } from "~/components/auth/AuthHeader";
 import { Button } from "~/components/button/Button";
 import { Spinner } from "~/components/Spinner";
-import { useGameListSWR } from "~/hooks/useGameListSWR";
-import { CreateRoomDialog } from "./_components/CreateRoomDialog";
-import { JoinRoomCard } from "./_components/JoinRoomCard";
+import { useRoomListSWR } from "~/routes/_index/hooks/useRoomListSWR";
+import { CreateRoomDialog } from "./components/CreateRoomDialog";
+import { JoinRoomCard } from "./components/JoinRoomCard";
 
 export default function () {
 	const [isOpen, setIsOpen] = useState(false);
-	const { data, error, isLoading } = useGameListSWR();
+	const { data, error, isLoading } = useRoomListSWR();
 	const gameList = data?.data;
 
 	return (
 		<>
-			<div className="grid gap-y-16">
+			<AuthHeader />
+			<main className="grid gap-y-16">
 				<div className="flex items-center justify-between">
 					<h2 className="font-bold text-lg">募集中の部屋一覧</h2>
 					<Button
@@ -54,7 +56,7 @@ export default function () {
 						</div>
 					)}
 				</div>
-			</div>
+			</main>
 			<CreateRoomDialog isOpen={isOpen} setIsOpen={setIsOpen} />
 		</>
 	);

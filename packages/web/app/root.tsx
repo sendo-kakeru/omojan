@@ -10,7 +10,6 @@ import {
 import type { Route } from "./+types/root";
 import "./app.css";
 import type { PropsWithChildren } from "react";
-import { AuthHeader } from "./components/auth/AuthHeader";
 import { ToastProvider } from "./components/Toast";
 import { MeProvider } from "./context/me/provider";
 
@@ -49,9 +48,10 @@ export function Layout({ children }: PropsWithChildren) {
 export default function App() {
 	return (
 		<MeProvider>
-			<div className="mx-auto min-h-svh max-w-800 px-16">
-				<AuthHeader />
-				<Outlet />
+			<div className="mx-auto grid min-h-svh max-w-800 px-16">
+				<div>
+					<Outlet />
+				</div>
 			</div>
 		</MeProvider>
 	);

@@ -6,7 +6,7 @@
 	},
 	"dialect": "sqlite",
 	"enums": {},
-	"id": "ef3101b4-067c-48a5-949c-ef59c69ab8c5",
+	"id": "7583ed42-49a2-47df-8849-1389733f3420",
 	"internal": {
 		"indexes": {}
 	},
@@ -110,14 +110,6 @@
 					"notNull": true,
 					"primaryKey": true,
 					"type": "text"
-				},
-				"is_host": {
-					"autoincrement": false,
-					"default": false,
-					"name": "is_host",
-					"notNull": true,
-					"primaryKey": false,
-					"type": "integer"
 				},
 				"player_name": {
 					"autoincrement": false,
@@ -223,13 +215,6 @@
 					"notNull": true,
 					"primaryKey": false,
 					"type": "text"
-				},
-				"word_id": {
-					"autoincrement": false,
-					"name": "word_id",
-					"notNull": true,
-					"primaryKey": false,
-					"type": "text"
 				}
 			},
 			"compositePrimaryKeys": {},
@@ -260,15 +245,6 @@
 					"onUpdate": "no action",
 					"tableFrom": "player_card",
 					"tableTo": "submission"
-				},
-				"player_card_word_id_word_id_fk": {
-					"columnsFrom": ["word_id"],
-					"columnsTo": ["id"],
-					"name": "player_card_word_id_word_id_fk",
-					"onDelete": "cascade",
-					"onUpdate": "no action",
-					"tableFrom": "player_card",
-					"tableTo": "word"
 				}
 			},
 			"indexes": {},
@@ -368,13 +344,6 @@
 					"notNull": true,
 					"primaryKey": false,
 					"type": "text"
-				},
-				"word_id": {
-					"autoincrement": false,
-					"name": "word_id",
-					"notNull": true,
-					"primaryKey": false,
-					"type": "text"
 				}
 			},
 			"compositePrimaryKeys": {},
@@ -387,15 +356,6 @@
 					"onUpdate": "no action",
 					"tableFrom": "round_theme",
 					"tableTo": "round"
-				},
-				"round_theme_word_id_word_id_fk": {
-					"columnsFrom": ["word_id"],
-					"columnsTo": ["id"],
-					"name": "round_theme_word_id_word_id_fk",
-					"onDelete": "cascade",
-					"onUpdate": "no action",
-					"tableFrom": "round_theme",
-					"tableTo": "word"
 				}
 			},
 			"indexes": {},
@@ -693,50 +653,6 @@
 			},
 			"indexes": {},
 			"name": "vote",
-			"uniqueConstraints": {}
-		},
-		"word": {
-			"checkConstraints": {},
-			"columns": {
-				"created_at": {
-					"autoincrement": false,
-					"name": "created_at",
-					"notNull": true,
-					"primaryKey": false,
-					"type": "text"
-				},
-				"id": {
-					"autoincrement": false,
-					"name": "id",
-					"notNull": true,
-					"primaryKey": true,
-					"type": "text"
-				},
-				"text": {
-					"autoincrement": false,
-					"name": "text",
-					"notNull": true,
-					"primaryKey": false,
-					"type": "text"
-				},
-				"updated_at": {
-					"autoincrement": false,
-					"name": "updated_at",
-					"notNull": true,
-					"primaryKey": false,
-					"type": "text"
-				}
-			},
-			"compositePrimaryKeys": {},
-			"foreignKeys": {},
-			"indexes": {
-				"word_text_unique": {
-					"columns": ["text"],
-					"isUnique": true,
-					"name": "word_text_unique"
-				}
-			},
-			"name": "word",
 			"uniqueConstraints": {}
 		}
 	},
