@@ -9,7 +9,6 @@ import {
 	submissionIdSchema,
 	submissionTable,
 } from "./submission";
-import { type WordId, wordIdSchema, wordTable } from "./word";
 
 export const playerCardIdSchema = pipe(
 	string(),
@@ -33,10 +32,6 @@ export const playerCardTable = sqliteTable("player_card", {
 		.notNull()
 		.$type<SubmissionId>()
 		.references(() => submissionTable.id, { onDelete: "cascade" }),
-	wordId: text("word_id")
-		.notNull()
-		.$type<WordId>()
-		.references(() => wordTable.id, { onDelete: "cascade" }),
 });
 
 export const playerCardSchema = createSelectSchema(playerCardTable, {
@@ -44,6 +39,5 @@ export const playerCardSchema = createSelectSchema(playerCardTable, {
 	playerId: playerIdSchema,
 	roundId: roundIdSchema,
 	submissionId: submissionIdSchema,
-	wordId: wordIdSchema,
 });
 export type PlayerCard = InferOutput<typeof playerCardSchema>;

@@ -14,6 +14,13 @@
 			"tag": "0001_jazzy_dazzler",
 			"version": "6",
 			"when": 1763649496596
+		},
+		{
+			"breakpoints": true,
+			"idx": 2,
+			"tag": "0002_open_prodigy",
+			"version": "6",
+			"when": 1765187761865
 		}
 	],
 	"version": "7"

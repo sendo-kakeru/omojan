@@ -7,4 +7,3 @@ export * from "./roundWinner";
 export * from "./submission";
 export * from "./user";
 export * from "./vote";
-export * from "./word";
