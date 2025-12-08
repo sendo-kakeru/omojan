@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS "__drizzle_migrations" (
 			created_at numeric
 		);
 INSERT INTO __drizzle_migrations VALUES(NULL,'05f08e65e51151aa1674737830f7c0ccb3f6161941cdaf16e9cc39cc998ce645',1763384773458);
+INSERT INTO __drizzle_migrations VALUES(NULL,'8f491c39b0d6fa798534ce27cd8f3b7fdac29c78f77eafed0bbd135e8b22c6fe',1763649496596);
 CREATE TABLE IF NOT EXISTS `game` (
 	`created_at` text NOT NULL,
 	`id` text PRIMARY KEY NOT NULL,
@@ -22,7 +23,6 @@ CREATE TABLE IF NOT EXISTS `player` (
 	`updated_at` text NOT NULL,
 	`game_id` text NOT NULL,
 	`game_token_hash` text NOT NULL,
-	`is_host` integer DEFAULT false NOT NULL,
 	`player_name` text NOT NULL,
 	`seat` integer NOT NULL,
 	`user_id` text,
