@@ -1,1 +1,0 @@
-ALTER TABLE `player` DROP COLUMN `is_host`;
