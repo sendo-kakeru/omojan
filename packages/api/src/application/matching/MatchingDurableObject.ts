@@ -20,8 +20,8 @@ import { safeParse } from "valibot";
 import type { Env } from "../../env";
 import { createDrizzleClient, type DrizzleClient } from "../../libs/drizzle";
 import { RoomService } from "../room/RoomService";
-import { ConnectionService } from "../websocket/ConnectionService";
 import { WebSocketService } from "../websocket/WebsocketService";
+import { HeartbeatService } from "./HeartbeatService";
 
 /** ハートビート間隔（ミリ秒） */
 const HEARTBEAT_INTERVAL_MS = 5_000 as const;
@@ -29,7 +29,7 @@ const HEARTBEAT_INTERVAL_MS = 5_000 as const;
 const HEARTBEAT_TIMEOUT_MS = 10_000 as const;
 
 export class MatchingDurableObject extends DurableObject<Env> {
-	private readonly connectionService = new ConnectionService();
+	private readonly heartbeatService = new HeartbeatService();
 	private readonly db: DrizzleClient;
 	private readonly roomService: RoomService;
 	private readonly webSocketService = new WebSocketService();
@@ -64,7 +64,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 			});
 		}
 
-		const existingConnection = this.connectionService.get(player.id);
+		const existingConnection = this.heartbeatService.get(player.id);
 		if (existingConnection) {
 			existingConnection.close(4001, "新しい接続に置き換えられました。");
 		}
@@ -73,7 +73,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 		this.ctx.acceptWebSocket(server);
 
 		// 接続を登録（ハートビート管理も含む）
-		this.connectionService.register({ id: player.id, socket: server });
+		this.heartbeatService.register({ id: player.id, socket: server });
 
 		// ハートビートアラームを開始（既に設定されていなければ）
 		const currentAlarm = await this.ctx.storage.getAlarm();
@@ -91,7 +91,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	 * ハートビート情報は保持し、再接続の猶予を与える
 	 */
 	async webSocketClose(ws: WebSocket): Promise<void> {
-		this.connectionService.disconnect(ws);
+		this.heartbeatService.disconnect(ws);
 	}
 
 	/**
@@ -108,7 +108,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	async webSocketMessage(ws: WebSocket, message: string): Promise<void> {
 		if (!this.gameId) return;
 
-		const playerId = this.connectionService.findIdBySocket(ws);
+		const playerId = this.heartbeatService.findIdBySocket(ws);
 
 		if (!playerId) {
 			ws.close(4409, "接続が見つかりません");
@@ -123,7 +123,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 				await this.handleExit({ playerId, ws });
 				break;
 			case "PONG":
-				this.connectionService.recordPong(playerId);
+				this.heartbeatService.recordPong(playerId);
 				break;
 		}
 	}
@@ -138,7 +138,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 		if (gameStatus && gameStatus !== "waiting") return;
 
 		// 全接続にPINGを送信
-		this.connectionService.sendPingToAll();
+		this.heartbeatService.sendPingToAll();
 
 		// DBから現在のプレイヤー一覧を取得
 		const players = await this.fetchParticipants({ gameId: this.gameId });
@@ -147,14 +147,14 @@ export class MatchingDurableObject extends DurableObject<Env> {
 		const disconnectedPlayerIds: PlayerId[] = [];
 
 		for (const player of players) {
-			const isTimedOut = this.connectionService.isTimedOut({
+			const isTimedOut = this.heartbeatService.isTimedOut({
 				id: player.id,
 				timeoutMs: HEARTBEAT_TIMEOUT_MS,
 			});
 
 			if (isTimedOut) {
 				// タイムアウトしていたら、接続解除
-				const ws = this.connectionService.get(player.id);
+				const ws = this.heartbeatService.get(player.id);
 				if (ws) {
 					try {
 						ws.close(4408, "ハートビートタイムアウト");
@@ -164,7 +164,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 					}
 				}
 
-				this.connectionService.unregister(player.id);
+				this.heartbeatService.unregister(player.id);
 				disconnectedPlayerIds.push(player.id);
 			}
 		}
@@ -190,7 +190,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 		}
 
 		// 接続が残っている場合は次のアラームを設定
-		if (this.connectionService.size > 0 || remainingParticipants.length > 0) {
+		if (this.heartbeatService.size > 0 || remainingParticipants.length > 0) {
 			await this.ctx.storage.setAlarm(Date.now() + HEARTBEAT_INTERVAL_MS);
 		}
 	}
@@ -210,7 +210,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 		const gameStatus = await this.roomService.getStatus(this.gameId);
 
 		// NOTE: 既に4人メンバーが確定し、activeになっていたら接続だけ解除。（確定からゲーム移動までの時間は退出操作不可なので、通常は発生し得ない）
-		this.connectionService.unregister(playerId);
+		this.heartbeatService.unregister(playerId);
 		if (gameStatus === "waiting") {
 			await this.db.delete(playerTable).where(eq(playerTable.id, playerId));
 		}
@@ -232,10 +232,10 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	 */
 	private async deleteRoom({ gameId }: { gameId: GameId }): Promise<void> {
 		await this.db.delete(gameTable).where(eq(gameTable.id, gameId));
-		for (const socket of this.connectionService.getSockets()) {
+		for (const socket of this.heartbeatService.getSockets()) {
 			socket.close(4410, "部屋が削除されました");
 		}
-		this.connectionService.clear();
+		this.heartbeatService.clear();
 	}
 
 	/**
@@ -333,7 +333,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 				participants,
 				type: "PARTICIPANTS",
 			} satisfies MatchingServerParticipantsMessage,
-			sockets: this.connectionService.getSockets(),
+			sockets: this.heartbeatService.getSockets(),
 		});
 	}
 
