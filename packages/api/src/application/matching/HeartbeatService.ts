@@ -4,7 +4,7 @@ import type { PlayerId } from "@repo/db/schema";
 /**
  * WebSocket接続とハートビートを統合管理するサービス
  */
-export class ConnectionService {
+export class HeartbeatService {
 	private readonly connections = new Map<
 		PlayerId,
 		{

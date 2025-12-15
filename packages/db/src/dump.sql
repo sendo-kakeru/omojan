@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS "__drizzle_migrations" (
 			created_at numeric
 		);
 INSERT INTO __drizzle_migrations VALUES(NULL,'85e8e30bb53f0598b25de849af1aa5e70f8791e7445156ffa34290443771378d',1765191260543);
+INSERT INTO __drizzle_migrations VALUES(NULL,'35e19d4ace100bdaee3895b54a9df902fae7e91be8525ac1e55eadf94cadd356',1765286580259);
 CREATE TABLE IF NOT EXISTS `game` (
 	`created_at` text NOT NULL,
 	`updated_at` text NOT NULL,
@@ -34,7 +35,7 @@ CREATE TABLE IF NOT EXISTS `player_card` (
 	`id` text PRIMARY KEY NOT NULL,
 	`player_id` text NOT NULL,
 	`round_id` text NOT NULL,
-	`submission_id` text NOT NULL,
+	`submission_id` text NOT NULL, `text` text NOT NULL,
 	FOREIGN KEY (`player_id`) REFERENCES `player`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`round_id`) REFERENCES `round`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`submission_id`) REFERENCES `submission`(`id`) ON UPDATE no action ON DELETE cascade
@@ -52,7 +53,7 @@ CREATE TABLE IF NOT EXISTS `round_theme` (
 	`created_at` text NOT NULL,
 	`updated_at` text NOT NULL,
 	`id` text PRIMARY KEY NOT NULL,
-	`round_id` text NOT NULL,
+	`round_id` text NOT NULL, `text` text NOT NULL,
 	FOREIGN KEY (`round_id`) REFERENCES `round`(`id`) ON UPDATE no action ON DELETE cascade
 );
 CREATE TABLE IF NOT EXISTS `round_winner` (
@@ -98,4 +99,6 @@ CREATE TABLE IF NOT EXISTS `vote` (
 CREATE UNIQUE INDEX `player_game_token_hash_unique` ON `player` (`game_token_hash`);
 CREATE UNIQUE INDEX `user_email_unique` ON `user` (`email`);
 CREATE UNIQUE INDEX `user_sub_unique` ON `user` (`sub`);
+CREATE UNIQUE INDEX `player_card_text_unique` ON `player_card` (`text`);
+CREATE UNIQUE INDEX `round_theme_text_unique` ON `round_theme` (`text`);
 COMMIT;

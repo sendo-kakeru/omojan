@@ -7,6 +7,10 @@
 			{
 				"class_name": "MatchingDurableObject",
 				"name": "MATCHING_DURABLE_OBJECT"
+			},
+			{
+				"class_name": "GameDurableObject",
+				"name": "GAME_DURABLE_OBJECT"
 			}
 		]
 	},
@@ -17,6 +21,10 @@
 					{
 						"class_name": "MatchingDurableObject",
 						"name": "MATCHING_DURABLE_OBJECT"
+					},
+					{
+						"class_name": "GameDurableObject",
+						"name": "GAME_DURABLE_OBJECT"
 					}
 				]
 			},
@@ -31,6 +39,10 @@
 					{
 						"class_name": "MatchingDurableObject",
 						"name": "MATCHING_DURABLE_OBJECT"
+					},
+					{
+						"class_name": "GameDurableObject",
+						"name": "GAME_DURABLE_OBJECT"
 					}
 				]
 			},
@@ -46,6 +58,10 @@
 					{
 						"class_name": "MatchingDurableObject",
 						"name": "MATCHING_DURABLE_OBJECT"
+					},
+					{
+						"class_name": "GameDurableObject",
+						"name": "GAME_DURABLE_OBJECT"
 					}
 				]
 			},
@@ -60,7 +76,11 @@
 	"migrations": [
 		{
 			"new_sqlite_classes": ["MatchingDurableObject"],
-			"tag": "v1"
+			"tag": "matching-v1"
+		},
+		{
+			"new_sqlite_classes": ["GameDurableObject"],
+			"tag": "game-v1"
 		}
 	],
 	"name": "api",

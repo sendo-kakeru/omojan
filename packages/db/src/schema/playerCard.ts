@@ -32,6 +32,7 @@ export const playerCardTable = sqliteTable("player_card", {
 		.notNull()
 		.$type<SubmissionId>()
 		.references(() => submissionTable.id, { onDelete: "cascade" }),
+	text: text("text").notNull().unique(),
 });
 
 export const playerCardSchema = createSelectSchema(playerCardTable, {

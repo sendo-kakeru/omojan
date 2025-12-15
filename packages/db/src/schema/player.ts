@@ -19,6 +19,14 @@ import { type UserId, userIdSchema, userTable } from "./user";
 export const playerIdSchema = pipe(string(), uuid(), brand("player_id"));
 export type PlayerId = InferOutput<typeof playerIdSchema>;
 
+export const playerSeatSchema = union([
+	literal(1),
+	literal(2),
+	literal(3),
+	literal(4),
+]);
+export type PlayerSeat = InferOutput<typeof playerSeatSchema>;
+
 export const playerTable = sqliteTable("player", {
 	...tableBaseColumns,
 	gameId: text("game_id")
@@ -31,7 +39,7 @@ export const playerTable = sqliteTable("player", {
 	// 匿名ユーザーは設定させる or `匿名1`のように割り振る
 	playerName: text("player_name").notNull(),
 	// NOTE: 席順 1~4
-	seat: integer("seat").notNull().$type<1 | 2 | 3 | 4>(),
+	seat: integer("seat").notNull().$type<PlayerSeat>(),
 	// NOTE: 匿名ユーザーの場合はnull
 	userId: text("user_id")
 		.$type<UserId | null>()
@@ -46,13 +54,6 @@ export const playerNameSchema = pipe(
 	maxLength(50, "プレイヤー名は50文字以下で入力してください"),
 );
 
-export const playerSeatSchema = union([
-	literal(1),
-	literal(2),
-	literal(3),
-	literal(4),
-]);
-
 export const playerSchema = createSelectSchema(playerTable, {
 	gameId: gameIdSchema,
 	id: playerIdSchema,
@@ -60,7 +61,6 @@ export const playerSchema = createSelectSchema(playerTable, {
 	seat: playerSeatSchema,
 	userId: userIdSchema,
 });
-export type PlayerSeat = InferOutput<typeof playerSeatSchema>;
 export function isPlayerSeat(seat: number): seat is PlayerSeat {
 	return is(playerSeatSchema, seat);
 }
