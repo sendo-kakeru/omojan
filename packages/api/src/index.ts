@@ -5,6 +5,7 @@ import { createDrizzleClient } from "./libs/drizzle";
 import { routes } from "./presentation/routes";
 import type { BaseContext, HttpRespondReturn } from "./types";
 
+export { GameDurableObject } from "./application/game/GameDurableObject";
 export { MatchingDurableObject } from "./application/matching/MatchingDurableObject";
 
 export const app = new Hono<BaseContext>()
