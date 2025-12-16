@@ -10,7 +10,7 @@ import {
 	uuid,
 } from "valibot";
 import { idBaseColumn, tableBaseColumns } from "./common";
-import { type GameId, gameIdSchema, gameTable } from "./game";
+import { type RoomId, roomIdSchema, roomTable } from "./room";
 
 export const roundIdSchema = pipe(string(), uuid(), brand("round_id"));
 export type RoundId = InferOutput<typeof roundIdSchema>;
@@ -25,11 +25,11 @@ export type RoundNo = InferOutput<typeof roundNoSchema>;
 
 export const roundTable = sqliteTable("round", {
 	...tableBaseColumns,
-	gameId: text("game_id")
-		.notNull()
-		.$type<GameId>()
-		.references(() => gameTable.id, { onDelete: "cascade" }),
 	id: idBaseColumn.$type<RoundId>(),
+	roomId: text("room_id")
+		.notNull()
+		.$type<RoomId>()
+		.references(() => roomTable.id, { onDelete: "cascade" }),
 	roundNo: integer("round_no").notNull().$type<RoundNo>(),
 	status: text("status", { enum: ["submitting", "voting", "closed"] })
 		.notNull()
@@ -37,8 +37,8 @@ export const roundTable = sqliteTable("round", {
 });
 
 export const roundSchema = createSelectSchema(roundTable, {
-	gameId: gameIdSchema,
 	id: roundIdSchema,
+	roomId: roomIdSchema,
 	roundNo: roundNoSchema,
 });
 export type Round = InferOutput<typeof roundSchema>;

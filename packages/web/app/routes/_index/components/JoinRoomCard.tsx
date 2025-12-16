@@ -1,4 +1,4 @@
-import type { Room } from "@repo/db/model";
+import type { Game } from "@repo/db/model";
 import classNames from "classnames";
 import { useState } from "react";
 import { FaRegClock } from "react-icons/fa6";
@@ -11,7 +11,7 @@ export function JoinRoomCard({
 	room,
 	className,
 }: {
-	room: Omit<Room, "password">;
+	room: Omit<Game, "password">;
 	className?: string;
 }) {
 	const [isOpen, setIsOpen] = useState(false);

@@ -13,17 +13,17 @@ import {
 } from "valibot";
 import { idBaseColumn, tableBaseColumns } from "./common";
 
-export const gameIdSchema = pipe(string(), uuid(), brand("game_id"));
-export type GameId = InferOutput<typeof gameIdSchema>;
+export const roomIdSchema = pipe(string(), uuid(), brand("room_id"));
+export type RoomId = InferOutput<typeof roomIdSchema>;
 
-export function isGameId(id: unknown): id is GameId {
-	const result = safeParse(gameIdSchema, id);
+export function isRoomId(id: unknown): id is RoomId {
+	const result = safeParse(roomIdSchema, id);
 	return result.success;
 }
 
-export const gameTable = sqliteTable("game", {
+export const roomTable = sqliteTable("room", {
 	...tableBaseColumns,
-	id: idBaseColumn.$type<GameId>(),
+	id: idBaseColumn.$type<RoomId>(),
 	isPrivate: integer("is_private", { mode: "boolean" })
 		.notNull()
 		.default(false),
@@ -35,18 +35,18 @@ export const gameTable = sqliteTable("game", {
 	title: text("title").notNull(),
 });
 
-export const gameSchema = createSelectSchema(gameTable, {
-	id: gameIdSchema,
+export const roomSchema = createSelectSchema(roomTable, {
+	id: roomIdSchema,
 });
-export type Game = InferOutput<typeof gameSchema>;
+export type Room = InferOutput<typeof roomSchema>;
 
-export const gameStateSchema = union([
+export const roomStateSchema = union([
 	literal("waiting"),
 	literal("setting"), // 不要だったら消す
 	literal("submission"),
 	literal("voting"),
 	literal("result"),
 ]);
-export type GameState = InferOutput<typeof gameStateSchema>;
+export type RoomState = InferOutput<typeof roomStateSchema>;
 
-export const gameIdRequestParamSchema = object({ gameId: gameIdSchema });
+export const roomIdRequestParamSchema = object({ roomId: roomIdSchema });

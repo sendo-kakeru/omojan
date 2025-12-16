@@ -1,11 +1,11 @@
 import { DurableObject } from "cloudflare:workers";
 import {
-	type GameId,
-	type GameState,
-	isGameId,
+	isRoomId,
 	type Player,
 	type PlayerId,
 	playerTable,
+	type RoomId,
+	type RoomState,
 	type RoundNo,
 } from "@repo/db/schema";
 import { and, eq } from "drizzle-orm";
@@ -18,9 +18,9 @@ import { WebSocketService } from "../websocket/WebsocketService";
 export class GameDurableObject extends DurableObject<Env> {
 	private readonly db: DrizzleClient;
 	private readonly webSocketService = new WebSocketService();
-	private gameId: GameId | null = null;
+	private roomId: RoomId | null = null;
 	private round: RoundNo = 1;
-	private state: GameState = "waiting";
+	private state: RoomState = "waiting";
 	private readonly connections = new Map<
 		PlayerId,
 		{
@@ -40,8 +40,8 @@ export class GameDurableObject extends DurableObject<Env> {
 	 * HTTP/WS のリクエストを受け取り、WebSocket のみを受け付ける。
 	 */
 	async fetch(request: Request): Promise<Response> {
-		const { token, gameId } = this.getSearchParams(request);
-		this.ensureGameId(gameId);
+		const { token, roomId } = this.getSearchParams(request);
+		this.ensureRoomId(roomId);
 
 		if (!this.webSocketService.isUpgradeRequest(request)) {
 			throw new HTTPException(426, {
@@ -50,7 +50,7 @@ export class GameDurableObject extends DurableObject<Env> {
 		}
 
 		// WS リクエストをアップグレードし、参加者一覧を即時配信する。
-		const player = await this.verifyPlayer({ gameId, token });
+		const player = await this.verifyPlayer({ roomId, token });
 		const [client, server] = Object.values(new WebSocketPair());
 
 		if (!client || !server) {
@@ -98,7 +98,7 @@ export class GameDurableObject extends DurableObject<Env> {
 	}
 
 	async alarm(): Promise<void> {
-		if (!this.gameId) return;
+		if (!this.roomId) return;
 		// 接続待機タイムアウトになったらゲームを開始
 		this.state = "setting";
 		await this.ctx.storage.deleteAlarm();
@@ -109,10 +109,10 @@ export class GameDurableObject extends DurableObject<Env> {
 	 * 入室トークンが該当ゲームのプレイヤーに属しているか検証する。
 	 */
 	private async verifyPlayer({
-		gameId,
+		roomId,
 		token,
 	}: {
-		gameId: GameId;
+		roomId: RoomId;
 		token: string;
 	}): Promise<Pick<Player, "id">> {
 		const tokenHash = this.roomService.hashGameToken(token);
@@ -123,7 +123,7 @@ export class GameDurableObject extends DurableObject<Env> {
 			.from(playerTable)
 			.where(
 				and(
-					eq(playerTable.gameId, gameId),
+					eq(playerTable.roomId, roomId),
 					eq(playerTable.gameTokenHash, tokenHash),
 				),
 			);
@@ -138,9 +138,9 @@ export class GameDurableObject extends DurableObject<Env> {
 	}
 
 	/**
-	 * 共通クエリ（token / gameId）を抽出し検証する。
+	 * 共通クエリ（token / roomId）を抽出し検証する。
 	 */
-	private getSearchParams(request: Request): { token: string; gameId: GameId } {
+	private getSearchParams(request: Request): { token: string; roomId: RoomId } {
 		let url: URL;
 
 		try {
@@ -154,23 +154,23 @@ export class GameDurableObject extends DurableObject<Env> {
 			throw new HTTPException(401, { message: "認証情報が不足しています" });
 		}
 
-		const gameId = url.searchParams.get("gameId");
-		if (!isGameId(gameId)) {
-			throw new HTTPException(400, { message: "gameIdが正しくありません" });
+		const roomId = url.searchParams.get("roomId");
+		if (!isRoomId(roomId)) {
+			throw new HTTPException(400, { message: "roomIdが正しくありません" });
 		}
 
-		return { gameId, token };
+		return { roomId, token };
 	}
 
 	/**
-	 * DurableObject が単一の gameId だけを扱うよう制限する。
+	 * DurableObject が単一の roomId だけを扱うよう制限する。
 	 */
-	private ensureGameId(gameId: GameId) {
-		if (this.gameId && this.gameId !== gameId) {
+	private ensureRoomId(roomId: RoomId) {
+		if (this.roomId && this.roomId !== roomId) {
 			throw new HTTPException(409, {
-				message: "DurableObjectが異なるgameIdで呼び出されました。",
+				message: "DurableObjectが異なるroomIdで呼び出されました。",
 			});
 		}
-		this.gameId = gameId;
+		this.roomId = roomId;
 	}
 }

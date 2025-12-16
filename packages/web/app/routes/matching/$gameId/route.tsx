@@ -29,7 +29,7 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 	});
 	const roomMetaResult = useRoomSWR({
 		header: { "x-game-token": gameToken ?? "" },
-		param: { gameId },
+		param: { roomId: gameId },
 	});
 	const { isCopied, copy } = useClipboard(roomMetaResult.data?.password ?? "");
 	const {
@@ -44,7 +44,6 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 		sendExit,
 		matchingCompletedTimeoutRef,
 	} = useMatchingSubscriptionSWR({
-		gameId,
 		gameToken,
 		onClose: (event: CloseEvent) => {
 			if (exitTimeoutRef.current) {
@@ -62,6 +61,7 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 		onCompleted() {
 			void navigate(`/game/${gameId}`);
 		},
+		roomId: gameId,
 	});
 
 	const handleExit = () => {

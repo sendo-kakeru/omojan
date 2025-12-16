@@ -13,7 +13,7 @@ import {
 	uuid,
 } from "valibot";
 import { idBaseColumn, tableBaseColumns } from "./common";
-import { type GameId, gameIdSchema, gameTable } from "./game";
+import { type RoomId, roomIdSchema, roomTable } from "./room";
 import { type UserId, userIdSchema, userTable } from "./user";
 
 export const playerIdSchema = pipe(string(), uuid(), brand("player_id"));
@@ -29,15 +29,15 @@ export type PlayerSeat = InferOutput<typeof playerSeatSchema>;
 
 export const playerTable = sqliteTable("player", {
 	...tableBaseColumns,
-	gameId: text("game_id")
-		.notNull()
-		.$type<GameId>()
-		.references(() => gameTable.id, { onDelete: "cascade" }),
 	gameTokenHash: text("game_token_hash").notNull().unique(),
 	id: idBaseColumn.$type<PlayerId>(),
 	// NOTE: ログインユーザーはuserのname
 	// 匿名ユーザーは設定させる or `匿名1`のように割り振る
 	playerName: text("player_name").notNull(),
+	roomId: text("room_id")
+		.notNull()
+		.$type<RoomId>()
+		.references(() => roomTable.id, { onDelete: "cascade" }),
 	// NOTE: 席順 1~4
 	seat: integer("seat").notNull().$type<PlayerSeat>(),
 	// NOTE: 匿名ユーザーの場合はnull
@@ -55,9 +55,9 @@ export const playerNameSchema = pipe(
 );
 
 export const playerSchema = createSelectSchema(playerTable, {
-	gameId: gameIdSchema,
 	id: playerIdSchema,
 	playerName: playerNameSchema,
+	roomId: roomIdSchema,
 	seat: playerSeatSchema,
 	userId: userIdSchema,
 });

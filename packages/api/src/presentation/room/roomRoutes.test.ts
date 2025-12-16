@@ -1,12 +1,12 @@
 import { faker } from "@faker-js/faker";
 import { sha256 } from "@noble/hashes/sha2.js";
 import { bytesToHex } from "@noble/hashes/utils.js";
-import type { CreateRoomRequestBody } from "@repo/db/model";
+import type { CreateGameRequestBody } from "@repo/db/model";
 import {
-	type GameId,
-	gameTable,
 	type PlayerSeat,
 	playerTable,
+	type RoomId,
+	roomTable,
 	userTable,
 } from "@repo/db/schema";
 import { MOCK_USER } from "@repo/mock/model";
@@ -39,12 +39,12 @@ describe("roomRoutes", () => {
 
 		beforeEach(async () => {
 			await db.delete(playerTable);
-			await db.delete(gameTable);
+			await db.delete(roomTable);
 			await db.delete(userTable);
 		});
 
 		describe("POST /rooms", () => {
-			const MOCK_REQUEST_BODY: CreateRoomRequestBody = {
+			const MOCK_REQUEST_BODY: CreateGameRequestBody = {
 				isPrivate: false,
 				playerName: MOCK_USER.name,
 				timeLimit: 30,
@@ -70,8 +70,8 @@ describe("roomRoutes", () => {
 
 				const [createdGame] = await db
 					.select()
-					.from(gameTable)
-					.where(eq(gameTable.id, body.data?.gameId as GameId));
+					.from(roomTable)
+					.where(eq(roomTable.id, body.data?.gameId as RoomId));
 				expect(createdGame).toBeDefined();
 				expect(createdGame?.title).toBe(MOCK_REQUEST_BODY.title);
 				expect(createdGame?.timeLimit).toBe(MOCK_REQUEST_BODY.timeLimit);
@@ -81,7 +81,7 @@ describe("roomRoutes", () => {
 				const [createdPlayer] = await db
 					.select()
 					.from(playerTable)
-					.where(eq(playerTable.gameId, body.data?.gameId as GameId));
+					.where(eq(playerTable.roomId, body.data?.gameId as RoomId));
 				expect(createdPlayer).toBeDefined();
 				expect(createdPlayer?.playerName).toBe(MOCK_REQUEST_BODY.playerName);
 				expect(createdPlayer?.seat).toBe(1);
@@ -93,7 +93,7 @@ describe("roomRoutes", () => {
 			test("プライベートルームを作成できる", async () => {
 				await db.insert(userTable).values(MOCK_USER);
 
-				const privateRoomBody: CreateRoomRequestBody = {
+				const privateRoomBody: CreateGameRequestBody = {
 					...MOCK_REQUEST_BODY,
 					isPrivate: true,
 				};
@@ -108,8 +108,8 @@ describe("roomRoutes", () => {
 
 				const [createdGame] = await db
 					.select()
-					.from(gameTable)
-					.where(eq(gameTable.id, body.data?.gameId as GameId));
+					.from(roomTable)
+					.where(eq(roomTable.id, body.data?.gameId as RoomId));
 				expect(createdGame?.isPrivate).toBe(true);
 				expect(createdGame?.password).toBeTypeOf("string");
 			});
@@ -117,7 +117,7 @@ describe("roomRoutes", () => {
 			test("バリデーションエラーの場合、400を返す", async () => {
 				const invalidBody = {
 					title: MOCK_REQUEST_BODY.title,
-				} as unknown as CreateRoomRequestBody;
+				} as unknown as CreateGameRequestBody;
 
 				const response = await mockHonoClient.v1.rooms.$post({
 					json: invalidBody,
@@ -130,7 +130,7 @@ describe("roomRoutes", () => {
 				const invalidBody = {
 					...MOCK_REQUEST_BODY,
 					timeLimit: -1,
-				} as CreateRoomRequestBody;
+				} as CreateGameRequestBody;
 
 				const response = await mockHonoClient.v1.rooms.$post({
 					json: invalidBody,
@@ -140,13 +140,13 @@ describe("roomRoutes", () => {
 			});
 		});
 
-		describe("GET /rooms/:gameId", () => {
+		describe("GET /rooms/:roomId", () => {
 			test("有効なトークンでルームを単体取得できる", async () => {
 				const gameToken = "valid-game-token";
 				const gameTokenHash = hashGameToken(gameToken);
 
 				const [createdGame] = await db
-					.insert(gameTable)
+					.insert(roomTable)
 					.values({
 						isPrivate: false,
 						password: null,
@@ -157,16 +157,16 @@ describe("roomRoutes", () => {
 					.returning();
 
 				await db.insert(playerTable).values({
-					gameId: createdGame.id,
 					gameTokenHash,
 					playerName: "Player",
+					roomId: createdGame.id,
 					seat: 1,
 					userId: null,
 				});
 
-				const response = await mockHonoClient.v1.rooms[":gameId"].$get({
+				const response = await mockHonoClient.v1.rooms[":roomId"].$get({
 					header: { "x-game-token": gameToken },
-					param: { gameId: createdGame.id },
+					param: { roomId: createdGame.id },
 				});
 
 				expect(response.status).toBe(200);
@@ -183,7 +183,7 @@ describe("roomRoutes", () => {
 				const gameTokenHash = hashGameToken(gameToken);
 
 				const [createdGame] = await db
-					.insert(gameTable)
+					.insert(roomTable)
 					.values({
 						isPrivate: true,
 						password: "secret",
@@ -194,16 +194,16 @@ describe("roomRoutes", () => {
 					.returning();
 
 				await db.insert(playerTable).values({
-					gameId: createdGame.id,
 					gameTokenHash,
 					playerName: "Player",
+					roomId: createdGame.id,
 					seat: 1,
 					userId: null,
 				});
 
-				const response = await mockHonoClient.v1.rooms[":gameId"].$get({
+				const response = await mockHonoClient.v1.rooms[":roomId"].$get({
 					header: { "x-game-token": gameToken },
-					param: { gameId: createdGame.id },
+					param: { roomId: createdGame.id },
 				});
 
 				expect(response.status).toBe(200);
@@ -220,7 +220,7 @@ describe("roomRoutes", () => {
 				const gameTokenHash = hashGameToken(validGameToken);
 
 				const [createdGame] = await db
-					.insert(gameTable)
+					.insert(roomTable)
 					.values({
 						isPrivate: false,
 						password: null,
@@ -231,16 +231,16 @@ describe("roomRoutes", () => {
 					.returning();
 
 				await db.insert(playerTable).values({
-					gameId: createdGame.id,
 					gameTokenHash,
 					playerName: "Player",
+					roomId: createdGame.id,
 					seat: 1,
 					userId: null,
 				});
 
-				const response = await mockHonoClient.v1.rooms[":gameId"].$get({
+				const response = await mockHonoClient.v1.rooms[":roomId"].$get({
 					header: { "x-game-token": invalidGameToken },
-					param: { gameId: createdGame.id },
+					param: { roomId: createdGame.id },
 				});
 
 				expect(response.status).toBe(403);
@@ -249,9 +249,9 @@ describe("roomRoutes", () => {
 			test("存在しないルームIDの場合は404を返す", async () => {
 				const gameToken = "some-token";
 
-				const response = await mockHonoClient.v1.rooms[":gameId"].$get({
+				const response = await mockHonoClient.v1.rooms[":roomId"].$get({
 					header: { "x-game-token": gameToken },
-					param: { gameId: faker.string.uuid() },
+					param: { roomId: faker.string.uuid() },
 				});
 
 				expect(response.status).toBe(404);
@@ -259,7 +259,7 @@ describe("roomRoutes", () => {
 
 			test("X-Game-Tokenヘッダーがない場合は400を返す", async () => {
 				const [createdGame] = await db
-					.insert(gameTable)
+					.insert(roomTable)
 					.values({
 						isPrivate: false,
 						password: null,
@@ -327,7 +327,7 @@ describe("roomRoutes", () => {
 			});
 		});
 
-		describe("POST /rooms/:gameId/join", () => {
+		describe("POST /rooms/:roomId/join", () => {
 			test("既に同じユーザーが参加している場合は201を返す", async () => {
 				const [insertedUser] = await db
 					.insert(userTable)
@@ -335,7 +335,7 @@ describe("roomRoutes", () => {
 					.returning();
 
 				const [createdGame] = await db
-					.insert(gameTable)
+					.insert(roomTable)
 					.values({
 						isPrivate: false,
 						password: null,
@@ -347,19 +347,19 @@ describe("roomRoutes", () => {
 
 				const hostTokenHash = hashGameToken("host-token");
 				await db.insert(playerTable).values({
-					gameId: createdGame.id,
 					gameTokenHash: hostTokenHash,
 					playerName: "Host",
+					roomId: createdGame.id,
 					seat: 1,
 					userId: insertedUser?.id ?? null,
 				});
 
-				const response = await mockHonoClient.v1.rooms[":gameId"].join.$post({
+				const response = await mockHonoClient.v1.rooms[":roomId"].join.$post({
 					json: {
 						heldToken: null,
 						playerName: "Dup Player",
 					},
-					param: { gameId: createdGame.id },
+					param: { roomId: createdGame.id },
 				});
 
 				expect(response.status).toBe(201);
@@ -372,7 +372,7 @@ describe("roomRoutes", () => {
 					.returning();
 
 				const [createdGame] = await db
-					.insert(gameTable)
+					.insert(roomTable)
 					.values({
 						isPrivate: false,
 						password: null,
@@ -387,27 +387,27 @@ describe("roomRoutes", () => {
 				const heldTokenHash = hashGameToken(heldToken);
 
 				await db.insert(playerTable).values({
-					gameId: createdGame.id,
 					gameTokenHash: hostTokenHash,
 					playerName: "Host",
+					roomId: createdGame.id,
 					seat: 1,
 					userId: null,
 				});
 
 				await db.insert(playerTable).values({
-					gameId: createdGame.id,
 					gameTokenHash: heldTokenHash,
 					playerName: "Existing Player",
+					roomId: createdGame.id,
 					seat: 2,
 					userId: insertedUser?.id ?? null,
 				});
 
-				const response = await mockHonoClient.v1.rooms[":gameId"].join.$post({
+				const response = await mockHonoClient.v1.rooms[":roomId"].join.$post({
 					json: {
 						heldToken,
 						playerName: "Rejoin Player",
 					},
-					param: { gameId: createdGame.id },
+					param: { roomId: createdGame.id },
 				});
 
 				expect(response.status).toBe(201);
@@ -426,12 +426,12 @@ describe("roomRoutes", () => {
 
 		beforeEach(async () => {
 			await db.delete(playerTable);
-			await db.delete(gameTable);
+			await db.delete(roomTable);
 			await db.delete(userTable);
 		});
 
 		describe("POST /rooms", () => {
-			const MOCK_REQUEST_BODY: CreateRoomRequestBody = {
+			const MOCK_REQUEST_BODY: CreateGameRequestBody = {
 				isPrivate: false,
 				playerName: faker.person.firstName(),
 				timeLimit: 60,
@@ -452,15 +452,15 @@ describe("roomRoutes", () => {
 
 				const [createdGame] = await db
 					.select()
-					.from(gameTable)
-					.where(eq(gameTable.id, body.data?.gameId as GameId));
+					.from(roomTable)
+					.where(eq(roomTable.id, body.data?.gameId as RoomId));
 				expect(createdGame).toBeDefined();
 				expect(createdGame?.title).toBe(MOCK_REQUEST_BODY.title);
 
 				const [createdPlayer] = await db
 					.select()
 					.from(playerTable)
-					.where(eq(playerTable.gameId, body.data?.gameId as GameId));
+					.where(eq(playerTable.roomId, body.data?.gameId as RoomId));
 				expect(createdPlayer).toBeDefined();
 				expect(createdPlayer?.playerName).toBe(MOCK_REQUEST_BODY.playerName);
 				expect(createdPlayer?.seat).toBe(1);
@@ -470,10 +470,10 @@ describe("roomRoutes", () => {
 			});
 		});
 
-		describe("POST /rooms/:gameId/join", () => {
+		describe("POST /rooms/:roomId/join", () => {
 			test("未認証ユーザーでもルームに参加できる", async () => {
 				const [createdGame] = await db
-					.insert(gameTable)
+					.insert(roomTable)
 					.values({
 						isPrivate: false,
 						password: null,
@@ -484,19 +484,19 @@ describe("roomRoutes", () => {
 					.returning();
 
 				await db.insert(playerTable).values({
-					gameId: createdGame.id,
 					gameTokenHash: hashGameToken("host-token"),
 					playerName: "Host",
+					roomId: createdGame.id,
 					seat: 1,
 					userId: null,
 				});
 
-				const response = await mockHonoClient.v1.rooms[":gameId"].join.$post({
+				const response = await mockHonoClient.v1.rooms[":roomId"].join.$post({
 					json: {
 						heldToken: null,
 						playerName: "Guest",
 					},
-					param: { gameId: createdGame.id },
+					param: { roomId: createdGame.id },
 				});
 
 				expect(response.status).toBe(201);
@@ -508,7 +508,7 @@ describe("roomRoutes", () => {
 				const createdPlayers = await db
 					.select()
 					.from(playerTable)
-					.where(eq(playerTable.gameId, createdGame.id));
+					.where(eq(playerTable.roomId, createdGame.id));
 				const guestPlayer = createdPlayers.find(
 					(player) => player.playerName === "Guest",
 				);
@@ -524,7 +524,7 @@ describe("roomRoutes", () => {
 
 			test("4人目が参加したらゲームステータスがactiveになる", async () => {
 				const [createdGame] = await db
-					.insert(gameTable)
+					.insert(roomTable)
 					.values({
 						isPrivate: false,
 						password: null,
@@ -537,36 +537,36 @@ describe("roomRoutes", () => {
 				await Promise.all(
 					["Host", "Guest 1", "Guest 2"].map(async (playerName, index) => {
 						await db.insert(playerTable).values({
-							gameId: createdGame.id,
 							gameTokenHash: hashGameToken(`token-${index}`),
 							playerName,
+							roomId: createdGame.id,
 							seat: (index + 1) as PlayerSeat,
 							userId: null,
 						});
 					}),
 				);
 
-				const response = await mockHonoClient.v1.rooms[":gameId"].join.$post({
+				const response = await mockHonoClient.v1.rooms[":roomId"].join.$post({
 					json: {
 						heldToken: null,
 						playerName: "Guest 3",
 					},
-					param: { gameId: createdGame.id },
+					param: { roomId: createdGame.id },
 				});
 
 				expect(response.status).toBe(201);
 
 				const [updatedGame] = await db
-					.select({ status: gameTable.status })
-					.from(gameTable)
-					.where(eq(gameTable.id, createdGame.id));
+					.select({ status: roomTable.status })
+					.from(roomTable)
+					.where(eq(roomTable.id, createdGame.id));
 
 				expect(updatedGame?.status).toBe("active");
 			});
 
 			test("プライベートルームで誤ったパスワードを送信すると403を返す", async () => {
 				const [createdGame] = await db
-					.insert(gameTable)
+					.insert(roomTable)
 					.values({
 						isPrivate: true,
 						password: "secret",
@@ -577,20 +577,20 @@ describe("roomRoutes", () => {
 					.returning();
 
 				await db.insert(playerTable).values({
-					gameId: createdGame.id,
 					gameTokenHash: hashGameToken("host-token"),
 					playerName: "Host",
+					roomId: createdGame.id,
 					seat: 1,
 					userId: null,
 				});
 
-				const response = await mockHonoClient.v1.rooms[":gameId"].join.$post({
+				const response = await mockHonoClient.v1.rooms[":roomId"].join.$post({
 					json: {
 						heldToken: null,
 						password: "wrong1",
 						playerName: "Intruder",
 					},
-					param: { gameId: createdGame.id },
+					param: { roomId: createdGame.id },
 				});
 
 				expect(response.status).toBe(403);
@@ -598,7 +598,7 @@ describe("roomRoutes", () => {
 
 			test("募集中以外のステータスの部屋には参加できない", async () => {
 				const [createdGame] = await db
-					.insert(gameTable)
+					.insert(roomTable)
 					.values({
 						isPrivate: false,
 						password: null,
@@ -609,19 +609,19 @@ describe("roomRoutes", () => {
 					.returning();
 
 				await db.insert(playerTable).values({
-					gameId: createdGame.id,
 					gameTokenHash: hashGameToken("host-token"),
 					playerName: "Host",
+					roomId: createdGame.id,
 					seat: 1,
 					userId: null,
 				});
 
-				const response = await mockHonoClient.v1.rooms[":gameId"].join.$post({
+				const response = await mockHonoClient.v1.rooms[":roomId"].join.$post({
 					json: {
 						heldToken: null,
 						playerName: "Late Player",
 					},
-					param: { gameId: createdGame.id },
+					param: { roomId: createdGame.id },
 				});
 
 				expect(response.status).toBe(400);
@@ -629,7 +629,7 @@ describe("roomRoutes", () => {
 
 			test("満員のルームには参加できない", async () => {
 				const [createdGame] = await db
-					.insert(gameTable)
+					.insert(roomTable)
 					.values({
 						isPrivate: false,
 						password: null,
@@ -643,33 +643,33 @@ describe("roomRoutes", () => {
 					Array.from({ length: 4 }).map(async (_, index) => {
 						const gameTokenHash = hashGameToken(`token-${index}`);
 						await db.insert(playerTable).values({
-							gameId: createdGame.id,
 							gameTokenHash,
 							playerName: `Player ${index + 1}`,
+							roomId: createdGame.id,
 							seat: (index + 1) as PlayerSeat,
 							userId: null,
 						});
 					}),
 				);
 
-				const response = await mockHonoClient.v1.rooms[":gameId"].join.$post({
+				const response = await mockHonoClient.v1.rooms[":roomId"].join.$post({
 					json: {
 						heldToken: null,
 						playerName: "Latecomer",
 					},
-					param: { gameId: createdGame.id },
+					param: { roomId: createdGame.id },
 				});
 
 				expect(response.status).toBe(409);
 			});
 
 			test("存在しないルームIDの場合は404を返す", async () => {
-				const response = await mockHonoClient.v1.rooms[":gameId"].join.$post({
+				const response = await mockHonoClient.v1.rooms[":roomId"].join.$post({
 					json: {
 						heldToken: null,
 						playerName: "Ghost",
 					},
-					param: { gameId: faker.string.uuid() },
+					param: { roomId: faker.string.uuid() },
 				});
 
 				expect(response.status).toBe(404);
@@ -677,7 +677,7 @@ describe("roomRoutes", () => {
 
 			test("プライベートルームでパスワード未入力の場合は400を返す", async () => {
 				const [createdGame] = await db
-					.insert(gameTable)
+					.insert(roomTable)
 					.values({
 						isPrivate: true,
 						password: "secret",
@@ -688,19 +688,19 @@ describe("roomRoutes", () => {
 					.returning();
 
 				await db.insert(playerTable).values({
-					gameId: createdGame.id,
 					gameTokenHash: hashGameToken("host-token"),
 					playerName: "Host",
+					roomId: createdGame.id,
 					seat: 1,
 					userId: null,
 				});
 
-				const response = await mockHonoClient.v1.rooms[":gameId"].join.$post({
+				const response = await mockHonoClient.v1.rooms[":roomId"].join.$post({
 					json: {
 						heldToken: null,
 						playerName: "NoPass",
 					},
-					param: { gameId: createdGame.id },
+					param: { roomId: createdGame.id },
 				});
 
 				expect(response.status).toBe(400);

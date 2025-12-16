@@ -1,7 +1,7 @@
 "use client";
 
-import type { JoinRoomRequestBody, Room } from "@repo/db/model";
-import { joinRoomRequestBodySchema, roomPasswordSchema } from "@repo/db/model";
+import type { Game, JoinGameRequestBody } from "@repo/db/model";
+import { gamePasswordSchema, joinGameRequestBodySchema } from "@repo/db/model";
 import { LOCALSTORAGE_OPERATION_FAILED_MESSAGE } from "@repo/shared/error";
 import { useForm } from "@tanstack/react-form";
 import { type Dispatch, type SetStateAction, useId, useState } from "react";
@@ -32,7 +32,7 @@ export function JoinRoomDialog({
 }: {
 	isOpen: boolean;
 	setIsOpen: Dispatch<SetStateAction<boolean>>;
-	room: Omit<Room, "password">;
+	room: Omit<Game, "password">;
 }) {
 	const { me } = useMe();
 	const navigate = useNavigate();
@@ -41,7 +41,7 @@ export function JoinRoomDialog({
 	const { isLoading, startLoading, stopLoading } = useIsLoading();
 	const [passwordError, setPasswordError] = useState<string | undefined>();
 
-	const defaultValues: JoinRoomRequestBody = (() => {
+	const defaultValues: JoinGameRequestBody = (() => {
 		const gameToken = gameTokenLocalStorage.get({
 			onError() {
 				showToast({
@@ -65,7 +65,7 @@ export function JoinRoomDialog({
 
 			// 鍵部屋はパスワード検証
 			if (room.isPrivate) {
-				const result = safeParse(roomPasswordSchema, value.password);
+				const result = safeParse(gamePasswordSchema, value.password);
 				if (!result.success) {
 					setPasswordError(result.issues[0].message);
 					stopLoading();
@@ -74,9 +74,9 @@ export function JoinRoomDialog({
 			}
 
 			try {
-				const response = await honoClient.v1.rooms[":gameId"].join.$post({
+				const response = await honoClient.v1.rooms[":roomId"].join.$post({
 					json: value,
-					param: { gameId: room.gameId },
+					param: { roomId: room.gameId },
 				});
 				const { data, message } = await response.json();
 
@@ -122,7 +122,7 @@ export function JoinRoomDialog({
 			}
 		},
 		validators: {
-			onSubmit: joinRoomRequestBodySchema,
+			onSubmit: joinGameRequestBodySchema,
 		},
 	});
 

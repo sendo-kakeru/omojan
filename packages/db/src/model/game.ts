@@ -20,25 +20,26 @@ import {
 	variant,
 } from "valibot";
 import {
-	gameIdSchema,
-	gameSchema,
-	gameTable,
 	playerIdSchema,
 	playerNameSchema,
 	playerSchema,
 	playerTable,
+	roomIdSchema,
+	roomTable,
+	roomSchema as roomTableSchema,
 	userSchema,
 } from "../schema";
 export type { BrandSymbol };
 
-export const roomPasswordSchema = pipe(
+export const gamePasswordSchema = pipe(
 	string("パスワードを入力してください"),
 	length(6, "パスワードは6文字で入力してください"),
 );
 
-export const roomSchema = object({
-	...pick(gameSchema, ["title", "isPrivate", "password", "timeLimit"]).entries,
-	gameId: gameIdSchema,
+export const gameSchema = object({
+	...pick(roomTableSchema, ["title", "isPrivate", "password", "timeLimit"])
+		.entries,
+	gameId: roomIdSchema,
 	players: array(
 		object({
 			...pick(playerSchema, ["playerName", "seat"]).entries,
@@ -47,41 +48,41 @@ export const roomSchema = object({
 		}),
 	),
 });
-export type Room = InferOutput<typeof roomSchema>;
+export type Game = InferOutput<typeof gameSchema>;
 
 // find many
-export const getRoomListResponseBodySchema = array(
-	omit(roomSchema, ["password"]),
+export const getGameListResponseBodySchema = array(
+	omit(gameSchema, ["password"]),
 );
-export type GetRoomListResponseBody = InferOutput<
-	typeof getRoomListResponseBodySchema
+export type GetGameListResponseBody = InferOutput<
+	typeof getGameListResponseBodySchema
 >;
 
 // find one
-export const getRoomResponseBodySchema = pick(roomSchema, [
+export const getGameResponseBodySchema = pick(gameSchema, [
 	"title",
 	"isPrivate",
 	"password",
 	"timeLimit",
 ]);
-export type GetRoomResponseBody = InferOutput<typeof getRoomResponseBodySchema>;
+export type GetGameResponseBody = InferOutput<typeof getGameResponseBodySchema>;
 
 // join
-export const joinRoomRequestBodySchema = object({
+export const joinGameRequestBodySchema = object({
 	/**
 	 * クライアントで保持しているトークン
 	 * 既に参加している場合の重複参加防止に使用
 	 */
 	heldToken: nullable(string()),
-	password: optional(roomPasswordSchema),
+	password: optional(gamePasswordSchema),
 	playerName: playerNameSchema,
 });
-export type JoinRoomRequestBody = InferOutput<typeof joinRoomRequestBodySchema>;
+export type JoinGameRequestBody = InferOutput<typeof joinGameRequestBodySchema>;
 
 /**
  * クライアントの状態に応じたレスポンス
  */
-export const joinRoomResponseBodySchema = variant("state", [
+export const joinGameResponseBodySchema = variant("state", [
 	object({
 		/**
 		 * 通常の参加成功
@@ -103,14 +104,14 @@ export const joinRoomResponseBodySchema = variant("state", [
 		state: literal("HELD_TOKEN_PLAYER_JOINED"),
 	}),
 ]);
-export type JoinRoomResponseBody = InferOutput<
-	typeof joinRoomResponseBodySchema
+export type JoinGameResponseBody = InferOutput<
+	typeof joinGameResponseBodySchema
 >;
 
 // create
-export const createRoomRequestBodySchema = object({
+export const createGameRequestBodySchema = object({
 	...pick(
-		createSelectSchema(gameTable, {
+		createSelectSchema(roomTable, {
 			timeLimit: pipe(
 				number("制限時間を選択してください"),
 				minValue(15, "制限時間は15秒以上で入力してください"),
@@ -131,19 +132,19 @@ export const createRoomRequestBodySchema = object({
 		["playerName"],
 	).entries,
 });
-export type CreateRoomRequestBody = InferOutput<
-	typeof createRoomRequestBodySchema
+export type CreateGameRequestBody = InferOutput<
+	typeof createGameRequestBodySchema
 >;
-export const createRoomResponseBodySchema = object({
-	gameId: gameIdSchema,
+export const createGameResponseBodySchema = object({
+	gameId: roomIdSchema,
 	token: playerSchema.entries.gameTokenHash,
 });
-export type CreateRoomResponseBody = InferOutput<
-	typeof createRoomResponseBodySchema
+export type CreateGameResponseBody = InferOutput<
+	typeof createGameResponseBodySchema
 >;
 
 // verify token
-export const verifyRoomTokenRequestQuerySchema = object({
+export const verifyGameTokenRequestQuerySchema = object({
 	token: string(),
 });
 

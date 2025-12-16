@@ -3,19 +3,19 @@ import { sha256 } from "@noble/hashes/sha2.js";
 import { bytesToHex } from "@noble/hashes/utils.js";
 import { encodeBase64urlNoPadding } from "@oslojs/encoding";
 import type {
-	CreateRoomRequestBody,
-	CreateRoomResponseBody,
-	GetRoomListResponseBody,
-	GetRoomResponseBody,
-	JoinRoomRequestBody,
-	JoinRoomResponseBody,
+	CreateGameRequestBody,
+	CreateGameResponseBody,
+	GetGameListResponseBody,
+	GetGameResponseBody,
+	JoinGameRequestBody,
+	JoinGameResponseBody,
 } from "@repo/db/model";
 import {
-	type Game,
-	type GameId,
-	gameTable,
 	isPlayerSeat,
 	playerTable,
+	type Room,
+	type RoomId,
+	roomTable,
 	type User,
 	userTable,
 } from "@repo/db/schema";
@@ -38,24 +38,24 @@ export class RoomService {
 	/**
 	 * ルームを単体取得する
 	 */
-	async findByGameId({
-		gameId,
+	async findByRoomId({
+		roomId,
 		gameToken,
 	}: {
-		gameId: GameId;
+		roomId: RoomId;
 		gameToken: string;
-	}): Promise<GetRoomResponseBody> {
+	}): Promise<GetGameResponseBody> {
 		const gameTokenHash = this.hashGameToken(gameToken);
 
 		const [game] = await this.db
 			.select({
-				isPrivate: gameTable.isPrivate,
-				password: gameTable.password,
-				timeLimit: gameTable.timeLimit,
-				title: gameTable.title,
+				isPrivate: roomTable.isPrivate,
+				password: roomTable.password,
+				timeLimit: roomTable.timeLimit,
+				title: roomTable.title,
 			})
-			.from(gameTable)
-			.where(eq(gameTable.id, gameId));
+			.from(roomTable)
+			.where(eq(roomTable.id, roomId));
 
 		if (!game) {
 			throw new HTTPException(404, { message: "指定された部屋が存在しません" });
@@ -66,7 +66,7 @@ export class RoomService {
 				gameTokenHash: playerTable.gameTokenHash,
 			})
 			.from(playerTable)
-			.where(eq(playerTable.gameId, gameId));
+			.where(eq(playerTable.roomId, roomId));
 
 		if (!players.some((player) => player.gameTokenHash === gameTokenHash)) {
 			throw new HTTPException(403, {
@@ -81,54 +81,54 @@ export class RoomService {
 	/**
 	 * 募集中のルーム一覧を取得する
 	 */
-	async findMany(): Promise<GetRoomListResponseBody> {
+	async findMany(): Promise<GetGameListResponseBody> {
 		return await this.db.transaction(async (tx) => {
 			// game取得
-			const games = await tx
+			const rooms = await tx
 				.select({
-					createdAt: gameTable.createdAt,
-					id: gameTable.id,
-					isPrivate: gameTable.isPrivate,
-					timeLimit: gameTable.timeLimit,
-					title: gameTable.title,
+					createdAt: roomTable.createdAt,
+					id: roomTable.id,
+					isPrivate: roomTable.isPrivate,
+					timeLimit: roomTable.timeLimit,
+					title: roomTable.title,
 				})
-				.from(gameTable)
-				.where(eq(gameTable.status, "waiting"))
-				.orderBy(desc(gameTable.createdAt));
+				.from(roomTable)
+				.where(eq(roomTable.status, "waiting"))
+				.orderBy(desc(roomTable.createdAt));
 
-			if (games.length === 0) return [];
+			if (rooms.length === 0) return [];
 
 			// gameのプレイヤー取得
 			const players = await tx
 				.select({
-					gameId: playerTable.gameId,
 					id: playerTable.id,
 					image: userTable.image,
 					playerName: playerTable.playerName,
+					roomId: playerTable.roomId,
 					seat: playerTable.seat,
 				})
 				.from(playerTable)
 				.leftJoin(userTable, eq(playerTable.userId, userTable.id))
 				.where(
 					inArray(
-						playerTable.gameId,
-						games.map((game) => game.id),
+						playerTable.roomId,
+						rooms.map((room) => room.id),
 					),
 				);
 
 			// gameIdごとにplayersをグルーピング
-			const groupedPlayersByGameId = new Map<string, typeof players>();
+			const groupedPlayersByRoomId = new Map<string, typeof players>();
 
 			for (const player of players) {
-				const arr = groupedPlayersByGameId.get(player.gameId) ?? [];
+				const arr = groupedPlayersByRoomId.get(player.roomId) ?? [];
 				arr.push(player);
-				groupedPlayersByGameId.set(player.gameId, arr);
+				groupedPlayersByRoomId.set(player.roomId, arr);
 			}
 
-			return games.map((game) => ({
-				gameId: game.id,
-				isPrivate: game.isPrivate,
-				players: (groupedPlayersByGameId.get(game.id) ?? [])
+			return rooms.map((room) => ({
+				gameId: room.id,
+				isPrivate: room.isPrivate,
+				players: (groupedPlayersByRoomId.get(room.id) ?? [])
 					.sort((a, b) => a.seat - b.seat)
 					.map((player) => ({
 						id: player.id,
@@ -136,17 +136,17 @@ export class RoomService {
 						playerName: player.playerName,
 						seat: player.seat,
 					})),
-				timeLimit: game.timeLimit,
-				title: game.title,
+				timeLimit: room.timeLimit,
+				title: room.title,
 			}));
 		});
 	}
 	async create({
 		sub,
 		...dto
-	}: CreateRoomRequestBody & {
+	}: CreateGameRequestBody & {
 		sub: User["sub"] | null;
-	}): Promise<CreateRoomResponseBody> {
+	}): Promise<CreateGameResponseBody> {
 		return await this.db.transaction(async (tx) => {
 			// 認証済みならユーザー取得
 			// 匿名ならnullで続行
@@ -162,19 +162,19 @@ export class RoomService {
 			})();
 
 			// game作成
-			const [createdGame] = await tx
-				.insert(gameTable)
+			const [createdRoom] = await tx
+				.insert(roomTable)
 				.values({
 					isPrivate: dto.isPrivate,
 					password: dto.isPrivate ? this.generateRoomPassword() : null,
 					timeLimit: dto.timeLimit,
 					title: dto.title,
 				})
-				.returning({ id: gameTable.id });
+				.returning({ id: roomTable.id });
 
-			if (!createdGame) {
+			if (!createdRoom) {
 				throw new HTTPException(500, {
-					message: "作成したGameの取得に失敗しました",
+					message: "作成したRoomの取得に失敗しました",
 				});
 			}
 
@@ -182,38 +182,38 @@ export class RoomService {
 			const { gameToken, gameTokenHash } = this.generateGameTokenPair();
 
 			await tx.insert(playerTable).values({
-				gameId: createdGame.id,
 				gameTokenHash,
 				playerName: dto.playerName,
+				roomId: createdRoom.id,
 				seat: 1,
 				userId: authUser?.id ?? null,
 			});
 
-			return { gameId: createdGame.id, token: gameToken };
+			return { gameId: createdRoom.id, token: gameToken };
 		});
 	}
 	async join({
-		gameId,
+		roomId,
 		password,
 		playerName,
 		sub,
 		heldToken,
 	}: {
-		gameId: GameId;
-	} & JoinRoomRequestBody & {
+		roomId: RoomId;
+	} & JoinGameRequestBody & {
 			sub: User["sub"] | null;
-		}): Promise<JoinRoomResponseBody> {
+		}): Promise<JoinGameResponseBody> {
 		return await this.db.transaction(async (tx) => {
 			// game取得
 			const [findGame] = await tx
 				.select({
-					id: gameTable.id,
-					isPrivate: gameTable.isPrivate,
-					password: gameTable.password,
-					status: gameTable.status,
+					id: roomTable.id,
+					isPrivate: roomTable.isPrivate,
+					password: roomTable.password,
+					status: roomTable.status,
 				})
-				.from(gameTable)
-				.where(eq(gameTable.id, gameId));
+				.from(roomTable)
+				.where(eq(roomTable.id, roomId));
 
 			if (!findGame) {
 				throw new HTTPException(404, {
@@ -249,7 +249,7 @@ export class RoomService {
 					userId: playerTable.userId,
 				})
 				.from(playerTable)
-				.where(eq(playerTable.gameId, findGame.id));
+				.where(eq(playerTable.roomId, findGame.id));
 
 			// クライアントが保持しているトークンのプレイヤーが参加済み
 			if (heldToken) {
@@ -261,7 +261,7 @@ export class RoomService {
 					.from(playerTable)
 					.where(
 						and(
-							eq(playerTable.gameId, findGame.id),
+							eq(playerTable.roomId, findGame.id),
 							eq(playerTable.gameTokenHash, heldTokenHash),
 						),
 					);
@@ -294,7 +294,7 @@ export class RoomService {
 					.set({ gameTokenHash })
 					.where(
 						and(
-							eq(playerTable.gameId, findGame.id),
+							eq(playerTable.roomId, findGame.id),
 							eq(playerTable.userId, authUser.id),
 						),
 					);
@@ -310,7 +310,7 @@ export class RoomService {
 				if (findGame.status === "waiting") {
 					await this.activate({
 						db: tx,
-						gameId: findGame.id,
+						roomId: findGame.id,
 					});
 				}
 				throw new HTTPException(409, { message: "この部屋は満員です" });
@@ -321,9 +321,9 @@ export class RoomService {
 
 			// 通常の参加の場合はplayerを作成してトークンを返す
 			await tx.insert(playerTable).values({
-				gameId: findGame.id,
 				gameTokenHash,
 				playerName,
+				roomId: findGame.id,
 				seat,
 				userId: authUser?.id,
 			});
@@ -334,7 +334,7 @@ export class RoomService {
 			) {
 				await this.activate({
 					db: tx,
-					gameId: findGame.id,
+					roomId: findGame.id,
 				});
 			}
 
@@ -376,7 +376,7 @@ export class RoomService {
 	 */
 	private async activate({
 		db,
-		gameId,
+		roomId,
 	}: {
 		db:
 			| DrizzleClient
@@ -386,12 +386,12 @@ export class RoomService {
 					Record<string, never>,
 					ExtractTablesWithRelations<Record<string, never>>
 			  >;
-		gameId: GameId;
+		roomId: RoomId;
 	}): Promise<void> {
 		await db
-			.update(gameTable)
+			.update(roomTable)
 			.set({ status: "active" })
-			.where(eq(gameTable.id, gameId));
+			.where(eq(roomTable.id, roomId));
 	}
 
 	private assignSeat(seats: number[]): number | undefined {
@@ -402,14 +402,14 @@ export class RoomService {
 		}
 	}
 
-	async getStatus(gameId: GameId): Promise<Game["status"] | null> {
+	async getStatus(roomId: RoomId): Promise<Room["status"] | null> {
 		try {
 			const [game] = await this.db
 				.select({
-					status: gameTable.status,
+					status: roomTable.status,
 				})
-				.from(gameTable)
-				.where(eq(gameTable.id, gameId));
+				.from(roomTable)
+				.where(eq(roomTable.id, roomId));
 
 			return game?.status ?? null;
 		} catch {

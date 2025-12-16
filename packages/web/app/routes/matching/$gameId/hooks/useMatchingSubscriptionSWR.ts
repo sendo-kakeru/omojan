@@ -9,9 +9,9 @@ import useSWRSubscription, {
 } from "swr/subscription";
 import { parse } from "valibot";
 
-function getUrl({ gameId }: { gameId: string }): URL | undefined {
+function getUrl({ roomId }: { roomId: string }): URL | undefined {
 	try {
-		return new URL(`/v1/matchings/${gameId}`, import.meta.env.VITE_API_URL);
+		return new URL(`/v1/matchings/${roomId}`, import.meta.env.VITE_API_URL);
 	} catch (error) {
 		console.error("URLの形式が正しくありません。", error);
 		return;
@@ -19,12 +19,12 @@ function getUrl({ gameId }: { gameId: string }): URL | undefined {
 }
 
 export function useMatchingSubscriptionSWR({
-	gameId,
+	roomId,
 	gameToken,
 	onClose,
 	onCompleted,
 }: {
-	gameId: string;
+	roomId: string;
 	gameToken: string | null;
 	onClose: (event: CloseEvent) => void;
 	onCompleted: () => void;
@@ -32,7 +32,7 @@ export function useMatchingSubscriptionSWR({
 	const wsRef = useRef<WebSocket | null>(null);
 	const matchingCompletedTimeoutRef = useRef<number | null>(null);
 
-	const url = getUrl({ gameId });
+	const url = getUrl({ roomId });
 	// なくても問題なく動いているのでコメントアウト
 	// url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
 

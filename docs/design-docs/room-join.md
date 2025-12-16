@@ -44,9 +44,9 @@
 ```ts
 export const playerTable = sqliteTable("player", {
 	...tableBaseColumns,
-	gameId: text("game_id")
-		.notNull()
-		.references(() => gameTable.id, { onDelete: "cascade" }),
+roomId: text("room_id")
+	.notNull()
+	.references(() => roomTable.id, { onDelete: "cascade" }),
 	gameTokenHash: text("game_token_hash").notNull().unique(),
 	playerName: text("player_name").notNull(),
 	seat: integer("seat").notNull().$type<1 | 2 | 3 | 4>(),

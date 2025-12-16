@@ -1,13 +1,13 @@
 import {
-	type CreateRoomResponseBody,
-	createRoomRequestBodySchema,
-	type GetRoomListResponseBody,
-	type GetRoomResponseBody,
+	type CreateGameResponseBody,
+	createGameRequestBodySchema,
+	type GetGameListResponseBody,
+	type GetGameResponseBody,
 	gameTokenHeaderSchema,
-	type JoinRoomResponseBody,
-	joinRoomRequestBodySchema,
+	type JoinGameResponseBody,
+	joinGameRequestBodySchema,
 } from "@repo/db/model";
-import { gameIdRequestParamSchema } from "@repo/db/schema";
+import { roomIdRequestParamSchema } from "@repo/db/schema";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { RoomService } from "../../application/room/RoomService";
@@ -22,7 +22,7 @@ export const routes = new Hono<
 		c.set("roomService", roomService);
 		await next();
 	})
-	.get("/", async (c): Promise<HttpRespondReturn<GetRoomListResponseBody>> => {
+	.get("/", async (c): Promise<HttpRespondReturn<GetGameListResponseBody>> => {
 		const { roomService } = c.var;
 
 		try {
@@ -43,8 +43,8 @@ export const routes = new Hono<
 	})
 	.post(
 		"/",
-		vValidator("json", createRoomRequestBodySchema),
-		async (c): Promise<HttpRespondReturn<CreateRoomResponseBody>> => {
+		vValidator("json", createGameRequestBodySchema),
+		async (c): Promise<HttpRespondReturn<CreateGameResponseBody>> => {
 			const { roomService, sub } = c.var;
 			const body = c.req.valid("json");
 
@@ -69,16 +69,19 @@ export const routes = new Hono<
 		},
 	)
 	.get(
-		"/:gameId",
-		vValidator("param", gameIdRequestParamSchema),
+		"/:roomId",
+		vValidator("param", roomIdRequestParamSchema),
 		vValidator("header", gameTokenHeaderSchema),
-		async (c): Promise<HttpRespondReturn<GetRoomResponseBody>> => {
+		async (c): Promise<HttpRespondReturn<GetGameResponseBody>> => {
 			const { roomService } = c.var;
-			const { gameId } = c.req.valid("param");
+			const { roomId } = c.req.valid("param");
 			const { "x-game-token": gameToken } = c.req.valid("header");
 
 			try {
-				const room = await roomService.findByGameId({ gameId, gameToken });
+				const room = await roomService.findByRoomId({
+					gameToken,
+					roomId,
+				});
 
 				return c.json(
 					{
@@ -96,18 +99,18 @@ export const routes = new Hono<
 		},
 	)
 	.post(
-		"/:gameId/join",
-		vValidator("json", joinRoomRequestBodySchema),
-		vValidator("param", gameIdRequestParamSchema),
-		async (c): Promise<HttpRespondReturn<JoinRoomResponseBody>> => {
+		"/:roomId/join",
+		vValidator("json", joinGameRequestBodySchema),
+		vValidator("param", roomIdRequestParamSchema),
+		async (c): Promise<HttpRespondReturn<JoinGameResponseBody>> => {
 			const { roomService, sub } = c.var;
 			const body = c.req.valid("json");
-			const { gameId } = c.req.valid("param");
+			const { roomId } = c.req.valid("param");
 
 			try {
 				const playerToken = await roomService.join({
 					...body,
-					gameId,
+					roomId,
 					sub,
 				});
 

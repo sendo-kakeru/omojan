@@ -1,6 +1,6 @@
-export * from "./game";
 export * from "./player";
 export * from "./playerCard";
+export * from "./room";
 export * from "./round";
 export * from "./roundTheme";
 export * from "./roundWinner";

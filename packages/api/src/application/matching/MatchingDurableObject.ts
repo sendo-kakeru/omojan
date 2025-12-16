@@ -5,12 +5,12 @@ import {
 	matchingClientMessageSchema,
 } from "@repo/db/model";
 import {
-	type GameId,
-	gameTable,
-	isGameId,
+	isRoomId,
 	type Player,
 	type PlayerId,
 	playerTable,
+	type RoomId,
+	roomTable,
 	type User,
 	userTable,
 } from "@repo/db/schema";
@@ -33,7 +33,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	private readonly db: DrizzleClient;
 	private readonly roomService: RoomService;
 	private readonly webSocketService = new WebSocketService();
-	private gameId: GameId | null = null;
+	private roomId: RoomId | null = null;
 
 	constructor(ctx: DurableObjectState, env: Env) {
 		super(ctx, env);
@@ -45,8 +45,8 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	 * HTTP/WS のリクエストを受け取り、WebSocket のみを受け付ける。
 	 */
 	async fetch(request: Request): Promise<Response> {
-		const { token, gameId } = this.getSearchParams(request);
-		this.ensureGameId(gameId);
+		const { token, roomId } = this.getSearchParams(request);
+		this.ensureRoomId(roomId);
 
 		if (!this.webSocketService.isUpgradeRequest(request)) {
 			throw new HTTPException(426, {
@@ -55,7 +55,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 		}
 
 		// WS リクエストをアップグレードし、参加者一覧を即時配信する。
-		const player = await this.verifyPlayer({ gameId, token });
+		const player = await this.verifyPlayer({ roomId, token });
 		const [client, server] = Object.values(new WebSocketPair());
 
 		if (!client || !server) {
@@ -80,7 +80,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 		if (currentAlarm === null) {
 			await this.ctx.storage.setAlarm(Date.now() + HEARTBEAT_INTERVAL_MS);
 		}
-		const participants = await this.fetchParticipants({ gameId });
+		const participants = await this.fetchParticipants({ roomId });
 		await this.broadcastParticipants({ participants });
 
 		return this.webSocketService.upgradeResponse({ client });
@@ -106,7 +106,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	 * WS メッセージ受信時の処理
 	 */
 	async webSocketMessage(ws: WebSocket, message: string): Promise<void> {
-		if (!this.gameId) return;
+		if (!this.roomId) return;
 
 		const playerId = this.heartbeatService.findIdBySocket(ws);
 
@@ -133,15 +133,15 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	 * 定期的にPINGを送信し、切断されたプレイヤーをクリーンアップする
 	 */
 	async alarm(): Promise<void> {
-		if (!this.gameId) return;
-		const gameStatus = await this.roomService.getStatus(this.gameId);
+		if (!this.roomId) return;
+		const gameStatus = await this.roomService.getStatus(this.roomId);
 		if (gameStatus && gameStatus !== "waiting") return;
 
 		// 全接続にPINGを送信
 		this.heartbeatService.sendPingToAll();
 
 		// DBから現在のプレイヤー一覧を取得
-		const players = await this.fetchParticipants({ gameId: this.gameId });
+		const players = await this.fetchParticipants({ roomId: this.roomId });
 
 		// 接続がなく、タイムアウトしたプレイヤーを格納
 		const disconnectedPlayerIds: PlayerId[] = [];
@@ -176,11 +176,11 @@ export class MatchingDurableObject extends DurableObject<Env> {
 
 		// 残りのプレイヤーを確認
 		const remainingParticipants = await this.fetchParticipants({
-			gameId: this.gameId,
+			roomId: this.roomId,
 		});
 
 		if (remainingParticipants.length === 0) {
-			await this.deleteRoom({ gameId: this.gameId });
+			await this.deleteRoom({ roomId: this.roomId });
 			return;
 		}
 
@@ -205,9 +205,9 @@ export class MatchingDurableObject extends DurableObject<Env> {
 		playerId: PlayerId;
 		ws: WebSocket;
 	}): Promise<void> {
-		if (!this.gameId) return;
+		if (!this.roomId) return;
 
-		const gameStatus = await this.roomService.getStatus(this.gameId);
+		const gameStatus = await this.roomService.getStatus(this.roomId);
 
 		// NOTE: 既に4人メンバーが確定し、activeになっていたら接続だけ解除。（確定からゲーム移動までの時間は退出操作不可なので、通常は発生し得ない）
 		this.heartbeatService.unregister(playerId);
@@ -217,10 +217,10 @@ export class MatchingDurableObject extends DurableObject<Env> {
 
 		ws.close(4204, "退出しました");
 
-		const participants = await this.fetchParticipants({ gameId: this.gameId });
+		const participants = await this.fetchParticipants({ roomId: this.roomId });
 
 		if (participants.length === 0) {
-			await this.deleteRoom({ gameId: this.gameId });
+			await this.deleteRoom({ roomId: this.roomId });
 			return;
 		}
 
@@ -230,8 +230,8 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	/**
 	 * 部屋を削除し、全接続をクローズする
 	 */
-	private async deleteRoom({ gameId }: { gameId: GameId }): Promise<void> {
-		await this.db.delete(gameTable).where(eq(gameTable.id, gameId));
+	private async deleteRoom({ roomId }: { roomId: RoomId }): Promise<void> {
+		await this.db.delete(roomTable).where(eq(roomTable.id, roomId));
 		for (const socket of this.heartbeatService.getSockets()) {
 			socket.close(4410, "部屋が削除されました");
 		}
@@ -268,10 +268,10 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	 * 入室トークンが該当ゲームのプレイヤーに属しているか検証する。
 	 */
 	private async verifyPlayer({
-		gameId,
+		roomId,
 		token,
 	}: {
-		gameId: GameId;
+		roomId: RoomId;
 		token: string;
 	}): Promise<Pick<Player, "id">> {
 		const tokenHash = this.roomService.hashGameToken(token);
@@ -282,7 +282,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 			.from(playerTable)
 			.where(
 				and(
-					eq(playerTable.gameId, gameId),
+					eq(playerTable.roomId, roomId),
 					eq(playerTable.gameTokenHash, tokenHash),
 				),
 			);
@@ -300,9 +300,9 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	 * ゲームに属する全プレイヤーを seat 順に取得する。
 	 */
 	private async fetchParticipants({
-		gameId,
+		roomId,
 	}: {
-		gameId: GameId;
+		roomId: RoomId;
 	}): Promise<(Pick<Player, "id" | "playerName"> & Pick<User, "image">)[]> {
 		const players = await this.db
 			.select({
@@ -312,7 +312,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 			})
 			.from(playerTable)
 			.leftJoin(userTable, eq(playerTable.userId, userTable.id))
-			.where(eq(playerTable.gameId, gameId))
+			.where(eq(playerTable.roomId, roomId))
 			.orderBy(asc(playerTable.seat));
 
 		return players;
@@ -338,9 +338,9 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	}
 
 	/**
-	 * 共通クエリ（token / gameId）を抽出し検証する。
+	 * 共通クエリ（token / roomId）を抽出し検証する。
 	 */
-	private getSearchParams(request: Request): { token: string; gameId: GameId } {
+	private getSearchParams(request: Request): { token: string; roomId: RoomId } {
 		let url: URL;
 
 		try {
@@ -354,23 +354,23 @@ export class MatchingDurableObject extends DurableObject<Env> {
 			throw new HTTPException(401, { message: "認証情報が不足しています" });
 		}
 
-		const gameId = url.searchParams.get("gameId");
-		if (!isGameId(gameId)) {
-			throw new HTTPException(400, { message: "gameIdが正しくありません" });
+		const roomId = url.searchParams.get("roomId");
+		if (!isRoomId(roomId)) {
+			throw new HTTPException(400, { message: "roomIdが正しくありません" });
 		}
 
-		return { gameId, token };
+		return { roomId, token };
 	}
 
 	/**
-	 * DurableObject が単一の gameId だけを扱うよう制限する。
+	 * DurableObject が単一の roomId だけを扱うよう制限する。
 	 */
-	private ensureGameId(gameId: GameId) {
-		if (this.gameId && this.gameId !== gameId) {
+	private ensureRoomId(roomId: RoomId) {
+		if (this.roomId && this.roomId !== roomId) {
 			throw new HTTPException(409, {
-				message: "DurableObjectが異なるgameIdで呼び出されました。",
+				message: "DurableObjectが異なるroomIdで呼び出されました。",
 			});
 		}
-		this.gameId = gameId;
+		this.roomId = roomId;
 	}
 }

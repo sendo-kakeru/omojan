@@ -1,5 +1,5 @@
 "use client";
-import { createRoomRequestBodySchema } from "@repo/db/model";
+import { createGameRequestBodySchema } from "@repo/db/model";
 import { LOCALSTORAGE_OPERATION_FAILED_MESSAGE } from "@repo/shared/error";
 import { useForm } from "@tanstack/react-form";
 import { type Dispatch, type SetStateAction, useId } from "react";
@@ -70,7 +70,7 @@ export function CreateRoomDialog({
 			}
 		},
 		validators: {
-			onSubmit: createRoomRequestBodySchema,
+			onSubmit: createGameRequestBodySchema,
 		},
 	});
 	return (
