@@ -134,8 +134,8 @@ importers:
         specifier: ^7.13.0
         version: 7.13.0(typescript@5.9.3)
       '@pulumi/pulumi':
-        specifier: ^3.210.0
-        version: 3.210.0(typescript@5.9.3)
+        specifier: ^3.213.0
+        version: 3.213.0(typescript@5.9.3)
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
@@ -1329,8 +1329,8 @@ packages:
   '@floating-ui/utils@0.2.10':
     resolution: {integrity: sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ==}
 
-  '@grpc/grpc-js@1.14.2':
-    resolution: {integrity: sha512-QzVUtEFyu05UNx2xr0fCQmStUO17uVQhGNowtxs00IgTZT6/W2PBLfUkj30s0FKJ29VtTa3ArVNIhNP6akQhqA==}
+  '@grpc/grpc-js@1.14.3':
+    resolution: {integrity: sha512-Iq8QQQ/7X3Sac15oB6p0FmUg/klxQvXLeileoqrTRGJYLV+/9tubbr9ipz0GKHjmXVsgFPo/+W+2cA8eNcR+XA==}
     engines: {node: '>=12.10.0'}
 
   '@grpc/proto-loader@0.8.0':
@@ -1850,8 +1850,8 @@ packages:
   '@pulumi/aws@7.13.0':
     resolution: {integrity: sha512-IVq5uu/0CLECORO8DtM24+LLc/eODzfK8a7b3x358sdtx+uhHlvr0HUD4VJaN5JP8B04RrsmPI64Qb2lMV2HAA==}
 
-  '@pulumi/pulumi@3.210.0':
-    resolution: {integrity: sha512-ZMe4oH8nFNi3Tig1U8mTEuqrjTyEz0aVkn+DvvjcBPvM7WzZSdB6xR9MiRK/ZUi0G5O+H7fx2gEEeq1vYcM5Jg==}
+  '@pulumi/pulumi@3.213.0':
+    resolution: {integrity: sha512-qTAOJXQYjMse2oAwht4iuYA4TiSgUgDfGmlySf2xa4n34+eF1/ytCbF3UJdfOx9+yDD5mYBAi37t0OY/VyVzyQ==}
     engines: {node: '>=20'}
     peerDependencies:
       ts-node: '>= 7.0.1 < 12'
@@ -6288,7 +6288,7 @@ snapshots:
 
   '@floating-ui/utils@0.2.10': {}
 
-  '@grpc/grpc-js@1.14.2':
+  '@grpc/grpc-js@1.14.3':
     dependencies:
       '@grpc/proto-loader': 0.8.0
       '@js-sdsl/ordered-map': 4.4.2
@@ -6836,7 +6836,7 @@ snapshots:
 
   '@pulumi/aws@7.13.0(typescript@5.9.3)':
     dependencies:
-      '@pulumi/pulumi': 3.210.0(typescript@5.9.3)
+      '@pulumi/pulumi': 3.213.0(typescript@5.9.3)
       mime: 2.6.0
     transitivePeerDependencies:
       - bluebird
@@ -6844,9 +6844,9 @@ snapshots:
       - ts-node
       - typescript
 
-  '@pulumi/pulumi@3.210.0(typescript@5.9.3)':
+  '@pulumi/pulumi@3.213.0(typescript@5.9.3)':
     dependencies:
-      '@grpc/grpc-js': 1.14.2
+      '@grpc/grpc-js': 1.14.3
       '@logdna/tail-file': 2.2.0
       '@npmcli/arborist': 7.5.4
       '@opentelemetry/api': 1.9.0
@@ -7805,7 +7805,7 @@ snapshots:
     dependencies:
       '@types/http-cache-semantics': 4.0.4
       '@types/keyv': 3.1.4
-      '@types/node': 25.0.2
+      '@types/node': 25.0.3
       '@types/responselike': 1.0.3
 
   '@types/chai@5.2.3':
@@ -7825,7 +7825,7 @@ snapshots:
 
   '@types/keyv@3.1.4':
     dependencies:
-      '@types/node': 25.0.2
+      '@types/node': 25.0.3
 
   '@types/mdx@2.0.13': {}
 
@@ -7841,7 +7841,6 @@ snapshots:
   '@types/node@25.0.3':
     dependencies:
       undici-types: 7.16.0
-    optional: true
 
   '@types/pg@8.15.6':
     dependencies:
@@ -7862,7 +7861,7 @@ snapshots:
 
   '@types/responselike@1.0.3':
     dependencies:
-      '@types/node': 25.0.2
+      '@types/node': 25.0.3
 
   '@types/semver@7.7.1': {}
 
@@ -9721,7 +9720,7 @@ snapshots:
       '@protobufjs/path': 1.1.2
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.0
-      '@types/node': 25.0.2
+      '@types/node': 25.0.3
       long: 5.3.2
 
   proxy-addr@2.0.7:
