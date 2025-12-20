@@ -20,7 +20,7 @@
 		"drizzle-seed": "^0.3.1",
 		"tsx": "^4.20.6",
 		"vitest": "^4.0.15",
-		"wrangler": "^4.54.0"
+		"wrangler": "^4.56.0"
 	},
 	"exports": {
 		".": "./dist/index.d.ts"
