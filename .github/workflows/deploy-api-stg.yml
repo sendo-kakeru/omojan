@@ -2,7 +2,7 @@ name: Deploy API Staging
 on:
   push:
     branches:
-      - develop
+      - staging
     paths:
       - packages/api/**
       - packages/db/**

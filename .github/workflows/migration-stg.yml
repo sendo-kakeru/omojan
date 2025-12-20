@@ -2,7 +2,7 @@ name: Migration Staging
 on:
   push:
     branches:
-      - develop
+      - staging
 jobs:
   migration:
     runs-on: ubuntu-latest
