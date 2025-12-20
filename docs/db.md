@@ -4,7 +4,7 @@
   - 基本はmainブランチマージ時にworkflowでmigration
   - 手動で行う必要がある場合はローカル環境から手動migration実行
 - STG: `omojan-main-stg`
-  - 基本はdevelopブランチマージ時にworkflowでmigration
+  - 基本はstagingブランチマージ時にworkflowでmigration
   - 手動で行う必要がある場合はローカル環境から手動migration実行
 - ローカル: `omojan-main-local-{developer}`
   - 開発者ごとに`omojan-main-stg` → `omojan-main-local-{developer}`をbranchingして開発
