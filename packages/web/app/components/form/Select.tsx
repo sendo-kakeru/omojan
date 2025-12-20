@@ -36,7 +36,7 @@ export function Select({
 			</select>
 			<FaAngleDown
 				aria-hidden
-				className="-translate-y-1/2 pointer-events-none absolute top-1/2 right-16 size-16 shrink-0 text-gray-400"
+				className="pointer-events-none absolute top-1/2 right-16 size-16 shrink-0 -translate-y-1/2 text-gray-400"
 			/>
 		</div>
 	);
