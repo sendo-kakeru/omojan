@@ -25,6 +25,16 @@ export const links: Route.LinksFunction = () => [
 		href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
 		rel: "stylesheet",
 	},
+	{ href: "/favicon.ico", rel: "icon", sizes: "any" },
+	{ href: "/favicon.svg", rel: "icon", type: "image/svg+xml" },
+	{
+		href: "/favicon-96x96.png",
+		rel: "icon",
+		sizes: "96x96",
+		type: "image/png",
+	},
+	{ href: "/apple-touch-icon.png", rel: "apple-touch-icon", sizes: "180x180" },
+	{ href: "/site.webmanifest", rel: "manifest" },
 ];
 
 export function Layout({ children }: PropsWithChildren) {
