@@ -449,13 +449,13 @@ export class RoomService {
 			.where(eq(gameTable.id, gameId));
 	}
 
-	private getEmptySeats(exitSeats: PlayerSeat[]): PlayerSeat[] {
-		const exitSeatsSet = new Set(exitSeats);
+	private getEmptySeats(existSeats: PlayerSeat[]): PlayerSeat[] {
+		const existSeatsSet = new Set(existSeats);
 		const emptySeats: PlayerSeat[] = [];
 
 		for (let seat = 1; seat <= 4; seat++) {
 			if (!isPlayerSeat(seat)) continue;
-			if (!exitSeatsSet.has(seat)) {
+			if (!existSeatsSet.has(seat)) {
 				emptySeats.push(seat);
 			}
 		}

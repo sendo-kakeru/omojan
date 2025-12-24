@@ -71,15 +71,14 @@ export const matchingServerParticipantsMessageSchema = object({
 	participants: array(matchingParticipantSchema),
 	type: literal("PARTICIPANTS"),
 });
+export type MatchingServerParticipantsMessage = InferOutput<
+	typeof matchingServerParticipantsMessageSchema
+>;
 
 export const matchingServerMePlayerMessageSchema = object({
 	player: pick(playerSchema, ["id", "isHost"]),
 	type: literal("ME_PLAYER"),
 });
-
-export type MatchingServerParticipantsMessage = InferOutput<
-	typeof matchingServerParticipantsMessageSchema
->;
 export type MatchingServerMePlayerMessage = InferOutput<
 	typeof matchingServerMePlayerMessageSchema
 >;
