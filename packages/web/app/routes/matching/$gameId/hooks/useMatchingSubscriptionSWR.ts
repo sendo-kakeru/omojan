@@ -1,5 +1,6 @@
 import {
 	type HeartbeatPongMessage,
+	type MatchingClientMessage,
 	type MatchingParticipant,
 	matchingServerMessageSchema,
 } from "@repo/db/model";
@@ -142,13 +143,23 @@ export function useMatchingSubscriptionSWR({
 			throw new Error("WebSocketが接続されていません。");
 		}
 
-		ws.send(JSON.stringify({ type: "EXIT" }));
+		ws.send(JSON.stringify({ type: "EXIT" } satisfies MatchingClientMessage));
+	};
+
+	const sendStart = (): void => {
+		const ws = wsRef.current;
+		if (!ws || ws.readyState !== WebSocket.OPEN) {
+			throw new Error("WebSocketが接続されていません。");
+		}
+
+		ws.send(JSON.stringify({ type: "START" } satisfies MatchingClientMessage));
 	};
 
 	return {
 		...subscription,
 		matchingCompletedTimeoutRef,
 		sendExit,
+		sendStart,
 		wsRef,
 	};
 }

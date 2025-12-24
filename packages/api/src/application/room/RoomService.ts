@@ -15,6 +15,7 @@ import {
 	type GameId,
 	gameTable,
 	isPlayerSeat,
+	type PlayerSeat,
 	playerTable,
 	type User,
 	userTable,
@@ -303,20 +304,20 @@ export class RoomService {
 			}
 
 			// 空いている席を割り当てて参加処理
-			const seat = this.assignSeat(
+			const [seat] = this.getEmptySeats(
 				participatingPlayers.map((player) => player.seat),
 			);
-			if (participatingPlayers.length >= 4) {
+
+			// 空いている席がない場合
+			if (!seat) {
 				if (findGame.status === "waiting") {
+					// 仮に満員なのにwaitingのままになっている場合、activeにする
 					await this.activate({
 						db: tx,
 						gameId: findGame.id,
 					});
 				}
 				throw new HTTPException(409, { message: "この部屋は満員です" });
-			}
-			if (!seat || !isPlayerSeat(seat)) {
-				throw new HTTPException(409, { message: "席番号が正しくありません" });
 			}
 
 			// 通常の参加の場合はplayerを作成してトークンを返す
@@ -339,6 +340,57 @@ export class RoomService {
 			}
 
 			return { state: "USUAL", token: gameToken };
+		});
+	}
+
+	async startWithCpu({ gameId }: { gameId: GameId }): Promise<void> {
+		await this.db.transaction(async (tx) => {
+			const [game] = await tx
+				.select({
+					status: gameTable.status,
+				})
+				.from(gameTable)
+				.where(eq(gameTable.id, gameId));
+
+			if (!game) {
+				throw new HTTPException(404, {
+					message: "指定された部屋が存在しません",
+				});
+			}
+
+			if (game.status !== "waiting") {
+				throw new HTTPException(409, {
+					message: "この部屋は現在募集していません",
+				});
+			}
+
+			const participatingPlayers = await tx
+				.select({
+					seat: playerTable.seat,
+				})
+				.from(playerTable)
+				.where(eq(playerTable.gameId, gameId));
+
+			const emptySeats = this.getEmptySeats(
+				participatingPlayers.map((player) => player.seat),
+			);
+
+			for (const seat of emptySeats) {
+				const { gameTokenHash } = this.generateGameTokenPair();
+				await tx.insert(playerTable).values({
+					gameId,
+					gameTokenHash,
+					isCpu: true,
+					playerName: "CPU",
+					seat,
+					userId: null,
+				});
+			}
+
+			await this.activate({
+				db: tx,
+				gameId,
+			});
 		});
 	}
 
@@ -394,12 +446,18 @@ export class RoomService {
 			.where(eq(gameTable.id, gameId));
 	}
 
-	private assignSeat(seats: number[]): number | undefined {
+	private getEmptySeats(exitSeats: PlayerSeat[]): PlayerSeat[] {
+		const exitSeatsSet = new Set(exitSeats);
+		const emptySeats: PlayerSeat[] = [];
+
 		for (let seat = 1; seat <= 4; seat++) {
-			if (!seats.includes(seat)) {
-				return seat;
+			if (!isPlayerSeat(seat)) continue;
+			if (!exitSeatsSet.has(seat)) {
+				emptySeats.push(seat);
 			}
 		}
+
+		return emptySeats;
 	}
 
 	async getStatus(gameId: GameId): Promise<Game["status"] | null> {

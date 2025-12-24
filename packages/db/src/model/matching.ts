@@ -23,11 +23,19 @@ export const matchingClientExitMessageSchema = object({
 	type: literal("EXIT"),
 });
 
+export const matchingClientStartMessageSchema = object({
+	/**
+	 * 募集中に不足人数をCPで埋めて開始する
+	 */
+	type: literal("START"),
+});
+
 /**
  * マッチング用WebSocketメッセージのスキーマ
  */
 export const matchingClientMessageSchema = variant("type", [
 	matchingClientExitMessageSchema,
+	matchingClientStartMessageSchema,
 	heartbeatPongMessageSchema,
 ]);
 

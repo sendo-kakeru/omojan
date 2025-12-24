@@ -38,10 +38,16 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 		stopLoading: stopExiting,
 	} = useIsLoading();
 	const {
+		isLoading: isStarting,
+		startLoading: startStarting,
+		stopLoading: stopStarting,
+	} = useIsLoading();
+	const {
 		data: participants,
 		error: matchingError,
 		wsRef,
 		sendExit,
+		sendStart,
 		matchingCompletedTimeoutRef,
 	} = useMatchingSubscriptionSWR({
 		gameId,
@@ -63,6 +69,22 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 			void navigate(`/game/${gameId}`);
 		},
 	});
+
+	const handleStart = () => {
+		startStarting();
+		try {
+			sendStart();
+		} catch (error) {
+			console.error("WebSocketが接続されていません。", error);
+			showToast({
+				title: "接続が切断されています。ページを再読み込みしてください。",
+				type: "error",
+			});
+			void navigate("/");
+		} finally {
+			stopStarting();
+		}
+	};
 
 	const handleExit = () => {
 		startExiting();
@@ -211,6 +233,18 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 					onClick={handleExit}
 				>
 					退出する
+				</Button>
+				<Button
+					as="button"
+					disabled={
+						isStarting ||
+						participants.length >= 4 ||
+						!!matchingCompletedTimeoutRef.current
+					}
+					leftIcon={isStarting ? <Spinner className="size-16" /> : undefined}
+					onClick={handleStart}
+				>
+					今すぐ開始
 				</Button>
 			</section>
 

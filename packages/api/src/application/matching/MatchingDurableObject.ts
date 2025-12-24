@@ -80,7 +80,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 		if (currentAlarm === null) {
 			await this.ctx.storage.setAlarm(Date.now() + HEARTBEAT_INTERVAL_MS);
 		}
-		const participants = await this.fetchParticipants({ gameId });
+		const participants = await this.getParticipants({ gameId });
 		await this.broadcastParticipants({ participants });
 
 		return this.webSocketService.upgradeResponse({ client });
@@ -125,6 +125,9 @@ export class MatchingDurableObject extends DurableObject<Env> {
 			case "PONG":
 				this.heartbeatService.recordPong(playerId);
 				break;
+			case "START":
+				await this.handleStart(ws);
+				break;
 		}
 	}
 
@@ -141,7 +144,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 		this.heartbeatService.sendPingToAll();
 
 		// DBから現在のプレイヤー一覧を取得
-		const players = await this.fetchParticipants({ gameId: this.gameId });
+		const players = await this.getParticipants({ gameId: this.gameId });
 
 		// 接続がなく、タイムアウトしたプレイヤーを格納
 		const disconnectedPlayerIds: PlayerId[] = [];
@@ -175,7 +178,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 		}
 
 		// 残りのプレイヤーを確認
-		const remainingParticipants = await this.fetchParticipants({
+		const remainingParticipants = await this.getParticipants({
 			gameId: this.gameId,
 		});
 
@@ -193,6 +196,27 @@ export class MatchingDurableObject extends DurableObject<Env> {
 		if (this.heartbeatService.size > 0 || remainingParticipants.length > 0) {
 			await this.ctx.storage.setAlarm(Date.now() + HEARTBEAT_INTERVAL_MS);
 		}
+	}
+
+	/**
+	 * 不足分をCPで埋めてゲームを開始する
+	 */
+	private async handleStart(ws: WebSocket): Promise<void> {
+		if (!this.gameId) return;
+
+		const gameStatus = await this.roomService.getStatus(this.gameId);
+		if (gameStatus !== "waiting") return;
+
+		try {
+			await this.roomService.startWithCpu({ gameId: this.gameId });
+		} catch (error) {
+			console.error("CPUを追加したゲームの開始に失敗しました:", error);
+			ws.close(1011, "ゲームの開始に失敗しました");
+			return;
+		}
+
+		const participants = await this.getParticipants({ gameId: this.gameId });
+		await this.broadcastParticipants({ participants });
 	}
 
 	/**
@@ -217,7 +241,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 
 		ws.close(4204, "退出しました");
 
-		const participants = await this.fetchParticipants({ gameId: this.gameId });
+		const participants = await this.getParticipants({ gameId: this.gameId });
 
 		if (participants.length === 0) {
 			await this.deleteRoom({ gameId: this.gameId });
@@ -299,7 +323,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	/**
 	 * ゲームに属する全プレイヤーを seat 順に取得する。
 	 */
-	private async fetchParticipants({
+	private async getParticipants({
 		gameId,
 	}: {
 		gameId: GameId;

@@ -35,6 +35,7 @@ export const playerTable = sqliteTable("player", {
 		.references(() => gameTable.id, { onDelete: "cascade" }),
 	gameTokenHash: text("game_token_hash").notNull().unique(),
 	id: idBaseColumn.$type<PlayerId>(),
+	isCpu: integer("is_cpu", { mode: "boolean" }).notNull().default(false),
 	// NOTE: ログインユーザーはuserのname
 	// 匿名ユーザーは設定させる or `匿名1`のように割り振る
 	playerName: text("player_name").notNull(),
