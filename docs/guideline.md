@@ -3,6 +3,7 @@
 - ページはdefault export、それ以外はnamed export
 - ログ、エラーは日本語で統一
 - 関数の返り値はできるだけ型を明示する。コールバック関数は任意。
+- 関数の引数は分割代入し、引数内で型定義
 - forEachは使わず、for ofを使用
 - any、as、Non-Null Assertion Operatorによる型の誤魔化しは最小にし、できるだけ適切に型付けする。as constの使用は問題ない。
 - 関数の引数が複数あるものは基本的にオブジェクトで渡す。
@@ -21,7 +22,6 @@
   - 部屋削除: 4410
 
 ### フロント
-- propsは分割代入し、引数で型定義
 - tailwind mergeの使用はいとしないマージが起こるので使用禁止
 - tailwind variantsのslotは複雑になるので基本使用しない
 
