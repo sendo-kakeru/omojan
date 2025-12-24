@@ -155,6 +155,29 @@ test("参加者3人の部屋に入るとマッチング完了後にゲーム画�
 	await hostContext.close();
 });
 
+test("開始ボタンでCPを補充してゲームを開始できる", async ({ page }) => {
+	const roomTitle = `途中開始-${uniqueSuffix()}`;
+	const playerName = `プレイヤー-${uniqueSuffix()}`;
+
+	const { gameId } = await createRoom({
+		page,
+		playerName: playerName,
+		roomTitle,
+	});
+
+	const startButton = page.getByRole("button", { name: "今すぐ開始" });
+	await expect(startButton).toBeVisible();
+
+	await startButton.click();
+
+	await expect(
+		page.getByText("参加者が集まりました。5秒後にゲーム画面へ移動します。"),
+	).toBeVisible({ timeout: 15_000 });
+
+	await page.waitForURL(`/game/${gameId}`, { timeout: 30_000 });
+	await expect(page.getByRole("heading", { name: "ゲーム画面" })).toBeVisible();
+});
+
 test("退出ボタンで退出が行える", async ({ page }) => {
 	const roomTitle = `退出-${uniqueSuffix()}`;
 	const playerName = `プレイヤー-${uniqueSuffix()}`;

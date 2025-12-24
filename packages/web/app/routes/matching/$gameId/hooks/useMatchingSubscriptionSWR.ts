@@ -1,9 +1,10 @@
 import {
 	type HeartbeatPongMessage,
+	type MatchingClientMessage,
 	type MatchingParticipant,
 	matchingServerMessageSchema,
 } from "@repo/db/model";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import useSWRSubscription, {
 	type SWRSubscriptionOptions,
 } from "swr/subscription";
@@ -31,6 +32,7 @@ export function useMatchingSubscriptionSWR({
 }) {
 	const wsRef = useRef<WebSocket | null>(null);
 	const matchingCompletedTimeoutRef = useRef<number | null>(null);
+	const [isHost, setIsHost] = useState(false);
 
 	const url = getUrl({ gameId });
 	// なくても問題なく動いているのでコメントアウト
@@ -62,26 +64,33 @@ export function useMatchingSubscriptionSWR({
 					const payload = JSON.parse(event.data);
 					const message = parse(matchingServerMessageSchema, payload);
 
-					if (message.type === "PING") {
-						ws.send(
-							JSON.stringify({ type: "PONG" } satisfies HeartbeatPongMessage),
-						);
-						return;
-					}
-
-					if (message.type === "PARTICIPANTS") {
-						if (message.participants.length === 4) {
-							matchingCompletedTimeoutRef.current = window.setTimeout(() => {
-								onCompleted();
-								ws.close(1000, "マッチングが完了しました。");
-							}, 5000);
-						} else {
-							if (matchingCompletedTimeoutRef.current) {
-								clearTimeout(matchingCompletedTimeoutRef.current);
-								matchingCompletedTimeoutRef.current = null;
-							}
+					switch (message.type) {
+						case "PING": {
+							ws.send(
+								JSON.stringify({ type: "PONG" } satisfies HeartbeatPongMessage),
+							);
+							break;
 						}
-						next(null, message.participants);
+						case "PARTICIPANTS": {
+							if (message.participants.length === 4) {
+								matchingCompletedTimeoutRef.current = window.setTimeout(() => {
+									onCompleted();
+									ws.close(1000, "マッチングが完了しました。");
+								}, 5000);
+							} else {
+								if (matchingCompletedTimeoutRef.current) {
+									clearTimeout(matchingCompletedTimeoutRef.current);
+									matchingCompletedTimeoutRef.current = null;
+								}
+							}
+							next(null, message.participants);
+							break;
+						}
+						case "ME_PLAYER": {
+							const { player } = message;
+							setIsHost(player.isHost);
+							break;
+						}
 					}
 				} catch (error) {
 					console.error("メッセージの形式が正しくありません:", error, event);
@@ -142,13 +151,24 @@ export function useMatchingSubscriptionSWR({
 			throw new Error("WebSocketが接続されていません。");
 		}
 
-		ws.send(JSON.stringify({ type: "EXIT" }));
+		ws.send(JSON.stringify({ type: "EXIT" } satisfies MatchingClientMessage));
+	};
+
+	const sendStart = (): void => {
+		const ws = wsRef.current;
+		if (!ws || ws.readyState !== WebSocket.OPEN) {
+			throw new Error("WebSocketが接続されていません。");
+		}
+
+		ws.send(JSON.stringify({ type: "START" } satisfies MatchingClientMessage));
 	};
 
 	return {
 		...subscription,
+		isHost,
 		matchingCompletedTimeoutRef,
 		sendExit,
+		sendStart,
 		wsRef,
 	};
 }
