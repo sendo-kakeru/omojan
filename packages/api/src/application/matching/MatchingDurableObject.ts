@@ -1,6 +1,7 @@
 import { DurableObject } from "cloudflare:workers";
 import {
 	type MatchingClientMessage,
+	type MatchingServerMePlayerMessage,
 	type MatchingServerParticipantsMessage,
 	matchingClientMessageSchema,
 } from "@repo/db/model";
@@ -75,6 +76,9 @@ export class MatchingDurableObject extends DurableObject<Env> {
 		// 接続を登録（ハートビート管理も含む）
 		this.heartbeatService.register({ id: player.id, socket: server });
 
+		// 自身のプレイヤー情報を先に送信
+		await this.sendMePlayerMessage({ player, socket: server });
+
 		// ハートビートアラームを開始（既に設定されていなければ）
 		const currentAlarm = await this.ctx.storage.getAlarm();
 		if (currentAlarm === null) {
@@ -126,7 +130,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 				this.heartbeatService.recordPong(playerId);
 				break;
 			case "START":
-				await this.handleStart(ws);
+				await this.handleStart({ playerId, ws });
 				break;
 		}
 	}
@@ -201,8 +205,24 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	/**
 	 * 不足分をCPで埋めてゲームを開始する
 	 */
-	private async handleStart(ws: WebSocket): Promise<void> {
+	private async handleStart({
+		playerId,
+		ws,
+	}: {
+		playerId: PlayerId;
+		ws: WebSocket;
+	}): Promise<void> {
 		if (!this.gameId) return;
+
+		const [player] = await this.db
+			.select({ isHost: playerTable.isHost })
+			.from(playerTable)
+			.where(eq(playerTable.id, playerId));
+
+		if (!player?.isHost) {
+			ws.close(4403, "ホストのみが開始を実行できます");
+			return;
+		}
 
 		const gameStatus = await this.roomService.getStatus(this.gameId);
 		if (gameStatus !== "waiting") return;
@@ -217,6 +237,28 @@ export class MatchingDurableObject extends DurableObject<Env> {
 
 		const participants = await this.getParticipants({ gameId: this.gameId });
 		await this.broadcastParticipants({ participants });
+	}
+
+	/**
+	 * クライアント自身のプレイヤー情報を送信する
+	 */
+	private async sendMePlayerMessage({
+		player,
+		socket,
+	}: {
+		player: MatchingServerMePlayerMessage["player"];
+		socket: WebSocket;
+	}): Promise<void> {
+		try {
+			socket.send(
+				JSON.stringify({
+					player,
+					type: "ME_PLAYER",
+				} satisfies MatchingServerMePlayerMessage),
+			);
+		} catch (error) {
+			console.error("ME_PLAYERメッセージの送信に失敗しました:", error);
+		}
 	}
 
 	/**
@@ -297,11 +339,12 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	}: {
 		gameId: GameId;
 		token: string;
-	}): Promise<Pick<Player, "id">> {
+	}): Promise<MatchingServerMePlayerMessage["player"]> {
 		const tokenHash = this.roomService.hashGameToken(token);
 		const [player] = await this.db
 			.select({
 				id: playerTable.id,
+				isHost: playerTable.isHost,
 			})
 			.from(playerTable)
 			.where(

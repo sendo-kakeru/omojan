@@ -50,6 +50,7 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 		sendExit,
 		sendStart,
 		matchingCompletedTimeoutRef,
+		isHost,
 	} = useMatchingSubscriptionSWR({
 		gameId,
 		gameToken,
@@ -72,6 +73,8 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 	});
 
 	const handleStart = () => {
+		if (!isHost) return;
+
 		startStarting();
 		try {
 			sendStart();
@@ -227,27 +230,33 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 						</p>
 					</div>
 				)}
-				<div className="mx-auto grid w-full max-w-360 gap-8 sm:max-w-600 sm:grid-cols-2 sm:gap-x-12">
+				<div className="mx-auto flex w-full flex-col items-center justify-center gap-8 sm:flex-row sm:gap-x-12">
 					<Button
 						as="button"
+						className="w-full max-w-280"
 						color="danger"
 						onClick={handleExit}
 						variant="outline"
 					>
 						退出する
 					</Button>
-					<Button
-						as="button"
-						disabled={
-							isStarting ||
-							participants.length >= 4 ||
-							!!matchingCompletedTimeoutRef.current
-						}
-						leftIcon={isStarting ? <Spinner className="size-16" /> : undefined}
-						onClick={handleStart}
-					>
-						今すぐ開始
-					</Button>
+					{isHost && (
+						<Button
+							as="button"
+							className="w-full max-w-280"
+							disabled={
+								isStarting ||
+								participants.length >= 4 ||
+								!!matchingCompletedTimeoutRef.current
+							}
+							leftIcon={
+								isStarting ? <Spinner className="size-16" /> : undefined
+							}
+							onClick={handleStart}
+						>
+							今すぐ開始
+						</Button>
+					)}
 				</div>
 			</section>
 
@@ -257,7 +266,8 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 				<div className="grid items-center gap-y-4 md:grid-cols-[auto_1fr] md:gap-x-16">
 					<h2 className="font-bold">参加者</h2>
 					<p className="text-gray-500 text-sm">
-						4人揃ったらゲームが開始されます。「今すぐ開始」で募集中のプレイヤーをCPUで開始します。
+						4人揃ったらゲームが開始されます。
+						{isHost && "「今すぐ開始」で募集中のプレイヤーをCPUで開始します。"}
 					</p>
 				</div>
 				<ul className="grid gap-y-12">

@@ -4,9 +4,15 @@ import {
 	literal,
 	nullable,
 	object,
+	pick,
 	variant,
 } from "valibot";
-import { playerIdSchema, playerNameSchema, userSchema } from "../schema";
+import {
+	playerIdSchema,
+	playerNameSchema,
+	playerSchema,
+	userSchema,
+} from "../schema";
 import {
 	heartbeatPingMessageSchema,
 	heartbeatPongMessageSchema,
@@ -66,14 +72,23 @@ export const matchingServerParticipantsMessageSchema = object({
 	type: literal("PARTICIPANTS"),
 });
 
+export const matchingServerMePlayerMessageSchema = object({
+	player: pick(playerSchema, ["id", "isHost"]),
+	type: literal("ME_PLAYER"),
+});
+
 export type MatchingServerParticipantsMessage = InferOutput<
 	typeof matchingServerParticipantsMessageSchema
+>;
+export type MatchingServerMePlayerMessage = InferOutput<
+	typeof matchingServerMePlayerMessageSchema
 >;
 
 /**
  * サーバーからクライアントへのメッセージ
  */
 export const matchingServerMessageSchema = variant("type", [
+	matchingServerMePlayerMessageSchema,
 	matchingServerParticipantsMessageSchema,
 	heartbeatPingMessageSchema,
 ]);

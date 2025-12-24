@@ -21,6 +21,13 @@
 			"tag": "0002_cpu_players",
 			"version": "7",
 			"when": 1765371200000
+		},
+		{
+			"breakpoints": true,
+			"idx": 3,
+			"tag": "0003_host_flag",
+			"version": "7",
+			"when": 1765372200000
 		}
 	],
 	"version": "7"

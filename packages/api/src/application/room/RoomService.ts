@@ -185,6 +185,7 @@ export class RoomService {
 			await tx.insert(playerTable).values({
 				gameId: createdGame.id,
 				gameTokenHash,
+				isHost: true,
 				playerName: dto.playerName,
 				seat: 1,
 				userId: authUser?.id ?? null,
@@ -324,6 +325,7 @@ export class RoomService {
 			await tx.insert(playerTable).values({
 				gameId: findGame.id,
 				gameTokenHash,
+				isHost: false,
 				playerName,
 				seat,
 				userId: authUser?.id,
@@ -381,6 +383,7 @@ export class RoomService {
 					gameId,
 					gameTokenHash,
 					isCpu: true,
+					isHost: false,
 					playerName: "CPU",
 					seat,
 					userId: null,
