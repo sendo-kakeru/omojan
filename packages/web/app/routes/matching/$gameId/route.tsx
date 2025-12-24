@@ -1,3 +1,4 @@
+import type { MatchingParticipant } from "@repo/db/model";
 import { LOCALSTORAGE_OPERATION_FAILED_MESSAGE } from "@repo/shared/error";
 import { DetailedError } from "hono/client";
 import { useRef } from "react";
@@ -226,26 +227,28 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 						</p>
 					</div>
 				)}
-				<Button
-					as="button"
-					className="mx-auto w-full md:w-240"
-					color="danger"
-					onClick={handleExit}
-				>
-					退出する
-				</Button>
-				<Button
-					as="button"
-					disabled={
-						isStarting ||
-						participants.length >= 4 ||
-						!!matchingCompletedTimeoutRef.current
-					}
-					leftIcon={isStarting ? <Spinner className="size-16" /> : undefined}
-					onClick={handleStart}
-				>
-					今すぐ開始
-				</Button>
+				<div className="mx-auto grid w-full max-w-360 gap-8 sm:max-w-600 sm:grid-cols-2 sm:gap-x-12">
+					<Button
+						as="button"
+						color="danger"
+						onClick={handleExit}
+						variant="outline"
+					>
+						退出する
+					</Button>
+					<Button
+						as="button"
+						disabled={
+							isStarting ||
+							participants.length >= 4 ||
+							!!matchingCompletedTimeoutRef.current
+						}
+						leftIcon={isStarting ? <Spinner className="size-16" /> : undefined}
+						onClick={handleStart}
+					>
+						今すぐ開始
+					</Button>
+				</div>
 			</section>
 
 			<Separator />
@@ -254,23 +257,43 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 				<div className="grid items-center gap-y-4 md:grid-cols-[auto_1fr] md:gap-x-16">
 					<h2 className="font-bold">参加者</h2>
 					<p className="text-gray-500 text-sm">
-						4人揃ったらゲームが開始されます。
+						4人揃ったらゲームが開始されます。「今すぐ開始」で募集中のプレイヤーをCPUで開始します。
 					</p>
 				</div>
 				<ul className="grid gap-y-12">
-					{participants.map((participant) => (
-						<li key={participant.id}>
-							<UserLabel
-								className="text-base"
-								user={{
-									image: participant.image ?? undefined,
-									name: participant.playerName,
-								}}
-							/>
+					{[1, 2, 3, 4].map((seat) => (
+						<li key={seat}>
+							<MatchingParticipantLabel participant={participants[seat - 1]} />
 						</li>
 					))}
 				</ul>
 			</section>
 		</main>
+	);
+}
+
+function MatchingParticipantLabel({
+	participant,
+}: {
+	participant?: MatchingParticipant;
+}) {
+	if (participant) {
+		return (
+			<UserLabel
+				user={{
+					image: participant.image ?? undefined,
+					name: participant.playerName,
+				}}
+			/>
+		);
+	}
+
+	return (
+		<div className="flex items-center gap-x-8">
+			<div className="size-32 rounded-full border border-gray-300 border-dashed" />
+			<p className="overflow-hidden text-ellipsis whitespace-nowrap text-gray-400 text-sm">
+				募集中
+			</p>
+		</div>
 	);
 }
