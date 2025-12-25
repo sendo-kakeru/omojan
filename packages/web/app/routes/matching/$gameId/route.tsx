@@ -42,7 +42,7 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 		wsRef,
 		sendExit,
 		sendStart,
-		matchingCompletedTimeoutRef,
+		transitionCount,
 		isHost,
 	} = useMatchingSubscriptionSWR({
 		gameId,
@@ -59,9 +59,6 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 				// NOTE: 退出時、部屋削除時はページ遷移
 				void navigate("/");
 			}
-		},
-		onCompleted() {
-			void navigate(`/game/${gameId}`);
 		},
 	});
 
@@ -147,12 +144,12 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 	return (
 		<MatchingPresenter
 			isHost={isHost}
-			isMatchingCompleted={!!matchingCompletedTimeoutRef.current}
 			isStarting={isStarting}
 			onExit={handleExit}
 			onStart={handleStart}
 			participants={participants}
 			roomMeta={roomMetaResult.data}
+			transitionCount={transitionCount}
 		/>
 	);
 }

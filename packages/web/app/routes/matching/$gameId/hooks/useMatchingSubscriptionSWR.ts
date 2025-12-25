@@ -4,7 +4,8 @@ import {
 	type MatchingParticipant,
 	matchingServerMessageSchema,
 } from "@repo/db/model";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router";
 import useSWRSubscription, {
 	type SWRSubscriptionOptions,
 } from "swr/subscription";
@@ -23,20 +24,17 @@ export function useMatchingSubscriptionSWR({
 	gameId,
 	gameToken,
 	onClose,
-	onCompleted,
 }: {
 	gameId: string;
 	gameToken: string | null;
 	onClose: (event: CloseEvent) => void;
-	onCompleted: () => void;
 }) {
+	const navigate = useNavigate();
 	const wsRef = useRef<WebSocket | null>(null);
-	const matchingCompletedTimeoutRef = useRef<number | null>(null);
 	const [isHost, setIsHost] = useState(false);
+	const [transitionCount, setTransitionCount] = useState<number | null>(null);
 
 	const url = getUrl({ gameId });
-	// なくても問題なく動いているのでコメントアウト
-	// url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
 
 	const subscription = useSWRSubscription<MatchingParticipant[], unknown>(
 		[url?.toString(), gameToken],
@@ -73,15 +71,7 @@ export function useMatchingSubscriptionSWR({
 						}
 						case "PARTICIPANTS": {
 							if (message.participants.length === 4) {
-								matchingCompletedTimeoutRef.current = window.setTimeout(() => {
-									onCompleted();
-									ws.close(1000, "マッチングが完了しました。");
-								}, 5000);
-							} else {
-								if (matchingCompletedTimeoutRef.current) {
-									clearTimeout(matchingCompletedTimeoutRef.current);
-									matchingCompletedTimeoutRef.current = null;
-								}
+								setTransitionCount(3);
 							}
 							next(null, message.participants);
 							break;
@@ -116,10 +106,6 @@ export function useMatchingSubscriptionSWR({
 						new Error("接続が切断されました。時間をおいて再接続してください。"),
 					);
 				}
-				if (matchingCompletedTimeoutRef.current) {
-					clearTimeout(matchingCompletedTimeoutRef.current);
-					matchingCompletedTimeoutRef.current = null;
-				}
 				onClose(event);
 			};
 
@@ -145,6 +131,22 @@ export function useMatchingSubscriptionSWR({
 		},
 	);
 
+	useEffect(() => {
+		if (transitionCount === null) return;
+
+		if (transitionCount <= 0) {
+			void navigate(`/game/${gameId}`);
+			wsRef.current?.close(1000, "マッチングが完了しました。");
+			return;
+		}
+
+		const timer = window.setTimeout(() => {
+			setTransitionCount((prev) => (prev === null ? null : prev - 1));
+		}, 1000);
+
+		return () => clearTimeout(timer);
+	}, [transitionCount, gameId, navigate]);
+
 	const sendExit = (): void => {
 		const ws = wsRef.current;
 		if (!ws || ws.readyState !== WebSocket.OPEN) {
@@ -166,9 +168,9 @@ export function useMatchingSubscriptionSWR({
 	return {
 		...subscription,
 		isHost,
-		matchingCompletedTimeoutRef,
 		sendExit,
 		sendStart,
+		transitionCount,
 		wsRef,
 	};
 }

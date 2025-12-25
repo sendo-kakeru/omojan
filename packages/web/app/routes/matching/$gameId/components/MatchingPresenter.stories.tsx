@@ -73,10 +73,10 @@ const privateRoomMeta = {
 
 const defaultArgs = {
 	isHost: false,
-	isMatchingCompleted: false,
 	isStarting: false,
 	onExit: noop,
 	onStart: noop,
+	transitionCount: null,
 };
 
 export const OneParticipant: Story = {
@@ -150,9 +150,9 @@ export const HostStarting: Story = {
 export const MatchingCompleted: Story = {
 	args: {
 		...defaultArgs,
-		isMatchingCompleted: true,
 		participants: mockParticipants,
 		roomMeta: defaultRoomMeta,
+		transitionCount: 3,
 	},
 	name: "マッチング完了",
 };
