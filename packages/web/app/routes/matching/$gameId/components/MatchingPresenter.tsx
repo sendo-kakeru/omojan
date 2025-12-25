@@ -12,7 +12,7 @@ export function MatchingPresenter({
 	roomMeta,
 	participants,
 	isHost,
-	isMatchingCompleted,
+	transitionCount,
 	isStarting,
 	onExit,
 	onStart,
@@ -20,7 +20,7 @@ export function MatchingPresenter({
 	roomMeta: Pick<Room, "title" | "isPrivate" | "password" | "timeLimit">;
 	participants: MatchingParticipant[];
 	isHost: boolean;
-	isMatchingCompleted: boolean;
+	transitionCount: number | null;
 	isStarting: boolean;
 	onExit: () => void;
 	onStart: () => void;
@@ -28,12 +28,13 @@ export function MatchingPresenter({
 	const { isCopied, copy } = useClipboard(roomMeta.password ?? "");
 	return (
 		<main className="relative my-24 grid gap-y-16 rounded-lg border border-gray-200 bg-white p-16">
-			{isMatchingCompleted && (
+			{transitionCount !== null && (
 				<div className="absolute inset-0 z-10 grid place-items-center bg-gray-200/70 backdrop-blur-sm">
 					<div className="grid gap-y-6 text-center text-gray-700">
 						<Spinner className="mx-auto size-32" />
 						<p className="font-semibold">
-							参加者が集まりました。5秒後にゲーム画面へ移動します。
+							参加者が集まりました。{transitionCount}
+							秒後にゲーム画面へ移動します。
 						</p>
 					</div>
 				</div>
@@ -103,7 +104,9 @@ export function MatchingPresenter({
 							as="button"
 							className="w-full max-w-280"
 							disabled={
-								isStarting || participants.length >= 4 || isMatchingCompleted
+								isStarting ||
+								participants.length >= 4 ||
+								transitionCount !== null
 							}
 							leftIcon={
 								isStarting ? <Spinner className="size-16" /> : undefined
