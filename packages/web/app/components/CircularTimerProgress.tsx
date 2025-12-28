@@ -22,7 +22,7 @@ export function CircularTimerProgress({
 			<svg className="size-full text-green-500" viewBox="0 0 32 32">
 				<title className="sr-only">Timer</title>
 				<circle
-					className="text-gray-200"
+					className="text-neutral-200"
 					cx="16"
 					cy="16"
 					fill="none"
@@ -44,7 +44,7 @@ export function CircularTimerProgress({
 					transform="rotate(-90 16 16)"
 				/>
 			</svg>
-			<text className="absolute inset-0 flex items-center justify-center font-semibold text-gray-900 text-sm md:text-lg">
+			<text className="absolute inset-0 flex items-center justify-center font-semibold text-neutral-900 text-sm md:text-lg">
 				{label ?? Math.round(clampedProgress)}
 			</text>
 		</div>

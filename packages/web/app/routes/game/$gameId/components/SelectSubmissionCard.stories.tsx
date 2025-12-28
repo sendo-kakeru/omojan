@@ -164,7 +164,7 @@ export const AllStates: Story = {
 	render: () => (
 		<div className="grid gap-y-24">
 			<div>
-				<p className="mb-8 font-bold text-gray-600 text-sm">
+				<p className="mb-8 font-bold text-neutral-600 text-sm">
 					待機中（他プレイヤーの番）
 				</p>
 				<div className="w-280">
@@ -173,7 +173,7 @@ export const AllStates: Story = {
 			</div>
 
 			<div>
-				<p className="mb-8 font-bold text-gray-600 text-sm">
+				<p className="mb-8 font-bold text-neutral-600 text-sm">
 					準備完了（手札未選択）
 				</p>
 				<div className="w-280">
@@ -187,7 +187,7 @@ export const AllStates: Story = {
 			</div>
 
 			<div>
-				<p className="mb-8 font-bold text-gray-600 text-sm">
+				<p className="mb-8 font-bold text-neutral-600 text-sm">
 					準備完了（手札選択済み）
 				</p>
 				<div className="w-280">
@@ -196,7 +196,7 @@ export const AllStates: Story = {
 			</div>
 
 			<div>
-				<p className="mb-8 font-bold text-gray-600 text-sm">
+				<p className="mb-8 font-bold text-neutral-600 text-sm">
 					選択中（決定ボタン表示）
 				</p>
 				<div className="w-280">
@@ -210,7 +210,7 @@ export const AllStates: Story = {
 			</div>
 
 			<div>
-				<p className="mb-8 font-bold text-gray-600 text-sm">配置完了</p>
+				<p className="mb-8 font-bold text-neutral-600 text-sm">配置完了</p>
 				<div className="w-280">
 					<SelectSubmissionCard label="前" state="placed" word="激辛" />
 				</div>

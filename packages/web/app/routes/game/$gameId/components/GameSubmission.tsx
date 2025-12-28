@@ -153,7 +153,7 @@ export function GameSubmission() {
 	return (
 		<div className="grid h-full grid-rows-[auto_1fr] gap-y-8 pt-8 xs:pt-16">
 			<nav className="flex w-full items-center gap-x-8">
-				<p className="grid w-fit place-items-center rounded-lg border border-gray-200 bg-white px-8 py-2 font-mono text-gray-600">
+				<p className="grid w-fit place-items-center rounded-lg border border-gray-200 bg-white px-8 py-2 font-mono text-neutral-600">
 					<span className="text-xs">Round</span>
 					<div className="flex items-center">
 						<span className="text-base">3</span>/
@@ -219,7 +219,7 @@ export function GameSubmission() {
 								return (
 									<button
 										className={classNames(
-											"flex rounded-md border px-8 py-4 text-center font-bold text-gray-800 text-sm xs:text-base transition sm:text-lg",
+											"flex rounded-md border px-8 py-4 text-center font-bold text-neutral-800 text-sm xs:text-base transition sm:text-lg",
 											isConfirmed
 												? "border-green-500 bg-green-100 opacity-50"
 												: isSelected

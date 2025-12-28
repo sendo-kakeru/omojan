@@ -30,7 +30,7 @@ export function MatchingPresenter({
 		<main className="relative my-24 grid gap-y-16 rounded-lg border border-gray-200 bg-white p-16">
 			{transitionCount !== null && (
 				<div className="absolute inset-0 z-10 grid place-items-center bg-gray-200/70 backdrop-blur-sm">
-					<div className="grid gap-y-6 text-center text-gray-700">
+					<div className="grid gap-y-6 text-center text-neutral-700">
 						<Spinner className="mx-auto size-32" />
 						<p className="font-semibold">
 							参加者が集まりました。{transitionCount}
@@ -54,7 +54,7 @@ export function MatchingPresenter({
 							</div>
 						)}
 					</div>
-					<div className="flex items-center gap-x-8 text-gray-500">
+					<div className="flex items-center gap-x-8 text-neutral-500">
 						<FaRegClock className="size-20" />
 						<p>制限時間: {roomMeta.timeLimit}秒</p>
 					</div>
@@ -84,7 +84,7 @@ export function MatchingPresenter({
 								)}
 							</Button>
 						</div>
-						<p className="w-fit text-gray-500 text-sm">
+						<p className="w-fit text-neutral-500 text-sm">
 							参加者にパスワードを共有してください。
 						</p>
 					</div>
@@ -124,7 +124,7 @@ export function MatchingPresenter({
 			<section className="grid gap-y-16">
 				<div className="grid items-center gap-y-4 md:grid-cols-[auto_1fr] md:gap-x-16">
 					<h2 className="font-bold">参加者</h2>
-					<p className="text-gray-500 text-sm">
+					<p className="text-neutral-500 text-sm">
 						4人揃ったらゲームが開始されます。
 						{isHost && "「今すぐ開始」で募集中のプレイヤーをCPUで開始します。"}
 					</p>
@@ -160,7 +160,7 @@ function MatchingParticipantLabel({
 	return (
 		<div className="flex items-center gap-x-8">
 			<div className="size-32 rounded-full border border-gray-300 border-dashed" />
-			<p className="overflow-hidden text-ellipsis whitespace-nowrap text-gray-400 text-sm">
+			<p className="overflow-hidden text-ellipsis whitespace-nowrap text-neutral-400 text-sm">
 				募集中
 			</p>
 		</div>
