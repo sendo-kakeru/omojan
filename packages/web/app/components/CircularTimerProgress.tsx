@@ -18,7 +18,7 @@ export function CircularTimerProgress({
 	const strokeDashoffset = ((100 - clampedProgress) / 100) * CIRCUMFERENCE;
 
 	return (
-		<div className={classNames("relative size-32", className)}>
+		<div className={classNames("relative size-32 md:size-40", className)}>
 			<svg className="size-full text-green-500" viewBox="0 0 32 32">
 				<title className="sr-only">Timer</title>
 				<circle
@@ -44,7 +44,7 @@ export function CircularTimerProgress({
 					transform="rotate(-90 16 16)"
 				/>
 			</svg>
-			<text className="absolute inset-0 flex items-center justify-center font-semibold text-gray-900 text-sm">
+			<text className="absolute inset-0 flex items-center justify-center font-semibold text-gray-900 text-sm md:text-lg">
 				{label ?? Math.round(clampedProgress)}
 			</text>
 		</div>

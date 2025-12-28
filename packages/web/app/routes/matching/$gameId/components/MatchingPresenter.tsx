@@ -56,14 +56,14 @@ export function MatchingPresenter({
 					</div>
 					<div className="flex items-center gap-x-8 text-gray-500">
 						<FaRegClock className="size-20" />
-						<p className="text-md">制限時間: {roomMeta.timeLimit}秒</p>
+						<p>制限時間: {roomMeta.timeLimit}秒</p>
 					</div>
 				</div>
 				{roomMeta.isPrivate && (
 					<div className="mx-auto grid w-full max-w-400 gap-y-12 rounded-lg border border-green-300 bg-green-50 p-8 md:p-16">
 						<div className="flex items-center justify-between gap-x-8 px-8">
 							<div className="flex items-center gap-x-16">
-								<p className="break-keep font-semibold text-sm md:text-md">
+								<p className="break-keep font-semibold text-sm md:text-base">
 									パスワード
 								</p>
 								<p className="w-fit rounded-lg border border-green-300 bg-white p-8 px-24 font-mono text-xl">
