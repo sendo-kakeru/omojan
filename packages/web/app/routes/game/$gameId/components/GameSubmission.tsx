@@ -166,78 +166,73 @@ export function GameSubmission() {
 				</p>
 				<CircularTimerProgress label={10} progress={60} />
 			</nav>
-			<main className="grid">
-				<div className="grid grid-rows-[auto_1fr_auto]">
-					<section className="grid rounded-lg border border-gray-200 bg-white">
-						{players.map((player, index) => (
-							<div className="w-full" key={player.name}>
-								<div
-									className={classNames(
-										"flex items-center gap-x-8 rounded-lg px-8 py-4 md:px-12",
-										player.isSelf ? "border border-green-400 bg-green-50" : "",
-									)}
-								>
-									<Avatar
-										className={classNames(
-											player.isSelf && "ring-2 ring-green-400",
+			<main className="grid grid-rows-[auto_1fr_auto]">
+				<section className="grid rounded-lg border border-gray-200 bg-white">
+					{players.map((player, index) => (
+						<div className="w-full" key={player.name}>
+							<div
+								className={classNames(
+									"flex items-center gap-x-8 rounded-lg px-8 py-4 md:px-12",
+									player.isSelf ? "border border-green-400 bg-green-50" : "",
+								)}
+							>
+								<Avatar name={player.name} size="S-M" />
+								<div className="grid flex-1 gap-y-1 md:gap-y-2">
+									<p className="font-semibold text-sm md:text-base">
+										{player.name}
+										{player.isSelf && (
+											<span className="text-neutral-300 text-xs">（自分）</span>
 										)}
-										name={player.name}
-										size="S-M"
-									/>
-									<div className="grid gap-y-1 md:gap-y-2">
-										<p className="font-semibold text-sm md:text-base">
-											{player.name}
-										</p>
-										<Badge
-											className={classNames(!player.combination && "opacity-0")}
-											color="gray"
-										>
-											{player.combination ?? "未選択"}
-										</Badge>
-									</div>
-								</div>
-								{index !== players.length - 1 && <Separator />}
-							</div>
-						))}
-					</section>
-
-					<section className="mt-8 xs:mt-16 grid place-items-center rounded-t-2xl border border-gray-300 border-b-0 bg-white p-16">
-						<div className="grid w-full max-w-480 place-items-center gap-y-16 sm:gap-y-24">
-							<SelectSubmissionCard label="前" {...getCardProps("prefix")} />
-							<p className="grid min-h-56 xs:min-h-64 w-full place-items-center rounded-md border border-yellow-300 bg-yellow-50 p-8 px-12 font-bold text-sm shadow sm:text-base">
-								{themeWord}
-							</p>
-							<SelectSubmissionCard label="後" {...getCardProps("suffix")} />
-						</div>
-					</section>
-
-					<section className="mx-[calc(50%-50cqw)] w-[100cqw] border-t-2 border-t-gray-300 bg-white py-8 xs:pt-16 sm:py-24">
-						<div className="mx-auto flex max-w-800 flex-wrap gap-8 px-16">
-							{handCards.map((card) => {
-								const isSelected = card.id === selectedHand?.id;
-								const isConfirmed = card.id === confirmedPlacement.card?.id;
-								return (
-									<button
-										className={classNames(
-											"flex rounded-md border px-8 py-4 text-center font-bold text-neutral-800 text-sm xs:text-base transition sm:text-lg",
-											isConfirmed
-												? "border-green-500 bg-green-100 opacity-50"
-												: isSelected
-													? "border-green-400 bg-green-50 shadow-sm"
-													: "border-gray-200 bg-gray-100 hover:bg-green-50",
-										)}
-										disabled={isConfirmed}
-										key={card.id}
-										onClick={() => handleSelectHand(card)}
-										type="button"
+									</p>
+									<Badge
+										className={classNames(!player.combination && "opacity-0")}
 									>
-										{card.word}
-									</button>
-								);
-							})}
+										{player.combination ?? "未選択"}
+									</Badge>
+								</div>
+								<Badge color="gray">2勝</Badge>
+							</div>
+							{index !== players.length - 1 && <Separator />}
 						</div>
-					</section>
-				</div>
+					))}
+				</section>
+
+				<section className="mt-8 xs:mt-16 grid place-items-center rounded-t-2xl border border-gray-300 border-b-0 bg-white p-16">
+					<div className="grid w-full max-w-480 place-items-center gap-y-16 sm:gap-y-24">
+						<SelectSubmissionCard label="前" {...getCardProps("prefix")} />
+						<p className="grid min-h-56 xs:min-h-64 w-full place-items-center rounded-md border border-yellow-300 bg-yellow-50 p-8 px-12 font-bold text-sm shadow sm:text-base">
+							{themeWord}
+						</p>
+						<SelectSubmissionCard label="後" {...getCardProps("suffix")} />
+					</div>
+				</section>
+
+				<section className="mx-[calc(50%-50cqw)] w-[100cqw] border-t-2 border-t-gray-300 bg-white py-8 xs:pt-16 sm:py-24">
+					<div className="mx-auto flex max-w-800 flex-wrap gap-8 px-16">
+						{handCards.map((card) => {
+							const isSelected = card.id === selectedHand?.id;
+							const isConfirmed = card.id === confirmedPlacement.card?.id;
+							return (
+								<button
+									className={classNames(
+										"flex rounded-md border px-8 py-4 text-center font-bold text-neutral-800 text-sm xs:text-base transition sm:text-lg",
+										isConfirmed
+											? "border-green-500 bg-green-100 opacity-50"
+											: isSelected
+												? "border-green-400 bg-green-50 shadow-sm"
+												: "border-gray-200 bg-gray-100 hover:bg-green-50",
+									)}
+									disabled={isConfirmed}
+									key={card.id}
+									onClick={() => handleSelectHand(card)}
+									type="button"
+								>
+									{card.word}
+								</button>
+							);
+						})}
+					</div>
+				</section>
 			</main>
 		</div>
 	);

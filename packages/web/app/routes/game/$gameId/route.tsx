@@ -1,5 +1,5 @@
 import { GamePresenter } from "./components/GamePresenter";
 
 export default function () {
-	return <GamePresenter state="submission" />;
+	return <GamePresenter state="voting" />;
 }
