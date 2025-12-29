@@ -176,12 +176,14 @@ export function GameSubmission() {
 									player.isSelf ? "border border-green-400 bg-green-50" : "",
 								)}
 							>
-								<Avatar name={player.name} size="S-M" />
+								<Avatar name={player.name} size="S" />
 								<div className="grid flex-1 gap-y-1 md:gap-y-2">
-									<p className="font-semibold text-sm md:text-base">
+									<p className="font-semibold text-xs">
 										{player.name}
 										{player.isSelf && (
-											<span className="text-neutral-300 text-xs">（自分）</span>
+											<span className="font-normal text-neutral-300">
+												（自分）
+											</span>
 										)}
 									</p>
 									<Badge
@@ -197,7 +199,7 @@ export function GameSubmission() {
 					))}
 				</section>
 
-				<section className="mt-8 xs:mt-16 grid place-items-center rounded-t-2xl border border-gray-300 border-b-0 bg-white p-16">
+				<section className="mt-8 grid place-items-center rounded-t-2xl border border-gray-300 border-b-0 bg-white p-16">
 					<div className="grid w-full max-w-480 place-items-center gap-y-16 sm:gap-y-24">
 						<SelectSubmissionCard label="前" {...getCardProps("prefix")} />
 						<p className="grid min-h-56 xs:min-h-64 w-full place-items-center rounded-md border border-yellow-300 bg-yellow-50 p-8 px-12 font-bold text-sm shadow sm:text-base">
