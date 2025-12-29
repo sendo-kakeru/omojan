@@ -10,7 +10,6 @@ const avatarVariants = tv(
 				L: "size-40",
 				M: "size-32",
 				S: "size-24",
-				"S-M": "size-24 md:size-32",
 			},
 		},
 	},
@@ -25,7 +24,6 @@ const fallbackVariants = tv(
 				L: "pt-8",
 				M: "pt-6",
 				S: "pt-4",
-				"S-M": "pt-4 md:pt-6",
 			},
 		},
 	},
@@ -39,7 +37,7 @@ export function Avatar({
 	name,
 	...props
 }: Omit<React.ComponentProps<"img">, "alt"> & {
-	size?: "S" | "S-M" | "M" | "L";
+	size?: "S" | "M" | "L";
 	name?: string;
 }) {
 	const avatarClassName = avatarVariants({

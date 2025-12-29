@@ -2,6 +2,7 @@ import classNames from "classnames";
 import { useMemo, useState } from "react";
 import { Avatar } from "~/components/Avatar";
 import { Badge } from "~/components/Badge";
+import { Button } from "~/components/button/Button";
 import { CircularTimerProgress } from "~/components/CircularTimerProgress";
 import { Separator } from "~/components/Separator";
 
@@ -13,7 +14,24 @@ type Submission = {
 	isSelf: boolean;
 };
 
+type HandCard = {
+	id: string;
+	word: string;
+};
+
 export function GameVote() {
+	const handCards: HandCard[] = useMemo(
+		() => [
+			{ id: "h2", word: "思いもよらぬ" },
+			{ id: "h3", word: "おふくろ" },
+			{ id: "h4", word: "生麦生米" },
+			{ id: "h5", word: "ジャーナリズムのかけらもない" },
+			{ id: "h6", word: "プリン" },
+			{ id: "h7", word: "よそはよそうちは" },
+		],
+		[],
+	);
+
 	const submissions: Submission[] = useMemo(
 		() => [
 			{
@@ -85,7 +103,7 @@ export function GameVote() {
 				</p>
 				<CircularTimerProgress label={30} progress={100} />
 			</nav>
-			<main className="grid grid-rows-[auto_1fr] gap-16">
+			<main className="grid grid-rows-[auto_1fr]">
 				<section className="grid rounded-lg border border-gray-200 bg-white">
 					{submissions.map((submission, index) => {
 						const isSelected =
@@ -107,17 +125,15 @@ export function GameVote() {
 								>
 									<div className="grid flex-1 gap-y-8">
 										<div className="flex items-center gap-x-4">
-											<Avatar name={submission.playerName} size="S-M" />
-											<p className="font-semibold text-sm md:text-base">
+											<Avatar name={submission.playerName} size="S" />
+											<p className="font-semibold text-xs">
 												{submission.playerName}
 												{submission.isSelf && (
-													<span className="text-neutral-400 text-xs">
-														（自分）
-													</span>
+													<span className="text-neutral-400">（自分）</span>
 												)}
 											</p>
 										</div>
-										<p className="font-bold text-lg md:text-2xl">
+										<p className="font-bold text-sm md:text-base">
 											{submission.combination}
 										</p>
 									</div>
@@ -130,7 +146,7 @@ export function GameVote() {
 					})}
 				</section>
 
-				<section className="xs:mt-16 flex flex-1 items-center justify-center rounded-2xl border border-gray-300 bg-white p-16">
+				<section className="mt-16 flex flex-1 items-center justify-center rounded-t-2xl border border-gray-300 border-b-0 bg-white p-16">
 					<div className="grid w-full max-w-480 place-items-center gap-y-16">
 						{selectedSubmission && !confirmedVote && (
 							<div className="grid w-full gap-y-16">
@@ -145,20 +161,17 @@ export function GameVote() {
 									に投票しますか？
 								</p>
 								<div className="flex justify-center gap-x-12">
-									<button
-										className="rounded-lg border border-gray-300 bg-white px-24 py-12 font-semibold text-neutral-600 text-sm transition hover:bg-neutral-50"
+									<Button
+										as="button"
+										color="gray"
 										onClick={handleCancelSelection}
-										type="button"
+										variant="outline"
 									>
 										キャンセル
-									</button>
-									<button
-										className="rounded-lg bg-green-500 px-24 py-12 font-semibold text-sm text-white transition hover:bg-green-600"
-										onClick={handleConfirmVote}
-										type="button"
-									>
+									</Button>
+									<Button as="button" onClick={handleConfirmVote}>
 										投票する
-									</button>
+									</Button>
 								</div>
 							</div>
 						)}
@@ -186,6 +199,19 @@ export function GameVote() {
 								上の一覧から投票先を選んでください
 							</p>
 						)}
+					</div>
+				</section>
+
+				<section className="mx-[calc(50%-50cqw)] w-[100cqw] border-t-2 border-t-gray-300 bg-white py-8 xs:pt-16 sm:py-24">
+					<div className="mx-auto flex max-w-800 flex-wrap gap-8 px-16">
+						{handCards.map((card) => (
+							<div
+								className="flex rounded-md border border-gray-200 bg-gray-100 px-8 py-4 text-center font-bold text-neutral-800 text-sm xs:text-base sm:text-lg"
+								key={card.id}
+							>
+								{card.word}
+							</div>
+						))}
 					</div>
 				</section>
 			</main>
