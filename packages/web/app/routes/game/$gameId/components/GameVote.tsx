@@ -196,7 +196,7 @@ export function GameVote() {
 
 						{!selectedSubmission && !confirmedVote && (
 							<p className="text-center text-neutral-500">
-								上の一覧から投票先を選んでください
+								投票先を選んでください
 							</p>
 						)}
 					</div>

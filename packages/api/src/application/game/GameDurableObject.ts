@@ -21,6 +21,7 @@ export class GameDurableObject extends DurableObject<Env> {
 	private gameId: GameId | null = null;
 	// biome-ignore lint/correctness/noUnusedPrivateClassMembers: 実装途中
 	private round: RoundNo = 1;
+	// 不要かも
 	// biome-ignore lint/correctness/noUnusedPrivateClassMembers: 実装途中
 	private state: GameState = "waiting";
 	private readonly connections = new Map<
