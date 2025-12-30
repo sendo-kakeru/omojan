@@ -1,4 +1,4 @@
-import type { GameState } from "@repo/db/schema";
+import type { GameState } from "@repo/db/model";
 import { Spinner } from "~/components/Spinner";
 
 export function GameWaiting({

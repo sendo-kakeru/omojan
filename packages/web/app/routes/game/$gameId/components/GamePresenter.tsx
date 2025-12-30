@@ -1,4 +1,4 @@
-import type { GameState } from "@repo/db/schema";
+import type { GameState } from "@repo/db/model";
 import { GameResult } from "./GameResult";
 import { GameSubmission } from "./GameSubmission";
 import { GameVote } from "./GameVote";

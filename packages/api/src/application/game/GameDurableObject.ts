@@ -1,7 +1,7 @@
 import { DurableObject } from "cloudflare:workers";
+import type { GameState } from "@repo/db/model";
 import {
 	type GameId,
-	type GameState,
 	isGameId,
 	type Player,
 	type PlayerId,
