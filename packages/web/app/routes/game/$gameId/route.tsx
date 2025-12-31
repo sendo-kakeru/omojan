@@ -19,7 +19,7 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 	const { data, error, wsRef } = useGameSubscriptionSWR({
 		gameId,
 		gameToken,
-		onClose: (event: CloseEvent) => {
+		onClose: (_event: CloseEvent) => {
 			// 不要だったら消す
 		},
 	});

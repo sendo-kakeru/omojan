@@ -53,9 +53,8 @@ export function SelectSubmissionCard({
 			{isSelected || isPlaced ? (
 				<div
 					className={classNames(
-						"text-center font-bold text-neutral-700 text-sm transition-all duration-300 sm:text-base",
+						"text-center font-bold text-neutral-700 text-sm transition-all duration-600 sm:text-base",
 						isPlaced && "animate-place-card",
-						isSelected && "animate-pulse-subtle",
 					)}
 				>
 					{props.word}

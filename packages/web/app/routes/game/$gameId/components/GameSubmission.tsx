@@ -115,8 +115,8 @@ export function GameSubmission({
 	return (
 		<>
 			{isStarting && (
-				<div className="fixed inset-0 z-80 flex justify-center pt-80 bg-gray-300/50">
-					<div className="rounded-xl bg-white px-32 h-fit py-16 flex flex-col gap-y-16 justify-center items-center shadow-lg aspect-square">
+				<div className="fixed inset-0 z-80 flex justify-center bg-gray-300/50 pt-80">
+					<div className="flex aspect-square h-fit flex-col items-center justify-center gap-y-16 rounded-xl bg-white px-32 py-16 shadow-lg">
 						<Spinner className="size-32 text-gray-400" />
 						<p className="mt-8 text-neutral-700 text-sm">
 							まもなく開始します...
