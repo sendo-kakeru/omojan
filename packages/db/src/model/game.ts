@@ -23,10 +23,11 @@ import {
 } from "../schema";
 
 const gameStateSchema = union([
-	literal("waiting"),
-	literal("submission"),
-	literal("voting"),
-	literal("result"),
+	literal("WAITING"),
+	literal("TURN_START_PENDING"),
+	literal("SUBMISSION"),
+	literal("VOTING"),
+	literal("RESULT"),
 ]);
 export type GameState = InferOutput<typeof gameStateSchema>;
 
@@ -96,6 +97,10 @@ const gameServerTurnStartMessageSchema = object({
 	type: literal("TURN_START"),
 });
 
+export type GameServerTurnStartMessage = InferOutput<
+	typeof gameServerTurnStartMessageSchema
+>;
+
 const gameServerTurnEndMessageSchema = object({
 	...gameSubmissionBaseSchema.entries,
 	game: object({
@@ -104,6 +109,10 @@ const gameServerTurnEndMessageSchema = object({
 	}),
 	type: literal("TURN_END"),
 });
+
+export type GameServerTurnEndMessage = InferOutput<
+	typeof gameServerTurnEndMessageSchema
+>;
 
 export const gameClientSubmissionMessageSchema = object({
 	submission: submitSchema,

@@ -179,6 +179,41 @@ export class GameService {
 	}
 
 	/**
+	 * ラウンド番号と席順から、そのラウンドでのターン順を算出する。
+	 * - ラウンド1: 席順1→2→3→4
+	 * - ラウンド2: 席順2→3→4→1
+	 * - ラウンド3: 席順3→4→1→2
+	 * - ラウンド4: 席順4→1→2→3
+	 */
+	calculateTurnOrder({
+		roundNo,
+		seat,
+	}: {
+		roundNo: RoundNo;
+		seat: RoundNo;
+	}): number {
+		// (seat - roundNo) mod 4 で0-3の順番を得て、1-4に変換
+		return ((seat - roundNo + 4) % 4) + 1;
+	}
+
+	/**
+	 * プレイヤー配列をラウンドに応じたターン順で並び替えて返す。
+	 */
+	sortTurnOrderPlayers<T extends { seat: RoundNo }>({
+		players,
+		roundNo,
+	}: {
+		players: T[];
+		roundNo: RoundNo;
+	}): T[] {
+		return [...players].sort((a, b) => {
+			const orderA = this.calculateTurnOrder({ roundNo, seat: a.seat });
+			const orderB = this.calculateTurnOrder({ roundNo, seat: b.seat });
+			return orderA - orderB;
+		});
+	}
+
+	/**
 	 * 有効な単語からテーマ牌(4枚)と手持ち牌(28枚)を重複なしでランダム抽出
 	 */
 	private getGameWords(): {

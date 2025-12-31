@@ -71,7 +71,7 @@ sequenceDiagram
 
     Note over S: ラウンドの席順配置
     S->>C: ROUND_START<br/>{game, mePlayer…}
-    Note over S: 1秒待機
+    Note over S: 2秒待機
     Note over C: 開始アニメーション用
 
     Note over C,S: 提出フェーズ
