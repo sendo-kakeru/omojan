@@ -131,7 +131,7 @@ export class GameDurableObject extends DurableObject<Env> {
 				// 接続待機タイムアウト→ゲーム開始
 				await this.startGame();
 				break;
-			case "TURN_START_PENDING":
+			case "START_PENDING":
 				// ROUND_START後の待機完了→TURN_START送信
 				this.broadcastTurnStart();
 				break;
@@ -170,8 +170,8 @@ export class GameDurableObject extends DurableObject<Env> {
 			// 各プレイヤーにROUND_STARTメッセージを送信
 			this.broadcastRoundStart();
 
-			// 2秒後にTURN_STARTを送信（開始アニメーション用の待機）
-			this.state = "TURN_START_PENDING";
+			// 2秒後にTURN_STARTを送信（開始オーバーレイ表示用の待機）
+			this.state = "START_PENDING";
 			await this.ctx.storage.setAlarm(Date.now() + 2000);
 		} catch (error) {
 			console.error("ゲーム開始処理に失敗しました:", error);
