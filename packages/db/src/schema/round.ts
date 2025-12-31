@@ -3,6 +3,7 @@ import { createSelectSchema } from "drizzle-valibot";
 import {
 	brand,
 	type InferOutput,
+	is,
 	literal,
 	pipe,
 	string,
@@ -22,6 +23,9 @@ export const roundNoSchema = union([
 	literal(4),
 ]);
 export type RoundNo = InferOutput<typeof roundNoSchema>;
+export function isRoundNo(value: unknown): value is RoundNo {
+	return is(roundNoSchema, value);
+}
 
 export const roundTable = sqliteTable("round", {
 	...tableBaseColumns,

@@ -23,43 +23,55 @@ import {
 } from "../schema";
 
 const gameStateSchema = union([
-	literal("waiting"),
-	literal("setting"), // 不要だったら消す
-	literal("submission"),
-	literal("voting"),
-	literal("result"),
+	literal("WAITING"),
+	literal("TURN_START_PENDING"),
+	literal("SUBMISSION"),
+	literal("VOTING"),
+	literal("RESULT"),
 ]);
 export type GameState = InferOutput<typeof gameStateSchema>;
+
+const gamePlayerCardSchema = object({
+	...pick(playerCardSchema, ["id"]).entries,
+	used: boolean(),
+	word: playerCardSchema.entries.text,
+});
+export type GamePlayerCard = InferOutput<typeof gamePlayerCardSchema>;
+
+const playerSubmissionSchema = object({
+	position: submissionSchema.entries.position,
+	text: playerCardSchema.entries.text,
+});
+
+const gamePlayerItemSchema = object({
+	...pick(playerSchema, ["id", "playerName", "seat"]).entries,
+	...pick(userSchema, ["image"]).entries,
+	submission: nullable(playerSubmissionSchema),
+	winCount: number(),
+});
+export type GamePlayerItem = InferOutput<typeof gamePlayerItemSchema>;
 
 const gameBaseSchema = object({
 	game: object({
 		...pick(gameSchema, ["timeLimit"]).entries,
 		...pick(roundSchema, ["roundNo"]).entries,
-		players: array(
-			object({
-				...pick(playerSchema, ["id", "playerName", "seat"]).entries,
-				...pick(userSchema, ["image"]).entries,
-				submittedText: playerCardSchema.entries.text,
-				winCount: number(),
-			}),
-		),
+		players: array(gamePlayerItemSchema),
 		theme: roundThemeSchema.entries.text,
 	}),
 	mePlayer: object({
 		id: playerIdSchema,
-		playerCards: array(
-			object({ ...playerCardSchema.entries, used: boolean() }),
-		),
+		playerCards: array(gamePlayerCardSchema),
 	}),
 });
 const gameSubmissionBaseSchema = object({
 	...gameBaseSchema.entries,
+	currentPlayerId: playerIdSchema,
 	game: object({
 		...gameBaseSchema.entries.game.entries,
 		players: array(
 			object({
 				...gameBaseSchema.entries.game.entries.players.item.entries,
-				submittedText: nullable(playerCardSchema.entries.text),
+				submission: nullable(playerSubmissionSchema),
 			}),
 		),
 	}),
@@ -80,6 +92,10 @@ const gameServerRoundStartMessageSchema = object({
 	type: literal("ROUND_START"),
 });
 
+export type GameServerRoundStartMessage = InferOutput<
+	typeof gameServerRoundStartMessageSchema
+>;
+
 const gameServerTurnStartMessageSchema = object({
 	...gameSubmissionBaseSchema.entries,
 	game: object({
@@ -89,6 +105,10 @@ const gameServerTurnStartMessageSchema = object({
 	type: literal("TURN_START"),
 });
 
+export type GameServerTurnStartMessage = InferOutput<
+	typeof gameServerTurnStartMessageSchema
+>;
+
 const gameServerTurnEndMessageSchema = object({
 	...gameSubmissionBaseSchema.entries,
 	game: object({
@@ -97,6 +117,10 @@ const gameServerTurnEndMessageSchema = object({
 	}),
 	type: literal("TURN_END"),
 });
+
+export type GameServerTurnEndMessage = InferOutput<
+	typeof gameServerTurnEndMessageSchema
+>;
 
 export const gameClientSubmissionMessageSchema = object({
 	submission: submitSchema,
@@ -141,3 +165,11 @@ export const gameServerResultMessageSchema = object({
 export type GameServerResultMessage = InferOutput<
 	typeof gameServerResultMessageSchema
 >;
+
+// 全体
+export const gameServerMessageSchema = variant("type", [
+	gameServerSubmissionMessageSchema,
+	gameServerVoteMessageSchema,
+	gameServerResultMessageSchema,
+]);
+export type GameServerMessage = InferOutput<typeof gameServerMessageSchema>;
