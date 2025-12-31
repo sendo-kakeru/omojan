@@ -24,14 +24,19 @@ import {
 
 const gameStateSchema = union([
 	literal("waiting"),
-	literal("setting"), // 不要だったら消す
 	literal("submission"),
 	literal("voting"),
 	literal("result"),
 ]);
 export type GameState = InferOutput<typeof gameStateSchema>;
 
-const gameBaseSchema = object({
+const gamePlayerCardSchema = object({
+	...pick(playerCardSchema, ["id", "text"]).entries,
+	used: boolean(),
+});
+export type GamePlayerCard = InferOutput<typeof gamePlayerCardSchema>;
+
+export const gameBaseSchema = object({
 	game: object({
 		...pick(gameSchema, ["timeLimit"]).entries,
 		...pick(roundSchema, ["roundNo"]).entries,
@@ -47,9 +52,7 @@ const gameBaseSchema = object({
 	}),
 	mePlayer: object({
 		id: playerIdSchema,
-		playerCards: array(
-			object({ ...playerCardSchema.entries, used: boolean() }),
-		),
+		playerCards: array(gamePlayerCardSchema),
 	}),
 });
 const gameSubmissionBaseSchema = object({
@@ -79,6 +82,10 @@ const gameServerRoundStartMessageSchema = object({
 	}),
 	type: literal("ROUND_START"),
 });
+
+export type GameServerRoundStartMessage = InferOutput<
+	typeof gameServerRoundStartMessageSchema
+>;
 
 const gameServerTurnStartMessageSchema = object({
 	...gameSubmissionBaseSchema.entries,

@@ -10,6 +10,7 @@ INSERT INTO __drizzle_migrations VALUES(NULL,'35e19d4ace100bdaee3895b54a9df902fa
 INSERT INTO __drizzle_migrations VALUES(NULL,'5fd36bf52f73836d77a8b78a065b63d0dc6008c639f26400d6b6f72f2728660a',1765371200000);
 INSERT INTO __drizzle_migrations VALUES(NULL,'36f4c0792f873b8e4008e445b8367a88d0a2256960a35f6b388ced3809be9ca8',1765372200000);
 INSERT INTO __drizzle_migrations VALUES(NULL,'1e256898e9e0c88263c744bd4f7235056b42c8d8e037fd3ac266015cb498dcd1',1767142655235);
+INSERT INTO __drizzle_migrations VALUES(NULL,'830060aa034711cc32daa0c49ebedd24391841a573c8ed23e137b3cd078520ec',1767162558179);
 CREATE TABLE IF NOT EXISTS `game` (
 	`created_at` text NOT NULL,
 	`updated_at` text NOT NULL,
@@ -152,17 +153,6 @@ INSERT INTO player VALUES('2025-12-25T11:26:42.558Z','2025-12-25T11:26:42.558Z',
 INSERT INTO player VALUES('2025-12-25T11:26:44.622Z','2025-12-25T11:26:44.622Z','019b5542-d761-79ee-88d5-32bbcf538b58','c00e8eb743bb7ec69654b6c4b5554bf66211c60a77cdeb55ebd1f75effb7d836','019b5542-df8f-7486-a324-5e0a0c4c7a24','CPU',2,NULL,1,0);
 INSERT INTO player VALUES('2025-12-25T11:26:44.656Z','2025-12-25T11:26:44.656Z','019b5542-d761-79ee-88d5-32bbcf538b58','327cde9e313ad69a0fefdebe7b38c2b4b3a3c9b18ad0bd19af0d422559d8eab2','019b5542-dfb0-79a4-8bfa-fe3bac10e064','CPU',3,NULL,1,0);
 INSERT INTO player VALUES('2025-12-25T11:26:44.683Z','2025-12-25T11:26:44.683Z','019b5542-d761-79ee-88d5-32bbcf538b58','248afb65e48a1d7b93659ee601a89b92bb7a68fa5dca936dffcea9baed1fbc8e','019b5542-dfcb-708c-bb9c-ad145750d590','CPU',4,NULL,1,0);
-CREATE TABLE IF NOT EXISTS `player_card` (
-	`created_at` text NOT NULL,
-	`updated_at` text NOT NULL,
-	`id` text PRIMARY KEY NOT NULL,
-	`player_id` text NOT NULL,
-	`round_id` text NOT NULL,
-	`submission_id` text NOT NULL, `text` text NOT NULL,
-	FOREIGN KEY (`player_id`) REFERENCES `player`(`id`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`round_id`) REFERENCES `round`(`id`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`submission_id`) REFERENCES `submission`(`id`) ON UPDATE no action ON DELETE cascade
-);
 CREATE TABLE IF NOT EXISTS `round` (
 	`created_at` text NOT NULL,
 	`updated_at` text NOT NULL,
@@ -219,9 +209,21 @@ CREATE TABLE IF NOT EXISTS `vote` (
 	FOREIGN KEY (`round_id`) REFERENCES `round`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`submission_id`) REFERENCES `submission`(`id`) ON UPDATE no action ON DELETE cascade
 );
+CREATE TABLE IF NOT EXISTS "player_card" (
+	`created_at` text NOT NULL,
+	`updated_at` text NOT NULL,
+	`id` text PRIMARY KEY NOT NULL,
+	`player_id` text NOT NULL,
+	`round_id` text NOT NULL,
+	`submission_id` text,
+	`text` text NOT NULL,
+	FOREIGN KEY (`player_id`) REFERENCES `player`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`round_id`) REFERENCES `round`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`submission_id`) REFERENCES `submission`(`id`) ON UPDATE no action ON DELETE set null
+);
 CREATE UNIQUE INDEX `player_game_token_hash_unique` ON `player` (`game_token_hash`);
 CREATE UNIQUE INDEX `user_email_unique` ON `user` (`email`);
 CREATE UNIQUE INDEX `user_sub_unique` ON `user` (`sub`);
-CREATE UNIQUE INDEX `player_card_text_unique` ON `player_card` (`text`);
 CREATE UNIQUE INDEX `round_theme_text_unique` ON `round_theme` (`text`);
+CREATE UNIQUE INDEX `player_card_text_unique` ON `player_card` (`text`);
 COMMIT;

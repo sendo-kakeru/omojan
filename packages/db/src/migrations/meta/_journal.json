@@ -35,6 +35,13 @@
 			"tag": "0004_fluffy_surge",
 			"version": "6",
 			"when": 1767142655235
+		},
+		{
+			"breakpoints": true,
+			"idx": 5,
+			"tag": "0005_fine_maverick",
+			"version": "6",
+			"when": 1767162558179
 		}
 	],
 	"version": "7"

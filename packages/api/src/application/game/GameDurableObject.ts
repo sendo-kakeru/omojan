@@ -1,5 +1,10 @@
 import { DurableObject } from "cloudflare:workers";
-import type { GameState } from "@repo/db/model";
+import type {
+	GamePlayerCard,
+	GameServerRoundStartMessage,
+	GameState,
+	gameBaseSchema,
+} from "@repo/db/model";
 import {
 	type GameId,
 	isGameId,
@@ -7,36 +12,48 @@ import {
 	type PlayerId,
 	playerTable,
 	type RoundNo,
+	type RoundTheme,
 } from "@repo/db/schema";
 import { and, eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
+import type { InferOutput } from "valibot";
 import type { Env } from "../../env";
 import { createDrizzleClient, type DrizzleClient } from "../../libs/drizzle";
 import { RoomService } from "../room/RoomService";
 import { WebSocketService } from "../websocket/WebsocketService";
+import { GameService } from "./GameService";
 
 export class GameDurableObject extends DurableObject<Env> {
 	private readonly db: DrizzleClient;
 	private readonly webSocketService = new WebSocketService();
+	private readonly gameService: GameService;
+	private readonly roomService: RoomService;
 	private gameId: GameId | null = null;
-	// biome-ignore lint/correctness/noUnusedPrivateClassMembers: 実装途中
-	private round: RoundNo = 1;
-	// 不要かも
-	// biome-ignore lint/correctness/noUnusedPrivateClassMembers: 実装途中
 	private state: GameState = "waiting";
+	private roundNo: RoundNo = 1;
+	private themes: Map<RoundNo, RoundTheme["text"]> = new Map();
+	private timeLimit = 30;
+	// TODO: 型が決まってきたらちゃんと定義
+	private players: Omit<
+		InferOutput<typeof gameBaseSchema>["game"]["players"][number],
+		"submittedText"
+	>[] = [];
+
 	private readonly connections = new Map<
 		PlayerId,
 		{
-			cards: string[];
+			cards: GamePlayerCard[];
+			isCpu: boolean;
+			// 未接続 or CPUはnull
 			socket: WebSocket | null;
 		}
 	>();
-	private readonly roomService: RoomService;
 
 	constructor(ctx: DurableObjectState, env: Env) {
 		super(ctx, env);
 		this.db = createDrizzleClient(env);
 		this.roomService = new RoomService(this.db);
+		this.gameService = new GameService(this.db);
 	}
 
 	/**
@@ -50,6 +67,11 @@ export class GameDurableObject extends DurableObject<Env> {
 			throw new HTTPException(426, {
 				message: "Upgrade: websocket を指定してください",
 			});
+		}
+
+		// 初回接続時にプレイヤー情報を初期化
+		if (this.connections.size === 0) {
+			await this.initializePlayerConnections(gameId);
 		}
 
 		// WS リクエストをアップグレードし、参加者一覧を即時配信する。
@@ -74,20 +96,27 @@ export class GameDurableObject extends DurableObject<Env> {
 		this.ctx.acceptWebSocket(server);
 
 		// 接続を登録
-		this.connections.set(player.id, { cards: [], socket: server });
+		this.connections.set(player.id, {
+			cards: existingConnections?.cards ?? [],
+			isCpu: existingConnections?.isCpu ?? false,
+			socket: server,
+		});
 
-		// 接続数が4人になったらゲーム開始
-		if (this.connections.size === 4) {
-			this.state = "setting";
-			await this.ctx.storage.deleteAlarm();
-			// TODO: ゲーム開始までの初期設定処理
+		// CPUでないプレイヤーが全員接続したらゲーム開始
+		if (this.areAllPlayersConnected()) {
+			if (this.state !== "waiting") {
+				// 待機アラームの削除
+				// waiting以外では再接続
+				await this.ctx.storage.deleteAlarm();
+			}
+			await this.startGame();
 		}
 
 		// 接続待ちのカウント開始
 		// 先に入ったプレイヤーが既にalermをセットしている可能性があるため確認
 		const currentAlarm = await this.ctx.storage.getAlarm();
 		if (currentAlarm === null) {
-			await this.ctx.storage.setAlarm(Date.now() + 20000);
+			await this.ctx.storage.setAlarm(Date.now() + 10000);
 		}
 		return this.webSocketService.upgradeResponse({ client });
 	}
@@ -103,9 +132,88 @@ export class GameDurableObject extends DurableObject<Env> {
 	async alarm(): Promise<void> {
 		if (!this.gameId) return;
 		// 接続待機タイムアウトになったらゲームを開始
-		this.state = "setting";
 		await this.ctx.storage.deleteAlarm();
-		// TODO: ゲーム開始までの初期設定処理
+		switch (this.state) {
+			case "waiting":
+				await this.startGame();
+				break;
+		}
+	}
+
+	/**
+	 * ゲーム開始処理
+	 * - ラウンド・テーマ・手持ち牌を初期化
+	 * - 全プレイヤーにROUND_STARTメッセージを送信
+	 */
+	private async startGame(): Promise<void> {
+		if (!this.gameId) return;
+
+		try {
+			const { roundNo, themes, timeLimit, players, playerCards } =
+				await this.gameService.initializeGame({
+					gameId: this.gameId,
+				});
+
+			// ゲーム状態を更新
+			this.roundNo = roundNo;
+			this.themes = themes;
+			this.timeLimit = timeLimit;
+			this.players = players;
+
+			// 各プレイヤーの手持ち牌を接続情報に設定
+			for (const [playerId, cards] of playerCards) {
+				const connection = this.connections.get(playerId);
+				if (connection) {
+					this.connections.set(playerId, { ...connection, cards });
+				}
+			}
+
+			// 各プレイヤーにROUND_STARTメッセージを送信
+			for (const [playerId, connection] of this.connections) {
+				if (!connection.socket) continue;
+
+				try {
+					connection.socket.send(
+						JSON.stringify({
+							game: {
+								players: this.players.map((player) => ({
+									...player,
+									submittedText: null,
+								})),
+								roundNo: this.roundNo,
+								submitted: null,
+								theme: this.themes.get(this.roundNo) ?? "",
+								timeLimit: this.timeLimit,
+							},
+							mePlayer: {
+								id: playerId,
+								playerCards: connection.cards,
+							},
+							type: "ROUND_START",
+						} satisfies GameServerRoundStartMessage),
+					);
+				} catch (error) {
+					const message = `プレイヤー ${playerId} へのROUND_START送信に失敗しました`;
+					console.error(message, error);
+					// 送信に失敗した場合はそのプレイヤーのみDPUにして接続を切断
+					this.connections.set(playerId, {
+						...connection,
+						isCpu: true,
+						socket: null,
+					});
+					connection.socket.close(1011, message);
+				}
+			}
+			this.state = "submission";
+		} catch (error) {
+			console.error("ゲーム開始処理に失敗しました:", error);
+			// エラー時は全プレイヤーに通知して切断
+			for (const [, connection] of this.connections) {
+				if (connection.socket) {
+					connection.socket.close(1011, "ゲーム開始処理に失敗しました");
+				}
+			}
+		}
 	}
 
 	/**
@@ -175,5 +283,39 @@ export class GameDurableObject extends DurableObject<Env> {
 			});
 		}
 		this.gameId = gameId;
+	}
+
+	/**
+	 * 初回接続時にプレイヤー情報を初期化する。
+	 * - 全プレイヤーをconnectionsに登録（CPUはsocket: null）
+	 */
+	private async initializePlayerConnections(gameId: GameId): Promise<void> {
+		const players = await this.db
+			.select({
+				id: playerTable.id,
+				isCpu: playerTable.isCpu,
+			})
+			.from(playerTable)
+			.where(eq(playerTable.gameId, gameId));
+
+		for (const player of players) {
+			this.connections.set(player.id, {
+				cards: [],
+				isCpu: player.isCpu,
+				socket: null,
+			});
+		}
+	}
+
+	/**
+	 * 全ての人間プレイヤーが接続済みかどうかを判定する。
+	 */
+	private areAllPlayersConnected(): boolean {
+		for (const [, connection] of this.connections) {
+			if (!connection.isCpu && connection.socket === null) {
+				return false;
+			}
+		}
+		return true;
 	}
 }
