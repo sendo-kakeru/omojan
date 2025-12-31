@@ -62,6 +62,50 @@ graph TD
 4. **投票フェーズ**：各自が場に出た組み合わせの中から最も面白いと思うものに投票する。**自分以外**の中から1票入れる。
 5. **結果**：最多得票が**ラウンド勝者**。同票は全員勝者
 
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant S as Server
+
+    Note over C,S: ラウンド開始(指定秒)
+
+    Note over S: ラウンドの席順配置
+    S->>C: ROUND_START<br/>{game, mePlayer…}
+    Note over S: 1秒待機
+    Note over C: 開始アニメーション用
+
+    Note over C,S: 提出フェーズ
+
+    loop 各プレイヤーのターン
+        S->>C: TURN_START
+        alt 提出する
+            C->>S: SUBMIT<br/>{submission}
+            S->>C: TURN_END
+        else タイムアウト
+            Note over S: ランダム提出
+            S->>C: TURN_END
+        end
+    end
+
+    Note over C,S: 投票フェーズ（30秒）
+
+    S->>C: VOTE_START
+
+    loop 各プレイヤー同時に投票
+        alt 投票する
+            C->>S: VOTE
+        else タイムアウト
+            Note over S: ランダム投票
+        end
+    end
+
+    Note over C,S: 結果フェーズ
+
+    S->>C: RESULT
+
+    Note over C,S: 次ラウンドへ or ゲーム終了
+```
+
 ### その他
 
 - プレイヤーは匿名でも参加できる。匿名の場合は、参加時、部屋作成時にプレイヤー名を入力する

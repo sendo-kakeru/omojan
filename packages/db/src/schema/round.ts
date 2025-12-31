@@ -31,9 +31,6 @@ export const roundTable = sqliteTable("round", {
 		.references(() => gameTable.id, { onDelete: "cascade" }),
 	id: idBaseColumn.$type<RoundId>(),
 	roundNo: integer("round_no").notNull().$type<RoundNo>(),
-	status: text("status", { enum: ["submitting", "voting", "closed"] })
-		.notNull()
-		.default("submitting"),
 });
 
 export const roundSchema = createSelectSchema(roundTable, {
