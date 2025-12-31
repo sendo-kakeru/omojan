@@ -31,7 +31,7 @@ export const playerCardTable = sqliteTable("player_card", {
 	submissionId: text("submission_id")
 		.$type<SubmissionId>()
 		.references(() => submissionTable.id, { onDelete: "set null" }),
-	text: text("text").notNull().unique(),
+	text: text("text").notNull(),
 });
 
 export const playerCardSchema = createSelectSchema(playerCardTable, {

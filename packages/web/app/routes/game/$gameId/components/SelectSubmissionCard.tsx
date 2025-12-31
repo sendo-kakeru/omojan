@@ -2,22 +2,17 @@ import classNames from "classnames";
 import { PiHandTap } from "react-icons/pi";
 import { Button } from "~/components/button/Button";
 
-export type SelectSubmissionCardState =
-	| "idle"
-	| "ready"
-	| "selected"
-	| "placed";
-
-type PropsBase = { label: string };
+export type SelectSubmissionCardProps = (
+	| { state: "idle" }
+	| { state: "ready"; onSelect: () => void; disabled?: boolean }
+	| { state: "selected"; word: string; onConfirm: () => void }
+	| { state: "placed"; word: string }
+) & { label: string };
 
 export function SelectSubmissionCard({
 	label,
 	...props
-}:
-	| (PropsBase & { state: "idle" })
-	| (PropsBase & { state: "ready"; onSelect: () => void; disabled?: boolean })
-	| (PropsBase & { state: "selected"; word: string; onConfirm: () => void })
-	| (PropsBase & { state: "placed"; word: string })) {
+}: SelectSubmissionCardProps) {
 	const { state } = props;
 	const isIdle = state === "idle";
 	const isReady = state === "ready";

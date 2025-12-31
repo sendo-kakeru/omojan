@@ -1,10 +1,10 @@
 import { DurableObject } from "cloudflare:workers";
 import type {
 	GamePlayerCard,
+	GamePlayerItem,
 	GameServerRoundStartMessage,
 	GameServerTurnStartMessage,
 	GameState,
-	gameBaseSchema,
 } from "@repo/db/model";
 import {
 	type GameId,
@@ -17,7 +17,6 @@ import {
 } from "@repo/db/schema";
 import { and, eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
-import type { InferOutput } from "valibot";
 import type { Env } from "../../env";
 import { createDrizzleClient, type DrizzleClient } from "../../libs/drizzle";
 import { RoomService } from "../room/RoomService";
@@ -32,13 +31,10 @@ export class GameDurableObject extends DurableObject<Env> {
 	private gameId: GameId | null = null;
 	private state: GameState = "WAITING";
 	private roundNo: RoundNo = 1;
+	private turnIndex: 0 | 1 | 2 | 3 = 0; // 0〜3: ラウンド内のターン番号
 	private themes: Map<RoundNo, RoundTheme["text"]> = new Map();
 	private timeLimit = 30;
-	// TODO: 型が決まってきたらちゃんと定義
-	private players: Omit<
-		InferOutput<typeof gameBaseSchema>["game"]["players"][number],
-		"submittedText"
-	>[] = [];
+	private players: GamePlayerItem[] = [];
 
 	private readonly connections = new Map<
 		PlayerId,
@@ -161,6 +157,7 @@ export class GameDurableObject extends DurableObject<Env> {
 			this.themes = themes;
 			this.timeLimit = timeLimit;
 			this.players = players;
+			this.turnIndex = 0; // ラウンド開始時はターン0から
 
 			// 各プレイヤーの手持ち牌を接続情報に設定
 			for (const [playerId, cards] of playerCards) {
@@ -304,16 +301,21 @@ export class GameDurableObject extends DurableObject<Env> {
 			roundNo: this.roundNo,
 		});
 
+		// turnIndexに基づいて現在のターンプレイヤーを取得（ラウンド開始時は0）
+		const currentPlayerId = orderedPlayers[this.turnIndex]?.id;
+		if (!currentPlayerId) return;
+
 		for (const [playerId, connection] of this.connections) {
 			if (!connection.socket) continue;
 
 			try {
 				connection.socket.send(
 					JSON.stringify({
+						currentPlayerId,
 						game: {
 							players: orderedPlayers.map((player) => ({
 								...player,
-								submittedText: null,
+								submission: null,
 							})),
 							roundNo: this.roundNo,
 							submitted: null,
@@ -345,16 +347,21 @@ export class GameDurableObject extends DurableObject<Env> {
 			roundNo: this.roundNo,
 		});
 
+		// turnIndexに基づいて現在のターンプレイヤーを取得
+		const currentPlayerId = orderedPlayers[this.turnIndex]?.id;
+		if (!currentPlayerId) return;
+
 		for (const [playerId, connection] of this.connections) {
 			if (!connection.socket) continue;
 
 			try {
 				connection.socket.send(
 					JSON.stringify({
+						currentPlayerId,
 						game: {
 							players: orderedPlayers.map((player) => ({
 								...player,
-								submittedText: null,
+								submission: null,
 							})),
 							roundNo: this.roundNo,
 							submitted: null,

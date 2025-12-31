@@ -32,23 +32,30 @@ const gameStateSchema = union([
 export type GameState = InferOutput<typeof gameStateSchema>;
 
 const gamePlayerCardSchema = object({
-	...pick(playerCardSchema, ["id", "text"]).entries,
+	...pick(playerCardSchema, ["id"]).entries,
 	used: boolean(),
+	word: playerCardSchema.entries.text,
 });
 export type GamePlayerCard = InferOutput<typeof gamePlayerCardSchema>;
 
-export const gameBaseSchema = object({
+const playerSubmissionSchema = object({
+	position: submissionSchema.entries.position,
+	text: playerCardSchema.entries.text,
+});
+
+const gamePlayerItemSchema = object({
+	...pick(playerSchema, ["id", "playerName", "seat"]).entries,
+	...pick(userSchema, ["image"]).entries,
+	submission: nullable(playerSubmissionSchema),
+	winCount: number(),
+});
+export type GamePlayerItem = InferOutput<typeof gamePlayerItemSchema>;
+
+const gameBaseSchema = object({
 	game: object({
 		...pick(gameSchema, ["timeLimit"]).entries,
 		...pick(roundSchema, ["roundNo"]).entries,
-		players: array(
-			object({
-				...pick(playerSchema, ["id", "playerName", "seat"]).entries,
-				...pick(userSchema, ["image"]).entries,
-				submittedText: playerCardSchema.entries.text,
-				winCount: number(),
-			}),
-		),
+		players: array(gamePlayerItemSchema),
 		theme: roundThemeSchema.entries.text,
 	}),
 	mePlayer: object({
@@ -58,12 +65,13 @@ export const gameBaseSchema = object({
 });
 const gameSubmissionBaseSchema = object({
 	...gameBaseSchema.entries,
+	currentPlayerId: playerIdSchema,
 	game: object({
 		...gameBaseSchema.entries.game.entries,
 		players: array(
 			object({
 				...gameBaseSchema.entries.game.entries.players.item.entries,
-				submittedText: nullable(playerCardSchema.entries.text),
+				submission: nullable(playerSubmissionSchema),
 			}),
 		),
 	}),
@@ -157,3 +165,11 @@ export const gameServerResultMessageSchema = object({
 export type GameServerResultMessage = InferOutput<
 	typeof gameServerResultMessageSchema
 >;
+
+// 全体
+export const gameServerMessageSchema = variant("type", [
+	gameServerSubmissionMessageSchema,
+	gameServerVoteMessageSchema,
+	gameServerResultMessageSchema,
+]);
+export type GameServerMessage = InferOutput<typeof gameServerMessageSchema>;

@@ -44,9 +44,9 @@ export function CircularTimerProgress({
 					transform="rotate(-90 16 16)"
 				/>
 			</svg>
-			<text className="absolute inset-0 flex items-center justify-center font-semibold text-neutral-900 text-sm md:text-lg">
+			<p className="absolute inset-0 flex items-center justify-center font-semibold text-neutral-900 text-sm md:text-lg">
 				{label ?? Math.round(clampedProgress)}
-			</text>
+			</p>
 		</div>
 	);
 }

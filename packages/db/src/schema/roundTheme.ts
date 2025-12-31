@@ -18,7 +18,7 @@ export const roundThemeTable = sqliteTable("round_theme", {
 		.notNull()
 		.$type<RoundId>()
 		.references(() => roundTable.id, { onDelete: "cascade" }),
-	text: text("text").notNull().unique(),
+	text: text("text").notNull(),
 });
 
 export const roundThemeSchema = createSelectSchema(roundThemeTable, {

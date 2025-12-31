@@ -42,6 +42,13 @@
 			"tag": "0005_fine_maverick",
 			"version": "6",
 			"when": 1767162558179
+		},
+		{
+			"breakpoints": true,
+			"idx": 6,
+			"tag": "0006_adorable_malcolm_colcord",
+			"version": "6",
+			"when": 1767168780437
 		}
 	],
 	"version": "7"

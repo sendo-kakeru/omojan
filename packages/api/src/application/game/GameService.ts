@@ -8,6 +8,7 @@ import {
 	isRoundNo,
 	type PlayerCard,
 	type PlayerId,
+	type PlayerSeat,
 	playerCardTable,
 	playerTable,
 	type RoundId,
@@ -62,7 +63,7 @@ export class GameService {
 				.leftJoin(userTable, eq(playerTable.userId, userTable.id))
 				.where(eq(playerTable.gameId, gameId));
 
-			if (players.length === 4) {
+			if (players.length < 4) {
 				// 通常はあり得ない
 				throw new HTTPException(409, {
 					message: "プレイヤーが不足しています。",
@@ -139,7 +140,7 @@ export class GameService {
 						.returning({ id: playerCardTable.id, text: playerCardTable.text });
 
 					if (card) {
-						cardsForPlayer.push({ ...card, used: false });
+						cardsForPlayer.push({ id: card.id, used: false, word: card.text });
 					}
 					handWordIndex++;
 				}
@@ -164,7 +165,7 @@ export class GameService {
 					.sort((a, b) => a.seat - b.seat)
 					.map((player) => ({
 						...player,
-						submittedText: null,
+						submission: null,
 						winCount: 0,
 					})),
 				roundNo: 1,
@@ -190,7 +191,7 @@ export class GameService {
 		seat,
 	}: {
 		roundNo: RoundNo;
-		seat: RoundNo;
+		seat: PlayerSeat;
 	}): number {
 		// (seat - roundNo) mod 4 で0-3の順番を得て、1-4に変換
 		return ((seat - roundNo + 4) % 4) + 1;

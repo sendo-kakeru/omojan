@@ -1,21 +1,14 @@
-import type { GameState } from "@repo/db/model";
-import { GameResult } from "./GameResult";
+import type { GameServerMessage } from "@repo/db/model";
 import { GameSubmission } from "./GameSubmission";
-import { GameVote } from "./GameVote";
-import { GameWaiting } from "./GameWaiting";
 
-export function GamePresenter({ state }: { state: GameState }) {
-	if (state === "waiting" || state === "setting") {
-		return <GameWaiting state={state} />;
+export function GamePresenter({ data }: { data: GameServerMessage }) {
+	if (
+		data.type === "ROUND_START" ||
+		data.type === "TURN_START" ||
+		data.type === "TURN_END"
+	) {
+		return <GameSubmission data={data} />;
 	}
-	if (state === "submission") {
-		return <GameSubmission />;
-	}
-	if (state === "voting") {
-		return <GameVote />;
-	}
-	if (state === "result") {
-		return <GameResult />;
-	}
+	// TODO: VOTE_START, RESULT の処理
 	return null;
 }
