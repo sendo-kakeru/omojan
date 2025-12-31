@@ -24,7 +24,7 @@ import {
 
 const gameStateSchema = union([
 	literal("WAITING"),
-	literal("TURN_START_PENDING"),
+	literal("START_PENDING"),
 	literal("SUBMISSION"),
 	literal("VOTING"),
 	literal("RESULT"),
