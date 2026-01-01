@@ -9,14 +9,14 @@ import type {
 	HybridRouteContext,
 	PrivateRouteContext,
 } from "../types";
+import { routes as gameRoutes } from "./game/gameRoutes";
 import { routes as matchingRoutes } from "./matching/matchingRoutes";
 import { routes as meRoutes } from "./me/meRoutes";
 import { routes as roomRoutes } from "./room/roomRoutes";
 
-const publicRoutes = new Hono<BaseContext>().route(
-	"/v1/matchings",
-	matchingRoutes,
-);
+const publicRoutes = new Hono<BaseContext>()
+	.route("/v1/games", gameRoutes)
+	.route("/v1/matchings", matchingRoutes);
 
 const hybridRoutes = new Hono<HybridRouteContext>()
 	.use(hybridAuthMiddleware())

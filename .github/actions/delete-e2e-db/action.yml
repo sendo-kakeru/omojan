@@ -1,0 +1,43 @@
+name: Teardown E2E Database
+
+description: E2E用に作成したTurso DBを削除
+
+inputs:
+  turso-api-token:
+    description: Turso APIトークン（組織レベル）
+    required: true
+  database-name:
+    description: 削除するデータベース名
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Install Turso CLI
+      shell: bash
+      run: |
+        if ! command -v turso &> /dev/null; then
+          curl -sSfL https://get.tur.so/install.sh | bash
+          echo "$HOME/.turso" >> $GITHUB_PATH
+        fi
+
+    - name: Destroy E2E Database
+      shell: bash
+      env:
+        TURSO_API_TOKEN: ${{ inputs.turso-api-token }}
+      run: |
+        DB_NAME="${{ inputs.database-name }}"
+
+        if [ -z "${DB_NAME}" ]; then
+          echo "No database name provided, skipping cleanup"
+          exit 0
+        fi
+
+        echo "Destroying database: ${DB_NAME}"
+
+        if turso db show "${DB_NAME}" >/dev/null 2>&1; then
+          turso db destroy "${DB_NAME}" --yes
+          echo "Database ${DB_NAME} destroyed successfully"
+        else
+          echo "Database ${DB_NAME} does not exist, skipping"
+        fi

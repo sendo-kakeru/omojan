@@ -3,12 +3,10 @@ import { createSelectSchema } from "drizzle-valibot";
 import {
 	brand,
 	type InferOutput,
-	literal,
 	object,
 	pipe,
 	safeParse,
 	string,
-	union,
 	uuid,
 } from "valibot";
 import { idBaseColumn, tableBaseColumns } from "./common";
@@ -39,14 +37,5 @@ export const gameSchema = createSelectSchema(gameTable, {
 	id: gameIdSchema,
 });
 export type Game = InferOutput<typeof gameSchema>;
-
-export const gameStateSchema = union([
-	literal("waiting"),
-	literal("setting"), // 不要だったら消す
-	literal("submission"),
-	literal("voting"),
-	literal("result"),
-]);
-export type GameState = InferOutput<typeof gameStateSchema>;
 
 export const gameIdRequestParamSchema = object({ gameId: gameIdSchema });
