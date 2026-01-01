@@ -30,7 +30,7 @@ export default function () {
 
 				<div className="grid gap-y-8">
 					{isLoading && (
-						<div className="grid place-items-center gap-y-4 py-16 text-gray-500">
+						<div className="grid place-items-center gap-y-4 py-16 text-neutral-500">
 							<Spinner className="size-32" />
 							<p className="text-center">部屋一覧を取得中...</p>
 						</div>
@@ -43,7 +43,7 @@ export default function () {
 					)}
 
 					{gameList && gameList.length === 0 && (
-						<p className="py-16 text-center text-gray-500">
+						<p className="py-16 text-center text-neutral-500">
 							現在募集している部屋はありません
 						</p>
 					)}

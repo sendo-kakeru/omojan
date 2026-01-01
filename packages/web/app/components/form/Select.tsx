@@ -18,11 +18,11 @@ export function Select({
 			<select
 				className={classNames(
 					"size-full cursor-pointer appearance-none overflow-hidden text-ellipsis whitespace-nowrap rounded-sm border border-gray-200 py-4 pr-40 pl-16 text-base transition-colors",
-					"invalid:text-gray-500", // 未選択時（一つ目の要素選択時）に文字色を変える
+					"invalid:text-neutral-500", // 未選択時（一つ目の要素選択時）に文字色を変える
 					"hover:bg-gray-50",
 					"focus-visible:border-gray-400",
-					"aria-invalid:border-red-600 aria-invalid:bg-red-500/5 aria-invalid:text-gray-500",
-					"disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500",
+					"aria-invalid:border-red-600 aria-invalid:bg-red-500/5 aria-invalid:text-neutral-500",
+					"disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-neutral-500",
 					className,
 				)}
 				disabled={disabled}
@@ -36,7 +36,7 @@ export function Select({
 			</select>
 			<FaAngleDown
 				aria-hidden
-				className="pointer-events-none absolute top-1/2 right-16 size-16 shrink-0 -translate-y-1/2 text-gray-400"
+				className="pointer-events-none absolute top-1/2 right-16 size-16 shrink-0 -translate-y-1/2 text-neutral-400"
 			/>
 		</div>
 	);
