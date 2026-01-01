@@ -9,7 +9,7 @@
 			"Bash(pnpm --filter @repo/db run build)",
 			"Bash(pnpm --filter @repo/shared run build)",
 			"Bash(pnpm i)",
-			"Bash(pnpm check-types)",
+			"Bash(pnpm typecheck)",
 			"Bash(pnpm lint)",
 			"Bash(pnpm ci)",
 			"Bash(pnpm dev)",

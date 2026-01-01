@@ -2,7 +2,7 @@ name: Deploy API Staging
 on:
   push:
     branches:
-      - develop
+      - staging
     paths:
       - packages/api/**
       - packages/db/**
@@ -15,16 +15,15 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Setup pnpm
         uses: ./.github/actions/setup-pnpm
 
       - name: Build dependencies packages
         run: |
-          pnpm --filter @repo/env run build
-          pnpm --filter @repo/db run build
-          pnpm --filter @repo/shared run build
+          pnpm turbo run build --filter @repo/db
+          pnpm turbo run build --filter @repo/shared
 
       - name: Deploy
         uses: cloudflare/wrangler-action@v3

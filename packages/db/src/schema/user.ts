@@ -1,27 +1,25 @@
-import { sql } from "drizzle-orm";
-import { boolean, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { createSelectSchema } from "drizzle-valibot";
-import { type InferOutput, omit } from "valibot";
+import { brand, type InferOutput, pipe, string, uuid } from "valibot";
+import { idBaseColumn, tableBaseColumns } from "./common";
 
-// TODO: スキーマ整備
-export const userTable = pgTable("user", {
-	avatarUrl: text(),
-	createdAt: timestamp("created_at").notNull().defaultNow(),
-	email: text().unique().notNull(),
-	id: uuid().primaryKey().defaultRandom(),
-	isActive: boolean().default(true).notNull(),
-	name: text().notNull(),
-	sub: text().unique().notNull(),
-	updatedAt: timestamp("updated_at")
+export const userIdSchema = pipe(string(), uuid(), brand("user_id"));
+export type UserId = InferOutput<typeof userIdSchema>;
+
+export const userTable = sqliteTable("user", {
+	...tableBaseColumns,
+	email: text("email").notNull().unique(),
+	id: idBaseColumn.$type<UserId>(),
+	image: text("image"),
+	name: text("name").notNull(),
+	status: text("status", { enum: ["active", "deactivated"] })
 		.notNull()
-		.defaultNow()
-		.$onUpdate(() => sql`now()`),
+		.default("active"),
+	sub: text("sub").notNull().unique(),
 });
 
-// model
-export const userSchema = omit(createSelectSchema(userTable), [
-	"createdAt",
-	"updatedAt",
-]);
+export const userSchema = createSelectSchema(userTable, {
+	id: userIdSchema,
+});
 
 export type User = InferOutput<typeof userSchema>;

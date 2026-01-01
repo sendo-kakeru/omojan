@@ -1,12 +1,26 @@
 {
 	"dependencies": {
+		"@libsql/client": "^0.15.15",
+		"@noble/hashes": "^2.0.1",
+		"@oslojs/encoding": "^1.1.0",
 		"@repo/db": "workspace:*",
-		"hono": "^4.9.8"
+		"@repo/shared": "workspace:*",
+		"aws-jwt-verify": "^5.1.1",
+		"drizzle-orm": "^0.45.1",
+		"drizzle-valibot": "^0.4.2",
+		"hono": "^4.11.1",
+		"valibot": "^1.2.0"
 	},
 	"devDependencies": {
+		"@faker-js/faker": "^10.1.0",
+		"@repo/mock": "workspace:*",
 		"@repo/tsup-config": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
-		"wrangler": "^4.4.0"
+		"@types/node": "^25.0.3",
+		"drizzle-seed": "^0.3.1",
+		"tsx": "^4.20.6",
+		"vitest": "^4.0.16",
+		"wrangler": "^4.56.0"
 	},
 	"exports": {
 		".": "./dist/index.d.ts"
@@ -16,7 +30,7 @@
 	"private": true,
 	"scripts": {
 		"build": "pnpm run cf-typegen && pnpm run build:tsup && pnpm run build:tsc",
-		"build:tsc": "tsc",
+		"build:tsc": "tsc -p tsconfig.build.json",
 		"build:tsup": "tsup --clean",
 		"cf-typegen": "wrangler types --env-interface CloudflareBindings",
 		"deploy": "wrangler deploy --minify",
@@ -24,9 +38,12 @@
 		"dev:tsc": "tsc --watch",
 		"dev:tsup": "tsup --watch",
 		"dev:wrangler": "wrangler dev",
+		"dev:e2e": "wrangler dev --env e2e",
 		"format": "biome check --fix --unsafe .",
 		"lint": "biome check .",
-		"type-check": "pnpm run cf-typegen && tsc --noEmit"
+		"test": "tsx ./src/__tests__/vitest-with-db.ts",
+		"test:run": "tsx ./src/__tests__/vitest-with-db.ts run",
+		"typecheck": "pnpm run cf-typegen && tsc --noEmit"
 	},
 	"type": "module",
 	"version": "1.0.0"

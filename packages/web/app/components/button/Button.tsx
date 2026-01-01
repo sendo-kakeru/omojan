@@ -31,7 +31,7 @@ const buttonVariants = tv(
 	{
 		base: classNames(
 			"pointer-events-auto inline-flex h-fit shrink-0 items-center justify-center gap-x-4 rounded-full font-medium transition-colors",
-			"disabled:cursor-not-allowed disabled:border-none disabled:bg-gray-300 disabled:text-gray-500 disabled:opacity-50",
+			"disabled:cursor-not-allowed disabled:border-none disabled:bg-gray-300 disabled:text-neutral-500 disabled:opacity-50",
 		),
 		compoundVariants: [
 			// アイコンのみ
@@ -144,14 +144,14 @@ const buttonVariants = tv(
 			},
 			{
 				class:
-					"border-1 border-gray-700 bg-white text-gray-700 hover:bg-gray-200",
+					"border-1 border-gray-700 bg-white text-neutral-700 hover:bg-gray-200",
 				color: "black",
 				disabled: false,
 				variant: "outline",
 			},
 			{
 				class:
-					"border-1 border-gray-300 bg-white text-gray-500 hover:bg-gray-200",
+					"border-1 border-gray-300 bg-white text-neutral-500 hover:bg-gray-200",
 				color: "gray",
 				disabled: false,
 				variant: "outline",
@@ -271,12 +271,6 @@ export function Button({
 		variant,
 	});
 
-	const contentClassName = contentVariants({
-		isIconOnly,
-		size,
-		variant,
-	});
-
 	const iconClassName = iconVariants();
 
 	const content = (
@@ -286,7 +280,15 @@ export function Button({
 					{leftIcon}
 				</span>
 			)}
-			<span className={contentClassName}>{children}</span>
+			<span
+				className={contentVariants({
+					isIconOnly,
+					size,
+					variant,
+				})}
+			>
+				{children}
+			</span>
 			{rightIcon && (
 				<span aria-disabled={disabled} className={iconClassName}>
 					{rightIcon}

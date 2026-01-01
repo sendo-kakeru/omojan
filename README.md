@@ -1,8 +1,14 @@
 # ようこそOmojanへ
 
-## コーディング規約
-- ページはdefault export、それ以外はnamed export
-- propsは分割代入し、引数で型定義
-- tailwind mergeの使用はいとしないマージが起こるので使用禁止
-- tailwind variantsのslotは複雑になるので基本使用しない
-- ログは日本語で統一
+## 環境
+全てCloudflare Workers
+
+- 本番サイト: `omojan.com`
+- STGサイト: `stg.omojan.com`
+- 本番 API: `api.omojan.com`
+- STG API: `api-stg.omojan.com`
+
+用語
+- 本番: production/prod
+- STG: staging/stg
+- 開発(現時点でローカル環境も含む): development/dev

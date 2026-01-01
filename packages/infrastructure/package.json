@@ -1,12 +1,12 @@
 {
 	"devDependencies": {
-		"@pulumi/aws": "^7.0.0",
-		"@pulumi/pulumi": "^3.113.0",
+		"@pulumi/aws": "^7.15.0",
+		"@pulumi/pulumi": "^3.213.0",
 		"@repo/typescript-config": "workspace:*",
-		"@types/node": "^24.5.2",
-		"dotenv": "^17.2.2",
-		"typescript": "^5.9.2",
-		"valibot": "^1.1.0"
+		"@types/node": "^25.0.3",
+		"dotenv": "^17.2.3",
+		"typescript": "^5.9.3",
+		"valibot": "^1.2.0"
 	},
 	"license": "UNLICENSED",
 	"main": "index.ts",
@@ -16,7 +16,7 @@
 		"destroy": "RUN_TYPE=DESTROY pulumi up -y && pulumi destroy -y",
 		"format": "biome check --fix --unsafe .",
 		"lint": "biome check .",
-		"type-check": "tsc --noEmit",
+		"typecheck": "tsc --noEmit",
 		"up": "pulumi up -y"
 	},
 	"version": "1.0.0"

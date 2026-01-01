@@ -1,25 +1,35 @@
 {
 	"devDependencies": {
+		"@repo/shared": "workspace:*",
 		"@repo/tsup-config": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
-		"@types/node": "^24.5.2",
-		"drizzle-kit": "^0.31.4",
-		"drizzle-orm": "^0.44.5",
+		"@types/node": "^25.0.3",
+		"drizzle-kit": "^0.31.8",
+		"dotenv": "^17.2.3",
+		"drizzle-orm": "^0.45.1",
 		"drizzle-valibot": "^0.4.2",
-		"valibot": "^1.1.0"
+		"drizzle-seed": "^0.3.1",
+		"pg": "^8.16.3",
+		"tsx": "^4.20.6",
+		"valibot": "^1.2.0"
 	},
 	"exports": {
-		"./schema/*": {
-			"import": "./dist/esm/*.js",
-			"require": "./dist/*.js",
-			"types": "./dist/schema/*.d.ts"
+		"./schema": {
+			"types": "./dist/schema/index.d.ts",
+			"import": "./dist/esm/schema/index.js",
+			"require": "./dist/schema/index.js"
+		},
+		"./model": {
+			"types": "./dist/model/index.d.ts",
+			"import": "./dist/esm/model/index.js",
+			"require": "./dist/model/index.js"
 		}
 	},
 	"license": "UNLICENSED",
 	"name": "@repo/db",
 	"private": true,
 	"scripts": {
-		"build": "pnpm run \"/^build:/\"",
+		"build": "pnpm run build:tsup && pnpm run build:tsc",
 		"build:tsc": "tsc",
 		"build:tsup": "tsup --clean",
 		"dev": "pnpm run \"/^dev:/\"",
@@ -27,9 +37,22 @@
 		"dev:tsup": "tsup --watch",
 		"format": "biome check --fix --unsafe .",
 		"lint": "biome check .",
-		"migrate": "drizzle-kit push",
+		"db:gen": "drizzle-kit generate",
+		"db:migrate:prod": "ENV=production drizzle-kit migrate",
+		"db:migrate:stg": "ENV=staging drizzle-kit migrate",
+		"db:migrate:local": "drizzle-kit migrate",
+		"db:migrate:e2e": "ENV=e2e drizzle-kit migrate",
+		"db:drop:local": "drizzle-kit drop",
+		"db:push:local": "drizzle-kit push",
+		"db:dump": "rm -f src/dump.sql src/local.db && turso db shell omojan-main-local-sendo .dump > src/dump.sql && cat src/dump.sql | sqlite3 src/local.db",
+		"db:reset:local": "tsx ./src/reset.ts",
+		"db:changed": "pnpm run db:gen && pnpm run db:migrate:local && pnpm run db:migrate:e2e && pnpm run db:dump",
 		"studio": "drizzle-kit studio",
-		"type-check": "tsc --noEmit"
+		"typecheck": "tsc --noEmit"
 	},
-	"version": "1.0.0"
+	"type": "module",
+	"version": "1.0.0",
+	"dependencies": {
+		"uuidv7": "^1.1.0"
+	}
 }

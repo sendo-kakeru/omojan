@@ -15,17 +15,16 @@ jobs:
       VITE_COGNITO_DOMAIN: ${{ vars.VITE_COGNITO_DOMAIN }}
       VITE_API_URL: ${{ vars.VITE_API_URL }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Setup pnpm
         uses: ./.github/actions/setup-pnpm
 
       - name: Build dependencies packages
         run: |
-          pnpm --filter @repo/env run build
-          pnpm --filter @repo/db run build
-          pnpm --filter @repo/shared run build
-          pnpm --filter @repo/api run build
+          pnpm turbo run build --filter @repo/db
+          pnpm turbo run build --filter @repo/shared
+          pnpm turbo run build --filter @repo/api
 
       - name: Build
         run: pnpm run build

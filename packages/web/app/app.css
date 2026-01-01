@@ -1,22 +1,80 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
 @theme {
 	--spacing: 1px;
-}
+	/**
+	 * 主にiPhone SEのみ対応したい時に使用
+	 */
+	--breakpoint-xs: 24rem;
 
-html,
-body {
-	@apply bg-white dark:bg-gray-950;
+	--animate-toast-hide: toast-hide 200ms ease-in;
+	--animate-toast-slide-in: toast-slide-in 150ms cubic-bezier(0.16, 1, 0.3, 1);
+	--animate-toast-swipe-out: toast-swipe-out 100ms ease-out;
 
-	@media (prefers-color-scheme: dark) {
-		color-scheme: dark;
+	@keyframes toast-hide {
+		from {
+			opacity: 1;
+		}
+		to {
+			opacity: 0;
+		}
 	}
-}
+	@keyframes toast-slide-in {
+		from {
+			transform: translateX(calc(100% + 25px));
+		}
+		to {
+			transform: translateX(0);
+		}
+	}
+	@keyframes toast-swipe-out {
+		from {
+			transform: translateX(var(--radix-toast-swipe-end-x));
+		}
+		to {
+			transform: translateX(calc(100% + 25px));
+		}
+	}
 
-@layer components {
-	.container {
-		max-width: 1040px;
-		padding-inline: 24px;
-		margin-inline: auto;
+	/* SelectSubmissionCard animations */
+	--animate-place-card: place-card 600ms cubic-bezier(0.34, 1.56, 0.64, 1);
+	--animate-pulse-subtle: pulse-subtle 1.5s ease-in-out infinite;
+	--animate-button-pop: button-pop 400ms cubic-bezier(0.34, 1.56, 0.64, 1)
+		forwards;
+
+	@keyframes place-card {
+		0% {
+			opacity: 0;
+			transform: scale(2) translateY(-8px);
+		}
+		70% {
+			opacity: 1;
+			transform: scale(0.98) translateY(0);
+		}
+		90% {
+			transform: scale(1.01);
+		}
+		100% {
+			opacity: 1;
+			transform: scale(1);
+		}
+	}
+
+	@keyframes button-pop {
+		0% {
+			opacity: 0;
+			transform: translate(-50%, 50%) scale(0);
+		}
+		50% {
+			transform: translate(-50%, -75%) scale(1.15);
+		}
+		70% {
+			transform: translate(-50%, -75%) scale(0.97);
+		}
+		100% {
+			opacity: 1;
+			transform: translate(-50%, -75%) scale(1);
+		}
 	}
 }
