@@ -1,0 +1,76 @@
+name: Setup E2E Database
+
+description: PR毎にTurso DBを作成し、Migrationを実行
+
+inputs:
+  turso-api-token:
+    description: Turso APIトークン（組織レベル）
+    required: true
+  source-db:
+    description: 複製元のデータベース名
+    required: false
+    default: "omojan-main-e2e"
+  group:
+    description: データベースグループ
+    required: false
+    default: "omojan-main"
+
+outputs:
+  database-name:
+    description: 作成されたデータベース名
+    value: ${{ steps.create-db.outputs.database-name }}
+  database-url:
+    description: データベースURL
+    value: ${{ steps.create-db.outputs.database-url }}
+  database-token:
+    description: データベース認証トークン
+    value: ${{ steps.create-db.outputs.database-token }}
+
+runs:
+  using: composite
+  steps:
+    - name: Install Turso CLI
+      shell: bash
+      run: curl -sSfL https://get.tur.so/install.sh | bash
+
+    - name: Add Turso to PATH
+      shell: bash
+      run: echo "$HOME/.turso" >> $GITHUB_PATH
+
+    - name: Create E2E Database
+      id: create-db
+      shell: bash
+      env:
+        TURSO_API_TOKEN: ${{ inputs.turso-api-token }}
+      run: |
+        # PR番号とコミットSHAからユニークなDB名を生成
+        PR_NUMBER="${{ github.event.pull_request.number }}"
+        SHORT_SHA="${{ github.event.pull_request.head.sha }}"
+        SHORT_SHA="${SHORT_SHA:0:7}"
+        DB_NAME="omojan-e2e-pr${PR_NUMBER}-${SHORT_SHA}"
+
+        echo "Creating database: ${DB_NAME}"
+
+        # 既存のDBがあれば削除（同じPR+SHAの再実行の場合）
+        if turso db show "${DB_NAME}" >/dev/null 2>&1; then
+          echo "Database ${DB_NAME} already exists, destroying..."
+          turso db destroy "${DB_NAME}" --yes
+        fi
+
+        # 新しいDBを作成（source-dbをベースに）
+        turso db create "${DB_NAME}" \
+          --from-db "${{ inputs.source-db }}" \
+          --group "${{ inputs.group }}" \
+          --wait
+
+        # DB URLを取得
+        DB_URL=$(turso db show "${DB_NAME}" --url)
+        echo "Database URL: ${DB_URL}"
+
+        # DBトークンを作成
+        DB_TOKEN=$(turso db tokens create "${DB_NAME}")
+
+        # 出力を設定
+        echo "database-name=${DB_NAME}" >> $GITHUB_OUTPUT
+        echo "database-url=${DB_URL}" >> $GITHUB_OUTPUT
+        echo "database-token=${DB_TOKEN}" >> $GITHUB_OUTPUT
