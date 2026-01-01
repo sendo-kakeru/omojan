@@ -13,7 +13,7 @@ inputs:
   group:
     description: データベースグループ
     required: false
-    default: "omojan-main"
+    default: "default"
 
 outputs:
   database-name:
