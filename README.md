@@ -12,3 +12,5 @@
 - 本番: production/prod
 - STG: staging/stg
 - 開発(現時点でローカル環境も含む): development/dev
+
+e2e
