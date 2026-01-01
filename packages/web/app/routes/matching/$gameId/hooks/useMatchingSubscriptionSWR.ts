@@ -89,14 +89,14 @@ export function useMatchingSubscriptionSWR({
 							? error
 							: new Error("メッセージの形式が正しくありません。"),
 					);
-					ws.close(4500, "メッセージの解析に失敗しました。");
+					ws.close(1011, "メッセージの解析に失敗しました。");
 				}
 			};
 
 			const handleError = (event: Event) => {
 				console.error("接続に失敗しました。", event);
 				next(new Error("接続に失敗しました。"));
-				ws.close(4500, "接続エラーが発生しました。");
+				ws.close(1011, "接続エラーが発生しました。");
 			};
 
 			const handleClose = (event: CloseEvent) => {

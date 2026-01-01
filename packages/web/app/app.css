@@ -3,6 +3,10 @@
 
 @theme {
 	--spacing: 1px;
+	/**
+	 * 主にiPhone SEのみ対応したい時に使用
+	 */
+	--breakpoint-xs: 24rem;
 
 	--animate-toast-hide: toast-hide 200ms ease-in;
 	--animate-toast-slide-in: toast-slide-in 150ms cubic-bezier(0.16, 1, 0.3, 1);
@@ -30,6 +34,47 @@
 		}
 		to {
 			transform: translateX(calc(100% + 25px));
+		}
+	}
+
+	/* SelectSubmissionCard animations */
+	--animate-place-card: place-card 600ms cubic-bezier(0.34, 1.56, 0.64, 1);
+	--animate-pulse-subtle: pulse-subtle 1.5s ease-in-out infinite;
+	--animate-button-pop: button-pop 400ms cubic-bezier(0.34, 1.56, 0.64, 1)
+		forwards;
+
+	@keyframes place-card {
+		0% {
+			opacity: 0;
+			transform: scale(2) translateY(-8px);
+		}
+		70% {
+			opacity: 1;
+			transform: scale(0.98) translateY(0);
+		}
+		90% {
+			transform: scale(1.01);
+		}
+		100% {
+			opacity: 1;
+			transform: scale(1);
+		}
+	}
+
+	@keyframes button-pop {
+		0% {
+			opacity: 0;
+			transform: translate(-50%, 50%) scale(0);
+		}
+		50% {
+			transform: translate(-50%, -75%) scale(1.15);
+		}
+		70% {
+			transform: translate(-50%, -75%) scale(0.97);
+		}
+		100% {
+			opacity: 1;
+			transform: translate(-50%, -75%) scale(1);
 		}
 	}
 }

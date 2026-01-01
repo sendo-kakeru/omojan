@@ -8,6 +8,7 @@
 - any、as、Non-Null Assertion Operatorによる型の誤魔化しは最小にし、できるだけ適切に型付けする。as constの使用は問題ない。
 - 関数の引数が複数あるものは基本的にオブジェクトで渡す。
 - 型定義はinterfaceではなくtype
+- 型定義はなるべくモデルのフィールドを参照する。（特にid）
 
 ### api
 - コンテキスト変数の参照は`c.var.*`を使う。`c.get("*")`は使わない
@@ -24,6 +25,7 @@
 ### フロント
 - tailwind mergeの使用はいとしないマージが起こるので使用禁止
 - tailwind variantsのslotは複雑になるので基本使用しない
+- memo化はなるべくReact Compilerに任せる
 
 #### tailwind css
 - `space-*`は使用せず、`gap-*`を使う
