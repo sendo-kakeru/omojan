@@ -23,10 +23,29 @@ import {
 } from "../schema";
 
 const gameStateSchema = union([
+	/**
+	 * プレイヤーの接続待機中
+	 */
 	literal("WAITING"),
+	/**
+	 * ラウンド開始前の待機中（開始オーバーレイ表示中）
+	 */
 	literal("START_PENDING"),
+	/**
+	 * プレイヤーがカードを提出できる状態。提出待ち。
+	 */
 	literal("SUBMISSION"),
+	/**
+	 * 提出完了後の待機中（提出表示中。数秒後に次のターンへ）
+	 */
+	literal("SUBMITTED"),
+	/**
+	 * 投票フェーズ
+	 */
 	literal("VOTING"),
+	/**
+	 * 結果表示フェーズ
+	 */
 	literal("RESULT"),
 ]);
 export type GameState = InferOutput<typeof gameStateSchema>;
@@ -126,6 +145,9 @@ export const gameClientSubmissionMessageSchema = object({
 	submission: submitSchema,
 	type: literal("SUBMIT"),
 });
+export type GameClientSubmissionMessage = InferOutput<
+	typeof gameClientSubmissionMessageSchema
+>;
 
 export const gameServerSubmissionMessageSchema = variant("type", [
 	gameServerRoundStartMessageSchema,

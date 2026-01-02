@@ -1,19 +1,25 @@
 import { DurableObject } from "cloudflare:workers";
-import type {
-	GamePlayerCard,
-	GamePlayerItem,
-	GameServerRoundStartMessage,
-	GameServerTurnStartMessage,
-	GameState,
+import {
+	type GamePlayerCard,
+	type GamePlayerItem,
+	type GameServerRoundStartMessage,
+	type GameServerTurnEndMessage,
+	type GameServerTurnStartMessage,
+	type GameState,
+	gameClientSubmissionMessageSchema,
 } from "@repo/db/model";
 import {
+	type Game,
 	type GameId,
 	isGameId,
+	isPlayerId,
 	type Player,
+	type PlayerCard,
 	type PlayerId,
 	playerTable,
 	type RoundNo,
 	type RoundTheme,
+	type Submission,
 } from "@repo/db/schema";
 import { and, eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
@@ -22,6 +28,26 @@ import { createDrizzleClient, type DrizzleClient } from "../../libs/drizzle";
 import { RoomService } from "../room/RoomService";
 import { WebSocketService } from "../websocket/WebsocketService";
 import { GameService } from "./GameService";
+
+/** ctx.storageに永続化するゲーム状態のキー */
+const STORAGE_KEY = "GAME_STATE" as const;
+
+/** DurableObject内部で使用するプレイヤー情報（GamePlayerItemを拡張） */
+type PlayerState = GamePlayerItem & {
+	cards: GamePlayerCard[];
+	isCpu: Player["isCpu"];
+};
+
+/** 永続化するゲーム状態の型 */
+type PersistedGameState = {
+	gameId: GameId;
+	players: PlayerState[];
+	roundNo: RoundNo;
+	state: GameState;
+	themes: Array<[RoundNo, RoundTheme["text"]]>;
+	timeLimit: Game["timeLimit"];
+	turnIndex: 0 | 1 | 2 | 3;
+};
 
 export class GameDurableObject extends DurableObject<Env> {
 	private readonly db: DrizzleClient;
@@ -34,23 +60,48 @@ export class GameDurableObject extends DurableObject<Env> {
 	private turnIndex: 0 | 1 | 2 | 3 = 0; // 0〜3: ラウンド内のターン番号
 	private themes: Map<RoundNo, RoundTheme["text"]> = new Map();
 	private timeLimit = 30;
-	private players: GamePlayerItem[] = [];
-
-	private readonly connections = new Map<
-		PlayerId,
-		{
-			cards: GamePlayerCard[];
-			isCpu: boolean;
-			// 未接続 or CPUはnull
-			socket: WebSocket | null;
-		}
-	>();
+	private players: PlayerState[] = [];
 
 	constructor(ctx: DurableObjectState, env: Env) {
 		super(ctx, env);
 		this.db = createDrizzleClient(env);
 		this.roomService = new RoomService(this.db);
 		this.gameService = new GameService(this.db);
+	}
+
+	/**
+	 * ゲーム状態をctx.storageに永続化する
+	 */
+	private async persistState(): Promise<void> {
+		if (!this.gameId) return;
+
+		await this.ctx.storage.put(STORAGE_KEY, {
+			gameId: this.gameId,
+			players: this.players,
+			roundNo: this.roundNo,
+			state: this.state,
+			themes: Array.from(this.themes.entries()),
+			timeLimit: this.timeLimit,
+			turnIndex: this.turnIndex,
+		} satisfies PersistedGameState);
+	}
+
+	/**
+	 * ctx.storageからゲーム状態を復元する
+	 */
+	private async restoreState(): Promise<void> {
+		const persistedState =
+			await this.ctx.storage.get<PersistedGameState>(STORAGE_KEY);
+
+		if (!persistedState) return;
+
+		this.gameId = persistedState.gameId;
+		this.state = persistedState.state;
+		this.roundNo = persistedState.roundNo;
+		this.turnIndex = persistedState.turnIndex;
+		this.themes = new Map(persistedState.themes);
+		this.timeLimit = persistedState.timeLimit;
+		this.players = persistedState.players;
 	}
 
 	/**
@@ -66,9 +117,13 @@ export class GameDurableObject extends DurableObject<Env> {
 			});
 		}
 
-		// 初回接続時にプレイヤー情報を初期化
-		if (this.connections.size === 0) {
-			await this.initializePlayerConnections({ gameId });
+		// CPUでないプレイヤーが全員接続したらゲーム開始
+		if (this.areAllPlayersConnected()) {
+			if (this.state !== "WAITING") {
+				// 待機アラームの削除（waiting以外では再接続）
+				await this.ctx.storage.deleteAlarm();
+			}
+			await this.handleInitialize();
 		}
 
 		// WS リクエストをアップグレードし、参加者一覧を即時配信する。
@@ -81,29 +136,14 @@ export class GameDurableObject extends DurableObject<Env> {
 			});
 		}
 
-		const existingConnection = this.connections.get(player.id);
-		if (existingConnection?.socket) {
-			existingConnection.socket.close(4001, "新しい接続に置き換えられました。");
+		// 既存の接続を閉じる（同じプレイヤーの再接続の場合）
+		const existingSocket = this.getPlayerSocket(player.id);
+		if (existingSocket) {
+			existingSocket.close(4001, "新しい接続に置き換えられました。");
 		}
 
 		// Durable Object の context で WebSocket を accept する
-		this.ctx.acceptWebSocket(server);
-
-		// 接続を登録
-		this.connections.set(player.id, {
-			cards: existingConnection?.cards ?? [],
-			isCpu: existingConnection?.isCpu ?? false,
-			socket: server,
-		});
-
-		// CPUでないプレイヤーが全員接続したらゲーム開始
-		if (this.areAllPlayersConnected()) {
-			if (this.state !== "WAITING") {
-				// 待機アラームの削除（waiting以外では再接続）
-				await this.ctx.storage.deleteAlarm();
-			}
-			await this.startGame();
-		}
+		this.ctx.acceptWebSocket(server, [player.id]);
 
 		// 接続待ちのカウント開始
 		// 先に入ったプレイヤーが既にalarmをセットしている可能性があるため確認
@@ -122,19 +162,120 @@ export class GameDurableObject extends DurableObject<Env> {
 		console.error("WebSocketでエラーが発生しました:", error);
 	}
 
+	/**
+	 * WebSocketメッセージ受信時のハンドラ
+	 */
+	async webSocketMessage(ws: WebSocket, message: string): Promise<void> {
+		await this.restoreState();
+
+		// 送信元のプレイヤーIDを特定
+		const senderId = this.findPlayerIdBySocket(ws);
+		if (!senderId) {
+			ws.close(1003, "送信元のプレイヤーが特定できませんでした。");
+			return;
+		}
+
+		const parsedMessage = this.webSocketService.parseClientMessage({
+			message,
+			schema: gameClientSubmissionMessageSchema,
+			ws,
+		});
+		if (!parsedMessage) return;
+
+		switch (parsedMessage.type) {
+			case "SUBMIT":
+				await this.handleSubmission({
+					playerId: senderId,
+					submission: parsedMessage.submission,
+				});
+				break;
+		}
+
+		await this.persistState();
+	}
+
 	async alarm(): Promise<void> {
 		if (!this.gameId) return;
+		await this.restoreState();
 		await this.ctx.storage.deleteAlarm();
 
 		switch (this.state) {
 			case "WAITING":
-				// 接続待機タイムアウト→ゲーム開始
-				await this.startGame();
+				await this.handleInitialize();
 				break;
 			case "START_PENDING":
-				// ROUND_START後の待機完了→TURN_START送信
-				this.broadcastTurnStart();
+				await this.handleStartFirstTurn();
 				break;
+			case "SUBMISSION":
+				await this.handleSubmissionTimeout();
+				break;
+			case "SUBMITTED":
+				await this.proceedToNextTurn();
+				break;
+		}
+
+		await this.persistState();
+	}
+
+	/**
+	 * ラウンド開始オーバーレイ後、最初のターンを開始する
+	 */
+	private async handleStartFirstTurn(): Promise<void> {
+		const currentPlayer = this.getCurrentPlayer();
+		if (!currentPlayer) return;
+
+		// 最初のプレイヤーがCPUの場合は自動提出
+		if (currentPlayer.isCpu) {
+			await this.randomSubmission({ playerId: currentPlayer.id });
+			this.state = "SUBMITTED";
+			await this.ctx.storage.setAlarm(Date.now() + 1000);
+		} else {
+			// 人間プレイヤーの場合は提出待機へ
+			this.state = "SUBMISSION";
+			await this.broadcastTurnStart();
+			await this.ctx.storage.setAlarm(Date.now() + this.timeLimit * 1000);
+		}
+	}
+
+	/**
+	 * 提出タイムアウト時の処理
+	 * タイムアウトしたプレイヤーをランダム提出させる
+	 */
+	private async handleSubmissionTimeout(): Promise<void> {
+		const currentPlayerId = this.getCurrentPlayer()?.id;
+		if (!currentPlayerId) return;
+
+		await this.randomSubmission({ playerId: currentPlayerId });
+		this.state = "SUBMITTED";
+		await this.ctx.storage.setAlarm(Date.now() + 1000);
+	}
+
+	/**
+	 * 提出結果表示後、次のターンまたは投票フェーズへ進む
+	 */
+	private async proceedToNextTurn(): Promise<void> {
+		// 4人全員が提出完了した場合は投票フェーズへ移行
+		if (this.turnIndex >= 3) {
+			this.state = "VOTING";
+			// TODO: 投票フェーズに移行する処理
+			return;
+		}
+
+		// 次のターンへ
+		this.turnIndex = (this.turnIndex + 1) as 0 | 1 | 2 | 3;
+		const nextPlayer = this.getCurrentPlayer();
+		if (!nextPlayer) return;
+
+		// 次のプレイヤーがCPUの場合は自動提出
+		if (nextPlayer.isCpu) {
+			await this.randomSubmission({ playerId: nextPlayer.id });
+			this.state = "SUBMITTED";
+			await this.ctx.storage.setAlarm(Date.now() + 1000);
+		} else {
+			// 人間プレイヤーの場合は提出待機へ
+			this.state = "SUBMISSION";
+			await this.broadcastTurnStart();
+			await this.ctx.storage.setAlarm(Date.now() + this.timeLimit * 1000);
 		}
 	}
 
@@ -143,11 +284,11 @@ export class GameDurableObject extends DurableObject<Env> {
 	 * - ラウンド・テーマ・手持ち牌を初期化
 	 * - 全プレイヤーにROUND_STARTメッセージを送信
 	 */
-	private async startGame(): Promise<void> {
+	private async handleInitialize(): Promise<void> {
 		if (!this.gameId) return;
 
 		try {
-			const { playerCards, players, roundNo, themes, timeLimit } =
+			const { players, roundNo, themes, timeLimit } =
 				await this.gameService.initializeGame({
 					gameId: this.gameId,
 				});
@@ -159,14 +300,6 @@ export class GameDurableObject extends DurableObject<Env> {
 			this.players = players;
 			this.turnIndex = 0; // ラウンド開始時はターン0から
 
-			// 各プレイヤーの手持ち牌を接続情報に設定
-			for (const [playerId, cards] of playerCards) {
-				const connection = this.connections.get(playerId);
-				if (connection) {
-					this.connections.set(playerId, { ...connection, cards });
-				}
-			}
-
 			// 各プレイヤーにROUND_STARTメッセージを送信
 			this.broadcastRoundStart();
 
@@ -176,10 +309,9 @@ export class GameDurableObject extends DurableObject<Env> {
 		} catch (error) {
 			console.error("ゲーム開始処理に失敗しました:", error);
 			// エラー時は全プレイヤーに通知して切断
-			for (const [, connection] of this.connections) {
-				if (connection.socket) {
-					connection.socket.close(1011, "ゲーム開始処理に失敗しました");
-				}
+			for (const { id } of this.players) {
+				const socket = this.getPlayerSocket(id);
+				socket?.close(1011, "ゲーム開始処理に失敗しました");
 			}
 		}
 	}
@@ -254,37 +386,23 @@ export class GameDurableObject extends DurableObject<Env> {
 	}
 
 	/**
-	 * 初回接続時にプレイヤー情報を初期化する。
-	 * - 全プレイヤーをconnectionsに登録（CPUはsocket: null）
+	 * プレイヤーIDからアクティブなWebSocketを取得する。
+	 * readyState === OPEN の接続のみ返す。
 	 */
-	private async initializePlayerConnections({
-		gameId,
-	}: {
-		gameId: GameId;
-	}): Promise<void> {
-		const players = await this.db
-			.select({
-				id: playerTable.id,
-				isCpu: playerTable.isCpu,
-			})
-			.from(playerTable)
-			.where(eq(playerTable.gameId, gameId));
-
-		for (const player of players) {
-			this.connections.set(player.id, {
-				cards: [],
-				isCpu: player.isCpu,
-				socket: null,
-			});
-		}
+	private getPlayerSocket(playerId: PlayerId): WebSocket | null {
+		const sockets = this.ctx.getWebSockets(playerId);
+		// OPENな接続のみ返す
+		return (
+			sockets.find((socket) => socket.readyState === WebSocket.OPEN) ?? null
+		);
 	}
 
 	/**
 	 * 全ての人間プレイヤーが接続済みかどうかを判定する。
 	 */
 	private areAllPlayersConnected(): boolean {
-		for (const [, connection] of this.connections) {
-			if (!connection.isCpu && connection.socket === null) {
+		for (const player of this.players) {
+			if (!player.isCpu && !this.getPlayerSocket(player.id)) {
 				return false;
 			}
 		}
@@ -296,26 +414,28 @@ export class GameDurableObject extends DurableObject<Env> {
 	 */
 	private broadcastRoundStart(): void {
 		// ラウンドに応じた順番でプレイヤーを並び替え
-		const orderedPlayers = this.gameService.sortTurnOrderPlayers({
-			players: this.players,
-			roundNo: this.roundNo,
-		});
+		const orderedPlayers = this.sortTurnOrderPlayers();
 
 		// turnIndexに基づいて現在のターンプレイヤーを取得（ラウンド開始時は0）
 		const currentPlayerId = orderedPlayers[this.turnIndex]?.id;
 		if (!currentPlayerId) return;
 
-		for (const [playerId, connection] of this.connections) {
-			if (!connection.socket) continue;
+		for (const player of this.players) {
+			const socket = this.getPlayerSocket(player.id);
+			if (!socket) continue;
 
 			try {
-				connection.socket.send(
+				socket.send(
 					JSON.stringify({
 						currentPlayerId,
 						game: {
 							players: orderedPlayers.map((player) => ({
-								...player,
+								id: player.id,
+								image: player.image,
+								playerName: player.playerName,
+								seat: player.seat,
 								submission: null,
+								winCount: player.winCount,
 							})),
 							roundNo: this.roundNo,
 							submitted: null,
@@ -323,45 +443,47 @@ export class GameDurableObject extends DurableObject<Env> {
 							timeLimit: this.timeLimit,
 						},
 						mePlayer: {
-							id: playerId,
-							playerCards: connection.cards,
+							id: player.id,
+							playerCards: player.cards,
 						},
 						type: "ROUND_START",
 					} satisfies GameServerRoundStartMessage),
 				);
 			} catch (error) {
-				const message = `プレイヤー ${playerId} へのROUND_START送信に失敗しました`;
+				const message = `プレイヤー ${player.id} へのROUND_START送信に失敗しました`;
 				console.error(message, error);
-				this.connectionSwitchToCpu({ connection, message, playerId });
+				this.switchToCpu({ message, playerId: player.id });
 			}
 		}
 	}
 
 	/**
-	 * 全プレイヤーにTURN_STARTメッセージを送信する。
+	 * 全プレイヤーにTURN_STARTメッセージを送信し、タイムアウトアラームを設定する。
 	 */
-	private broadcastTurnStart(): void {
+	private async broadcastTurnStart(): Promise<void> {
 		// ラウンドに応じた順番でプレイヤーを並び替え
-		const orderedPlayers = this.gameService.sortTurnOrderPlayers({
-			players: this.players,
-			roundNo: this.roundNo,
-		});
+		const orderedPlayers = this.sortTurnOrderPlayers();
 
 		// turnIndexに基づいて現在のターンプレイヤーを取得
 		const currentPlayerId = orderedPlayers[this.turnIndex]?.id;
 		if (!currentPlayerId) return;
 
-		for (const [playerId, connection] of this.connections) {
-			if (!connection.socket) continue;
+		for (const player of this.players) {
+			const socket = this.getPlayerSocket(player.id);
+			if (!socket) continue;
 
 			try {
-				connection.socket.send(
+				socket.send(
 					JSON.stringify({
 						currentPlayerId,
 						game: {
 							players: orderedPlayers.map((player) => ({
-								...player,
+								id: player.id,
+								image: player.image,
+								playerName: player.playerName,
+								seat: player.seat,
 								submission: null,
+								winCount: player.winCount,
 							})),
 							roundNo: this.roundNo,
 							submitted: null,
@@ -369,16 +491,16 @@ export class GameDurableObject extends DurableObject<Env> {
 							timeLimit: this.timeLimit,
 						},
 						mePlayer: {
-							id: playerId,
-							playerCards: connection.cards,
+							id: player.id,
+							playerCards: player.cards,
 						},
 						type: "TURN_START",
 					} satisfies GameServerTurnStartMessage),
 				);
 			} catch (error) {
-				const message = `プレイヤー ${playerId} へのTURN_START送信に失敗しました`;
+				const message = `プレイヤー ${player.id} へのTURN_START送信に失敗しました`;
 				console.error(message, error);
-				this.connectionSwitchToCpu({ connection, message, playerId });
+				this.switchToCpu({ message, playerId: player.id });
 			}
 		}
 	}
@@ -386,24 +508,217 @@ export class GameDurableObject extends DurableObject<Env> {
 	/**
 	 * プレイヤーをCPUに切り替え、接続を切断する。
 	 */
-	private connectionSwitchToCpu({
-		connection,
-		playerId,
+	private switchToCpu({
 		message,
+		playerId,
 	}: {
-		connection: {
-			cards: GamePlayerCard[];
-			isCpu: boolean;
-			socket: WebSocket | null;
-		};
-		playerId: PlayerId;
 		message: string;
+		playerId: PlayerId;
 	}): void {
-		this.connections.set(playerId, {
-			...connection,
-			isCpu: true,
-			socket: null,
+		const playerIndex = this.players.findIndex(
+			(player) => player.id === playerId,
+		);
+		if (playerIndex !== -1) {
+			const player = this.players[playerIndex];
+			if (player) {
+				this.players[playerIndex] = { ...player, isCpu: true };
+			}
+		}
+		const socket = this.getPlayerSocket(playerId);
+		socket?.close(1011, message);
+	}
+
+	/**
+	 * 全プレイヤーにTURN_ENDメッセージを送信する。
+	 */
+	private broadcastTurnEnd({
+		submission,
+	}: {
+		submission: Pick<Submission, "position"> & Pick<PlayerCard, "text">;
+	}): void {
+		// ラウンドに応じた順番でプレイヤーを並び替え
+		const orderedPlayers = this.sortTurnOrderPlayers();
+
+		// turnIndexに基づいて現在のターンプレイヤーを取得
+		const currentPlayerId = orderedPlayers[this.turnIndex]?.id;
+		if (!currentPlayerId) return;
+
+		for (const player of this.players) {
+			const socket = this.getPlayerSocket(player.id);
+			if (!socket) continue;
+
+			try {
+				socket.send(
+					JSON.stringify({
+						currentPlayerId,
+						game: {
+							players: orderedPlayers.map((player) => ({
+								id: player.id,
+								image: player.image,
+								playerName: player.playerName,
+								seat: player.seat,
+								submission: player.submission,
+								winCount: player.winCount,
+							})),
+							roundNo: this.roundNo,
+							submitted: submission,
+							theme: this.themes.get(this.roundNo) ?? "",
+							timeLimit: this.timeLimit,
+						},
+						mePlayer: {
+							id: player.id,
+							playerCards: player.cards,
+						},
+						type: "TURN_END",
+					} satisfies GameServerTurnEndMessage),
+				);
+			} catch (error) {
+				const message = `プレイヤー ${player.id} へのTURN_END送信に失敗しました`;
+				console.error(message, error);
+				this.switchToCpu({ message, playerId: player.id });
+			}
+		}
+	}
+
+	/**
+	 * 提出処理
+	 */
+	private async handleSubmission({
+		playerId,
+		submission,
+	}: {
+		playerId: PlayerId;
+		submission: Pick<Submission, "position"> & Pick<PlayerCard, "text">;
+	}): Promise<void> {
+		if (this.state !== "SUBMISSION" || !this.gameId) return;
+
+		// 現在のターンプレイヤーか確認
+		const currentPlayerId = this.getCurrentPlayer()?.id;
+		if (currentPlayerId !== playerId) {
+			console.warn("提出したプレイヤーのターンではありません。");
+			return;
+		}
+
+		// 既に提出済みか確認
+		const playerData = this.players.find((player) => player.id === playerId);
+		if (playerData?.submission) {
+			console.warn("提出済みです。");
+			return;
+		}
+
+		// 提出を処理（DB保存、メモリ更新、カード使用済み）
+		await this.submitPlayerCard({ playerId, submission });
+
+		// 状態をSUBMITTEDに変更
+		this.state = "SUBMITTED";
+
+		// TURN_ENDをブロードキャスト
+		this.broadcastTurnEnd({ submission });
+
+		// 1秒後に次のターンへ進む
+		await this.ctx.storage.setAlarm(Date.now() + 1000);
+	}
+
+	/**
+	 * WebSocketからプレイヤーIDを特定する
+	 * acceptWebSocket時に設定したタグを使用して特定する
+	 */
+	private findPlayerIdBySocket(ws: WebSocket): PlayerId | null {
+		// タグの最初の要素がプレイヤーID
+		const playerId = this.ctx.getTags(ws)[0];
+
+		if (!isPlayerId(playerId)) return null;
+
+		if (this.players.some((player) => player.id === playerId)) {
+			return playerId;
+		}
+		return null;
+	}
+
+	/**
+	 * プレイヤーの提出を処理する（DB保存、メモリ状態更新、カード使用済み）
+	 */
+	private async submitPlayerCard({
+		playerId,
+		submission,
+	}: {
+		playerId: PlayerId;
+		submission: Pick<Submission, "position"> & Pick<PlayerCard, "text">;
+	}): Promise<void> {
+		if (!this.gameId) return;
+
+		// DBに提出を保存
+		await this.gameService.saveSubmission({
+			gameId: this.gameId,
+			playerId,
+			position: submission.position,
+			roundNo: this.roundNo,
+			text: submission.text,
 		});
-		connection.socket?.close(1011, message);
+
+		// メモリ上のプレイヤー状態を更新
+		const playerIndex = this.players.findIndex(
+			(player) => player.id === playerId,
+		);
+		if (playerIndex !== -1) {
+			const player = this.players[playerIndex];
+			if (player) {
+				this.players[playerIndex] = {
+					...player,
+					cards: player.cards.map((card) =>
+						card.word === submission.text ? { ...card, used: true } : card,
+					),
+					submission,
+				};
+			}
+		}
+	}
+
+	/**
+	 * ランダムに提出する（待機なし、alarmを設定しない）
+	 * CPUのターンと時間切れて使用
+	 */
+	private async randomSubmission({
+		playerId,
+	}: {
+		playerId: PlayerId;
+	}): Promise<void> {
+		const player = this.players.find((player) => player.id === playerId);
+		if (!player || !this.gameId) return;
+
+		// 未使用のカードからランダムに選択
+		const unusedCards = player.cards.filter((card) => !card.used);
+		const randomCard =
+			unusedCards[Math.floor(Math.random() * unusedCards.length)];
+		if (!randomCard) return;
+
+		// ランダムにprefixまたはsuffixを選択
+		const position: Submission["position"] =
+			Math.random() < 0.5 ? "prefix" : "suffix";
+
+		const submission = { position, text: randomCard.word };
+
+		// 提出を処理（DB保存、メモリ更新、カード使用済み）
+		await this.submitPlayerCard({ playerId, submission });
+
+		// TURN_ENDをブロードキャスト
+		this.broadcastTurnEnd({ submission });
+	}
+
+	/**
+	 * 現在のターンプレイヤーを取得する。
+	 */
+	private getCurrentPlayer(): PlayerState | undefined {
+		return this.sortTurnOrderPlayers()[this.turnIndex];
+	}
+
+	/**
+	 * ラウンドに応じた順番でプレイヤーを並び替えて返す。
+	 */
+	private sortTurnOrderPlayers(): PlayerState[] {
+		return this.gameService.sortTurnOrderPlayers({
+			players: this.players,
+			roundNo: this.roundNo,
+		});
 	}
 }

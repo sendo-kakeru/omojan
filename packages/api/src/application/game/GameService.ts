@@ -1,5 +1,6 @@
 import type {
 	GamePlayerCard,
+	GamePlayerItem,
 	GameServerRoundStartMessage,
 } from "@repo/db/model";
 import {
@@ -16,10 +17,12 @@ import {
 	type RoundTheme,
 	roundTable,
 	roundThemeTable,
+	type Submission,
+	submissionTable,
 	userTable,
 } from "@repo/db/schema";
 import { WORDS } from "@repo/shared/constants/words";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import type { DrizzleClient } from "../../libs/drizzle";
 
@@ -33,9 +36,12 @@ export class GameService {
 	 * - 各プレイヤーに7枚の手持ち牌を配布
 	 */
 	async initializeGame({ gameId }: { gameId: GameId }): Promise<
-		Omit<GameServerRoundStartMessage["game"], "theme"> & {
-			playerCards: Map<PlayerId, GamePlayerCard[]>;
+		Omit<GameServerRoundStartMessage["game"], "theme" | "players"> & {
 			themes: Map<RoundNo, RoundTheme["text"]>;
+			players: (GamePlayerItem & {
+				cards: GamePlayerCard[];
+				isCpu: boolean;
+			})[];
 		}
 	> {
 		return await this.db.transaction(async (tx) => {
@@ -56,6 +62,7 @@ export class GameService {
 				.select({
 					id: playerTable.id,
 					image: userTable.image,
+					isCpu: playerTable.isCpu,
 					playerName: playerTable.playerName,
 					seat: playerTable.seat,
 				})
@@ -160,11 +167,11 @@ export class GameService {
 			}
 
 			return {
-				playerCards: playerCardsMap,
 				players: players
 					.sort((a, b) => a.seat - b.seat)
 					.map((player) => ({
 						...player,
+						cards: playerCardsMap.get(player.id) ?? [],
 						submission: null,
 						winCount: 0,
 					})),
@@ -172,9 +179,15 @@ export class GameService {
 				submitted: null,
 				themes: roundGroupedThemes,
 				timeLimit: game.timeLimit,
-			} satisfies Omit<GameServerRoundStartMessage["game"], "theme"> & {
-				playerCards: Map<PlayerId, GamePlayerCard[]>;
+			} satisfies Omit<
+				GameServerRoundStartMessage["game"],
+				"theme" | "players"
+			> & {
 				themes: Map<RoundNo, RoundTheme["text"]>;
+				players: (GamePlayerItem & {
+					cards: GamePlayerCard[];
+					isCpu: boolean;
+				})[];
 			};
 		});
 	}
@@ -211,6 +224,61 @@ export class GameService {
 			const orderA = this.calculateTurnOrder({ roundNo, seat: a.seat });
 			const orderB = this.calculateTurnOrder({ roundNo, seat: b.seat });
 			return orderA - orderB;
+		});
+	}
+
+	/**
+	 * 提出をDBに保存する
+	 */
+	async saveSubmission({
+		gameId,
+		playerId,
+		position,
+		roundNo,
+		text,
+	}: Pick<Submission, "position" | "playerId"> &
+		Pick<PlayerCard, "text"> & {
+			gameId: GameId;
+			roundNo: RoundNo;
+		}): Promise<void> {
+		await this.db.transaction(async (tx) => {
+			// gameIdとroundNoからラウンドIDを取得
+			const [round] = await tx
+				.select({ id: roundTable.id })
+				.from(roundTable)
+				.where(
+					and(eq(roundTable.gameId, gameId), eq(roundTable.roundNo, roundNo)),
+				);
+
+			if (!round) {
+				throw new HTTPException(404, { message: "ラウンドが見つかりません" });
+			}
+
+			// 提出レコードを作成
+			const [savedSubmission] = await tx
+				.insert(submissionTable)
+				.values({
+					playerId,
+					position,
+					roundId: round.id,
+				})
+				.returning({ id: submissionTable.id });
+
+			if (!savedSubmission) {
+				throw new HTTPException(500, { message: "提出に失敗しました" });
+			}
+
+			// プレイヤーカードに提出IDを紐付け
+			await tx
+				.update(playerCardTable)
+				.set({ submissionId: savedSubmission.id })
+				.where(
+					and(
+						eq(playerCardTable.playerId, playerId),
+						eq(playerCardTable.roundId, round.id),
+						eq(playerCardTable.text, text),
+					),
+				);
 		});
 	}
 

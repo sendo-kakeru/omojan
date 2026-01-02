@@ -1,6 +1,5 @@
 import { DurableObject } from "cloudflare:workers";
 import {
-	type MatchingClientMessage,
 	type MatchingServerMePlayerMessage,
 	type MatchingServerParticipantsMessage,
 	matchingClientMessageSchema,
@@ -17,7 +16,6 @@ import {
 } from "@repo/db/schema";
 import { and, asc, eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
-import { safeParse } from "valibot";
 import type { Env } from "../../env";
 import { createDrizzleClient, type DrizzleClient } from "../../libs/drizzle";
 import { RoomService } from "../room/RoomService";
@@ -119,7 +117,11 @@ export class MatchingDurableObject extends DurableObject<Env> {
 			return;
 		}
 
-		const parsedMessage = this.parseClientMessage({ message, ws });
+		const parsedMessage = this.webSocketService.parseClientMessage({
+			message,
+			schema: matchingClientMessageSchema,
+			ws,
+		});
 		if (!parsedMessage) return;
 
 		switch (parsedMessage.type) {
@@ -302,32 +304,6 @@ export class MatchingDurableObject extends DurableObject<Env> {
 			socket.close(4410, "部屋が削除されました");
 		}
 		this.heartbeatService.clear();
-	}
-
-	/**
-	 * クライアントメッセージをパースして検証する
-	 */
-	private parseClientMessage({
-		ws,
-		message,
-	}: {
-		ws: WebSocket;
-		message: string;
-	}): MatchingClientMessage | null {
-		try {
-			const json = JSON.parse(message);
-			const result = safeParse(matchingClientMessageSchema, json);
-
-			if (!result.success) {
-				ws.close(4400, "メッセージの形式が正しくありません");
-				return null;
-			}
-
-			return result.output;
-		} catch {
-			ws.close(4400, "メッセージのパースに失敗しました");
-			return null;
-		}
 	}
 
 	/**

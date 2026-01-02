@@ -1,3 +1,6 @@
+import type { BaseIssue, BaseSchema, InferOutput } from "valibot";
+import { safeParse } from "valibot";
+
 /**
  * WebSocket の機能を共通化したユーティリティ。
  */
@@ -36,5 +39,36 @@ export class WebSocketService {
 	 */
 	isUpgradeRequest(request: Request): boolean {
 		return request.headers.get("Upgrade") === "websocket";
+	}
+
+	/**
+	 * クライアントメッセージをパースして検証する。
+	 * 失敗時はWebSocketをcloseしてnullを返す。
+	 */
+	parseClientMessage<
+		T extends BaseSchema<unknown, unknown, BaseIssue<unknown>>,
+	>({
+		ws,
+		message,
+		schema,
+	}: {
+		ws: WebSocket;
+		message: string;
+		schema: T;
+	}): InferOutput<T> | null {
+		try {
+			const json = JSON.parse(message);
+			const result = safeParse(schema, json);
+
+			if (!result.success) {
+				ws.close(1003, "メッセージの形式が正しくありません");
+				return null;
+			}
+
+			return result.output;
+		} catch {
+			ws.close(1003, "メッセージのパースに失敗しました");
+			return null;
+		}
 	}
 }
