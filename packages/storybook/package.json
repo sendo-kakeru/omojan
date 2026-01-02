@@ -21,7 +21,7 @@
 		"@vitest/browser": "^4.0.16",
 		"@vitest/browser-playwright": "^4.0.16",
 		"@vitest/coverage-v8": "^4.0.16",
-		"globals": "^16.5.0",
+		"globals": "^17.0.0",
 		"playwright": "^1.57.0",
 		"storybook": "^10.1.10",
 		"tailwindcss": "^4.1.18",
