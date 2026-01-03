@@ -3,6 +3,7 @@ import {
 	type GameServerMessage,
 	gameServerMessageSchema,
 } from "@repo/db/model";
+import pRetry from "p-retry";
 import { useRef } from "react";
 import { useNavigate } from "react-router";
 import useSWRSubscription, {
@@ -114,17 +115,23 @@ export function useGameSubscriptionSWR({
 		position,
 	}: GameClientSubmissionMessage["submission"]): void => {
 		try {
-			if (!wsRef.current || wsRef.current?.readyState !== WebSocket.OPEN) {
-				throw new Error("WebSocketが接続されていません。");
-			}
-			wsRef.current.send(
-				JSON.stringify({
-					submission: { position, text },
-					type: "SUBMIT",
-				} satisfies GameClientSubmissionMessage),
+			void pRetry(
+				() => {
+					if (!wsRef.current || wsRef.current?.readyState !== WebSocket.OPEN) {
+						throw new Error("WebSocketが接続されていません。");
+					}
+					wsRef.current.send(
+						JSON.stringify({
+							submission: { position, text },
+							type: "SUBMIT",
+						} satisfies GameClientSubmissionMessage),
+					);
+				},
+				{
+					retries: 3,
+				},
 			);
 		} catch (error) {
-			// TODO: リトライ
 			console.error("提出の送信に失敗しました。", error);
 			alert("提出に失敗しました。ゲームを終了します。");
 			wsRef.current?.close(4410, "提出の送信に失敗しました。");

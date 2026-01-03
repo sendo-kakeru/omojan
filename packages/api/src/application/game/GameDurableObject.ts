@@ -23,6 +23,7 @@ import {
 } from "@repo/db/schema";
 import { and, eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
+import pRetry from "p-retry";
 import type { Env } from "../../env";
 import { createDrizzleClient, type DrizzleClient } from "../../libs/drizzle";
 import { RoomService } from "../room/RoomService";
@@ -646,16 +647,30 @@ export class GameDurableObject extends DurableObject<Env> {
 		playerId: PlayerId;
 		submission: Pick<Submission, "position"> & Pick<PlayerCard, "text">;
 	}): Promise<void> {
-		if (!this.gameId) return;
-
 		// DBに提出を保存
-		await this.gameService.saveSubmission({
-			gameId: this.gameId,
-			playerId,
-			position: submission.position,
-			roundNo: this.roundNo,
-			text: submission.text,
-		});
+		try {
+			await pRetry(
+				async () => {
+					if (!this.gameId) return;
+
+					await this.gameService.saveSubmission({
+						gameId: this.gameId,
+						playerId,
+						position: submission.position,
+						roundNo: this.roundNo,
+						text: submission.text,
+					});
+				},
+				{
+					retries: 3,
+				},
+			);
+		} catch (error) {
+			console.error("提出処理に失敗しました:", error);
+			const socket = this.getPlayerSocket(playerId);
+			socket?.close(1011, "提出処理に失敗しました。");
+			return;
+		}
 
 		// メモリ上のプレイヤー状態を更新
 		const playerIndex = this.players.findIndex(
