@@ -20,6 +20,7 @@ import {
 	type Submission,
 	submissionTable,
 	userTable,
+	voteTable,
 } from "@repo/db/schema";
 import { WORDS } from "@repo/shared/constants/words";
 import { and, eq } from "drizzle-orm";
@@ -280,6 +281,90 @@ export class GameService {
 					),
 				);
 		});
+	}
+
+	/**
+	 * 投票をDBに保存する
+	 */
+	async saveVote({
+		gameId,
+		playerId,
+		roundNo,
+		votePlayerId,
+	}: {
+		gameId: GameId;
+		playerId: PlayerId;
+		roundNo: RoundNo;
+		votePlayerId: PlayerId;
+	}): Promise<void> {
+		await this.db.transaction(async (tx) => {
+			// gameIdとroundNoからラウンドIDを取得
+			const [round] = await tx
+				.select({ id: roundTable.id })
+				.from(roundTable)
+				.where(
+					and(eq(roundTable.gameId, gameId), eq(roundTable.roundNo, roundNo)),
+				);
+
+			if (!round) {
+				throw new HTTPException(404, { message: "ラウンドが見つかりません" });
+			}
+
+			// 投票先プレイヤーの提出を取得
+			const [submission] = await tx
+				.select({ id: submissionTable.id })
+				.from(submissionTable)
+				.where(
+					and(
+						eq(submissionTable.playerId, votePlayerId),
+						eq(submissionTable.roundId, round.id),
+					),
+				);
+
+			if (!submission) {
+				throw new HTTPException(404, {
+					message: "投票先の提出が見つかりません",
+				});
+			}
+
+			// 投票レコードを作成
+			await tx.insert(voteTable).values({
+				playerId,
+				roundId: round.id,
+				submissionId: submission.id,
+			});
+		});
+	}
+
+	/**
+	 * 指定ラウンドで投票済みのプレイヤーIDを取得する
+	 */
+	async getVotedPlayerIds({
+		gameId,
+		roundNo,
+	}: {
+		gameId: GameId;
+		roundNo: RoundNo;
+	}): Promise<PlayerId[]> {
+		// gameIdとroundNoからラウンドIDを取得
+		const [round] = await this.db
+			.select({ id: roundTable.id })
+			.from(roundTable)
+			.where(
+				and(eq(roundTable.gameId, gameId), eq(roundTable.roundNo, roundNo)),
+			);
+
+		if (!round) {
+			throw new HTTPException(404, { message: "ラウンドが見つかりません" });
+		}
+
+		// 投票済みのプレイヤーIDを取得
+		const votes = await this.db
+			.select({ playerId: voteTable.playerId })
+			.from(voteTable)
+			.where(eq(voteTable.roundId, round.id));
+
+		return votes.map((vote) => vote.playerId);
 	}
 
 	/**

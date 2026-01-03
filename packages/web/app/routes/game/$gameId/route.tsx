@@ -16,13 +16,14 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 		},
 	});
 
-	const { data, error, sendSubmission, wsRef } = useGameSubscriptionSWR({
-		gameId,
-		gameToken,
-		onClose: (_event: CloseEvent) => {
-			// 不要だったら消す
-		},
-	});
+	const { data, error, sendSubmission, sendVote, wsRef } =
+		useGameSubscriptionSWR({
+			gameId,
+			gameToken,
+			onClose: (_event: CloseEvent) => {
+				// 不要だったら消す
+			},
+		});
 
 	if (error) {
 		return (
@@ -44,5 +45,11 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 		);
 	}
 
-	return <GamePresenter data={data} sendSubmission={sendSubmission} />;
+	return (
+		<GamePresenter
+			data={data}
+			sendSubmission={sendSubmission}
+			sendVote={sendVote}
+		/>
+	);
 }

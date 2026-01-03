@@ -7,7 +7,7 @@ import {
 	type GameServerTurnStartMessage,
 	type GameServerVoteMessage,
 	type GameState,
-	gameClientSubmissionMessageSchema,
+	gameClientMessageSchema,
 } from "@repo/db/model";
 import {
 	type Game,
@@ -180,7 +180,7 @@ export class GameDurableObject extends DurableObject<Env> {
 
 		const parsedMessage = this.webSocketService.parseClientMessage({
 			message,
-			schema: gameClientSubmissionMessageSchema,
+			schema: gameClientMessageSchema,
 			ws,
 		});
 		if (!parsedMessage) return;
@@ -190,6 +190,12 @@ export class GameDurableObject extends DurableObject<Env> {
 				await this.handleSubmission({
 					playerId: senderId,
 					submission: parsedMessage.submission,
+				});
+				break;
+			case "VOTE":
+				await this.handleVote({
+					playerId: senderId,
+					votePlayerId: parsedMessage.votePlayerId,
 				});
 				break;
 		}
@@ -214,6 +220,9 @@ export class GameDurableObject extends DurableObject<Env> {
 				break;
 			case "SUBMITTED":
 				await this.proceedToNextTurn();
+				break;
+			case "VOTING":
+				await this.handleVoteTimeout();
 				break;
 		}
 
@@ -260,7 +269,7 @@ export class GameDurableObject extends DurableObject<Env> {
 		// 4人全員が提出完了した場合は投票フェーズへ移行
 		if (this.turnIndex >= 3) {
 			this.state = "VOTING";
-			this.broadcastVoteStart();
+			await this.broadcastVoteStart();
 			return;
 		}
 
@@ -532,9 +541,9 @@ export class GameDurableObject extends DurableObject<Env> {
 	}
 
 	/**
-	 * 全プレイヤーにVOTE_STARTメッセージを送信する。
+	 * 全プレイヤーにVOTE_STARTメッセージを送信し、投票タイムアウトアラームを設定する。
 	 */
-	private broadcastVoteStart(): void {
+	private async broadcastVoteStart(): Promise<void> {
 		// ラウンドに応じた順番でプレイヤーを並び替え
 		const orderedPlayers = this.sortTurnOrderPlayers();
 
@@ -571,6 +580,9 @@ export class GameDurableObject extends DurableObject<Env> {
 				this.switchToCpu({ message, playerId: player.id });
 			}
 		}
+
+		// 投票タイムアウトアラームを設定
+		await this.ctx.storage.setAlarm(Date.now() + this.timeLimit * 1000);
 	}
 
 	/**
@@ -662,6 +674,117 @@ export class GameDurableObject extends DurableObject<Env> {
 
 		// 1秒後に次のターンへ進む
 		await this.ctx.storage.setAlarm(Date.now() + 1000);
+	}
+
+	/**
+	 * 投票処理
+	 */
+	private async handleVote({
+		playerId,
+		votePlayerId,
+	}: {
+		playerId: PlayerId;
+		votePlayerId: PlayerId;
+	}): Promise<void> {
+		if (this.state !== "VOTING" || !this.gameId) return;
+
+		// 自分に投票することはできない
+		if (playerId === votePlayerId) {
+			console.warn("自分自身に投票することはできません。");
+			return;
+		}
+
+		// 投票先が存在するか確認
+		const targetPlayer = this.players.find(
+			(player) => player.id === votePlayerId,
+		);
+		if (!targetPlayer) {
+			console.warn("投票先のプレイヤーが存在しません。");
+			return;
+		}
+
+		// 投票をDBに保存
+		try {
+			await pRetry(
+				async () => {
+					if (!this.gameId) return;
+
+					await this.gameService.saveVote({
+						gameId: this.gameId,
+						playerId,
+						roundNo: this.roundNo,
+						votePlayerId,
+					});
+				},
+				{
+					retries: 3,
+				},
+			);
+		} catch (error) {
+			console.error("投票の保存に失敗しました:", error);
+			this.switchToCpu({
+				message: "投票の保存に失敗しました。CPUに切り替えます。",
+				playerId,
+			});
+		}
+	}
+
+	/**
+	 * 投票タイムアウト時の処理
+	 * 未投票のプレイヤーにランダム投票させ、結果フェーズへ移行する
+	 */
+	private async handleVoteTimeout(): Promise<void> {
+		if (!this.gameId) return;
+
+		// 投票済みのプレイヤーIDを取得
+		const votedPlayerIds = await this.gameService.getVotedPlayerIds({
+			gameId: this.gameId,
+			roundNo: this.roundNo,
+		});
+
+		// 未投票のプレイヤーにランダム投票
+		for (const player of this.players) {
+			if (!votedPlayerIds.includes(player.id)) {
+				// 自分以外のプレイヤーからランダムに選択
+				const notMePlayers = this.players.filter(
+					(otherPlayer) => otherPlayer.id !== player.id,
+				);
+				const randomTarget =
+					notMePlayers[Math.floor(Math.random() * notMePlayers.length)];
+
+				if (randomTarget) {
+					try {
+						await this.gameService.saveVote({
+							gameId: this.gameId,
+							playerId: player.id,
+							roundNo: this.roundNo,
+							votePlayerId: randomTarget.id,
+						});
+					} catch (error) {
+						console.error(
+							`プレイヤー ${player.id} のランダム投票に失敗しました:`,
+							error,
+						);
+						this.disconnectAllPlayers("ランダム投票に失敗しました");
+						return;
+					}
+				}
+			}
+		}
+
+		this.state = "RESULT";
+		// TODO: 結果をブロードキャスト（DBから投票結果を集計して次のラウンドへの移行も含む）
+		console.log("投票タイムアウト: 結果フェーズへ移行");
+	}
+
+	/**
+	 * 全プレイヤーを切断する
+	 */
+	private disconnectAllPlayers(reason: string): void {
+		for (const player of this.players) {
+			const socket = this.getPlayerSocket(player.id);
+			socket?.close(1011, reason);
+		}
 	}
 
 	/**

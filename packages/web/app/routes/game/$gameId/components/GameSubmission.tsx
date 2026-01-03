@@ -24,7 +24,9 @@ export function GameSubmission({
 	sendSubmission,
 }: {
 	data: GameServerSubmissionMessage;
-	sendSubmission: (message: GameClientSubmissionMessage["submission"]) => void;
+	sendSubmission: (
+		message: GameClientSubmissionMessage["submission"],
+	) => Promise<void>;
 }) {
 	const { currentPlayerId, game, mePlayer } = data;
 	const isMyTurn = currentPlayerId === mePlayer.id;
@@ -96,7 +98,7 @@ export function GameSubmission({
 		if (isMyTurn && selectedCard && pendingPosition === position) {
 			return {
 				label,
-				onConfirm: () => {
+				onConfirm: async () => {
 					if (!selectedCard || !pendingPosition) return;
 					setConfirmedSubmission({
 						position: pendingPosition,
@@ -104,7 +106,7 @@ export function GameSubmission({
 					});
 					setPendingPosition(null);
 					// サーバーに提出を送信
-					sendSubmission({
+					await sendSubmission({
 						position: pendingPosition,
 						text: selectedCard.word,
 					});
