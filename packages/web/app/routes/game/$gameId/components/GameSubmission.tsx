@@ -152,12 +152,25 @@ export function GameSubmission({
 	return (
 		<>
 			{isStarting && (
-				<div className="fixed inset-0 z-80 flex justify-center bg-gray-300/50 pt-80">
-					<div className="flex aspect-square h-fit flex-col items-center justify-center gap-y-16 rounded-xl bg-white px-32 py-16 shadow-lg">
-						<Spinner className="size-32 text-gray-400" />
-						<p className="mt-8 text-neutral-700 text-sm">
-							まもなく開始します...
-						</p>
+				<div className="fixed inset-0 z-80 flex items-center justify-center bg-black/40">
+					<div className="grid w-full max-w-xs place-items-center gap-y-24 rounded-2xl bg-white px-24 py-32 shadow-xl">
+						<div className="grid place-items-center gap-y-8">
+							<p className="font-mono text-neutral-500 text-sm">Round</p>
+							<p className="font-bold text-4xl text-neutral-800">
+								{game.roundNo}
+								<span className="text-neutral-400"> / 4</span>
+							</p>
+						</div>
+						<div className="grid w-full place-items-center gap-y-8">
+							<p className="text-neutral-500 text-sm">お題</p>
+							<p className="w-full rounded-lg border border-yellow-300 bg-yellow-50 px-16 py-12 text-center font-bold text-lg text-neutral-800">
+								{game.theme}
+							</p>
+						</div>
+						<div className="flex items-center gap-x-8 text-neutral-500">
+							<Spinner className="size-20" />
+							<p className="text-sm">まもなく開始...</p>
+						</div>
 					</div>
 				</div>
 			)}

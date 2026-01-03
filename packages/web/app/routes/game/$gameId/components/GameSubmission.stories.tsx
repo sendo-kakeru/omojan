@@ -92,7 +92,7 @@ const meta: Meta<typeof GameSubmission> = {
 export default meta;
 type Story = StoryObj<typeof GameSubmission>;
 
-// ラウンド開始時（オーバーレイ表示）
+// ラウンド1開始時（オーバーレイ表示）
 export const RoundStart: Story = {
 	args: {
 		data: {
@@ -106,7 +106,55 @@ export const RoundStart: Story = {
 		} satisfies GameServerRoundStartMessage,
 		sendSubmission: noop,
 	},
-	name: "ラウンド開始（オーバーレイ表示）",
+	name: "ラウンド1開始（オーバーレイ表示）",
+};
+
+// ラウンド3開始時（オーバーレイ表示）
+export const Round3Start: Story = {
+	args: {
+		data: {
+			currentPlayerId: createPlayerId("3"),
+			game: {
+				...baseGameData,
+				roundNo: 3 as const,
+				submitted: null,
+				theme: "お寿司",
+			},
+			mePlayer: {
+				...baseMePlayer,
+				playerCards: mockPlayerCards.map((c, i) =>
+					i < 3 ? { ...c, used: true } : c,
+				),
+			},
+			type: "ROUND_START",
+		} satisfies GameServerRoundStartMessage,
+		sendSubmission: noop,
+	},
+	name: "ラウンド3開始（オーバーレイ表示）",
+};
+
+// ラウンド4開始時（オーバーレイ表示・長いテーマ）
+export const Round4StartLongTheme: Story = {
+	args: {
+		data: {
+			currentPlayerId: createPlayerId("4"),
+			game: {
+				...baseGameData,
+				roundNo: 4 as const,
+				submitted: null,
+				theme: "プログラミング",
+			},
+			mePlayer: {
+				...baseMePlayer,
+				playerCards: mockPlayerCards.map((c, i) =>
+					i < 4 ? { ...c, used: true } : c,
+				),
+			},
+			type: "ROUND_START",
+		} satisfies GameServerRoundStartMessage,
+		sendSubmission: noop,
+	},
+	name: "ラウンド4開始（長いテーマ）",
 };
 
 // 自分のターン開始
