@@ -11,6 +11,7 @@ import { CircularTimerProgress } from "~/components/CircularTimerProgress";
 import { Separator } from "~/components/Separator";
 import { Spinner } from "~/components/Spinner";
 import { useCountdown } from "~/hooks/useCountdown";
+import { createCombination } from "../libs/gameUtils";
 import {
 	SelectSubmissionCard,
 	type SelectSubmissionCardProps,
@@ -45,11 +46,7 @@ export function GameSubmission({
 	const isConfirmed = confirmedSubmission !== null;
 
 	// カウントダウンタイマー
-	const {
-		count: remainingTime,
-		progress,
-		start: startCountdown,
-	} = useCountdown();
+	const { count, progress, start: startCountdown } = useCountdown();
 
 	// TURN_START時に状態をリセットしてカウントダウンを開始
 	useEffect(() => {
@@ -61,20 +58,6 @@ export function GameSubmission({
 		}
 	}, [data.type, game.timeLimit, startCountdown]);
 
-	// 組み合わせ文字列を生成
-	const createCombination = ({
-		text,
-		position,
-	}: {
-		text: string | null | undefined;
-		position: Position | null | undefined;
-	}): string | null => {
-		if (!text || !position) return null;
-		return position === "prefix"
-			? `${text}${game.theme}`
-			: `${game.theme}${text}`;
-	};
-
 	// プレイヤーの組み合わせ文字列を取得
 	const getPlayerCombination = (playerId: PlayerId): string | null => {
 		const isSelf = playerId === mePlayer.id;
@@ -83,6 +66,7 @@ export function GameSubmission({
 			return createCombination({
 				position: confirmedSubmission?.position ?? pendingPosition,
 				text: confirmedSubmission?.text ?? selectedCard?.word,
+				theme: game.theme,
 			});
 		}
 		// それ以外はサーバーの提出データを使用
@@ -90,6 +74,7 @@ export function GameSubmission({
 		return createCombination({
 			position: player?.submission?.position,
 			text: player?.submission?.text,
+			theme: game.theme,
 		});
 	};
 
@@ -187,13 +172,13 @@ export function GameSubmission({
 						className={classNames(
 							"flex-1 rounded-lg border px-8 py-2 text-sm",
 							isMyTurn
-								? "border-yellow-300 bg-white text-yellow-600"
-								: "border-gray-200 bg-gray-50 text-neutral-500",
+								? "border-green-300 bg-white text-green-600"
+								: "border-gray-300 bg-gray-50 text-neutral-500",
 						)}
 					>
 						{getMessage()}
 					</p>
-					<CircularTimerProgress label={remainingTime} progress={progress} />
+					<CircularTimerProgress label={count} progress={progress} />
 				</nav>
 				<main className="grid grid-rows-[auto_1fr_auto]">
 					<section className="grid rounded-lg border border-gray-200 bg-white">
@@ -206,8 +191,8 @@ export function GameSubmission({
 								<div className="w-full" key={player.id}>
 									<div
 										className={classNames(
-											"flex items-center gap-x-8 rounded-lg px-8 py-4 md:px-12",
-											isCurrentPlayer && "border border-green-400 bg-green-50",
+											"flex items-center gap-x-8 rounded-lg border-green-400 px-8 py-4 transition-colors md:px-12",
+											isCurrentPlayer && "border bg-green-50",
 										)}
 									>
 										<Avatar
