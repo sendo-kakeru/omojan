@@ -18,6 +18,9 @@ import { type UserId, userIdSchema, userTable } from "./user";
 
 export const playerIdSchema = pipe(string(), uuid(), brand("player_id"));
 export type PlayerId = InferOutput<typeof playerIdSchema>;
+export function isPlayerId(id: unknown): id is PlayerId {
+	return is(playerIdSchema, id);
+}
 
 export const playerSeatSchema = union([
 	literal(1),

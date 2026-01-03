@@ -1,8 +1,11 @@
 import {
+	type GameClientSubmissionMessage,
 	type GameServerMessage,
 	gameServerMessageSchema,
 } from "@repo/db/model";
+import pRetry from "p-retry";
 import { useRef } from "react";
+import { useNavigate } from "react-router";
 import useSWRSubscription, {
 	type SWRSubscriptionOptions,
 } from "swr/subscription";
@@ -27,6 +30,7 @@ export function useGameSubscriptionSWR({
 	onClose: (event: CloseEvent) => void;
 }) {
 	const wsRef = useRef<WebSocket | null>(null);
+	const navigate = useNavigate();
 	const url = getUrl({ gameId });
 
 	const subscription = useSWRSubscription<GameServerMessage, unknown>(
@@ -50,10 +54,12 @@ export function useGameSubscriptionSWR({
 			const ws = new WebSocket(url.toString());
 			wsRef.current = ws;
 
-			const handleMessage = (event: MessageEvent) => {
+			const handleMessage = (event: MessageEvent): void => {
 				try {
-					const payload = JSON.parse(event.data);
-					const message = parse(gameServerMessageSchema, payload);
+					const message = parse(
+						gameServerMessageSchema,
+						JSON.parse(event.data),
+					);
 					next(null, message);
 				} catch (error) {
 					console.error("メッセージの形式が正しくありません:", error, event);
@@ -66,13 +72,13 @@ export function useGameSubscriptionSWR({
 				}
 			};
 
-			const handleError = (event: Event) => {
+			const handleError = (event: Event): void => {
 				console.error("接続に失敗しました。", event);
 				next(new Error("接続に失敗しました。"));
 				ws.close(1011, "接続エラーが発生しました。");
 			};
 
-			const handleClose = (event: CloseEvent) => {
+			const handleClose = (event: CloseEvent): void => {
 				if (event.code !== 1000 && event.code !== 4204 && event.code !== 4410) {
 					console.error("接続が閉じられました。", event);
 					next(
@@ -104,8 +110,38 @@ export function useGameSubscriptionSWR({
 		},
 	);
 
+	const sendSubmission = ({
+		text,
+		position,
+	}: GameClientSubmissionMessage["submission"]): void => {
+		try {
+			void pRetry(
+				() => {
+					if (!wsRef.current || wsRef.current?.readyState !== WebSocket.OPEN) {
+						throw new Error("WebSocketが接続されていません。");
+					}
+					wsRef.current.send(
+						JSON.stringify({
+							submission: { position, text },
+							type: "SUBMIT",
+						} satisfies GameClientSubmissionMessage),
+					);
+				},
+				{
+					retries: 3,
+				},
+			);
+		} catch (error) {
+			console.error("提出の送信に失敗しました。", error);
+			alert("提出に失敗しました。ゲームを終了します。");
+			wsRef.current?.close(4410, "提出の送信に失敗しました。");
+			void navigate("/");
+		}
+	};
+
 	return {
 		...subscription,
+		sendSubmission,
 		wsRef,
 	};
 }
