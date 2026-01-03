@@ -468,6 +468,16 @@ export class GameService {
 	}
 
 	/**
+	 * ゲームを終了状態に更新する
+	 */
+	async endGame({ gameId }: { gameId: GameId }): Promise<void> {
+		await this.db
+			.update(gameTable)
+			.set({ status: "finished" })
+			.where(eq(gameTable.id, gameId));
+	}
+
+	/**
 	 * 有効な単語からテーマ牌(4枚)と手持ち牌(28枚)を重複なしでランダム抽出
 	 */
 	private getGameWords(): {

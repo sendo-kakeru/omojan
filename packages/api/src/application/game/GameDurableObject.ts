@@ -2,6 +2,7 @@ import { DurableObject } from "cloudflare:workers";
 import {
 	type GamePlayerCard,
 	type GamePlayerItem,
+	type GameServerGameEndMessage,
 	type GameServerResultMessage,
 	type GameServerRoundStartMessage,
 	type GameServerTurnEndMessage,
@@ -834,7 +835,7 @@ export class GameDurableObject extends DurableObject<Env> {
 						`プレイヤー ${player.id} のランダム投票に失敗しました:`,
 						error,
 					);
-					this.disconnectAllPlayers("ランダム投票に失敗しました");
+					this.disconnectAllPlayers({ message: "ランダム投票に失敗しました" });
 					return;
 				}
 			}
@@ -891,7 +892,9 @@ export class GameDurableObject extends DurableObject<Env> {
 			await this.ctx.storage.setAlarm(Date.now() + 6000);
 		} catch (error) {
 			console.error("結果フェーズの処理に失敗しました:", error);
-			this.disconnectAllPlayers("結果フェーズの処理に失敗しました");
+			this.disconnectAllPlayers({
+				message: "結果フェーズの処理に失敗しました",
+			});
 			return;
 		}
 	}
@@ -902,9 +905,7 @@ export class GameDurableObject extends DurableObject<Env> {
 	private async proceedToNextRound(): Promise<void> {
 		// 4ラウンド終了したらゲーム終了
 		if (this.roundNo === 4) {
-			// TODO: ゲーム終了処理
-
-			this.disconnectAllPlayers("ゲーム終了");
+			await this.handleGameEnd();
 			return;
 		}
 
@@ -937,12 +938,62 @@ export class GameDurableObject extends DurableObject<Env> {
 	}
 
 	/**
-	 * 全プレイヤーを切断する
+	 * ゲーム終了処理
+	 * - ゲームステータスを終了に更新
+	 * - 全プレイヤーにENDメッセージを送信
+	 * - 全プレイヤーを切断
 	 */
-	private disconnectAllPlayers(reason: string): void {
+	private async handleGameEnd(): Promise<void> {
+		if (!this.gameId) return;
+
+		try {
+			await this.gameService.endGame({ gameId: this.gameId });
+		} catch (error) {
+			console.error("ゲームステータスの更新に失敗しました:", error);
+		}
+
+		// ENDメッセージを送信し、送信成功したプレイヤーを正常終了で切断
 		for (const player of this.players) {
 			const socket = this.getPlayerSocket(player.id);
-			socket?.close(1011, reason);
+			if (!socket) continue;
+
+			try {
+				socket.send(
+					JSON.stringify({
+						type: "END",
+					} satisfies GameServerGameEndMessage),
+				);
+				socket.close(1000, "ゲーム終了");
+			} catch (error) {
+				console.error(
+					`プレイヤー ${player.id} へのEND送信に失敗しました`,
+					error,
+				);
+				socket.close(1011, "ゲーム終了処理に失敗しました");
+			}
+		}
+
+		try {
+			// 永続化した状態をクリア
+			await this.ctx.storage.delete(STORAGE_KEY);
+		} catch (error) {
+			console.error("永続化状態のクリアに失敗しました:", error);
+		}
+	}
+
+	/**
+	 * 全プレイヤーを切断する
+	 */
+	private disconnectAllPlayers({
+		code = 1011,
+		message,
+	}: {
+		code?: number;
+		message: string;
+	}): void {
+		for (const player of this.players) {
+			const socket = this.getPlayerSocket(player.id);
+			socket?.close(code, message);
 		}
 	}
 

@@ -195,10 +195,19 @@ export type GameServerResultMessage = InferOutput<
 	typeof gameServerResultMessageSchema
 >;
 
+// ゲーム終了
+export const gameServerGameEndMessageSchema = object({
+	type: literal("END"),
+});
+export type GameServerGameEndMessage = InferOutput<
+	typeof gameServerGameEndMessageSchema
+>;
+
 // 全体
 export const gameServerMessageSchema = variant("type", [
 	gameServerSubmissionMessageSchema,
 	gameServerVoteMessageSchema,
 	gameServerResultMessageSchema,
+	gameServerGameEndMessageSchema,
 ]);
 export type GameServerMessage = InferOutput<typeof gameServerMessageSchema>;
