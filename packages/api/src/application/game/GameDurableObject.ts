@@ -5,6 +5,7 @@ import {
 	type GameServerRoundStartMessage,
 	type GameServerTurnEndMessage,
 	type GameServerTurnStartMessage,
+	type GameServerVoteMessage,
 	type GameState,
 	gameClientSubmissionMessageSchema,
 } from "@repo/db/model";
@@ -259,7 +260,7 @@ export class GameDurableObject extends DurableObject<Env> {
 		// 4人全員が提出完了した場合は投票フェーズへ移行
 		if (this.turnIndex >= 3) {
 			this.state = "VOTING";
-			// TODO: 投票フェーズに移行する処理
+			this.broadcastVoteStart();
 			return;
 		}
 
@@ -484,7 +485,7 @@ export class GameDurableObject extends DurableObject<Env> {
 								image: player.image,
 								playerName: player.playerName,
 								seat: player.seat,
-								submission: null,
+								submission: player.submission,
 								winCount: player.winCount,
 							})),
 							roundNo: this.roundNo,
@@ -528,6 +529,48 @@ export class GameDurableObject extends DurableObject<Env> {
 		}
 		const socket = this.getPlayerSocket(playerId);
 		socket?.close(1011, message);
+	}
+
+	/**
+	 * 全プレイヤーにVOTE_STARTメッセージを送信する。
+	 */
+	private broadcastVoteStart(): void {
+		// ラウンドに応じた順番でプレイヤーを並び替え
+		const orderedPlayers = this.sortTurnOrderPlayers();
+
+		for (const player of this.players) {
+			const socket = this.getPlayerSocket(player.id);
+			if (!socket) continue;
+
+			try {
+				socket.send(
+					JSON.stringify({
+						game: {
+							players: orderedPlayers.map((player) => ({
+								id: player.id,
+								image: player.image,
+								playerName: player.playerName,
+								seat: player.seat,
+								submission: player.submission,
+								winCount: player.winCount,
+							})),
+							roundNo: this.roundNo,
+							theme: this.themes.get(this.roundNo) ?? "",
+							timeLimit: this.timeLimit,
+						},
+						mePlayer: {
+							id: player.id,
+							playerCards: player.cards,
+						},
+						type: "VOTE_START",
+					} satisfies GameServerVoteMessage),
+				);
+			} catch (error) {
+				const message = `プレイヤー ${player.id} へのVOTE_START送信に失敗しました`;
+				console.error(message, error);
+				this.switchToCpu({ message, playerId: player.id });
+			}
+		}
 	}
 
 	/**
@@ -667,8 +710,10 @@ export class GameDurableObject extends DurableObject<Env> {
 			);
 		} catch (error) {
 			console.error("提出処理に失敗しました:", error);
-			const socket = this.getPlayerSocket(playerId);
-			socket?.close(1011, "提出処理に失敗しました。");
+			this.switchToCpu({
+				message: "提出処理に失敗しました。CPUに切り替えます。",
+				playerId,
+			});
 			return;
 		}
 
