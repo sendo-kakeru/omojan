@@ -3,6 +3,7 @@ import type {
 	GameClientVoteMessage,
 	GameServerMessage,
 } from "@repo/db/model";
+import { GameResult } from "./GameResult";
 import { GameSubmission } from "./GameSubmission";
 import { GameVote } from "./GameVote";
 
@@ -29,6 +30,8 @@ export function GamePresenter({
 	if (data.type === "VOTE_START") {
 		return <GameVote data={data} sendVote={sendVote} />;
 	}
-	// TODO: RESULT の処理
+	if (data.type === "RESULT") {
+		return <GameResult data={data} />;
+	}
 	return null;
 }

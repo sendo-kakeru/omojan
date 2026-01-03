@@ -17,6 +17,7 @@ import {
 	type RoundTheme,
 	roundTable,
 	roundThemeTable,
+	roundWinnerTable,
 	type Submission,
 	submissionTable,
 	userTable,
@@ -365,6 +366,105 @@ export class GameService {
 			.where(eq(voteTable.roundId, round.id));
 
 		return votes.map((vote) => vote.playerId);
+	}
+
+	/**
+	 * ラウンドの勝者を計算する
+	 * 最も得票数が多いプレイヤーを勝者とする（同率の場合は複数人）
+	 */
+	async calculateRoundWinners({
+		gameId,
+		roundNo,
+	}: {
+		gameId: GameId;
+		roundNo: RoundNo;
+	}): Promise<PlayerId[]> {
+		// gameIdとroundNoからラウンドIDを取得
+		const [round] = await this.db
+			.select({ id: roundTable.id })
+			.from(roundTable)
+			.where(
+				and(eq(roundTable.gameId, gameId), eq(roundTable.roundNo, roundNo)),
+			);
+
+		if (!round) {
+			throw new HTTPException(404, { message: "ラウンドが見つかりません" });
+		}
+
+		// 各提出の投票数を集計
+		const submissions = await this.db
+			.select({
+				playerId: submissionTable.playerId,
+				submissionId: submissionTable.id,
+			})
+			.from(submissionTable)
+			.where(eq(submissionTable.roundId, round.id));
+
+		const votes = await this.db
+			.select({
+				submissionId: voteTable.submissionId,
+			})
+			.from(voteTable)
+			.where(eq(voteTable.roundId, round.id));
+
+		// 各プレイヤーの得票数を集計
+		const voteCountByPlayer = new Map<PlayerId, number>();
+		for (const submission of submissions) {
+			const voteCount = votes.filter(
+				(vote) => vote.submissionId === submission.submissionId,
+			).length;
+			voteCountByPlayer.set(submission.playerId, voteCount);
+		}
+
+		// 最大得票数を取得
+		const maxVotes = Math.max(...voteCountByPlayer.values(), 0);
+
+		// 最大得票数を持つプレイヤーを勝者とする
+		const winners: PlayerId[] = [];
+		for (const [playerId, voteCount] of voteCountByPlayer) {
+			if (voteCount === maxVotes) {
+				winners.push(playerId);
+			}
+		}
+
+		return winners;
+	}
+
+	/**
+	 * ラウンドの勝者をDBに保存する
+	 */
+	async saveRoundWinners({
+		gameId,
+		roundNo,
+		winnerPlayerIds,
+	}: {
+		gameId: GameId;
+		roundNo: RoundNo;
+		winnerPlayerIds: PlayerId[];
+	}): Promise<void> {
+		if (winnerPlayerIds.length === 0) return;
+
+		await this.db.transaction(async (tx) => {
+			// gameIdとroundNoからラウンドIDを取得
+			const [round] = await tx
+				.select({ id: roundTable.id })
+				.from(roundTable)
+				.where(
+					and(eq(roundTable.gameId, gameId), eq(roundTable.roundNo, roundNo)),
+				);
+
+			if (!round) {
+				throw new HTTPException(404, { message: "ラウンドが見つかりません" });
+			}
+
+			// 各勝者をround_winnerテーブルに保存
+			for (const playerId of winnerPlayerIds) {
+				await tx.insert(roundWinnerTable).values({
+					playerId,
+					roundId: round.id,
+				});
+			}
+		});
 	}
 
 	/**
