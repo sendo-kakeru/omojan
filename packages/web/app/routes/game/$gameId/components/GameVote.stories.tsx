@@ -141,30 +141,19 @@ export const LongCombinations: Story = {
 		data: {
 			game: {
 				...baseGameData,
-				players: [
-					{
-						...mockPlayersWithSubmissions[0]!,
-						submission: {
-							position: "prefix" as const,
-							text: "ジャーナリズムのかけらもない",
-						},
-					},
-					{
-						...mockPlayersWithSubmissions[1]!,
-						submission: {
-							position: "suffix" as const,
-							text: "よそはよそうちは",
-						},
-					},
-					{
-						...mockPlayersWithSubmissions[2]!,
-						submission: { position: "prefix" as const, text: "思いもよらぬ" },
-					},
-					{
-						...mockPlayersWithSubmissions[3]!,
-						submission: { position: "suffix" as const, text: "生麦生米" },
-					},
-				],
+				players: mockPlayersWithSubmissions.map((player, index) => ({
+					...player,
+					submission:
+						[
+							{
+								position: "prefix" as const,
+								text: "ジャーナリズムのかけらもない",
+							},
+							{ position: "suffix" as const, text: "よそはよそうちは" },
+							{ position: "prefix" as const, text: "思いもよらぬ" },
+							{ position: "suffix" as const, text: "生麦生米" },
+						][index] ?? player.submission,
+				})),
 				theme: "プログラミング",
 			},
 			mePlayer: baseMePlayer,
