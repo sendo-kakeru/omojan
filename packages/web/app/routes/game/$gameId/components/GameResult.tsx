@@ -23,13 +23,13 @@ export function GameResult({ data }: { data: GameServerResultMessage }) {
 	return (
 		<div className="grid h-full grid-rows-[auto_1fr] gap-y-8 pt-8 xs:pt-16 pb-16">
 			<nav className="flex w-full items-center gap-x-8">
-				<p className="grid w-fit place-items-center rounded-lg border border-gray-200 bg-white px-8 py-2 font-mono text-neutral-600">
+				<div className="grid w-fit place-items-center rounded-lg border border-gray-200 bg-white px-8 py-2 font-mono text-neutral-600">
 					<span className="text-xs">Round</span>
 					<div className="flex items-center">
 						<span className="text-base">{game.roundNo}</span>/
 						<span className="text-base">4</span>
 					</div>
-				</p>
+				</div>
 				<p className="flex-1 rounded-lg border border-gray-300 bg-gray-50 px-8 py-2 text-neutral-500 text-sm">
 					ラウンド結果
 				</p>
