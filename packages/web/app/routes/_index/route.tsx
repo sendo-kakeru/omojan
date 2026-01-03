@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { FaPlus } from "react-icons/fa";
+import { RxUpdate } from "react-icons/rx";
 import { AuthHeader } from "~/components/auth/AuthHeader";
 import { Button } from "~/components/button/Button";
 import { Spinner } from "~/components/Spinner";
@@ -9,7 +10,7 @@ import { JoinRoomCard } from "./components/JoinRoomCard";
 
 export default function () {
 	const [isOpen, setIsOpen] = useState(false);
-	const { data, error, isLoading } = useRoomListSWR();
+	const { data, error, isLoading, isValidating, mutate } = useRoomListSWR();
 	const gameList = data?.data;
 
 	return (
@@ -18,14 +19,25 @@ export default function () {
 			<main className="grid gap-y-16">
 				<div className="flex items-center justify-between">
 					<h2 className="font-bold text-lg">募集中の部屋一覧</h2>
-					<Button
-						as="button"
-						className="w-fit justify-self-end"
-						leftIcon={<FaPlus />}
-						onClick={() => setIsOpen(true)}
-					>
-						部屋作成
-					</Button>
+					<div className="flex gap-x-8">
+						<Button
+							as="button"
+							color="gray"
+							disabled={isValidating}
+							leftIcon={isValidating ? <Spinner /> : <RxUpdate />}
+							onClick={() => mutate()}
+							variant="outline"
+						>
+							更新
+						</Button>
+						<Button
+							as="button"
+							leftIcon={<FaPlus />}
+							onClick={() => setIsOpen(true)}
+						>
+							部屋作成
+						</Button>
+					</div>
 				</div>
 
 				<div className="grid gap-y-8">

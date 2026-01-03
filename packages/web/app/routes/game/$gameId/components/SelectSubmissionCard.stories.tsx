@@ -55,7 +55,7 @@ export const ReadyEnabled: Story = {
 export const Selected: Story = {
 	args: {
 		label: "前",
-		onConfirm: () => {},
+		onConfirm: async () => {},
 		state: "selected",
 		word: "激辛",
 	},
@@ -88,7 +88,7 @@ export const Interactive: Story = {
 			setIsSelected(true);
 		};
 
-		const handleConfirm = () => {
+		const handleConfirm = async () => {
 			setConfirmedWord(selectedWord);
 			setIsSelected(false);
 			setSelectedWord(undefined);
@@ -202,7 +202,7 @@ export const AllStates: Story = {
 				<div className="w-280">
 					<SelectSubmissionCard
 						label="前"
-						onConfirm={() => {}}
+						onConfirm={async () => {}}
 						state="selected"
 						word="激辛"
 					/>

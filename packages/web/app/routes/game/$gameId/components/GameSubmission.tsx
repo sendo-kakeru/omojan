@@ -1,12 +1,17 @@
-import type { GameServerSubmissionMessage } from "@repo/db/model";
-import type { PlayerCardId } from "@repo/db/schema";
+import type {
+	GameClientSubmissionMessage,
+	GameServerSubmissionMessage,
+} from "@repo/db/model";
+import type { PlayerCard, PlayerCardId, PlayerId } from "@repo/db/schema";
 import classNames from "classnames";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Avatar } from "~/components/Avatar";
 import { Badge } from "~/components/Badge";
 import { CircularTimerProgress } from "~/components/CircularTimerProgress";
 import { Separator } from "~/components/Separator";
 import { Spinner } from "~/components/Spinner";
+import { useCountdown } from "~/hooks/useCountdown";
+import { createCombination } from "../libs/gameUtils";
 import {
 	SelectSubmissionCard,
 	type SelectSubmissionCardProps,
@@ -16,8 +21,12 @@ type Position = "prefix" | "suffix";
 
 export function GameSubmission({
 	data,
+	sendSubmission,
 }: {
 	data: GameServerSubmissionMessage;
+	sendSubmission: (
+		message: GameClientSubmissionMessage["submission"],
+	) => Promise<void>;
 }) {
 	const { currentPlayerId, game, mePlayer } = data;
 	const isMyTurn = currentPlayerId === mePlayer.id;
@@ -28,27 +37,47 @@ export function GameSubmission({
 	);
 	// 選択中の配置位置（確定前はnull）
 	const [pendingPosition, setPendingPosition] = useState<Position | null>(null);
-	// 確定した配置位置
-	const [confirmedPosition, setConfirmedPosition] = useState<Position | null>(
-		null,
-	);
+	// 確定した提出内容
+	const [confirmedSubmission, setConfirmedSubmission] = useState<{
+		position: Position;
+		text: PlayerCard["text"];
+	} | null>(null);
 	const selectedCard = mePlayer.playerCards.find(
 		(card) => card.id === selectedCardId,
 	);
-	const isConfirmed = confirmedPosition !== null;
+	const isConfirmed = confirmedSubmission !== null;
 
-	// 組み合わせ文字列を生成
-	const createCombination = ({
-		text,
-		position,
-	}: {
-		text: string | null | undefined;
-		position: Position | null | undefined;
-	}): string | null => {
-		if (!text || !position) return null;
-		return position === "prefix"
-			? `${text}${game.theme}`
-			: `${game.theme}${text}`;
+	// カウントダウンタイマー
+	const { count, progress, start: startCountdown } = useCountdown();
+
+	// TURN_START時に状態をリセットしてカウントダウンを開始
+	useEffect(() => {
+		if (data.type === "TURN_START") {
+			setSelectedCardId(null);
+			setPendingPosition(null);
+			setConfirmedSubmission(null);
+			startCountdown(game.timeLimit);
+		}
+	}, [data.type, game.timeLimit, startCountdown]);
+
+	// プレイヤーの組み合わせ文字列を取得
+	const getPlayerCombination = (playerId: PlayerId): string | null => {
+		const isSelf = playerId === mePlayer.id;
+		// 自分のターンでカード選択中または確定済みの場合はローカル状態を使用
+		if (isSelf && isMyTurn && (selectedCard || isConfirmed)) {
+			return createCombination({
+				position: confirmedSubmission?.position ?? pendingPosition,
+				text: confirmedSubmission?.text ?? selectedCard?.word,
+				theme: game.theme,
+			});
+		}
+		// それ以外はサーバーの提出データを使用
+		const player = game.players.find((player) => player.id === playerId);
+		return createCombination({
+			position: player?.submission?.position,
+			text: player?.submission?.text,
+			theme: game.theme,
+		});
 	};
 
 	// SelectSubmissionCardのpropsを生成
@@ -58,21 +87,29 @@ export function GameSubmission({
 		const label = position === "prefix" ? "前" : "後";
 
 		// 自分のターンで確定済み
-		if (isMyTurn && selectedCard && confirmedPosition === position) {
+		if (isMyTurn && confirmedSubmission?.position === position) {
 			return {
 				label,
 				state: "placed",
-				word: selectedCard.word,
+				word: confirmedSubmission.text,
 			};
 		}
 		// 自分のターンで選択中（決定ボタン表示）
 		if (isMyTurn && selectedCard && pendingPosition === position) {
 			return {
 				label,
-				onConfirm: () => {
+				onConfirm: async () => {
 					if (!selectedCard || !pendingPosition) return;
-					setConfirmedPosition(pendingPosition);
+					setConfirmedSubmission({
+						position: pendingPosition,
+						text: selectedCard.word,
+					});
 					setPendingPosition(null);
+					// サーバーに提出を送信
+					await sendSubmission({
+						position: pendingPosition,
+						text: selectedCard.word,
+					});
 				},
 				state: "selected",
 				word: selectedCard.word,
@@ -115,12 +152,25 @@ export function GameSubmission({
 	return (
 		<>
 			{isStarting && (
-				<div className="fixed inset-0 z-80 flex justify-center bg-gray-300/50 pt-80">
-					<div className="flex aspect-square h-fit flex-col items-center justify-center gap-y-16 rounded-xl bg-white px-32 py-16 shadow-lg">
-						<Spinner className="size-32 text-gray-400" />
-						<p className="mt-8 text-neutral-700 text-sm">
-							まもなく開始します...
-						</p>
+				<div className="fixed inset-0 z-80 flex items-center justify-center bg-black/40">
+					<div className="grid w-full max-w-xs place-items-center gap-y-24 rounded-2xl bg-white px-24 py-32 shadow-xl">
+						<div className="grid place-items-center gap-y-8">
+							<p className="font-mono text-neutral-500 text-sm">Round</p>
+							<p className="font-bold text-4xl text-neutral-800">
+								{game.roundNo}
+								<span className="text-neutral-400"> / 4</span>
+							</p>
+						</div>
+						<div className="grid w-full place-items-center gap-y-8">
+							<p className="text-neutral-500 text-sm">お題</p>
+							<p className="w-full rounded-lg border border-yellow-300 bg-yellow-50 px-16 py-12 text-center font-bold text-lg text-neutral-800">
+								{game.theme}
+							</p>
+						</div>
+						<div className="flex items-center gap-x-8 text-neutral-500">
+							<Spinner className="size-20" />
+							<p className="text-sm">まもなく開始...</p>
+						</div>
 					</div>
 				</div>
 			)}
@@ -137,31 +187,27 @@ export function GameSubmission({
 						className={classNames(
 							"flex-1 rounded-lg border px-8 py-2 text-sm",
 							isMyTurn
-								? "border-yellow-300 bg-white text-yellow-600"
-								: "border-gray-200 bg-gray-50 text-neutral-500",
+								? "border-green-300 bg-white text-green-600"
+								: "border-gray-300 bg-gray-50 text-neutral-500",
 						)}
 					>
 						{getMessage()}
 					</p>
-					<CircularTimerProgress label={game.timeLimit} progress={100} />
+					<CircularTimerProgress label={count} progress={progress} />
 				</nav>
 				<main className="grid grid-rows-[auto_1fr_auto]">
 					<section className="grid rounded-lg border border-gray-200 bg-white">
 						{game.players.map((player, index) => {
 							const isSelf = player.id === mePlayer.id;
-							const combination = createCombination({
-								position: isSelf
-									? (confirmedPosition ?? pendingPosition)
-									: player.submission?.position,
-								text: isSelf ? selectedCard?.word : player.submission?.text,
-							});
+							const isCurrentPlayer = player.id === currentPlayerId;
+							const combination = getPlayerCombination(player.id);
 
 							return (
 								<div className="w-full" key={player.id}>
 									<div
 										className={classNames(
-											"flex items-center gap-x-8 rounded-lg px-8 py-4 md:px-12",
-											isSelf && "border border-green-400 bg-green-50",
+											"flex items-center gap-x-8 rounded-lg border-green-400 px-8 py-4 transition-colors md:px-12",
+											isCurrentPlayer && "border bg-green-50",
 										)}
 									>
 										<Avatar
