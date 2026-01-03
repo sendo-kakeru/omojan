@@ -1,4 +1,8 @@
-import type { GameServerVoteMessage } from "@repo/db/model";
+import type {
+	GameClientVoteMessage,
+	GameServerVoteMessage,
+} from "@repo/db/model";
+import type { PlayerId } from "@repo/db/schema";
 import classNames from "classnames";
 import { useEffect, useState } from "react";
 import { Avatar } from "~/components/Avatar";
@@ -9,23 +13,25 @@ import { Separator } from "~/components/Separator";
 import { useCountdown } from "~/hooks/useCountdown";
 import { createCombination } from "../libs/gameUtils";
 
-export function GameVote({ data }: { data: GameServerVoteMessage }) {
+export function GameVote({
+	data,
+	sendVote,
+}: {
+	data: GameServerVoteMessage;
+	sendVote: (
+		votePlayerId: GameClientVoteMessage["votePlayerId"],
+	) => Promise<void>;
+}) {
 	const { game, mePlayer } = data;
 
-	const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
-	const [confirmedPlayerId, setConfirmedPlayerId] = useState<string | null>(
+	const [selectedPlayerId, setSelectedPlayerId] = useState<PlayerId | null>(
+		null,
+	);
+	const [confirmedPlayerId, setConfirmedPlayerId] = useState<PlayerId | null>(
 		null,
 	);
 
 	const { count, progress, start: startCountdown } = useCountdown();
-
-	// 組み合わせ文字列を生成
-
-	const handleConfirmVote = () => {
-		if (!selectedPlayerId) return;
-		setConfirmedPlayerId(selectedPlayerId);
-		// TODO: サーバーに投票を送信
-	};
 
 	const selectedPlayer = game.players.find(
 		(player) => player.id === selectedPlayerId,
@@ -147,7 +153,14 @@ export function GameVote({ data }: { data: GameServerVoteMessage }) {
 									>
 										キャンセル
 									</Button>
-									<Button as="button" onClick={handleConfirmVote}>
+									<Button
+										as="button"
+										onClick={async () => {
+											if (!selectedPlayerId) return;
+											setConfirmedPlayerId(selectedPlayerId);
+											await sendVote(selectedPlayerId);
+										}}
+									>
 										投票する
 									</Button>
 								</div>

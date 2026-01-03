@@ -5,7 +5,7 @@ import { Button } from "~/components/button/Button";
 export type SelectSubmissionCardProps = (
 	| { state: "idle" }
 	| { state: "ready"; onSelect: () => void; disabled?: boolean }
-	| { state: "selected"; word: string; onConfirm: () => void }
+	| { state: "selected"; word: string; onConfirm: () => Promise<void> }
 	| { state: "placed"; word: string }
 ) & { label: string };
 

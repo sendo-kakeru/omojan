@@ -9,7 +9,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { GameSubmission } from "./GameSubmission";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
-const noop = () => {};
+const noop = async () => {};
 
 // モックデータ生成ヘルパー
 const createPlayerId = (id: string): PlayerId => `player_${id}` as PlayerId;

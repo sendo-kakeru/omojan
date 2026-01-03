@@ -1,5 +1,6 @@
 import {
 	type GameClientSubmissionMessage,
+	type GameClientVoteMessage,
 	type GameServerMessage,
 	gameServerMessageSchema,
 } from "@repo/db/model";
@@ -110,12 +111,12 @@ export function useGameSubscriptionSWR({
 		},
 	);
 
-	const sendSubmission = ({
+	const sendSubmission = async ({
 		text,
 		position,
-	}: GameClientSubmissionMessage["submission"]): void => {
+	}: GameClientSubmissionMessage["submission"]): Promise<void> => {
 		try {
-			void pRetry(
+			await pRetry(
 				() => {
 					if (!wsRef.current || wsRef.current?.readyState !== WebSocket.OPEN) {
 						throw new Error("WebSocketが接続されていません。");
@@ -139,9 +140,38 @@ export function useGameSubscriptionSWR({
 		}
 	};
 
+	const sendVote = async (
+		votePlayerId: GameClientVoteMessage["votePlayerId"],
+	): Promise<void> => {
+		try {
+			await pRetry(
+				() => {
+					if (!wsRef.current || wsRef.current?.readyState !== WebSocket.OPEN) {
+						throw new Error("WebSocketが接続されていません。");
+					}
+					wsRef.current.send(
+						JSON.stringify({
+							type: "VOTE",
+							votePlayerId,
+						} satisfies GameClientVoteMessage),
+					);
+				},
+				{
+					retries: 3,
+				},
+			);
+		} catch (error) {
+			console.error("投票の送信に失敗しました。", error);
+			alert("投票に失敗しました。ゲームを終了します。");
+			wsRef.current?.close(4410, "投票の送信に失敗しました。");
+			void navigate("/");
+		}
+	};
+
 	return {
 		...subscription,
 		sendSubmission,
+		sendVote,
 		wsRef,
 	};
 }

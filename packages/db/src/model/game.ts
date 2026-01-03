@@ -175,6 +175,13 @@ export type GameClientVoteMessage = InferOutput<
 	typeof gameClientVoteMessageSchema
 >;
 
+// クライアントメッセージ（統合）
+export const gameClientMessageSchema = variant("type", [
+	gameClientSubmissionMessageSchema,
+	gameClientVoteMessageSchema,
+]);
+export type GameClientMessage = InferOutput<typeof gameClientMessageSchema>;
+
 // 結果
 export const gameServerResultMessageSchema = object({
 	...gameBaseSchema.entries,
