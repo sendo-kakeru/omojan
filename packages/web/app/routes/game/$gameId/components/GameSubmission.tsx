@@ -1,12 +1,16 @@
-import type { GameServerSubmissionMessage } from "@repo/db/model";
+import type {
+	GameClientSubmissionMessage,
+	GameServerSubmissionMessage,
+} from "@repo/db/model";
 import type { PlayerCardId } from "@repo/db/schema";
 import classNames from "classnames";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Avatar } from "~/components/Avatar";
 import { Badge } from "~/components/Badge";
 import { CircularTimerProgress } from "~/components/CircularTimerProgress";
 import { Separator } from "~/components/Separator";
 import { Spinner } from "~/components/Spinner";
+import { useCountdown } from "~/hooks/useCountdown";
 import {
 	SelectSubmissionCard,
 	type SelectSubmissionCardProps,
@@ -16,8 +20,10 @@ type Position = "prefix" | "suffix";
 
 export function GameSubmission({
 	data,
+	sendSubmission,
 }: {
 	data: GameServerSubmissionMessage;
+	sendSubmission: (message: GameClientSubmissionMessage["submission"]) => void;
 }) {
 	const { currentPlayerId, game, mePlayer } = data;
 	const isMyTurn = currentPlayerId === mePlayer.id;
@@ -36,6 +42,23 @@ export function GameSubmission({
 		(card) => card.id === selectedCardId,
 	);
 	const isConfirmed = confirmedPosition !== null;
+
+	// カウントダウンタイマー
+	const {
+		count: remainingTime,
+		progress,
+		start: startCountdown,
+	} = useCountdown();
+
+	// TURN_START時に状態をリセットしてカウントダウンを開始
+	useEffect(() => {
+		if (data.type === "TURN_START") {
+			setSelectedCardId(null);
+			setPendingPosition(null);
+			setConfirmedPosition(null);
+			startCountdown(game.timeLimit);
+		}
+	}, [data.type, game.timeLimit, startCountdown]);
 
 	// 組み合わせ文字列を生成
 	const createCombination = ({
@@ -73,6 +96,11 @@ export function GameSubmission({
 					if (!selectedCard || !pendingPosition) return;
 					setConfirmedPosition(pendingPosition);
 					setPendingPosition(null);
+					// サーバーに提出を送信
+					sendSubmission({
+						position: pendingPosition,
+						text: selectedCard.word,
+					});
 				},
 				state: "selected",
 				word: selectedCard.word,
@@ -143,12 +171,13 @@ export function GameSubmission({
 					>
 						{getMessage()}
 					</p>
-					<CircularTimerProgress label={game.timeLimit} progress={100} />
+					<CircularTimerProgress label={remainingTime} progress={progress} />
 				</nav>
 				<main className="grid grid-rows-[auto_1fr_auto]">
 					<section className="grid rounded-lg border border-gray-200 bg-white">
 						{game.players.map((player, index) => {
 							const isSelf = player.id === mePlayer.id;
+							const isCurrentPlayer = player.id === currentPlayerId;
 							const combination = createCombination({
 								position: isSelf
 									? (confirmedPosition ?? pendingPosition)
@@ -161,7 +190,7 @@ export function GameSubmission({
 									<div
 										className={classNames(
 											"flex items-center gap-x-8 rounded-lg px-8 py-4 md:px-12",
-											isSelf && "border border-green-400 bg-green-50",
+											isCurrentPlayer && "border border-green-400 bg-green-50",
 										)}
 									>
 										<Avatar

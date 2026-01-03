@@ -16,7 +16,7 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 		},
 	});
 
-	const { data, error, wsRef } = useGameSubscriptionSWR({
+	const { data, error, sendSubmission, wsRef } = useGameSubscriptionSWR({
 		gameId,
 		gameToken,
 		onClose: (_event: CloseEvent) => {
@@ -44,5 +44,5 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 		);
 	}
 
-	return <GamePresenter data={data} />;
+	return <GamePresenter data={data} sendSubmission={sendSubmission} />;
 }

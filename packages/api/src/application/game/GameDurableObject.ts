@@ -119,11 +119,12 @@ export class GameDurableObject extends DurableObject<Env> {
 
 		// CPUでないプレイヤーが全員接続したらゲーム開始
 		if (this.areAllPlayersConnected()) {
-			if (this.state !== "WAITING") {
+			if (this.state === "WAITING") {
+				await this.handleInitialize();
+			} else {
 				// 待機アラームの削除（waiting以外では再接続）
 				await this.ctx.storage.deleteAlarm();
 			}
-			await this.handleInitialize();
 		}
 
 		// WS リクエストをアップグレードし、参加者一覧を即時配信する。
@@ -600,8 +601,8 @@ export class GameDurableObject extends DurableObject<Env> {
 		}
 
 		// 既に提出済みか確認
-		const playerData = this.players.find((player) => player.id === playerId);
-		if (playerData?.submission) {
+		const submitPlayer = this.players.find((player) => player.id === playerId);
+		if (submitPlayer?.submission) {
 			console.warn("提出済みです。");
 			return;
 		}
