@@ -41,7 +41,7 @@ export function GameVote({
 	);
 
 	useEffect(() => {
-		startCountdown(10);
+		startCountdown(15);
 	}, [startCountdown]);
 
 	return (

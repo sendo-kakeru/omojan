@@ -2,6 +2,7 @@ import { DurableObject } from "cloudflare:workers";
 import {
 	type GamePlayerCard,
 	type GamePlayerItem,
+	type GameServerResultMessage,
 	type GameServerRoundStartMessage,
 	type GameServerTurnEndMessage,
 	type GameServerTurnStartMessage,
@@ -223,6 +224,9 @@ export class GameDurableObject extends DurableObject<Env> {
 				break;
 			case "VOTING":
 				await this.handleVoteTimeout();
+				break;
+			case "RESULT":
+				await this.proceedToNextRound();
 				break;
 		}
 
@@ -541,9 +545,12 @@ export class GameDurableObject extends DurableObject<Env> {
 	}
 
 	/**
-	 * 全プレイヤーにVOTE_STARTメッセージを送信し、投票タイムアウトアラームを設定する。
+	 * 全プレイヤーにVOTE_STARTメッセージを送信し、CPUプレイヤーの自動投票を行い、
+	 * 投票タイムアウトアラームを設定する。
 	 */
 	private async broadcastVoteStart(): Promise<void> {
+		if (!this.gameId) return;
+
 		// ラウンドに応じた順番でプレイヤーを並び替え
 		const orderedPlayers = this.sortTurnOrderPlayers();
 
@@ -581,8 +588,69 @@ export class GameDurableObject extends DurableObject<Env> {
 			}
 		}
 
-		// 投票タイムアウトアラームを設定
-		await this.ctx.storage.setAlarm(Date.now() + this.timeLimit * 1000);
+		// CPUプレイヤーの自動投票
+		for (const player of this.players) {
+			if (player.isCpu) {
+				try {
+					await this.randomVote({ playerId: player.id });
+				} catch (error) {
+					console.error(
+						`CPUプレイヤー ${player.id} の自動投票に失敗しました:`,
+						error,
+					);
+				}
+			}
+		}
+
+		// 投票タイムアウトアラームを設定（15秒）
+		await this.ctx.storage.setAlarm(Date.now() + 15000);
+	}
+
+	/**
+	 * 全プレイヤーにRESULTメッセージを送信する。
+	 */
+	private broadcastResult({
+		winnerPlayerIds,
+	}: {
+		winnerPlayerIds: PlayerId[];
+	}): void {
+		// ラウンドに応じた順番でプレイヤーを並び替え
+		const orderedPlayers = this.sortTurnOrderPlayers();
+
+		for (const player of this.players) {
+			const socket = this.getPlayerSocket(player.id);
+			if (!socket) continue;
+
+			try {
+				socket.send(
+					JSON.stringify({
+						game: {
+							players: orderedPlayers.map((player) => ({
+								id: player.id,
+								image: player.image,
+								playerName: player.playerName,
+								seat: player.seat,
+								submission: player.submission,
+								winCount: player.winCount,
+							})),
+							roundNo: this.roundNo,
+							theme: this.themes.get(this.roundNo) ?? "",
+							timeLimit: this.timeLimit,
+							winnerPlayerIds,
+						},
+						mePlayer: {
+							id: player.id,
+							playerCards: player.cards,
+						},
+						type: "RESULT",
+					} satisfies GameServerResultMessage),
+				);
+			} catch (error) {
+				const message = `プレイヤー ${player.id} へのRESULT送信に失敗しました`;
+				console.error(message, error);
+				this.switchToCpu({ message, playerId: player.id });
+			}
+		}
 	}
 
 	/**
@@ -726,6 +794,19 @@ export class GameDurableObject extends DurableObject<Env> {
 				message: "投票の保存に失敗しました。CPUに切り替えます。",
 				playerId,
 			});
+			return;
+		}
+
+		// 全員投票完了か確認
+		const votedPlayerIds = await this.gameService.getVotedPlayerIds({
+			gameId: this.gameId,
+			roundNo: this.roundNo,
+		});
+
+		if (votedPlayerIds.length >= this.players.length) {
+			await this.ctx.storage.deleteAlarm();
+			// 結果フェーズへ移行
+			await this.proceedToResult();
 		}
 	}
 
@@ -745,36 +826,113 @@ export class GameDurableObject extends DurableObject<Env> {
 		// 未投票のプレイヤーにランダム投票
 		for (const player of this.players) {
 			if (!votedPlayerIds.includes(player.id)) {
-				// 自分以外のプレイヤーからランダムに選択
-				const notMePlayers = this.players.filter(
-					(otherPlayer) => otherPlayer.id !== player.id,
-				);
-				const randomTarget =
-					notMePlayers[Math.floor(Math.random() * notMePlayers.length)];
-
-				if (randomTarget) {
-					try {
-						await this.gameService.saveVote({
-							gameId: this.gameId,
-							playerId: player.id,
-							roundNo: this.roundNo,
-							votePlayerId: randomTarget.id,
-						});
-					} catch (error) {
-						console.error(
-							`プレイヤー ${player.id} のランダム投票に失敗しました:`,
-							error,
-						);
-						this.disconnectAllPlayers("ランダム投票に失敗しました");
-						return;
-					}
+				try {
+					await this.randomVote({ playerId: player.id });
+				} catch (error) {
+					console.error(
+						`プレイヤー ${player.id} のランダム投票に失敗しました:`,
+						error,
+					);
+					this.disconnectAllPlayers("ランダム投票に失敗しました");
+					return;
 				}
 			}
 		}
 
-		this.state = "RESULT";
-		// TODO: 結果をブロードキャスト（DBから投票結果を集計して次のラウンドへの移行も含む）
-		console.log("投票タイムアウト: 結果フェーズへ移行");
+		// 結果フェーズへ移行
+		await this.proceedToResult();
+	}
+
+	/**
+	 * 結果フェーズへ移行する
+	 * - 勝者を計算
+	 * - 勝者をDBに保存
+	 * - 勝者のwinCountを更新
+	 * - 結果をブロードキャスト
+	 * - 次のラウンドへのアラームを設定
+	 */
+	private async proceedToResult(): Promise<void> {
+		if (!this.gameId) return;
+
+		try {
+			// 勝者を計算
+			const winnerPlayerIds = await this.gameService.calculateRoundWinners({
+				gameId: this.gameId,
+				roundNo: this.roundNo,
+			});
+
+			// 勝者をDBに保存
+			await this.gameService.saveRoundWinners({
+				gameId: this.gameId,
+				roundNo: this.roundNo,
+				winnerPlayerIds,
+			});
+
+			// 勝者のwinCountを更新
+			for (const winnerId of winnerPlayerIds) {
+				const playerIndex = this.players.findIndex(
+					(player) => player.id === winnerId,
+				);
+				if (playerIndex !== -1) {
+					const player = this.players[playerIndex];
+					if (player) {
+						this.players[playerIndex] = {
+							...player,
+							winCount: player.winCount + 1,
+						};
+					}
+				}
+			}
+
+			this.state = "RESULT";
+			this.broadcastResult({ winnerPlayerIds });
+			// 6秒後に次のラウンドへ（または終了処理）
+			await this.ctx.storage.setAlarm(Date.now() + 6000);
+		} catch (error) {
+			console.error("結果フェーズの処理に失敗しました:", error);
+			this.disconnectAllPlayers("結果フェーズの処理に失敗しました");
+			return;
+		}
+	}
+
+	/**
+	 * 次のラウンドへ進む、または全ラウンド終了時はゲーム終了処理を行う
+	 */
+	private async proceedToNextRound(): Promise<void> {
+		// 4ラウンド終了したらゲーム終了
+		if (this.roundNo === 4) {
+			// TODO: ゲーム終了処理
+
+			this.disconnectAllPlayers("ゲーム終了");
+			return;
+		}
+
+		// 次のラウンドへ
+		const nextRoundNo = this.roundNo + 1;
+		if (nextRoundNo !== 2 && nextRoundNo !== 3 && nextRoundNo !== 4) {
+			return;
+		}
+
+		this.roundNo = nextRoundNo;
+		this.turnIndex = 0;
+
+		// プレイヤーの提出状態をリセット
+		for (let i = 0; i < this.players.length; i++) {
+			const player = this.players[i];
+			if (player) {
+				this.players[i] = {
+					...player,
+					submission: null,
+				};
+			}
+		}
+
+		// ROUND_STARTを送信
+		this.broadcastRoundStart();
+
+		// 2秒後にTURN_STARTを送信（開始オーバーレイ表示用の待機）
+		this.state = "START_PENDING";
+		await this.ctx.storage.setAlarm(Date.now() + 2000);
 	}
 
 	/**
@@ -903,6 +1061,33 @@ export class GameDurableObject extends DurableObject<Env> {
 		return this.gameService.sortTurnOrderPlayers({
 			players: this.players,
 			roundNo: this.roundNo,
+		});
+	}
+
+	/**
+	 * 指定したプレイヤーにランダム投票
+	 */
+	private async randomVote({
+		playerId,
+	}: {
+		playerId: PlayerId;
+	}): Promise<void> {
+		if (!this.gameId) return;
+
+		// 自分以外のプレイヤーからランダムに選択
+		const otherPlayers = this.players.filter(
+			(player) => player.id !== playerId,
+		);
+		const randomTarget =
+			otherPlayers[Math.floor(Math.random() * otherPlayers.length)];
+
+		if (!randomTarget) return;
+
+		await this.gameService.saveVote({
+			gameId: this.gameId,
+			playerId,
+			roundNo: this.roundNo,
+			votePlayerId: randomTarget.id,
 		});
 	}
 }

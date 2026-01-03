@@ -16,6 +16,7 @@ const COLORS = [
 	"danger",
 	"black",
 	"gray",
+	"warning",
 ] as const satisfies ComponentProps<typeof Badge>["color"][];
 
 export const ColorList: Story = {
