@@ -120,16 +120,6 @@ export class GameDurableObject extends DurableObject<Env> {
 			});
 		}
 
-		// CPUでないプレイヤーが全員接続したらゲーム開始
-		if (this.areAllPlayersConnected()) {
-			if (this.state === "WAITING") {
-				await this.handleInitialize();
-			} else {
-				// 待機アラームの削除（waiting以外では再接続）
-				await this.ctx.storage.deleteAlarm();
-			}
-		}
-
 		// WS リクエストをアップグレードし、参加者一覧を即時配信する。
 		const player = await this.verifyPlayer({ gameId, token });
 		const [client, server] = Object.values(new WebSocketPair());
@@ -148,6 +138,17 @@ export class GameDurableObject extends DurableObject<Env> {
 
 		// Durable Object の context で WebSocket を accept する
 		this.ctx.acceptWebSocket(server, [player.id]);
+
+		// CPUでないプレイヤーが全員接続したらゲーム開始
+		// acceptWebSocketの後に呼ぶことで、最後に接続したプレイヤーにもROUND_STARTが届く
+		if (this.areAllPlayersConnected()) {
+			if (this.state === "WAITING") {
+				await this.handleInitialize();
+			} else {
+				// 待機アラームの削除（waiting以外では再接続）
+				await this.ctx.storage.deleteAlarm();
+			}
+		}
 
 		// 接続待ちのカウント開始
 		// 先に入ったプレイヤーが既にalarmをセットしている可能性があるため確認
