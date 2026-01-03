@@ -197,8 +197,8 @@ export class GameDurableObject extends DurableObject<Env> {
 	}
 
 	async alarm(): Promise<void> {
-		if (!this.gameId) return;
 		await this.restoreState();
+		if (!this.gameId) return;
 		await this.ctx.storage.deleteAlarm();
 
 		switch (this.state) {

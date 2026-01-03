@@ -2,7 +2,7 @@ import type {
 	GameClientSubmissionMessage,
 	GameServerSubmissionMessage,
 } from "@repo/db/model";
-import type { PlayerCardId } from "@repo/db/schema";
+import type { PlayerCard, PlayerCardId, PlayerId } from "@repo/db/schema";
 import classNames from "classnames";
 import { useEffect, useState } from "react";
 import { Avatar } from "~/components/Avatar";
@@ -34,14 +34,15 @@ export function GameSubmission({
 	);
 	// 選択中の配置位置（確定前はnull）
 	const [pendingPosition, setPendingPosition] = useState<Position | null>(null);
-	// 確定した配置位置
-	const [confirmedPosition, setConfirmedPosition] = useState<Position | null>(
-		null,
-	);
+	// 確定した提出内容
+	const [confirmedSubmission, setConfirmedSubmission] = useState<{
+		position: Position;
+		text: PlayerCard["text"];
+	} | null>(null);
 	const selectedCard = mePlayer.playerCards.find(
 		(card) => card.id === selectedCardId,
 	);
-	const isConfirmed = confirmedPosition !== null;
+	const isConfirmed = confirmedSubmission !== null;
 
 	// カウントダウンタイマー
 	const {
@@ -55,7 +56,7 @@ export function GameSubmission({
 		if (data.type === "TURN_START") {
 			setSelectedCardId(null);
 			setPendingPosition(null);
-			setConfirmedPosition(null);
+			setConfirmedSubmission(null);
 			startCountdown(game.timeLimit);
 		}
 	}, [data.type, game.timeLimit, startCountdown]);
@@ -74,6 +75,24 @@ export function GameSubmission({
 			: `${game.theme}${text}`;
 	};
 
+	// プレイヤーの組み合わせ文字列を取得
+	const getPlayerCombination = (playerId: PlayerId): string | null => {
+		const isSelf = playerId === mePlayer.id;
+		// 自分のターンでカード選択中または確定済みの場合はローカル状態を使用
+		if (isSelf && isMyTurn && (selectedCard || isConfirmed)) {
+			return createCombination({
+				position: confirmedSubmission?.position ?? pendingPosition,
+				text: confirmedSubmission?.text ?? selectedCard?.word,
+			});
+		}
+		// それ以外はサーバーの提出データを使用
+		const player = game.players.find((player) => player.id === playerId);
+		return createCombination({
+			position: player?.submission?.position,
+			text: player?.submission?.text,
+		});
+	};
+
 	// SelectSubmissionCardのpropsを生成
 	const buildSelectSubmissionCardProps = (
 		position: Position,
@@ -81,11 +100,11 @@ export function GameSubmission({
 		const label = position === "prefix" ? "前" : "後";
 
 		// 自分のターンで確定済み
-		if (isMyTurn && selectedCard && confirmedPosition === position) {
+		if (isMyTurn && confirmedSubmission?.position === position) {
 			return {
 				label,
 				state: "placed",
-				word: selectedCard.word,
+				word: confirmedSubmission.text,
 			};
 		}
 		// 自分のターンで選択中（決定ボタン表示）
@@ -94,7 +113,10 @@ export function GameSubmission({
 				label,
 				onConfirm: () => {
 					if (!selectedCard || !pendingPosition) return;
-					setConfirmedPosition(pendingPosition);
+					setConfirmedSubmission({
+						position: pendingPosition,
+						text: selectedCard.word,
+					});
 					setPendingPosition(null);
 					// サーバーに提出を送信
 					sendSubmission({
@@ -178,12 +200,7 @@ export function GameSubmission({
 						{game.players.map((player, index) => {
 							const isSelf = player.id === mePlayer.id;
 							const isCurrentPlayer = player.id === currentPlayerId;
-							const combination = createCombination({
-								position: isSelf
-									? (confirmedPosition ?? pendingPosition)
-									: player.submission?.position,
-								text: isSelf ? selectedCard?.word : player.submission?.text,
-							});
+							const combination = getPlayerCombination(player.id);
 
 							return (
 								<div className="w-full" key={player.id}>
