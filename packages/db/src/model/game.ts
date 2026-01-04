@@ -30,6 +30,10 @@ const gameStateSchema = union([
 	 */
 	literal("WAITING"),
 	/**
+	 * ゲーム初期化中（重複実行防止用）
+	 */
+	literal("INITIALIZING"),
+	/**
 	 * ラウンド開始前の待機中（開始オーバーレイ表示中）
 	 */
 	literal("START_PENDING"),
