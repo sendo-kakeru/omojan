@@ -7,11 +7,13 @@ import {
 	number,
 	object,
 	pick,
+	string,
 	union,
 	null as valibotNull,
 	variant,
 } from "valibot";
 import {
+	gameIdSchema,
 	gameSchema,
 	playerCardSchema,
 	playerIdSchema,
@@ -195,10 +197,56 @@ export type GameServerResultMessage = InferOutput<
 	typeof gameServerResultMessageSchema
 >;
 
+// ゲーム終了
+export const gameServerGameEndMessageSchema = object({
+	type: literal("END"),
+});
+export type GameServerGameEndMessage = InferOutput<
+	typeof gameServerGameEndMessageSchema
+>;
+
 // 全体
 export const gameServerMessageSchema = variant("type", [
 	gameServerSubmissionMessageSchema,
 	gameServerVoteMessageSchema,
 	gameServerResultMessageSchema,
+	gameServerGameEndMessageSchema,
 ]);
 export type GameServerMessage = InferOutput<typeof gameServerMessageSchema>;
+
+export const gameResultRequestParamSchema = object({
+	gameId: gameIdSchema,
+});
+export type GameResultRequestParam = InferOutput<
+	typeof gameResultRequestParamSchema
+>;
+
+export const gameResultResponseBodySchema = object({
+	rounds: array(
+		object({
+			players: array(
+				object({
+					image: userSchema.entries.image,
+					isWinner: boolean(),
+					...pick(playerSchema, ["id", "playerName"]).entries,
+					submission: string(),
+					userId: nullable(playerSchema.entries.userId),
+				}),
+			),
+			roundNo: roundSchema.entries.roundNo,
+			theme: roundThemeSchema.entries.text,
+		}),
+	),
+	title: gameSchema.entries.title,
+	winners: array(
+		object({
+			...pick(playerSchema, ["id", "playerName"]).entries,
+			image: userSchema.entries.image,
+			userId: nullable(playerSchema.entries.userId),
+			winCount: number(),
+		}),
+	),
+});
+export type GameResultResponseBody = InferOutput<
+	typeof gameResultResponseBodySchema
+>;

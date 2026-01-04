@@ -3,7 +3,6 @@ export * from "./player";
 export * from "./playerCard";
 export * from "./round";
 export * from "./roundTheme";
-export * from "./roundWinner";
 export * from "./submission";
 export * from "./user";
 export * from "./vote";

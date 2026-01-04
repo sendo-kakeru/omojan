@@ -45,7 +45,7 @@ export function GameVote({
 	}, [startCountdown]);
 
 	return (
-		<div className="grid h-full grid-rows-[auto_1fr] gap-y-8 pt-8 xs:pt-16 pb-16">
+		<div className="grid h-full grid-rows-[auto_1fr] gap-y-8 pt-8 xs:pt-16">
 			<nav className="flex w-full items-center gap-x-8">
 				<div className="grid w-fit place-items-center rounded-lg border border-gray-200 bg-white px-8 py-2 font-mono text-neutral-600">
 					<span className="text-xs">Round</span>

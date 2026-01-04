@@ -1,7 +1,8 @@
 import { sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { createSelectSchema } from "drizzle-valibot";
-import { brand, type InferOutput, pipe, string, uuid } from "valibot";
+import { brand, type InferOutput, nullable, pipe, string, uuid } from "valibot";
 import { idBaseColumn, tableBaseColumns } from "./common";
+import { type GameId, gameIdSchema, gameTable } from "./game";
 import { type PlayerId, playerIdSchema, playerTable } from "./player";
 import { type RoundId, roundIdSchema, roundTable } from "./round";
 import {
@@ -19,13 +20,16 @@ export type PlayerCardId = InferOutput<typeof playerCardIdSchema>;
 
 export const playerCardTable = sqliteTable("player_card", {
 	...tableBaseColumns,
+	gameId: text("game_id")
+		.notNull()
+		.$type<GameId>()
+		.references(() => gameTable.id, { onDelete: "cascade" }),
 	id: idBaseColumn.$type<PlayerCardId>(),
 	playerId: text("player_id")
 		.notNull()
 		.$type<PlayerId>()
 		.references(() => playerTable.id, { onDelete: "cascade" }),
 	roundId: text("round_id")
-		.notNull()
 		.$type<RoundId>()
 		.references(() => roundTable.id, { onDelete: "cascade" }),
 	submissionId: text("submission_id")
@@ -35,9 +39,10 @@ export const playerCardTable = sqliteTable("player_card", {
 });
 
 export const playerCardSchema = createSelectSchema(playerCardTable, {
+	gameId: gameIdSchema,
 	id: playerCardIdSchema,
 	playerId: playerIdSchema,
-	roundId: roundIdSchema,
-	submissionId: submissionIdSchema,
+	roundId: nullable(roundIdSchema),
+	submissionId: nullable(submissionIdSchema),
 });
 export type PlayerCard = InferOutput<typeof playerCardSchema>;
