@@ -117,15 +117,8 @@ export class GameService {
 				});
 			}
 
-			// 最初のラウンドを取得
-			const firstRoundId = roundIds[0];
-			if (!firstRoundId) {
-				throw new HTTPException(500, {
-					message: "ラウンドの作成に失敗しました",
-				});
-			}
-
 			// 各プレイヤーに7枚の手持ち牌を配布
+			// カードはゲームに紐づき、使用時にラウンドと紐づける
 			const playerCardsMap = new Map<PlayerId, GamePlayerCard[]>();
 			let handWordIndex = 0;
 
@@ -143,8 +136,8 @@ export class GameService {
 					const [card] = await tx
 						.insert(playerCardTable)
 						.values({
+							gameId,
 							playerId: player.id,
-							roundId: firstRoundId,
 							text: word,
 						})
 						.returning({ id: playerCardTable.id, text: playerCardTable.text });
@@ -271,14 +264,15 @@ export class GameService {
 				throw new HTTPException(500, { message: "提出に失敗しました" });
 			}
 
-			// プレイヤーカードに提出IDを紐付け
+			// プレイヤーカードに提出IDとラウンドIDを紐付け
+			// カードはゲームに紐づいており、使用時にラウンドと紐付ける
 			await tx
 				.update(playerCardTable)
-				.set({ submissionId: savedSubmission.id })
+				.set({ roundId: round.id, submissionId: savedSubmission.id })
 				.where(
 					and(
+						eq(playerCardTable.gameId, gameId),
 						eq(playerCardTable.playerId, playerId),
-						eq(playerCardTable.roundId, round.id),
 						eq(playerCardTable.text, text),
 					),
 				);

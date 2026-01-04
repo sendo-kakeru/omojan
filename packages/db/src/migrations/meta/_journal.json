@@ -56,6 +56,13 @@
 			"tag": "0007_illegal_red_hulk",
 			"version": "6",
 			"when": 1767514044682
+		},
+		{
+			"breakpoints": true,
+			"idx": 8,
+			"tag": "0008_aspiring_moondragon",
+			"version": "6",
+			"when": 1767518525634
 		}
 	],
 	"version": "7"

@@ -141,6 +141,7 @@ describe("gameRoutes", () => {
 
 					// プレイヤーカード作成（提出と紐付け）
 					await db.insert(playerCardTable).values({
+						gameId: game.id,
 						playerId: data.playerId,
 						roundId: data.roundId,
 						submissionId: submission.id,
@@ -268,6 +269,7 @@ describe("gameRoutes", () => {
 						});
 
 						await db.insert(playerCardTable).values({
+							gameId: game.id,
 							playerId: player.id,
 							roundId: round.id,
 							submissionId: submission.id,
@@ -385,6 +387,7 @@ describe("gameRoutes", () => {
 				.returning();
 
 			await db.insert(playerCardTable).values({
+				gameId: game.id,
 				playerId: player.id,
 				roundId: round.id,
 				submissionId: submission.id,
@@ -449,6 +452,7 @@ describe("gameRoutes", () => {
 				.returning();
 
 			await db.insert(playerCardTable).values({
+				gameId: game.id,
 				playerId: player.id,
 				roundId: round.id,
 				submissionId: submission.id,

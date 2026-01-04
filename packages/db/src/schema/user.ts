@@ -1,6 +1,6 @@
 import { sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { createSelectSchema } from "drizzle-valibot";
-import { brand, type InferOutput, pipe, string, uuid } from "valibot";
+import { brand, type InferOutput, nullable, pipe, string, uuid } from "valibot";
 import { idBaseColumn, tableBaseColumns } from "./common";
 
 export const userIdSchema = pipe(string(), uuid(), brand("user_id"));
@@ -20,6 +20,7 @@ export const userTable = sqliteTable("user", {
 
 export const userSchema = createSelectSchema(userTable, {
 	id: userIdSchema,
+	image: nullable(string()),
 });
 
 export type User = InferOutput<typeof userSchema>;
