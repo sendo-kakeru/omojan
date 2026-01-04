@@ -305,6 +305,9 @@ export class GameDurableObject extends DurableObject<Env> {
 	private async handleInitialize(): Promise<void> {
 		if (!this.gameId) return;
 
+		// 重複実行を防ぐため、状態を先に変更
+		this.state = "INITIALIZING";
+
 		try {
 			const { players, roundNo, themes, timeLimit } =
 				await this.gameService.initializeGame({
