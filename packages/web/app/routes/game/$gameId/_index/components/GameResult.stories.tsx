@@ -169,6 +169,30 @@ export const WithVariousWinCounts: Story = {
 	name: "勝利数が様々なプレイヤー",
 };
 
+// 全員勝者（4人勝ち）
+export const AllWinners: Story = {
+	args: {
+		data: {
+			game: {
+				...baseGameData,
+				players: mockPlayersWithSubmissions.map((p) => ({
+					...p,
+					winCount: 1,
+				})),
+				winnerPlayerIds: [
+					createPlayerId("1"),
+					createPlayerId("2"),
+					createPlayerId("3"),
+					createPlayerId("4"),
+				],
+			},
+			mePlayer: baseMePlayer,
+			type: "RESULT",
+		} satisfies GameServerResultMessage,
+	},
+	name: "全員勝者（4人勝ち）",
+};
+
 // 長い組み合わせ
 export const LongCombinations: Story = {
 	args: {
