@@ -1,6 +1,7 @@
 import type { GameServerResultMessage } from "@repo/db/model";
 import classNames from "classnames";
 import { useEffect } from "react";
+import { FaCrown } from "react-icons/fa";
 import { Avatar } from "~/components/Avatar";
 import { Badge } from "~/components/Badge";
 import { CircularTimerProgress } from "~/components/CircularTimerProgress";
@@ -56,6 +57,9 @@ export function GameResult({ data }: { data: GameServerResultMessage }) {
 												size="S"
 												src={player.image ?? undefined}
 											/>
+											{isWinner && (
+												<FaCrown className="size-20 text-yellow-500" />
+											)}
 											<p className="font-semibold text-xs">
 												{player.playerName}
 												{isSelf && (
@@ -64,7 +68,6 @@ export function GameResult({ data }: { data: GameServerResultMessage }) {
 													</span>
 												)}
 											</p>
-											{isWinner && <Badge color="warning">ラウンド勝者</Badge>}
 										</div>
 										<p className="font-bold text-sm md:text-base">
 											{createCombination({
@@ -84,12 +87,12 @@ export function GameResult({ data }: { data: GameServerResultMessage }) {
 					})}
 				</section>
 
-				<section className="mt-16 flex flex-1 items-center justify-center rounded-t-2xl border border-gray-300 border-b-0 bg-white p-16">
+				<section className="mt-16 flex flex-1 items-center justify-center rounded-t-2xl border border-yellow-300 border-b-0 bg-white p-16">
 					<div className="grid w-full max-w-560 place-items-center gap-y-16">
 						{winners.length > 0 && (
 							<div className="grid place-items-center gap-y-12">
-								<p className="text-center font-medium text-neutral-600">
-									このラウンドの勝者
+								<p className="text-center font-bold text-yellow-700">
+									ラウンド勝者
 								</p>
 								<div className="flex flex-wrap justify-center gap-16">
 									{winners.map((winner) => (
