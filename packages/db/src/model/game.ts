@@ -242,6 +242,7 @@ export const gameResultResponseBodySchema = object({
 		object({
 			...pick(playerSchema, ["id", "playerName"]).entries,
 			image: userSchema.entries.image,
+			userId: nullable(playerSchema.entries.userId),
 			winCount: number(),
 		}),
 	),

@@ -608,6 +608,7 @@ export class GameService {
 				id: player.id,
 				image: player.image,
 				playerName: player.playerName,
+				userId: player.userId,
 				winCount: winCountByPlayer.get(player.id) ?? 0,
 			}));
 
