@@ -1,0 +1,619 @@
+{
+	"_meta": {
+		"columns": {},
+		"schemas": {},
+		"tables": {}
+	},
+	"dialect": "sqlite",
+	"enums": {},
+	"id": "725977df-2835-49de-ba71-bee6a033ffd0",
+	"internal": {
+		"indexes": {}
+	},
+	"prevId": "5c9e63e4-983e-4628-963e-b46bdb84538b",
+	"tables": {
+		"game": {
+			"checkConstraints": {},
+			"columns": {
+				"created_at": {
+					"autoincrement": false,
+					"name": "created_at",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"id": {
+					"autoincrement": false,
+					"name": "id",
+					"notNull": true,
+					"primaryKey": true,
+					"type": "text"
+				},
+				"is_private": {
+					"autoincrement": false,
+					"default": false,
+					"name": "is_private",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "integer"
+				},
+				"password": {
+					"autoincrement": false,
+					"name": "password",
+					"notNull": false,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"status": {
+					"autoincrement": false,
+					"default": "'waiting'",
+					"name": "status",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"time_limit": {
+					"autoincrement": false,
+					"name": "time_limit",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "integer"
+				},
+				"title": {
+					"autoincrement": false,
+					"name": "title",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"updated_at": {
+					"autoincrement": false,
+					"name": "updated_at",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"foreignKeys": {},
+			"indexes": {},
+			"name": "game",
+			"uniqueConstraints": {}
+		},
+		"player": {
+			"checkConstraints": {},
+			"columns": {
+				"created_at": {
+					"autoincrement": false,
+					"name": "created_at",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"game_id": {
+					"autoincrement": false,
+					"name": "game_id",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"game_token_hash": {
+					"autoincrement": false,
+					"name": "game_token_hash",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"id": {
+					"autoincrement": false,
+					"name": "id",
+					"notNull": true,
+					"primaryKey": true,
+					"type": "text"
+				},
+				"is_cpu": {
+					"autoincrement": false,
+					"default": false,
+					"name": "is_cpu",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "integer"
+				},
+				"is_host": {
+					"autoincrement": false,
+					"default": false,
+					"name": "is_host",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "integer"
+				},
+				"player_name": {
+					"autoincrement": false,
+					"name": "player_name",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"seat": {
+					"autoincrement": false,
+					"name": "seat",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "integer"
+				},
+				"updated_at": {
+					"autoincrement": false,
+					"name": "updated_at",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"user_id": {
+					"autoincrement": false,
+					"name": "user_id",
+					"notNull": false,
+					"primaryKey": false,
+					"type": "text"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"foreignKeys": {
+				"player_game_id_game_id_fk": {
+					"columnsFrom": ["game_id"],
+					"columnsTo": ["id"],
+					"name": "player_game_id_game_id_fk",
+					"onDelete": "cascade",
+					"onUpdate": "no action",
+					"tableFrom": "player",
+					"tableTo": "game"
+				},
+				"player_user_id_user_id_fk": {
+					"columnsFrom": ["user_id"],
+					"columnsTo": ["id"],
+					"name": "player_user_id_user_id_fk",
+					"onDelete": "set null",
+					"onUpdate": "no action",
+					"tableFrom": "player",
+					"tableTo": "user"
+				}
+			},
+			"indexes": {
+				"player_game_token_hash_unique": {
+					"columns": ["game_token_hash"],
+					"isUnique": true,
+					"name": "player_game_token_hash_unique"
+				}
+			},
+			"name": "player",
+			"uniqueConstraints": {}
+		},
+		"player_card": {
+			"checkConstraints": {},
+			"columns": {
+				"created_at": {
+					"autoincrement": false,
+					"name": "created_at",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"id": {
+					"autoincrement": false,
+					"name": "id",
+					"notNull": true,
+					"primaryKey": true,
+					"type": "text"
+				},
+				"player_id": {
+					"autoincrement": false,
+					"name": "player_id",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"round_id": {
+					"autoincrement": false,
+					"name": "round_id",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"submission_id": {
+					"autoincrement": false,
+					"name": "submission_id",
+					"notNull": false,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"text": {
+					"autoincrement": false,
+					"name": "text",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"updated_at": {
+					"autoincrement": false,
+					"name": "updated_at",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"foreignKeys": {
+				"player_card_player_id_player_id_fk": {
+					"columnsFrom": ["player_id"],
+					"columnsTo": ["id"],
+					"name": "player_card_player_id_player_id_fk",
+					"onDelete": "cascade",
+					"onUpdate": "no action",
+					"tableFrom": "player_card",
+					"tableTo": "player"
+				},
+				"player_card_round_id_round_id_fk": {
+					"columnsFrom": ["round_id"],
+					"columnsTo": ["id"],
+					"name": "player_card_round_id_round_id_fk",
+					"onDelete": "cascade",
+					"onUpdate": "no action",
+					"tableFrom": "player_card",
+					"tableTo": "round"
+				},
+				"player_card_submission_id_submission_id_fk": {
+					"columnsFrom": ["submission_id"],
+					"columnsTo": ["id"],
+					"name": "player_card_submission_id_submission_id_fk",
+					"onDelete": "set null",
+					"onUpdate": "no action",
+					"tableFrom": "player_card",
+					"tableTo": "submission"
+				}
+			},
+			"indexes": {},
+			"name": "player_card",
+			"uniqueConstraints": {}
+		},
+		"round": {
+			"checkConstraints": {},
+			"columns": {
+				"created_at": {
+					"autoincrement": false,
+					"name": "created_at",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"game_id": {
+					"autoincrement": false,
+					"name": "game_id",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"id": {
+					"autoincrement": false,
+					"name": "id",
+					"notNull": true,
+					"primaryKey": true,
+					"type": "text"
+				},
+				"round_no": {
+					"autoincrement": false,
+					"name": "round_no",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "integer"
+				},
+				"updated_at": {
+					"autoincrement": false,
+					"name": "updated_at",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"foreignKeys": {
+				"round_game_id_game_id_fk": {
+					"columnsFrom": ["game_id"],
+					"columnsTo": ["id"],
+					"name": "round_game_id_game_id_fk",
+					"onDelete": "cascade",
+					"onUpdate": "no action",
+					"tableFrom": "round",
+					"tableTo": "game"
+				}
+			},
+			"indexes": {},
+			"name": "round",
+			"uniqueConstraints": {}
+		},
+		"round_theme": {
+			"checkConstraints": {},
+			"columns": {
+				"created_at": {
+					"autoincrement": false,
+					"name": "created_at",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"id": {
+					"autoincrement": false,
+					"name": "id",
+					"notNull": true,
+					"primaryKey": true,
+					"type": "text"
+				},
+				"round_id": {
+					"autoincrement": false,
+					"name": "round_id",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"text": {
+					"autoincrement": false,
+					"name": "text",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"updated_at": {
+					"autoincrement": false,
+					"name": "updated_at",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"foreignKeys": {
+				"round_theme_round_id_round_id_fk": {
+					"columnsFrom": ["round_id"],
+					"columnsTo": ["id"],
+					"name": "round_theme_round_id_round_id_fk",
+					"onDelete": "cascade",
+					"onUpdate": "no action",
+					"tableFrom": "round_theme",
+					"tableTo": "round"
+				}
+			},
+			"indexes": {},
+			"name": "round_theme",
+			"uniqueConstraints": {}
+		},
+		"submission": {
+			"checkConstraints": {},
+			"columns": {
+				"created_at": {
+					"autoincrement": false,
+					"name": "created_at",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"id": {
+					"autoincrement": false,
+					"name": "id",
+					"notNull": true,
+					"primaryKey": true,
+					"type": "text"
+				},
+				"player_id": {
+					"autoincrement": false,
+					"name": "player_id",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"position": {
+					"autoincrement": false,
+					"name": "position",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"round_id": {
+					"autoincrement": false,
+					"name": "round_id",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"updated_at": {
+					"autoincrement": false,
+					"name": "updated_at",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"foreignKeys": {
+				"submission_player_id_player_id_fk": {
+					"columnsFrom": ["player_id"],
+					"columnsTo": ["id"],
+					"name": "submission_player_id_player_id_fk",
+					"onDelete": "cascade",
+					"onUpdate": "no action",
+					"tableFrom": "submission",
+					"tableTo": "player"
+				},
+				"submission_round_id_round_id_fk": {
+					"columnsFrom": ["round_id"],
+					"columnsTo": ["id"],
+					"name": "submission_round_id_round_id_fk",
+					"onDelete": "cascade",
+					"onUpdate": "no action",
+					"tableFrom": "submission",
+					"tableTo": "round"
+				}
+			},
+			"indexes": {},
+			"name": "submission",
+			"uniqueConstraints": {}
+		},
+		"user": {
+			"checkConstraints": {},
+			"columns": {
+				"created_at": {
+					"autoincrement": false,
+					"name": "created_at",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"email": {
+					"autoincrement": false,
+					"name": "email",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"id": {
+					"autoincrement": false,
+					"name": "id",
+					"notNull": true,
+					"primaryKey": true,
+					"type": "text"
+				},
+				"image": {
+					"autoincrement": false,
+					"name": "image",
+					"notNull": false,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"name": {
+					"autoincrement": false,
+					"name": "name",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"status": {
+					"autoincrement": false,
+					"default": "'active'",
+					"name": "status",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"sub": {
+					"autoincrement": false,
+					"name": "sub",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"updated_at": {
+					"autoincrement": false,
+					"name": "updated_at",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"foreignKeys": {},
+			"indexes": {
+				"user_email_unique": {
+					"columns": ["email"],
+					"isUnique": true,
+					"name": "user_email_unique"
+				},
+				"user_sub_unique": {
+					"columns": ["sub"],
+					"isUnique": true,
+					"name": "user_sub_unique"
+				}
+			},
+			"name": "user",
+			"uniqueConstraints": {}
+		},
+		"vote": {
+			"checkConstraints": {},
+			"columns": {
+				"created_at": {
+					"autoincrement": false,
+					"name": "created_at",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"id": {
+					"autoincrement": false,
+					"name": "id",
+					"notNull": true,
+					"primaryKey": true,
+					"type": "text"
+				},
+				"player_id": {
+					"autoincrement": false,
+					"name": "player_id",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"round_id": {
+					"autoincrement": false,
+					"name": "round_id",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"submission_id": {
+					"autoincrement": false,
+					"name": "submission_id",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"updated_at": {
+					"autoincrement": false,
+					"name": "updated_at",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"foreignKeys": {
+				"vote_player_id_player_id_fk": {
+					"columnsFrom": ["player_id"],
+					"columnsTo": ["id"],
+					"name": "vote_player_id_player_id_fk",
+					"onDelete": "cascade",
+					"onUpdate": "no action",
+					"tableFrom": "vote",
+					"tableTo": "player"
+				},
+				"vote_round_id_round_id_fk": {
+					"columnsFrom": ["round_id"],
+					"columnsTo": ["id"],
+					"name": "vote_round_id_round_id_fk",
+					"onDelete": "cascade",
+					"onUpdate": "no action",
+					"tableFrom": "vote",
+					"tableTo": "round"
+				},
+				"vote_submission_id_submission_id_fk": {
+					"columnsFrom": ["submission_id"],
+					"columnsTo": ["id"],
+					"name": "vote_submission_id_submission_id_fk",
+					"onDelete": "cascade",
+					"onUpdate": "no action",
+					"tableFrom": "vote",
+					"tableTo": "submission"
+				}
+			},
+			"indexes": {},
+			"name": "vote",
+			"uniqueConstraints": {}
+		}
+	},
+	"version": "6",
+	"views": {}
+}

@@ -1,6 +1,7 @@
 import type {
 	GamePlayerCard,
 	GamePlayerItem,
+	GameResultResponseBody,
 	GameServerRoundStartMessage,
 } from "@repo/db/model";
 import {
@@ -17,14 +18,14 @@ import {
 	type RoundTheme,
 	roundTable,
 	roundThemeTable,
-	roundWinnerTable,
 	type Submission,
+	type SubmissionId,
 	submissionTable,
 	userTable,
 	voteTable,
 } from "@repo/db/schema";
 import { WORDS } from "@repo/shared/constants/words";
-import { and, eq } from "drizzle-orm";
+import { and, asc, eq, inArray } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import type { DrizzleClient } from "../../libs/drizzle";
 
@@ -407,64 +408,38 @@ export class GameService {
 			.from(voteTable)
 			.where(eq(voteTable.roundId, round.id));
 
-		// 各プレイヤーの得票数を集計
-		const voteCountByPlayer = new Map<PlayerId, number>();
-		for (const submission of submissions) {
-			const voteCount = votes.filter(
-				(vote) => vote.submissionId === submission.submissionId,
-			).length;
-			voteCountByPlayer.set(submission.playerId, voteCount);
-		}
-
-		// 最大得票数を取得
-		const maxVotes = Math.max(...voteCountByPlayer.values(), 0);
-
-		// 最大得票数を持つプレイヤーを勝者とする
-		const winners: PlayerId[] = [];
-		for (const [playerId, voteCount] of voteCountByPlayer) {
-			if (voteCount === maxVotes) {
-				winners.push(playerId);
-			}
-		}
-
-		return winners;
+		return this.calculateWinnersFromVotes({ submissions, votes });
 	}
 
 	/**
-	 * ラウンドの勝者をDBに保存する
+	 * 投票結果から勝者を計算する
 	 */
-	async saveRoundWinners({
-		gameId,
-		roundNo,
-		winnerPlayerIds,
+	private calculateWinnersFromVotes({
+		submissions,
+		votes,
 	}: {
-		gameId: GameId;
-		roundNo: RoundNo;
-		winnerPlayerIds: PlayerId[];
-	}): Promise<void> {
-		if (winnerPlayerIds.length === 0) return;
+		submissions: { playerId: PlayerId; submissionId: SubmissionId }[];
+		votes: { submissionId: SubmissionId }[];
+	}): PlayerId[] {
+		// 各提出の得票数を集計
+		const voteCountBySubmission = new Map<SubmissionId, number>();
+		for (const vote of votes) {
+			const count = voteCountBySubmission.get(vote.submissionId) ?? 0;
+			voteCountBySubmission.set(vote.submissionId, count + 1);
+		}
 
-		await this.db.transaction(async (tx) => {
-			// gameIdとroundNoからラウンドIDを取得
-			const [round] = await tx
-				.select({ id: roundTable.id })
-				.from(roundTable)
-				.where(
-					and(eq(roundTable.gameId, gameId), eq(roundTable.roundNo, roundNo)),
-				);
+		// 最大得票数を取得
+		const maxVotes = Math.max(...voteCountBySubmission.values(), 0);
+		if (maxVotes === 0) return [];
 
-			if (!round) {
-				throw new HTTPException(404, { message: "ラウンドが見つかりません" });
-			}
-
-			// 各勝者をround_winnerテーブルに保存
-			for (const playerId of winnerPlayerIds) {
-				await tx.insert(roundWinnerTable).values({
-					playerId,
-					roundId: round.id,
-				});
-			}
-		});
+		// 最大得票数を持つ提出のプレイヤーIDを返す
+		return submissions
+			.filter(
+				(submission) =>
+					(voteCountBySubmission.get(submission.submissionId) ?? 0) ===
+					maxVotes,
+			)
+			.map((submission) => submission.playerId);
 	}
 
 	/**
@@ -509,6 +484,181 @@ export class GameService {
 				THEME_COUNT + HAND_CARD_COUNT,
 			),
 			themeWords: enabledTexts.slice(0, THEME_COUNT),
+		};
+	}
+
+	/**
+	 * ゲーム結果を取得する
+	 */
+	async getResult({
+		gameId,
+	}: {
+		gameId: GameId;
+	}): Promise<GameResultResponseBody> {
+		// ゲーム情報取得
+		const [game] = await this.db
+			.select({
+				status: gameTable.status,
+				title: gameTable.title,
+			})
+			.from(gameTable)
+			.where(eq(gameTable.id, gameId));
+
+		if (!game) {
+			throw new HTTPException(404, { message: "ゲームが見つかりません" });
+		}
+		if (game.status !== "finished") {
+			throw new HTTPException(409, { message: "このゲームは終了していません" });
+		}
+
+		// プレイヤー一覧を取得
+		const players = await this.db
+			.select({
+				id: playerTable.id,
+				image: userTable.image,
+				playerName: playerTable.playerName,
+				seat: playerTable.seat,
+				userId: playerTable.userId,
+			})
+			.from(playerTable)
+			.leftJoin(userTable, eq(playerTable.userId, userTable.id))
+			.where(eq(playerTable.gameId, gameId));
+
+		// ラウンド一覧を取得
+		const rounds = await this.db
+			.select({
+				id: roundTable.id,
+				roundNo: roundTable.roundNo,
+			})
+			.from(roundTable)
+			.where(eq(roundTable.gameId, gameId))
+			.orderBy(asc(roundTable.roundNo));
+
+		const roundIds = rounds.map((round) => round.id);
+
+		// テーマ一覧を取得
+		const themes = await this.db
+			.select({
+				roundId: roundThemeTable.roundId,
+				text: roundThemeTable.text,
+			})
+			.from(roundThemeTable)
+			.where(inArray(roundThemeTable.roundId, roundIds));
+
+		// 提出一覧を取得
+		const submissions = await this.db
+			.select({
+				playerId: submissionTable.playerId,
+				position: submissionTable.position,
+				roundId: submissionTable.roundId,
+				submissionId: submissionTable.id,
+			})
+			.from(submissionTable)
+			.where(inArray(submissionTable.roundId, roundIds));
+
+		// 提出に紐づくカード（テキスト）を取得
+		const submissionIds = submissions
+			.map((submission) => submission.submissionId)
+			.filter((id) => id !== null);
+		const cards = await this.db
+			.select({
+				submissionId: playerCardTable.submissionId,
+				text: playerCardTable.text,
+			})
+			.from(playerCardTable)
+			.where(inArray(playerCardTable.submissionId, submissionIds));
+
+		// 投票一覧を取得
+		const votes = await this.db
+			.select({
+				roundId: voteTable.roundId,
+				submissionId: voteTable.submissionId,
+			})
+			.from(voteTable)
+			.where(inArray(voteTable.roundId, roundIds));
+
+		// 各プレイヤーの勝利数を計算
+		const winCountByPlayer = new Map<PlayerId, number>();
+		const roundWinnersByRoundId = new Map<RoundId, PlayerId[]>();
+		for (const round of rounds) {
+			const roundSubmissions = submissions.filter(
+				(submission) => submission.roundId === round.id,
+			);
+			const roundVotes = votes.filter((vote) => vote.roundId === round.id);
+			const winnerPlayerIds = this.calculateWinnersFromVotes({
+				submissions: roundSubmissions,
+				votes: roundVotes,
+			});
+			roundWinnersByRoundId.set(round.id, winnerPlayerIds);
+			for (const playerId of winnerPlayerIds) {
+				const currentCount = winCountByPlayer.get(playerId) ?? 0;
+				winCountByPlayer.set(playerId, currentCount + 1);
+			}
+		}
+
+		// 最大勝利数を計算
+		const maxWinCount = Math.max(...winCountByPlayer.values(), 0);
+
+		// 勝者一覧（最大勝利数を持つプレイヤー）
+		const winners: GameResultResponseBody["winners"] = players
+			.filter(
+				(player) => (winCountByPlayer.get(player.id) ?? 0) === maxWinCount,
+			)
+			.map((player) => ({
+				id: player.id,
+				image: player.image,
+				playerName: player.playerName,
+				winCount: winCountByPlayer.get(player.id) ?? 0,
+			}));
+
+		// ラウンド情報を構築
+		const roundResults: GameResultResponseBody["rounds"] = rounds.map(
+			(round) => {
+				const theme = themes.find((theme) => theme.roundId === round.id);
+				const roundSubmissions = submissions.filter(
+					(submission) => submission.roundId === round.id,
+				);
+
+				return {
+					players: players
+						.sort((a, b) => a.seat - b.seat)
+						.map((player) => {
+							const submission = roundSubmissions.find(
+								(submission) => submission.playerId === player.id,
+							);
+							const card = submission
+								? cards.find(
+										(card) => card.submissionId === submission.submissionId,
+									)
+								: undefined;
+
+							// テーマとカードテキストを組み合わせて提出テキストを生成
+							const submissionText =
+								submission?.position === "prefix"
+									? `${card?.text ?? ""}${theme?.text ?? ""}`
+									: `${theme?.text ?? ""}${card?.text ?? ""}`;
+
+							return {
+								id: player.id,
+								image: player.image,
+								isWinner: (roundWinnersByRoundId.get(round.id) ?? []).includes(
+									player.id,
+								),
+								playerName: player.playerName,
+								submission: submissionText,
+								userId: player.userId,
+							};
+						}),
+					roundNo: round.roundNo,
+					theme: theme?.text ?? "",
+				};
+			},
+		);
+
+		return {
+			rounds: roundResults,
+			title: game.title,
+			winners,
 		};
 	}
 }
