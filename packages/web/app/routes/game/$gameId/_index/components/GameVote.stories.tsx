@@ -1,6 +1,10 @@
 import type { GameServerVoteMessage } from "@repo/db/model";
 import type { PlayerCardId, PlayerId, PlayerSeat } from "@repo/db/schema";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import {
+	gameScreenDecorator,
+	gameScreenParameters,
+} from "~/storybook/decorators";
 import { GameVote } from "./GameVote";
 
 // モックデータ生成ヘルパー
@@ -67,16 +71,8 @@ const baseMePlayer = {
 
 const meta: Meta<typeof GameVote> = {
 	component: GameVote,
-	decorators: [
-		(Story) => (
-			<div className="h-screen w-full bg-gray-100 p-16">
-				<Story />
-			</div>
-		),
-	],
-	parameters: {
-		layout: "fullscreen",
-	},
+	decorators: [gameScreenDecorator],
+	parameters: gameScreenParameters,
 	tags: ["autodocs"],
 	title: "Game/GameVote",
 };

@@ -6,6 +6,10 @@ import type {
 } from "@repo/db/model";
 import type { PlayerCardId, PlayerId, PlayerSeat } from "@repo/db/schema";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import {
+	gameScreenDecorator,
+	gameScreenParameters,
+} from "~/storybook/decorators";
 import { GameSubmission } from "./GameSubmission";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -75,16 +79,8 @@ const baseMePlayer = {
 
 const meta: Meta<typeof GameSubmission> = {
 	component: GameSubmission,
-	decorators: [
-		(Story) => (
-			<div className="h-screen w-full bg-gray-100 p-16">
-				<Story />
-			</div>
-		),
-	],
-	parameters: {
-		layout: "fullscreen",
-	},
+	decorators: [gameScreenDecorator],
+	parameters: gameScreenParameters,
 	tags: ["autodocs"],
 	title: "Game/GameSubmission",
 };
@@ -323,8 +319,12 @@ export const AllStates: Story = {
 				{states.map(({ data, label }) => (
 					<div key={label}>
 						<p className="mb-8 font-bold text-neutral-600 text-sm">{label}</p>
-						<div className="h-600 rounded-lg border bg-gray-100 p-16">
-							<GameSubmission data={data} sendSubmission={noop} />
+						<div className="h-600 overflow-x-hidden rounded-lg border bg-yellow-50">
+							<div className="mx-auto grid h-full max-w-800 px-16">
+								<div>
+									<GameSubmission data={data} sendSubmission={noop} />
+								</div>
+							</div>
 						</div>
 					</div>
 				))}
