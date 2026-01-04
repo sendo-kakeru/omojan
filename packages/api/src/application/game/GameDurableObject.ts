@@ -863,13 +863,6 @@ export class GameDurableObject extends DurableObject<Env> {
 				roundNo: this.roundNo,
 			});
 
-			// 勝者をDBに保存
-			await this.gameService.saveRoundWinners({
-				gameId: this.gameId,
-				roundNo: this.roundNo,
-				winnerPlayerIds,
-			});
-
 			// 勝者のwinCountを更新
 			for (const winnerId of winnerPlayerIds) {
 				const playerIndex = this.players.findIndex(

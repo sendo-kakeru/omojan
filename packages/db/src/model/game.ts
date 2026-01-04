@@ -7,11 +7,13 @@ import {
 	number,
 	object,
 	pick,
+	string,
 	union,
 	null as valibotNull,
 	variant,
 } from "valibot";
 import {
+	gameIdSchema,
 	gameSchema,
 	playerCardSchema,
 	playerIdSchema,
@@ -211,3 +213,39 @@ export const gameServerMessageSchema = variant("type", [
 	gameServerGameEndMessageSchema,
 ]);
 export type GameServerMessage = InferOutput<typeof gameServerMessageSchema>;
+
+export const gameResultRequestParamSchema = object({
+	gameId: gameIdSchema,
+});
+export type GameResultRequestParam = InferOutput<
+	typeof gameResultRequestParamSchema
+>;
+
+export const gameResultResponseBodySchema = object({
+	rounds: array(
+		object({
+			players: array(
+				object({
+					image: userSchema.entries.image,
+					isWinner: boolean(),
+					...pick(playerSchema, ["id", "playerName"]).entries,
+					submission: string(),
+					userId: nullable(playerSchema.entries.userId),
+				}),
+			),
+			roundNo: roundSchema.entries.roundNo,
+			theme: roundThemeSchema.entries.text,
+		}),
+	),
+	title: gameSchema.entries.title,
+	winners: array(
+		object({
+			...pick(playerSchema, ["id", "playerName"]).entries,
+			image: userSchema.entries.image,
+			winCount: number(),
+		}),
+	),
+});
+export type GameResultResponseBody = InferOutput<
+	typeof gameResultResponseBodySchema
+>;
