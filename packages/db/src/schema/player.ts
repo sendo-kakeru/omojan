@@ -7,6 +7,7 @@ import {
 	literal,
 	maxLength,
 	minLength,
+	nullable,
 	pipe,
 	string,
 	union,
@@ -68,7 +69,7 @@ export const playerSchema = createSelectSchema(playerTable, {
 	id: playerIdSchema,
 	playerName: playerNameSchema,
 	seat: playerSeatSchema,
-	userId: userIdSchema,
+	userId: nullable(userIdSchema),
 });
 export function isPlayerSeat(seat: number): seat is PlayerSeat {
 	return is(playerSeatSchema, seat);
