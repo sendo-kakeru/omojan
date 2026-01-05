@@ -377,6 +377,7 @@ export class RoomService {
 				participatingPlayers.map((player) => player.seat),
 			);
 
+			let cpuNumber = 1;
 			for (const seat of emptySeats) {
 				const { gameTokenHash } = this.generateGameTokenPair();
 				await tx.insert(playerTable).values({
@@ -384,10 +385,11 @@ export class RoomService {
 					gameTokenHash,
 					isCpu: true,
 					isHost: false,
-					playerName: "CPU",
+					playerName: `CPU${cpuNumber}`,
 					seat,
 					userId: null,
 				});
+				cpuNumber++;
 			}
 
 			await this.activate({
