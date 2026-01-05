@@ -20,7 +20,6 @@ import type { Env } from "../../env";
 import { createDrizzleClient, type DrizzleClient } from "../../libs/drizzle";
 import { RoomService } from "../room/RoomService";
 import { WebSocketService } from "../websocket/WebsocketService";
-import { HeartbeatService } from "./HeartbeatService";
 
 /** ハートビート間隔（ミリ秒） */
 const HEARTBEAT_INTERVAL_MS = 5_000 as const;
@@ -28,11 +27,12 @@ const HEARTBEAT_INTERVAL_MS = 5_000 as const;
 const HEARTBEAT_TIMEOUT_MS = 10_000 as const;
 
 export class MatchingDurableObject extends DurableObject<Env> {
-	private readonly heartbeatService = new HeartbeatService();
 	private readonly db: DrizzleClient;
 	private readonly roomService: RoomService;
 	private readonly webSocketService = new WebSocketService();
 	private gameId: GameId | null = null;
+	/** プレイヤーIDと最終PONG受信時刻のマップ */
+	private readonly lastPongAt = new Map<PlayerId, number>();
 
 	constructor(ctx: DurableObjectState, env: Env) {
 		super(ctx, env);
@@ -63,16 +63,20 @@ export class MatchingDurableObject extends DurableObject<Env> {
 			});
 		}
 
-		const existingConnection = this.heartbeatService.get(player.id);
-		if (existingConnection) {
-			existingConnection.close(4001, "新しい接続に置き換えられました。");
+		// 既存の接続を閉じる（同じプレイヤーの再接続の場合）
+		const existingSocket = this.webSocketService.getPlayerSocket({
+			ctx: this.ctx,
+			playerId: player.id,
+		});
+		if (existingSocket) {
+			existingSocket.close(4001, "新しい接続に置き換えられました。");
 		}
 
 		// Durable Object の context で WebSocket を accept する
-		this.ctx.acceptWebSocket(server);
+		this.ctx.acceptWebSocket(server, [player.id]);
 
-		// 接続を登録（ハートビート管理も含む）
-		this.heartbeatService.register({ id: player.id, socket: server });
+		// ハートビート管理用に最終PONG時刻を記録
+		this.lastPongAt.set(player.id, Date.now());
 
 		// 自身のプレイヤー情報を先に送信
 		await this.sendMePlayerMessage({ player, socket: server });
@@ -89,14 +93,6 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	}
 
 	/**
-	 * WS 切断時に接続を切断状態にする。
-	 * ハートビート情報は保持し、再接続の猶予を与える
-	 */
-	async webSocketClose(ws: WebSocket): Promise<void> {
-		this.heartbeatService.disconnect(ws);
-	}
-
-	/**
 	 * WS エラー発生時に接続を切断状態にし、ログを出力する。
 	 */
 	async webSocketError(ws: WebSocket, error: unknown): Promise<void> {
@@ -110,7 +106,10 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	async webSocketMessage(ws: WebSocket, message: string): Promise<void> {
 		if (!this.gameId) return;
 
-		const playerId = this.heartbeatService.findIdBySocket(ws);
+		const playerId = this.webSocketService.getPlayerIdBySocket({
+			ctx: this.ctx,
+			ws,
+		});
 
 		if (!playerId) {
 			ws.close(4409, "接続が見つかりません");
@@ -129,7 +128,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 				await this.handleExit({ playerId, ws });
 				break;
 			case "PONG":
-				this.heartbeatService.recordPong(playerId);
+				this.lastPongAt.set(playerId, Date.now());
 				break;
 			case "START":
 				await this.handleStart({ playerId, ws });
@@ -147,33 +146,35 @@ export class MatchingDurableObject extends DurableObject<Env> {
 		if (gameStatus && gameStatus !== "waiting") return;
 
 		// 全接続にPINGを送信
-		this.heartbeatService.sendPingToAll();
+		this.webSocketService.sendPingToAll({ ctx: this.ctx });
 
 		// DBから現在のプレイヤー一覧を取得
 		const players = await this.getParticipants({ gameId: this.gameId });
 
 		// 接続がなく、タイムアウトしたプレイヤーを格納
 		const disconnectedPlayerIds: PlayerId[] = [];
+		const now = Date.now();
 
 		for (const player of players) {
-			const isTimedOut = this.heartbeatService.isTimedOut({
-				id: player.id,
-				timeoutMs: HEARTBEAT_TIMEOUT_MS,
+			// アクティブな接続があるプレイヤーはスキップ
+			const ws = this.webSocketService.getPlayerSocket({
+				ctx: this.ctx,
+				playerId: player.id,
 			});
+			if (ws) {
+				// 接続があるがlastPongAtがない場合（Durable Object再起動後など）は記録を初期化
+				if (!this.lastPongAt.has(player.id)) {
+					this.lastPongAt.set(player.id, now);
+				}
+				continue;
+			}
+
+			// 接続がないプレイヤーはタイムアウト判定
+			const lastPong = this.lastPongAt.get(player.id);
+			const isTimedOut = !lastPong || now - lastPong > HEARTBEAT_TIMEOUT_MS;
 
 			if (isTimedOut) {
-				// タイムアウトしていたら、接続解除
-				const ws = this.heartbeatService.get(player.id);
-				if (ws) {
-					try {
-						ws.close(4408, "ハートビートタイムアウト");
-					} catch {
-						// noop
-						console.log("websocketのcloseに失敗しました。");
-					}
-				}
-
-				this.heartbeatService.unregister(player.id);
+				this.lastPongAt.delete(player.id);
 				disconnectedPlayerIds.push(player.id);
 			}
 		}
@@ -199,7 +200,8 @@ export class MatchingDurableObject extends DurableObject<Env> {
 		}
 
 		// 接続が残っている場合は次のアラームを設定
-		if (this.heartbeatService.size > 0 || remainingParticipants.length > 0) {
+		const activeSockets = this.ctx.getWebSockets();
+		if (activeSockets.length > 0 || remainingParticipants.length > 0) {
 			await this.ctx.storage.setAlarm(Date.now() + HEARTBEAT_INTERVAL_MS);
 		}
 	}
@@ -278,7 +280,6 @@ export class MatchingDurableObject extends DurableObject<Env> {
 		const gameStatus = await this.roomService.getStatus(this.gameId);
 
 		// NOTE: 既に4人メンバーが確定し、activeになっていたら接続だけ解除。（確定からゲーム移動までの時間は退出操作不可なので、通常は発生し得ない）
-		this.heartbeatService.unregister(playerId);
 		if (gameStatus === "waiting") {
 			await this.db.delete(playerTable).where(eq(playerTable.id, playerId));
 		}
@@ -300,10 +301,9 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	 */
 	private async deleteRoom({ gameId }: { gameId: GameId }): Promise<void> {
 		await this.db.delete(gameTable).where(eq(gameTable.id, gameId));
-		for (const socket of this.heartbeatService.getSockets()) {
+		for (const socket of this.ctx.getWebSockets()) {
 			socket.close(4410, "部屋が削除されました");
 		}
-		this.heartbeatService.clear();
 	}
 
 	/**
@@ -376,7 +376,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 				participants,
 				type: "PARTICIPANTS",
 			} satisfies MatchingServerParticipantsMessage,
-			sockets: this.heartbeatService.getSockets(),
+			sockets: this.ctx.getWebSockets(),
 		});
 	}
 
