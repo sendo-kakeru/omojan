@@ -15,7 +15,6 @@ import {
 	type Game,
 	type GameId,
 	isGameId,
-	isPlayerId,
 	type Player,
 	type PlayerCard,
 	type PlayerId,
@@ -132,7 +131,10 @@ export class GameDurableObject extends DurableObject<Env> {
 		}
 
 		// 既存の接続を閉じる（同じプレイヤーの再接続の場合）
-		const existingSocket = this.getPlayerSocket(player.id);
+		const existingSocket = this.webSocketService.getPlayerSocket({
+			ctx: this.ctx,
+			playerId: player.id,
+		});
 		if (existingSocket) {
 			existingSocket.close(4001, "新しい接続に置き換えられました。");
 		}
@@ -175,7 +177,7 @@ export class GameDurableObject extends DurableObject<Env> {
 		await this.restoreState();
 
 		// 送信元のプレイヤーIDを特定
-		const senderId = this.findPlayerIdBySocket(ws);
+		const senderId = this.getPlayerIdBySocket(ws);
 		if (!senderId) {
 			ws.close(1003, "送信元のプレイヤーが特定できませんでした。");
 			return;
@@ -331,7 +333,10 @@ export class GameDurableObject extends DurableObject<Env> {
 			console.error("ゲーム開始処理に失敗しました:", error);
 			// エラー時は全プレイヤーに通知して切断
 			for (const { id } of this.players) {
-				const socket = this.getPlayerSocket(id);
+				const socket = this.webSocketService.getPlayerSocket({
+					ctx: this.ctx,
+					playerId: id,
+				});
 				socket?.close(1011, "ゲーム開始処理に失敗しました");
 			}
 		}
@@ -407,23 +412,17 @@ export class GameDurableObject extends DurableObject<Env> {
 	}
 
 	/**
-	 * プレイヤーIDからアクティブなWebSocketを取得する。
-	 * readyState === OPEN の接続のみ返す。
-	 */
-	private getPlayerSocket(playerId: PlayerId): WebSocket | null {
-		const sockets = this.ctx.getWebSockets(playerId);
-		// OPENな接続のみ返す
-		return (
-			sockets.find((socket) => socket.readyState === WebSocket.OPEN) ?? null
-		);
-	}
-
-	/**
 	 * 全ての人間プレイヤーが接続済みかどうかを判定する。
 	 */
 	private areAllPlayersConnected(): boolean {
 		for (const player of this.players) {
-			if (!player.isCpu && !this.getPlayerSocket(player.id)) {
+			if (
+				!player.isCpu &&
+				!this.webSocketService.getPlayerSocket({
+					ctx: this.ctx,
+					playerId: player.id,
+				})
+			) {
 				return false;
 			}
 		}
@@ -442,7 +441,10 @@ export class GameDurableObject extends DurableObject<Env> {
 		if (!currentPlayerId) return;
 
 		for (const player of this.players) {
-			const socket = this.getPlayerSocket(player.id);
+			const socket = this.webSocketService.getPlayerSocket({
+				ctx: this.ctx,
+				playerId: player.id,
+			});
 			if (!socket) continue;
 
 			try {
@@ -490,7 +492,10 @@ export class GameDurableObject extends DurableObject<Env> {
 		if (!currentPlayerId) return;
 
 		for (const player of this.players) {
-			const socket = this.getPlayerSocket(player.id);
+			const socket = this.webSocketService.getPlayerSocket({
+				ctx: this.ctx,
+				playerId: player.id,
+			});
 			if (!socket) continue;
 
 			try {
@@ -545,7 +550,10 @@ export class GameDurableObject extends DurableObject<Env> {
 				this.players[playerIndex] = { ...player, isCpu: true };
 			}
 		}
-		const socket = this.getPlayerSocket(playerId);
+		const socket = this.webSocketService.getPlayerSocket({
+			ctx: this.ctx,
+			playerId,
+		});
 		socket?.close(1011, message);
 	}
 
@@ -560,7 +568,10 @@ export class GameDurableObject extends DurableObject<Env> {
 		const orderedPlayers = this.sortTurnOrderPlayers();
 
 		for (const player of this.players) {
-			const socket = this.getPlayerSocket(player.id);
+			const socket = this.webSocketService.getPlayerSocket({
+				ctx: this.ctx,
+				playerId: player.id,
+			});
 			if (!socket) continue;
 
 			try {
@@ -623,7 +634,10 @@ export class GameDurableObject extends DurableObject<Env> {
 		const orderedPlayers = this.sortTurnOrderPlayers();
 
 		for (const player of this.players) {
-			const socket = this.getPlayerSocket(player.id);
+			const socket = this.webSocketService.getPlayerSocket({
+				ctx: this.ctx,
+				playerId: player.id,
+			});
 			if (!socket) continue;
 
 			try {
@@ -674,7 +688,10 @@ export class GameDurableObject extends DurableObject<Env> {
 		if (!currentPlayerId) return;
 
 		for (const player of this.players) {
-			const socket = this.getPlayerSocket(player.id);
+			const socket = this.webSocketService.getPlayerSocket({
+				ctx: this.ctx,
+				playerId: player.id,
+			});
 			if (!socket) continue;
 
 			try {
@@ -950,7 +967,10 @@ export class GameDurableObject extends DurableObject<Env> {
 
 		// ENDメッセージを送信し、送信成功したプレイヤーを正常終了で切断
 		for (const player of this.players) {
-			const socket = this.getPlayerSocket(player.id);
+			const socket = this.webSocketService.getPlayerSocket({
+				ctx: this.ctx,
+				playerId: player.id,
+			});
 			if (!socket) continue;
 
 			try {
@@ -988,7 +1008,10 @@ export class GameDurableObject extends DurableObject<Env> {
 		message: string;
 	}): void {
 		for (const player of this.players) {
-			const socket = this.getPlayerSocket(player.id);
+			const socket = this.webSocketService.getPlayerSocket({
+				ctx: this.ctx,
+				playerId: player.id,
+			});
 			socket?.close(code, message);
 		}
 	}
@@ -997,11 +1020,13 @@ export class GameDurableObject extends DurableObject<Env> {
 	 * WebSocketからプレイヤーIDを特定する
 	 * acceptWebSocket時に設定したタグを使用して特定する
 	 */
-	private findPlayerIdBySocket(ws: WebSocket): PlayerId | null {
-		// タグの最初の要素がプレイヤーID
-		const playerId = this.ctx.getTags(ws)[0];
+	private getPlayerIdBySocket(ws: WebSocket): PlayerId | null {
+		const playerId = this.webSocketService.getPlayerIdBySocket({
+			ctx: this.ctx,
+			ws,
+		});
 
-		if (!isPlayerId(playerId)) return null;
+		if (!playerId) return null;
 
 		if (this.players.some((player) => player.id === playerId)) {
 			return playerId;
