@@ -14,6 +14,7 @@ import {
 import {
 	type Game,
 	type GameId,
+	gameTable,
 	isGameId,
 	type Player,
 	type PlayerCard,
@@ -113,6 +114,9 @@ export class GameDurableObject extends DurableObject<Env> {
 	async fetch(request: Request): Promise<Response> {
 		const { gameId, token } = this.getSearchParams(request);
 		this.ensureGameId({ gameId });
+
+		// ゲームステータスをチェック（終了したゲームへの接続を拒否）
+		await this.ensureGameNotFinished({ gameId });
 
 		if (!this.webSocketService.isUpgradeRequest(request)) {
 			throw new HTTPException(426, {
@@ -409,6 +413,33 @@ export class GameDurableObject extends DurableObject<Env> {
 			});
 		}
 		this.gameId = gameId;
+	}
+
+	/**
+	 * ゲームが終了していないことを確認する。
+	 * 終了したゲームへの接続を拒否する。
+	 */
+	private async ensureGameNotFinished({
+		gameId,
+	}: {
+		gameId: GameId;
+	}): Promise<void> {
+		const [game] = await this.db
+			.select({ status: gameTable.status })
+			.from(gameTable)
+			.where(eq(gameTable.id, gameId));
+
+		if (!game) {
+			throw new HTTPException(404, {
+				message: "指定されたゲームが存在しません",
+			});
+		}
+
+		if (game.status === "finished") {
+			throw new HTTPException(410, {
+				message: "このゲームは終了しています",
+			});
+		}
 	}
 
 	/**
