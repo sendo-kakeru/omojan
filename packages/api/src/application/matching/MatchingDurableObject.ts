@@ -47,6 +47,9 @@ export class MatchingDurableObject extends DurableObject<Env> {
 		const { token, gameId } = this.getSearchParams(request);
 		this.ensureGameId(gameId);
 
+		// ゲームステータスをチェック（waiting以外は接続を拒否）
+		await this.ensureGameWaiting({ gameId });
+
 		if (!this.webSocketService.isUpgradeRequest(request)) {
 			throw new HTTPException(426, {
 				message: "Upgrade: websocket を指定してください",
@@ -101,6 +104,37 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	}
 
 	/**
+	 * WS 接続クローズ時の処理
+	 * ブラウザバック、タブ閉じ、ネットワーク切断などで呼ばれる
+	 */
+	async webSocketClose(ws: WebSocket): Promise<void> {
+		if (!this.gameId) return;
+
+		const playerId = this.webSocketService.getPlayerIdBySocket({
+			ctx: this.ctx,
+			ws,
+		});
+
+		if (!playerId) return;
+
+		// lastPongAtを現在時刻に設定し、タイムアウト猶予を与える
+		// これにより、一時的な切断からの復帰が可能
+		// 完全な削除はalarm()のタイムアウト処理に委ねる
+		const now = Date.now();
+
+		// 既に記録がある場合は更新しない（意図的な切断の可能性）
+		if (!this.lastPongAt.get(playerId)) {
+			this.lastPongAt.set(playerId, now);
+		}
+
+		// アラームが設定されていない場合は設定（クリーンアップ用）
+		const currentAlarm = await this.ctx.storage.getAlarm();
+		if (currentAlarm === null) {
+			await this.ctx.storage.setAlarm(now + HEARTBEAT_INTERVAL_MS);
+		}
+	}
+
+	/**
 	 * WS メッセージ受信時の処理
 	 */
 	async webSocketMessage(ws: WebSocket, message: string): Promise<void> {
@@ -141,9 +175,33 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	 * 定期的にPINGを送信し、切断されたプレイヤーをクリーンアップする
 	 */
 	async alarm(): Promise<void> {
-		if (!this.gameId) return;
+		if (!this.gameId) {
+			// gameIdがない場合、残っている接続を全て閉じる
+			await this.closeAllConnections({ message: "部屋が見つかりません" });
+			return;
+		}
+
 		const gameStatus = await this.roomService.getStatus(this.gameId);
-		if (gameStatus && gameStatus !== "waiting") return;
+
+		// ゲームが存在しない場合、全接続を閉じてクリーンアップ
+		if (!gameStatus) {
+			await this.closeAllConnections({ message: "部屋が削除されました" });
+			this.cleanup();
+			return;
+		}
+
+		// ゲームが開始済み or 終了済みの場合、全接続を閉じてクリーンアップ
+		if (gameStatus !== "waiting") {
+			await this.closeAllConnections({
+				code: 4200,
+				message:
+					gameStatus === "active"
+						? "ゲームが開始されました"
+						: "ゲームが終了しました",
+			});
+			this.cleanup();
+			return;
+		}
 
 		// 全接続にPINGを送信
 		this.webSocketService.sendPingToAll({ ctx: this.ctx });
@@ -191,6 +249,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 
 		if (remainingParticipants.length === 0) {
 			await this.deleteRoom({ gameId: this.gameId });
+			this.cleanup();
 			return;
 		}
 
@@ -199,11 +258,30 @@ export class MatchingDurableObject extends DurableObject<Env> {
 			await this.broadcastParticipants({ participants: remainingParticipants });
 		}
 
-		// 接続が残っている場合は次のアラームを設定
-		const activeSockets = this.ctx.getWebSockets();
-		if (activeSockets.length > 0 || remainingParticipants.length > 0) {
-			await this.ctx.storage.setAlarm(Date.now() + HEARTBEAT_INTERVAL_MS);
+		// 次のアラームを設定（プレイヤーがいる限り継続）
+		await this.ctx.storage.setAlarm(Date.now() + HEARTBEAT_INTERVAL_MS);
+	}
+
+	/**
+	 * 全ての接続をクローズする
+	 */
+	private async closeAllConnections({
+		code = 4410,
+		message,
+	}: {
+		code?: number;
+		message: string;
+	}): Promise<void> {
+		for (const socket of this.ctx.getWebSockets()) {
+			socket.close(code, message);
 		}
+	}
+
+	/**
+	 * DurableObjectの状態をクリーンアップする
+	 */
+	private cleanup(): void {
+		this.lastPongAt.clear();
 	}
 
 	/**
@@ -415,5 +493,38 @@ export class MatchingDurableObject extends DurableObject<Env> {
 			});
 		}
 		this.gameId = gameId;
+	}
+
+	/**
+	 * ゲームが募集中（waiting）状態であることを確認する。
+	 * 開始済み・終了済みのゲームへの接続を拒否する。
+	 */
+	private async ensureGameWaiting({
+		gameId,
+	}: {
+		gameId: GameId;
+	}): Promise<void> {
+		const [game] = await this.db
+			.select({ status: gameTable.status })
+			.from(gameTable)
+			.where(eq(gameTable.id, gameId));
+
+		if (!game) {
+			throw new HTTPException(404, {
+				message: "指定された部屋が存在しません",
+			});
+		}
+
+		if (game.status === "active") {
+			throw new HTTPException(409, {
+				message: "この部屋は既にゲームが開始しています",
+			});
+		}
+
+		if (game.status === "finished") {
+			throw new HTTPException(410, {
+				message: "この部屋は終了しています",
+			});
+		}
 	}
 }
