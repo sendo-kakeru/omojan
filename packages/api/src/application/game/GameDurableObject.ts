@@ -335,14 +335,8 @@ export class GameDurableObject extends DurableObject<Env> {
 			await this.ctx.storage.setAlarm(Date.now() + 2000);
 		} catch (error) {
 			console.error("ゲーム開始処理に失敗しました:", error);
-			// エラー時は全プレイヤーに通知して切断
-			for (const { id } of this.players) {
-				const socket = this.webSocketService.getPlayerSocket({
-					ctx: this.ctx,
-					playerId: id,
-				});
-				socket?.close(1011, "ゲーム開始処理に失敗しました");
-			}
+			// エラー時は異常終了処理を実行
+			await this.handleGameAbort({ message: "ゲーム開始処理に失敗しました" });
 		}
 	}
 
@@ -886,7 +880,7 @@ export class GameDurableObject extends DurableObject<Env> {
 						`プレイヤー ${player.id} のランダム投票に失敗しました:`,
 						error,
 					);
-					this.disconnectAllPlayers({ message: "ランダム投票に失敗しました" });
+					await this.handleGameAbort({ message: "ランダム投票に失敗しました" });
 					return;
 				}
 			}
@@ -936,7 +930,7 @@ export class GameDurableObject extends DurableObject<Env> {
 			await this.ctx.storage.setAlarm(Date.now() + 6000);
 		} catch (error) {
 			console.error("結果フェーズの処理に失敗しました:", error);
-			this.disconnectAllPlayers({
+			await this.handleGameAbort({
 				message: "結果フェーズの処理に失敗しました",
 			});
 			return;
@@ -982,10 +976,11 @@ export class GameDurableObject extends DurableObject<Env> {
 	}
 
 	/**
-	 * ゲーム終了処理
+	 * ゲーム終了処理（正常終了）
 	 * - ゲームステータスを終了に更新
 	 * - 全プレイヤーにENDメッセージを送信
 	 * - 全プレイヤーを切断
+	 * - クリーンアップ処理を実行
 	 */
 	private async handleGameEnd(): Promise<void> {
 		if (!this.gameId) return;
@@ -1020,24 +1015,35 @@ export class GameDurableObject extends DurableObject<Env> {
 			}
 		}
 
-		try {
-			// 永続化した状態をクリア
-			await this.ctx.storage.delete(STORAGE_KEY);
-		} catch (error) {
-			console.error("永続化状態のクリアに失敗しました:", error);
-		}
+		// クリーンアップ処理
+		await this.cleanup();
 	}
 
 	/**
-	 * 全プレイヤーを切断する
+	 * ゲーム異常終了処理
+	 * - ゲームステータスを終了に更新
+	 * - 全プレイヤーを切断
+	 * - クリーンアップ処理を実行
 	 */
-	private disconnectAllPlayers({
+	private async handleGameAbort({
 		code = 1011,
 		message,
 	}: {
 		code?: number;
 		message: string;
-	}): void {
+	}): Promise<void> {
+		console.error(`ゲーム異常終了: ${message}`);
+
+		// DBステータスを終了に更新
+		if (this.gameId) {
+			try {
+				await this.gameService.endGame({ gameId: this.gameId });
+			} catch (error) {
+				console.error("ゲームステータスの更新に失敗しました:", error);
+			}
+		}
+
+		// 全プレイヤーを切断
 		for (const player of this.players) {
 			const socket = this.webSocketService.getPlayerSocket({
 				ctx: this.ctx,
@@ -1045,6 +1051,40 @@ export class GameDurableObject extends DurableObject<Env> {
 			});
 			socket?.close(code, message);
 		}
+
+		// クリーンアップ処理
+		await this.cleanup();
+	}
+
+	/**
+	 * DurableObjectのクリーンアップ処理
+	 * - アラームの削除
+	 * - 永続化データの削除
+	 * - メモリ状態のリセット
+	 */
+	private async cleanup(): Promise<void> {
+		// アラームの削除
+		try {
+			await this.ctx.storage.deleteAlarm();
+		} catch (error) {
+			console.error("アラームの削除に失敗しました:", error);
+		}
+
+		// 永続化データの削除
+		try {
+			await this.ctx.storage.delete(STORAGE_KEY);
+		} catch (error) {
+			console.error("永続化状態のクリアに失敗しました:", error);
+		}
+
+		// メモリ状態のリセット
+		this.gameId = null;
+		this.state = "WAITING";
+		this.roundNo = 1;
+		this.turnIndex = 0;
+		this.themes = new Map();
+		this.timeLimit = 30;
+		this.players = [];
 	}
 
 	/**
