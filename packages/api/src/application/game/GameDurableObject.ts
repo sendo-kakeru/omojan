@@ -651,8 +651,10 @@ export class GameDurableObject extends DurableObject<Env> {
 	 * 全プレイヤーにRESULTメッセージを送信する。
 	 */
 	private broadcastResult({
+		playerVoteCounts,
 		winnerPlayerIds,
 	}: {
+		playerVoteCounts: Map<PlayerId, number>;
 		winnerPlayerIds: PlayerId[];
 	}): void {
 		// ラウンドに応じた順番でプレイヤーを並び替え
@@ -675,7 +677,8 @@ export class GameDurableObject extends DurableObject<Env> {
 								playerName: player.playerName,
 								seat: player.seat,
 								submission: player.submission,
-								winCount: player.winCount,
+								voteCount: playerVoteCounts.get(player.id) ?? 0,
+								winCount: player.winCount, // 消しても良い
 							})),
 							roundNo: this.roundNo,
 							theme: this.themes.get(this.roundNo) ?? "",
@@ -892,8 +895,7 @@ export class GameDurableObject extends DurableObject<Env> {
 
 	/**
 	 * 結果フェーズへ移行する
-	 * - 勝者を計算
-	 * - 勝者をDBに保存
+	 * - 勝者と得票数を計算
 	 * - 勝者のwinCountを更新
 	 * - 結果をブロードキャスト
 	 * - 次のラウンドへのアラームを設定
@@ -902,11 +904,12 @@ export class GameDurableObject extends DurableObject<Env> {
 		if (!this.gameId) return;
 
 		try {
-			// 勝者を計算
-			const winnerPlayerIds = await this.gameService.calculateRoundWinners({
-				gameId: this.gameId,
-				roundNo: this.roundNo,
-			});
+			// 勝者と得票数を計算
+			const { playerVoteCounts, winnerPlayerIds } =
+				await this.gameService.calculateRoundWinnersWithVoteCounts({
+					gameId: this.gameId,
+					roundNo: this.roundNo,
+				});
 
 			// 勝者のwinCountを更新
 			for (const winnerId of winnerPlayerIds) {
@@ -925,7 +928,7 @@ export class GameDurableObject extends DurableObject<Env> {
 			}
 
 			this.state = "RESULT";
-			this.broadcastResult({ winnerPlayerIds });
+			this.broadcastResult({ playerVoteCounts, winnerPlayerIds });
 			// 6秒後に次のラウンドへ（または終了処理）
 			await this.ctx.storage.setAlarm(Date.now() + 6000);
 		} catch (error) {
