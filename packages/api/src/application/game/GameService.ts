@@ -364,16 +364,19 @@ export class GameService {
 	}
 
 	/**
-	 * ラウンドの勝者を計算する
+	 * ラウンドの勝者と各プレイヤーの得票数を計算する
 	 * 最も得票数が多いプレイヤーを勝者とする（同率の場合は複数人）
 	 */
-	async calculateRoundWinners({
+	async calculateRoundWinnersWithVoteCounts({
 		gameId,
 		roundNo,
 	}: {
 		gameId: GameId;
 		roundNo: RoundNo;
-	}): Promise<PlayerId[]> {
+	}): Promise<{
+		playerVoteCounts: Map<PlayerId, number>;
+		winnerPlayerIds: PlayerId[];
+	}> {
 		// gameIdとroundNoからラウンドIDを取得
 		const [round] = await this.db
 			.select({ id: roundTable.id })
@@ -402,19 +405,22 @@ export class GameService {
 			.from(voteTable)
 			.where(eq(voteTable.roundId, round.id));
 
-		return this.calculateWinnersFromVotes({ submissions, votes });
+		return this.calculateWinnersAndVoteCountsFromVotes({ submissions, votes });
 	}
 
 	/**
-	 * 投票結果から勝者を計算する
+	 * 投票結果から勝者と得票数を計算する
 	 */
-	private calculateWinnersFromVotes({
+	private calculateWinnersAndVoteCountsFromVotes({
 		submissions,
 		votes,
 	}: {
 		submissions: { playerId: PlayerId; submissionId: SubmissionId }[];
 		votes: { submissionId: SubmissionId }[];
-	}): PlayerId[] {
+	}): {
+		playerVoteCounts: Map<PlayerId, number>;
+		winnerPlayerIds: PlayerId[];
+	} {
 		// 各提出の得票数を集計
 		const voteCountBySubmission = new Map<SubmissionId, number>();
 		for (const vote of votes) {
@@ -422,18 +428,30 @@ export class GameService {
 			voteCountBySubmission.set(vote.submissionId, count + 1);
 		}
 
+		// プレイヤーIDごとの得票数を集計
+		const playerVoteCounts = new Map<PlayerId, number>();
+		for (const submission of submissions) {
+			const voteCount = voteCountBySubmission.get(submission.submissionId) ?? 0;
+			playerVoteCounts.set(submission.playerId, voteCount);
+		}
+
 		// 最大得票数を取得
 		const maxVotes = Math.max(...voteCountBySubmission.values(), 0);
-		if (maxVotes === 0) return [];
+		if (maxVotes === 0) {
+			return { playerVoteCounts, winnerPlayerIds: [] };
+		}
 
-		// 最大得票数を持つ提出のプレイヤーIDを返す
-		return submissions
-			.filter(
-				(submission) =>
-					(voteCountBySubmission.get(submission.submissionId) ?? 0) ===
-					maxVotes,
-			)
-			.map((submission) => submission.playerId);
+		return {
+			playerVoteCounts,
+			// 最大得票数を持つ提出のプレイヤーIDを返す
+			winnerPlayerIds: submissions
+				.filter(
+					(submission) =>
+						(voteCountBySubmission.get(submission.submissionId) ?? 0) ===
+						maxVotes,
+				)
+				.map((submission) => submission.playerId),
+		};
 	}
 
 	/**
@@ -579,7 +597,7 @@ export class GameService {
 				(submission) => submission.roundId === round.id,
 			);
 			const roundVotes = votes.filter((vote) => vote.roundId === round.id);
-			const winnerPlayerIds = this.calculateWinnersFromVotes({
+			const { winnerPlayerIds } = this.calculateWinnersAndVoteCountsFromVotes({
 				submissions: roundSubmissions,
 				votes: roundVotes,
 			});

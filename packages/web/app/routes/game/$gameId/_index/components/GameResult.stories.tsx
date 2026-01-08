@@ -19,6 +19,7 @@ const mockPlayersWithSubmissions = [
 		playerName: "プレイヤー1",
 		seat: 1 as PlayerSeat,
 		submission: { position: "prefix" as const, text: "激辛" },
+		voteCount: 2,
 		winCount: 1,
 	},
 	{
@@ -27,6 +28,7 @@ const mockPlayersWithSubmissions = [
 		playerName: "プレイヤー2",
 		seat: 2 as PlayerSeat,
 		submission: { position: "suffix" as const, text: "究極" },
+		voteCount: 1,
 		winCount: 0,
 	},
 	{
@@ -35,6 +37,7 @@ const mockPlayersWithSubmissions = [
 		playerName: "プレイヤー3",
 		seat: 3 as PlayerSeat,
 		submission: { position: "prefix" as const, text: "おふくろ" },
+		voteCount: 1,
 		winCount: 0,
 	},
 	{
@@ -43,6 +46,7 @@ const mockPlayersWithSubmissions = [
 		playerName: "プレイヤー4",
 		seat: 4 as PlayerSeat,
 		submission: { position: "suffix" as const, text: "禁断" },
+		voteCount: 0,
 		winCount: 0,
 	},
 ];
@@ -131,6 +135,7 @@ export const Round4: Story = {
 				...baseGameData,
 				players: mockPlayersWithSubmissions.map((p, i) => ({
 					...p,
+					voteCount: [3, 0, 0, 1][i] ?? 0,
 					winCount: [2, 1, 0, 1][i] ?? 0,
 				})),
 				roundNo: 4 as const,
@@ -157,6 +162,7 @@ export const WithVariousWinCounts: Story = {
 				...baseGameData,
 				players: mockPlayersWithSubmissions.map((p, i) => ({
 					...p,
+					voteCount: [0, 1, 0, 3][i] ?? 0,
 					winCount: [3, 1, 0, 2][i] ?? 0,
 				})),
 				roundNo: 4 as const,
@@ -177,6 +183,7 @@ export const AllWinners: Story = {
 				...baseGameData,
 				players: mockPlayersWithSubmissions.map((p) => ({
 					...p,
+					voteCount: 1,
 					winCount: 1,
 				})),
 				winnerPlayerIds: [
@@ -211,6 +218,7 @@ export const LongCombinations: Story = {
 							{ position: "prefix" as const, text: "思いもよらぬ" },
 							{ position: "suffix" as const, text: "生麦生米" },
 						][index] ?? player.submission,
+					voteCount: [2, 1, 1, 0][index] ?? 0,
 				})),
 				theme: "プログラミング",
 				winnerPlayerIds: [createPlayerId("1")],

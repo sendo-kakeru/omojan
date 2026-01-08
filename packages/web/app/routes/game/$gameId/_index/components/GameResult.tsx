@@ -3,7 +3,6 @@ import classNames from "classnames";
 import { useEffect } from "react";
 import { FaCrown } from "react-icons/fa";
 import { Avatar } from "~/components/Avatar";
-import { Badge } from "~/components/Badge";
 import { CircularTimerProgress } from "~/components/CircularTimerProgress";
 import { Separator } from "~/components/Separator";
 import { useCountdown } from "~/hooks/useCountdown";
@@ -77,9 +76,9 @@ export function GameResult({ data }: { data: GameServerResultMessage }) {
 											})}
 										</p>
 									</div>
-									<div className="grid gap-y-4 text-right">
-										<Badge color="gray">{player.winCount}勝</Badge>
-									</div>
+									<p className="inline-flex w-fit shrink-0 items-center overflow-hidden whitespace-nowrap rounded-full border-2 border-green-200 bg-green-100 px-12 py-2 font-medium text-green-700 text-sm transition-colors">
+										{player.voteCount}票
+									</p>
 								</div>
 								{index !== game.players.length - 1 && <Separator />}
 							</div>

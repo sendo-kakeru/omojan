@@ -193,6 +193,12 @@ export const gameServerResultMessageSchema = object({
 	...gameBaseSchema.entries,
 	game: object({
 		...gameBaseSchema.entries.game.entries,
+		players: array(
+			object({
+				...gamePlayerItemSchema.entries,
+				voteCount: number(),
+			}),
+		),
 		winnerPlayerIds: array(playerIdSchema),
 	}),
 	type: literal("RESULT"),
