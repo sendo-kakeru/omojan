@@ -42,7 +42,6 @@
 			"Bash(npm publish:*)",
 			"Bash(rm:*)",
 			"Bash(rm -rf:*)",
-			"Bash(git commit:*)",
 			"Bash(git stash:*)",
 			"Bash(git reflog:*)",
 			"Bash(git reset:*)",
