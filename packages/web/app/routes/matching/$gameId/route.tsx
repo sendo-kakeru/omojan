@@ -131,6 +131,7 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 	if (
 		roomMetaResult.isLoading ||
 		!roomMetaResult.data ||
+		!WebSocket ||
 		wsRef.current?.readyState !== WebSocket.OPEN ||
 		!participants
 	) {
