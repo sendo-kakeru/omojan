@@ -3,7 +3,6 @@ import classNames from "classnames";
 import { useEffect } from "react";
 import { FaCrown } from "react-icons/fa";
 import { Avatar } from "~/components/Avatar";
-import { Badge } from "~/components/Badge";
 import { CircularTimerProgress } from "~/components/CircularTimerProgress";
 import { Separator } from "~/components/Separator";
 import { useCountdown } from "~/hooks/useCountdown";
@@ -34,7 +33,7 @@ export function GameResult({ data }: { data: GameServerResultMessage }) {
 				<p className="flex-1 rounded-lg border border-gray-300 bg-gray-50 px-8 py-2 text-neutral-500 text-sm">
 					ラウンド結果
 				</p>
-				<CircularTimerProgress label={count} progress={progress} />
+				<CircularTimerProgress count={count} progress={progress} />
 			</nav>
 			<main className="grid grid-rows-[auto_1fr]">
 				<section className="grid rounded-lg border border-gray-200 bg-white">
@@ -77,9 +76,9 @@ export function GameResult({ data }: { data: GameServerResultMessage }) {
 											})}
 										</p>
 									</div>
-									<div className="grid gap-y-4 text-right">
-										<Badge color="gray">{player.winCount}勝</Badge>
-									</div>
+									<p className="inline-flex w-fit shrink-0 items-center overflow-hidden whitespace-nowrap rounded-full border-2 border-green-200 bg-green-100 px-12 py-2 font-medium text-green-700 text-sm transition-colors">
+										{player.voteCount}票
+									</p>
 								</div>
 								{index !== game.players.length - 1 && <Separator />}
 							</div>

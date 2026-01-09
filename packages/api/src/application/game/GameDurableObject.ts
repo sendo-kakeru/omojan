@@ -14,8 +14,8 @@ import {
 import {
 	type Game,
 	type GameId,
+	gameTable,
 	isGameId,
-	isPlayerId,
 	type Player,
 	type PlayerCard,
 	type PlayerId,
@@ -115,6 +115,9 @@ export class GameDurableObject extends DurableObject<Env> {
 		const { gameId, token } = this.getSearchParams(request);
 		this.ensureGameId({ gameId });
 
+		// ゲームステータスをチェック（終了したゲームへの接続を拒否）
+		await this.ensureGameNotFinished({ gameId });
+
 		if (!this.webSocketService.isUpgradeRequest(request)) {
 			throw new HTTPException(426, {
 				message: "Upgrade: websocket を指定してください",
@@ -132,7 +135,10 @@ export class GameDurableObject extends DurableObject<Env> {
 		}
 
 		// 既存の接続を閉じる（同じプレイヤーの再接続の場合）
-		const existingSocket = this.getPlayerSocket(player.id);
+		const existingSocket = this.webSocketService.getPlayerSocket({
+			ctx: this.ctx,
+			playerId: player.id,
+		});
 		if (existingSocket) {
 			existingSocket.close(4001, "新しい接続に置き換えられました。");
 		}
@@ -175,7 +181,7 @@ export class GameDurableObject extends DurableObject<Env> {
 		await this.restoreState();
 
 		// 送信元のプレイヤーIDを特定
-		const senderId = this.findPlayerIdBySocket(ws);
+		const senderId = this.getPlayerIdBySocket(ws);
 		if (!senderId) {
 			ws.close(1003, "送信元のプレイヤーが特定できませんでした。");
 			return;
@@ -329,11 +335,8 @@ export class GameDurableObject extends DurableObject<Env> {
 			await this.ctx.storage.setAlarm(Date.now() + 2000);
 		} catch (error) {
 			console.error("ゲーム開始処理に失敗しました:", error);
-			// エラー時は全プレイヤーに通知して切断
-			for (const { id } of this.players) {
-				const socket = this.getPlayerSocket(id);
-				socket?.close(1011, "ゲーム開始処理に失敗しました");
-			}
+			// エラー時は異常終了処理を実行
+			await this.handleGameAbort({ message: "ゲーム開始処理に失敗しました" });
 		}
 	}
 
@@ -407,15 +410,30 @@ export class GameDurableObject extends DurableObject<Env> {
 	}
 
 	/**
-	 * プレイヤーIDからアクティブなWebSocketを取得する。
-	 * readyState === OPEN の接続のみ返す。
+	 * ゲームが終了していないことを確認する。
+	 * 終了したゲームへの接続を拒否する。
 	 */
-	private getPlayerSocket(playerId: PlayerId): WebSocket | null {
-		const sockets = this.ctx.getWebSockets(playerId);
-		// OPENな接続のみ返す
-		return (
-			sockets.find((socket) => socket.readyState === WebSocket.OPEN) ?? null
-		);
+	private async ensureGameNotFinished({
+		gameId,
+	}: {
+		gameId: GameId;
+	}): Promise<void> {
+		const [game] = await this.db
+			.select({ status: gameTable.status })
+			.from(gameTable)
+			.where(eq(gameTable.id, gameId));
+
+		if (!game) {
+			throw new HTTPException(404, {
+				message: "指定されたゲームが存在しません",
+			});
+		}
+
+		if (game.status === "finished") {
+			throw new HTTPException(410, {
+				message: "このゲームは終了しています",
+			});
+		}
 	}
 
 	/**
@@ -423,7 +441,13 @@ export class GameDurableObject extends DurableObject<Env> {
 	 */
 	private areAllPlayersConnected(): boolean {
 		for (const player of this.players) {
-			if (!player.isCpu && !this.getPlayerSocket(player.id)) {
+			if (
+				!player.isCpu &&
+				!this.webSocketService.getPlayerSocket({
+					ctx: this.ctx,
+					playerId: player.id,
+				})
+			) {
 				return false;
 			}
 		}
@@ -442,7 +466,10 @@ export class GameDurableObject extends DurableObject<Env> {
 		if (!currentPlayerId) return;
 
 		for (const player of this.players) {
-			const socket = this.getPlayerSocket(player.id);
+			const socket = this.webSocketService.getPlayerSocket({
+				ctx: this.ctx,
+				playerId: player.id,
+			});
 			if (!socket) continue;
 
 			try {
@@ -490,7 +517,10 @@ export class GameDurableObject extends DurableObject<Env> {
 		if (!currentPlayerId) return;
 
 		for (const player of this.players) {
-			const socket = this.getPlayerSocket(player.id);
+			const socket = this.webSocketService.getPlayerSocket({
+				ctx: this.ctx,
+				playerId: player.id,
+			});
 			if (!socket) continue;
 
 			try {
@@ -545,7 +575,10 @@ export class GameDurableObject extends DurableObject<Env> {
 				this.players[playerIndex] = { ...player, isCpu: true };
 			}
 		}
-		const socket = this.getPlayerSocket(playerId);
+		const socket = this.webSocketService.getPlayerSocket({
+			ctx: this.ctx,
+			playerId,
+		});
 		socket?.close(1011, message);
 	}
 
@@ -560,7 +593,10 @@ export class GameDurableObject extends DurableObject<Env> {
 		const orderedPlayers = this.sortTurnOrderPlayers();
 
 		for (const player of this.players) {
-			const socket = this.getPlayerSocket(player.id);
+			const socket = this.webSocketService.getPlayerSocket({
+				ctx: this.ctx,
+				playerId: player.id,
+			});
 			if (!socket) continue;
 
 			try {
@@ -615,15 +651,20 @@ export class GameDurableObject extends DurableObject<Env> {
 	 * 全プレイヤーにRESULTメッセージを送信する。
 	 */
 	private broadcastResult({
+		playerVoteCounts,
 		winnerPlayerIds,
 	}: {
+		playerVoteCounts: Map<PlayerId, number>;
 		winnerPlayerIds: PlayerId[];
 	}): void {
 		// ラウンドに応じた順番でプレイヤーを並び替え
 		const orderedPlayers = this.sortTurnOrderPlayers();
 
 		for (const player of this.players) {
-			const socket = this.getPlayerSocket(player.id);
+			const socket = this.webSocketService.getPlayerSocket({
+				ctx: this.ctx,
+				playerId: player.id,
+			});
 			if (!socket) continue;
 
 			try {
@@ -636,7 +677,8 @@ export class GameDurableObject extends DurableObject<Env> {
 								playerName: player.playerName,
 								seat: player.seat,
 								submission: player.submission,
-								winCount: player.winCount,
+								voteCount: playerVoteCounts.get(player.id) ?? 0,
+								winCount: player.winCount, // 消しても良い
 							})),
 							roundNo: this.roundNo,
 							theme: this.themes.get(this.roundNo) ?? "",
@@ -674,7 +716,10 @@ export class GameDurableObject extends DurableObject<Env> {
 		if (!currentPlayerId) return;
 
 		for (const player of this.players) {
-			const socket = this.getPlayerSocket(player.id);
+			const socket = this.webSocketService.getPlayerSocket({
+				ctx: this.ctx,
+				playerId: player.id,
+			});
 			if (!socket) continue;
 
 			try {
@@ -838,7 +883,7 @@ export class GameDurableObject extends DurableObject<Env> {
 						`プレイヤー ${player.id} のランダム投票に失敗しました:`,
 						error,
 					);
-					this.disconnectAllPlayers({ message: "ランダム投票に失敗しました" });
+					await this.handleGameAbort({ message: "ランダム投票に失敗しました" });
 					return;
 				}
 			}
@@ -850,8 +895,7 @@ export class GameDurableObject extends DurableObject<Env> {
 
 	/**
 	 * 結果フェーズへ移行する
-	 * - 勝者を計算
-	 * - 勝者をDBに保存
+	 * - 勝者と得票数を計算
 	 * - 勝者のwinCountを更新
 	 * - 結果をブロードキャスト
 	 * - 次のラウンドへのアラームを設定
@@ -860,11 +904,12 @@ export class GameDurableObject extends DurableObject<Env> {
 		if (!this.gameId) return;
 
 		try {
-			// 勝者を計算
-			const winnerPlayerIds = await this.gameService.calculateRoundWinners({
-				gameId: this.gameId,
-				roundNo: this.roundNo,
-			});
+			// 勝者と得票数を計算
+			const { playerVoteCounts, winnerPlayerIds } =
+				await this.gameService.calculateRoundWinnersWithVoteCounts({
+					gameId: this.gameId,
+					roundNo: this.roundNo,
+				});
 
 			// 勝者のwinCountを更新
 			for (const winnerId of winnerPlayerIds) {
@@ -883,12 +928,12 @@ export class GameDurableObject extends DurableObject<Env> {
 			}
 
 			this.state = "RESULT";
-			this.broadcastResult({ winnerPlayerIds });
+			this.broadcastResult({ playerVoteCounts, winnerPlayerIds });
 			// 6秒後に次のラウンドへ（または終了処理）
 			await this.ctx.storage.setAlarm(Date.now() + 6000);
 		} catch (error) {
 			console.error("結果フェーズの処理に失敗しました:", error);
-			this.disconnectAllPlayers({
+			await this.handleGameAbort({
 				message: "結果フェーズの処理に失敗しました",
 			});
 			return;
@@ -934,10 +979,11 @@ export class GameDurableObject extends DurableObject<Env> {
 	}
 
 	/**
-	 * ゲーム終了処理
+	 * ゲーム終了処理（正常終了）
 	 * - ゲームステータスを終了に更新
 	 * - 全プレイヤーにENDメッセージを送信
 	 * - 全プレイヤーを切断
+	 * - クリーンアップ処理を実行
 	 */
 	private async handleGameEnd(): Promise<void> {
 		if (!this.gameId) return;
@@ -950,7 +996,10 @@ export class GameDurableObject extends DurableObject<Env> {
 
 		// ENDメッセージを送信し、送信成功したプレイヤーを正常終了で切断
 		for (const player of this.players) {
-			const socket = this.getPlayerSocket(player.id);
+			const socket = this.webSocketService.getPlayerSocket({
+				ctx: this.ctx,
+				playerId: player.id,
+			});
 			if (!socket) continue;
 
 			try {
@@ -969,39 +1018,89 @@ export class GameDurableObject extends DurableObject<Env> {
 			}
 		}
 
-		try {
-			// 永続化した状態をクリア
-			await this.ctx.storage.delete(STORAGE_KEY);
-		} catch (error) {
-			console.error("永続化状態のクリアに失敗しました:", error);
-		}
+		// クリーンアップ処理
+		await this.cleanup();
 	}
 
 	/**
-	 * 全プレイヤーを切断する
+	 * ゲーム異常終了処理
+	 * - ゲームステータスを終了に更新
+	 * - 全プレイヤーを切断
+	 * - クリーンアップ処理を実行
 	 */
-	private disconnectAllPlayers({
+	private async handleGameAbort({
 		code = 1011,
 		message,
 	}: {
 		code?: number;
 		message: string;
-	}): void {
+	}): Promise<void> {
+		console.error(`ゲーム異常終了: ${message}`);
+
+		// DBステータスを終了に更新
+		if (this.gameId) {
+			try {
+				await this.gameService.endGame({ gameId: this.gameId });
+			} catch (error) {
+				console.error("ゲームステータスの更新に失敗しました:", error);
+			}
+		}
+
+		// 全プレイヤーを切断
 		for (const player of this.players) {
-			const socket = this.getPlayerSocket(player.id);
+			const socket = this.webSocketService.getPlayerSocket({
+				ctx: this.ctx,
+				playerId: player.id,
+			});
 			socket?.close(code, message);
 		}
+
+		// クリーンアップ処理
+		await this.cleanup();
+	}
+
+	/**
+	 * DurableObjectのクリーンアップ処理
+	 * - アラームの削除
+	 * - 永続化データの削除
+	 * - メモリ状態のリセット
+	 */
+	private async cleanup(): Promise<void> {
+		// アラームの削除
+		try {
+			await this.ctx.storage.deleteAlarm();
+		} catch (error) {
+			console.error("アラームの削除に失敗しました:", error);
+		}
+
+		// 永続化データの削除
+		try {
+			await this.ctx.storage.delete(STORAGE_KEY);
+		} catch (error) {
+			console.error("永続化状態のクリアに失敗しました:", error);
+		}
+
+		// メモリ状態のリセット
+		this.gameId = null;
+		this.state = "WAITING";
+		this.roundNo = 1;
+		this.turnIndex = 0;
+		this.themes = new Map();
+		this.timeLimit = 30;
+		this.players = [];
 	}
 
 	/**
 	 * WebSocketからプレイヤーIDを特定する
 	 * acceptWebSocket時に設定したタグを使用して特定する
 	 */
-	private findPlayerIdBySocket(ws: WebSocket): PlayerId | null {
-		// タグの最初の要素がプレイヤーID
-		const playerId = this.ctx.getTags(ws)[0];
+	private getPlayerIdBySocket(ws: WebSocket): PlayerId | null {
+		const playerId = this.webSocketService.getPlayerIdBySocket({
+			ctx: this.ctx,
+			ws,
+		});
 
-		if (!isPlayerId(playerId)) return null;
+		if (!playerId) return null;
 
 		if (this.players.some((player) => player.id === playerId)) {
 			return playerId;
