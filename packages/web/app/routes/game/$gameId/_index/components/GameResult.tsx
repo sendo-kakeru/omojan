@@ -33,7 +33,7 @@ export function GameResult({ data }: { data: GameServerResultMessage }) {
 				<p className="flex-1 rounded-lg border border-gray-300 bg-gray-50 px-8 py-2 text-neutral-500 text-sm">
 					ラウンド結果
 				</p>
-				<CircularTimerProgress label={count} progress={progress} />
+				<CircularTimerProgress count={count} progress={progress} />
 			</nav>
 			<main className="grid grid-rows-[auto_1fr]">
 				<section className="grid rounded-lg border border-gray-200 bg-white">

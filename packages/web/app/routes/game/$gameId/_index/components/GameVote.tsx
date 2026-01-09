@@ -66,7 +66,7 @@ export function GameVote({
 						? "投票が完了しました。"
 						: "最も面白いと思う組み合わせに投票してください。"}
 				</p>
-				<CircularTimerProgress label={count} progress={progress} />
+				<CircularTimerProgress count={count} progress={progress} />
 			</nav>
 			<main className="grid grid-rows-[auto_1fr]">
 				<section className="grid rounded-lg border border-gray-200 bg-white">

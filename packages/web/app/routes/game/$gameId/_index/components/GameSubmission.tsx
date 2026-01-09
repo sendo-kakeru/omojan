@@ -193,7 +193,7 @@ export function GameSubmission({
 					>
 						{getMessage()}
 					</p>
-					<CircularTimerProgress label={count} progress={progress} />
+					<CircularTimerProgress count={count} progress={progress} />
 				</nav>
 				<main className="grid grid-rows-[auto_1fr_auto]">
 					<section className="grid rounded-lg border border-gray-200 bg-white">
