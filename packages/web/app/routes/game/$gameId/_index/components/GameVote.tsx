@@ -195,7 +195,7 @@ export function GameVote({
 					</div>
 				</section>
 
-				<section className="mx-[calc(50%-50cqw)] w-[100cqw] border-t-2 border-t-gray-300 bg-white py-8 xs:pt-16 sm:py-24">
+				<section className="relative right-1/2 left-1/2 -mx-[50vw] w-screen border-t-2 border-t-gray-300 bg-white py-8 xs:pt-16 sm:py-24">
 					<div className="mx-auto flex max-w-800 flex-wrap gap-8 px-16">
 						{mePlayer.playerCards.map((card) => (
 							<div
