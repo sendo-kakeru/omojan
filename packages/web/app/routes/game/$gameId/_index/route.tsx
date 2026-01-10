@@ -25,6 +25,15 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 			},
 		});
 
+	if (!WebSocket || wsRef.current?.readyState !== WebSocket.OPEN || !data) {
+		return (
+			<main className="grid place-items-center gap-y-4 py-24 text-neutral-500">
+				<Spinner className="size-32" />
+				<p className="text-center">ゲームを開始しています…</p>
+			</main>
+		);
+	}
+
 	if (error) {
 		return (
 			<main className="grid place-items-center gap-y-12">
@@ -32,15 +41,6 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 				<Button as="link" className="w-fit" to="/">
 					トップに戻る
 				</Button>
-			</main>
-		);
-	}
-
-	if (!WebSocket || wsRef.current?.readyState !== WebSocket.OPEN || !data) {
-		return (
-			<main className="grid place-items-center gap-y-4 py-24 text-neutral-500">
-				<Spinner className="size-32" />
-				<p className="text-center">ゲームを開始しています…</p>
 			</main>
 		);
 	}

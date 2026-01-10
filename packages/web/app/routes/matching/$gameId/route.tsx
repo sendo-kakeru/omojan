@@ -106,6 +106,20 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 		}
 	};
 
+	if (
+		roomMetaResult.isLoading ||
+		!roomMetaResult.data ||
+		!WebSocket ||
+		wsRef.current?.readyState !== WebSocket.OPEN ||
+		!participants
+	) {
+		return <MatchingLoading message="接続しています..." />;
+	}
+
+	if (isExiting) {
+		return <MatchingLoading message="退出しています..." />;
+	}
+
 	if (roomMetaResult.error || matchingError) {
 		const isNotFound =
 			roomMetaResult.error instanceof DetailedError &&
@@ -126,20 +140,6 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 					: "connectionError";
 
 		return <MatchingError errorType={errorType} />;
-	}
-
-	if (
-		roomMetaResult.isLoading ||
-		!roomMetaResult.data ||
-		!WebSocket ||
-		wsRef.current?.readyState !== WebSocket.OPEN ||
-		!participants
-	) {
-		return <MatchingLoading message="接続しています..." />;
-	}
-
-	if (isExiting) {
-		return <MatchingLoading message="退出しています..." />;
 	}
 
 	return (
