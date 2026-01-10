@@ -46,7 +46,7 @@ export function FieldItem({
 					<p className="whitespace-pre-line text-xs">{supportText}</p>
 				)}
 			</div>
-			<div className="grid grid-cols-1 gap-y-4">
+			<div className="grid grid-cols-1 gap-y-4 p-4">
 				{children}
 				{note && (
 					<p className="whitespace-pre-line text-neutral-500 text-xs">{note}</p>
