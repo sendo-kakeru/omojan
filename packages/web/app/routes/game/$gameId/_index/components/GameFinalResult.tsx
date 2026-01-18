@@ -16,8 +16,13 @@ export function GameFinalResult({ result }: GameFinalResultProps) {
 
 	return (
 		<main className="grid min-h-full gap-y-24 pt-16 pb-36">
-			<div className="grid gap-y-4">
+			<div className="flex items-center justify-between">
 				<h1 className="font-bold text-lg">最終結果</h1>
+				<Button as="link" to="/">
+					トップに戻る
+				</Button>
+			</div>
+			<div className="grid gap-y-4">
 				<section className="grid place-items-center gap-y-12 rounded-2xl border-1 border-yellow-300 bg-yellow-100 p-16 shadow">
 					<div className="flex items-center gap-x-8">
 						<FaCrown className="size-20 text-yellow-500" />
