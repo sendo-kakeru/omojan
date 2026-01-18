@@ -283,6 +283,9 @@ export function GameSubmission({
 								);
 							})}
 						</div>
+						{!isMyTurn && (
+							<div className="absolute inset-0 z-50 bg-gray-600 opacity-50" />
+						)}
 					</section>
 				</main>
 			</div>
