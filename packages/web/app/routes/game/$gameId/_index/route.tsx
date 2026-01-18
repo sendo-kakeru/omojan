@@ -2,6 +2,7 @@ import { LOCALSTORAGE_OPERATION_FAILED_MESSAGE } from "@repo/shared/error";
 import { useNavigate } from "react-router";
 import { Button } from "~/components/button/Button";
 import { Spinner } from "~/components/Spinner";
+import { useNavigationWarning } from "~/hooks/useNavigationWarning";
 import { gameTokenLocalStorage } from "~/libs/gameTokenLocalStorage";
 import type { Route } from "./+types/route";
 import { GamePresenter } from "./components/GamePresenter";
@@ -24,6 +25,14 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 				// 不要だったら消す
 			},
 		});
+
+	// ゲーム中はナビゲーション警告を表示（ENDメッセージを受信するまで）
+	const isConnected = wsRef.current?.readyState === WebSocket.OPEN;
+	const isGameEnded = data?.type === "END";
+	useNavigationWarning({
+		enabled: isConnected && !isGameEnded,
+		message: "ゲームを中断しますか？",
+	});
 
 	if (!WebSocket || wsRef.current?.readyState !== WebSocket.OPEN || !data) {
 		return (

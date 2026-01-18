@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { useNavigate } from "react-router";
 import { useToast } from "~/components/Toast";
 import { useIsLoading } from "~/hooks/useIsLoading";
+import { useNavigationWarning } from "~/hooks/useNavigationWarning";
 import { gameTokenLocalStorage } from "~/libs/gameTokenLocalStorage";
 import type { Route } from "./+types/route";
 import { MatchingError } from "./components/MatchingError";
@@ -60,6 +61,13 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 				void navigate("/");
 			}
 		},
+	});
+
+	// マッチング中はナビゲーション警告を表示
+	const isConnected = wsRef.current?.readyState === WebSocket.OPEN;
+	useNavigationWarning({
+		enabled: isConnected && !isExiting,
+		message: "マッチングを中断しますか？",
 	});
 
 	const handleStart = () => {
