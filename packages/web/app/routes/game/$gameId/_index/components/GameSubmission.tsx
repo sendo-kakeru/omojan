@@ -141,12 +141,12 @@ export function GameSubmission({
 
 	const getMessage = () => {
 		if (isStarting) {
-			return "";
+			return "ゲームを開始しています";
 		}
 		if (isMyTurn) {
 			return "あなたの番です。面白いと思う組み合わせを選んでください。";
 		}
-		return "他のプレイヤーの提出を待っています…";
+		return "他のプレイヤーの提出を待っています。";
 	};
 
 	return (
@@ -185,7 +185,7 @@ export function GameSubmission({
 					</div>
 					<p
 						className={classNames(
-							"flex-1 rounded-lg border px-8 py-2 text-sm",
+							"flex h-full flex-1 items-center rounded-lg border px-8 py-2 text-sm",
 							isMyTurn
 								? "border-green-300 bg-white text-green-600"
 								: "border-gray-300 bg-gray-50 text-neutral-500",
@@ -252,7 +252,8 @@ export function GameSubmission({
 						</div>
 					</section>
 
-					<section className="mx-[calc(50%-50cqw)] w-[100cqw] border-t-2 border-t-gray-300 bg-white py-8 xs:pt-16 sm:py-24">
+					{/* cqwを使って画面いっぱいに広げると　safariで崩れる。若干ズレはあるが最もマシな形をとっている。 */}
+					<section className="relative right-1/2 left-1/2 -mx-[50vw] w-screen border-t-2 border-t-gray-300 bg-white py-8 xs:pt-16 sm:py-24">
 						<div className="mx-auto flex max-w-800 flex-wrap gap-8 px-16">
 							{mePlayer.playerCards.map((card) => {
 								const isSelected = card.id === selectedCardId;
@@ -282,6 +283,9 @@ export function GameSubmission({
 								);
 							})}
 						</div>
+						{!isMyTurn && (
+							<div className="absolute inset-0 z-50 bg-gray-600 opacity-50" />
+						)}
 					</section>
 				</main>
 			</div>

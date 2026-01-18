@@ -30,7 +30,7 @@ export function GameResult({ data }: { data: GameServerResultMessage }) {
 						<span className="text-base">4</span>
 					</div>
 				</div>
-				<p className="flex-1 rounded-lg border border-gray-300 bg-gray-50 px-8 py-2 text-neutral-500 text-sm">
+				<p className="flex h-full flex-1 items-center rounded-lg border border-gray-300 bg-gray-50 px-8 py-2 text-neutral-500 text-sm">
 					ラウンド結果
 				</p>
 				<CircularTimerProgress count={count} progress={progress} />
@@ -125,7 +125,7 @@ export function GameResult({ data }: { data: GameServerResultMessage }) {
 					</div>
 				</section>
 
-				<section className="mx-[calc(50%-50cqw)] w-[100cqw] border-t-2 border-t-gray-300 bg-white py-8 xs:pt-16 sm:py-24">
+				<section className="relative right-1/2 left-1/2 -mx-[50vw] w-screen border-t-2 border-t-gray-300 bg-white py-8 xs:pt-16 sm:py-24">
 					<div className="mx-auto flex max-w-800 flex-wrap gap-8 px-16">
 						{mePlayer.playerCards.map((card) => (
 							<div
@@ -141,6 +141,7 @@ export function GameResult({ data }: { data: GameServerResultMessage }) {
 							</div>
 						))}
 					</div>
+					<div className="absolute inset-0 z-50 bg-gray-600 opacity-50" />
 				</section>
 			</main>
 		</div>

@@ -1,6 +1,6 @@
 {
 	"dependencies": {
-		"@libsql/client": "^0.15.15",
+		"@libsql/client": "^0.17.0",
 		"@noble/hashes": "^2.0.1",
 		"@oslojs/encoding": "^1.1.0",
 		"@repo/db": "workspace:*",
@@ -8,20 +8,20 @@
 		"aws-jwt-verify": "^5.1.1",
 		"drizzle-orm": "^0.45.1",
 		"drizzle-valibot": "^0.4.2",
-		"hono": "^4.11.3",
+		"hono": "^4.11.4",
 		"p-retry": "^7.1.1",
 		"valibot": "^1.2.0"
 	},
 	"devDependencies": {
-		"@faker-js/faker": "^10.1.0",
+		"@faker-js/faker": "^10.2.0",
 		"@repo/mock": "workspace:*",
 		"@repo/tsup-config": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
-		"@types/node": "^25.0.3",
+		"@types/node": "^25.0.9",
 		"drizzle-seed": "^0.3.1",
 		"tsx": "^4.20.6",
-		"vitest": "^4.0.16",
-		"wrangler": "^4.56.0"
+		"vitest": "^4.0.17",
+		"wrangler": "^4.59.2"
 	},
 	"exports": {
 		".": "./dist/index.d.ts"
