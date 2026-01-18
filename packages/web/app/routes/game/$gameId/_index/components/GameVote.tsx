@@ -56,15 +56,15 @@ export function GameVote({
 				</div>
 				<p
 					className={classNames(
-						"flex-1 rounded-lg border bg-white px-8 py-2 text-sm",
+						"flex h-full flex-1 items-center rounded-lg border bg-white px-8 py-2 text-sm",
 						confirmedPlayerId
 							? "border-gray-300 bg-gray-50 text-neutral-500"
 							: "border-green-300 text-green-600",
 					)}
 				>
 					{confirmedPlayerId
-						? "投票が完了しました。"
-						: "最も面白いと思う組み合わせに投票してください。"}
+						? "投票しました。他のプレイヤーの投票を待っています。"
+						: "面白いと思う組み合わせに投票してください。"}
 				</p>
 				<CircularTimerProgress count={count} progress={progress} />
 			</nav>

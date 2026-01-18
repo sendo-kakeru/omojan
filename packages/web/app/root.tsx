@@ -46,7 +46,7 @@ export function Layout({ children }: PropsWithChildren) {
 				<Meta />
 				<Links />
 			</head>
-			<body className="bg-yellow-50 font-[Inter] text-neutral-800 overflow-x-hidden">
+			<body className="overflow-x-hidden bg-yellow-50 font-[Inter] text-neutral-800">
 				<ToastProvider>{children}</ToastProvider>
 				<ScrollRestoration />
 				<Scripts />
