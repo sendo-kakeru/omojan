@@ -54,6 +54,7 @@ feat(api): 変更内容の概要
    - What よりも Why を記述
    - 箇条書きは `-` を使用
    - 破壊的変更: `BREAKING CHANGE:` で始める
+   - 日本語
 
 ### type 一覧
 
