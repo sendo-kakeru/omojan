@@ -9,7 +9,6 @@
 		"drizzle-orm": "^0.45.1",
 		"drizzle-valibot": "^0.4.2",
 		"drizzle-seed": "^0.3.1",
-		"pg": "^8.16.3",
 		"tsx": "^4.20.6",
 		"valibot": "^1.2.0"
 	},
