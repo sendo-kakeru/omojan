@@ -18,7 +18,7 @@ export function GameFinalResult({ result }: GameFinalResultProps) {
 		<main className="grid min-h-full gap-y-24 pt-16 pb-36">
 			<div className="flex items-center justify-between">
 				<h1 className="font-bold text-lg">最終結果</h1>
-				<Button as="link" to="/">
+				<Button as="link" replace to="/">
 					トップに戻る
 				</Button>
 			</div>
@@ -130,6 +130,7 @@ export function GameFinalResult({ result }: GameFinalResultProps) {
 					as="link"
 					className="mx-auto w-full max-w-240"
 					color="primary"
+					replace
 					size="L"
 					to="/"
 				>

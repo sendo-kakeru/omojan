@@ -136,7 +136,7 @@ export function useGameSubscriptionSWR({
 			console.error("提出の送信に失敗しました。", error);
 			alert("提出に失敗しました。ゲームを終了します。");
 			wsRef.current?.close(4410, "提出の送信に失敗しました。");
-			void navigate("/");
+			void navigate("/", { replace: true });
 		}
 	};
 
@@ -164,7 +164,7 @@ export function useGameSubscriptionSWR({
 			console.error("投票の送信に失敗しました。", error);
 			alert("投票に失敗しました。ゲームを終了します。");
 			wsRef.current?.close(4410, "投票の送信に失敗しました。");
-			void navigate("/");
+			void navigate("/", { replace: true });
 		}
 	};
 
