@@ -135,7 +135,7 @@ export function useMatchingSubscriptionSWR({
 		if (transitionCount === null) return;
 
 		if (transitionCount <= 0) {
-			void navigate(`/game/${gameId}`);
+			void navigate(`/game/${gameId}`, { replace: true });
 			wsRef.current?.close(1000, "マッチングが完了しました。");
 			return;
 		}

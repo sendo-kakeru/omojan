@@ -19,7 +19,7 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 	const gameToken = gameTokenLocalStorage.get({
 		onError() {
 			alert(LOCALSTORAGE_OPERATION_FAILED_MESSAGE);
-			void navigate("/");
+			void navigate("/", { replace: true });
 		},
 	});
 	const roomMetaResult = useRoomSWR({
@@ -57,7 +57,7 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 
 			if (event.code === 4204 || event.code === 4410) {
 				// NOTE: 退出時、部屋削除時はページ遷移
-				void navigate("/");
+				void navigate("/", { replace: true });
 			}
 		},
 	});
@@ -74,7 +74,7 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 				title: "接続が切断されています。ページを再読み込みしてください。",
 				type: "error",
 			});
-			void navigate("/");
+			void navigate("/", { replace: true });
 		} finally {
 			stopStarting();
 		}
@@ -101,7 +101,7 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 				exitTimeoutRef.current = null;
 			}
 			stopExiting();
-			void navigate("/");
+			void navigate("/", { replace: true });
 			return;
 		}
 	};

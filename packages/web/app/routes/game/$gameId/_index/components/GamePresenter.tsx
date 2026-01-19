@@ -27,7 +27,7 @@ export function GamePresenter({
 
 	useEffect(() => {
 		if (data.type === "END") {
-			void navigate(`/game/${gameId}/result`);
+			void navigate(`/game/${gameId}/result`, { replace: true });
 		}
 	}, [data.type, gameId, navigate]);
 
