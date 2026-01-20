@@ -465,6 +465,13 @@ export class GameService {
 	}
 
 	/**
+	 * ゲーム（部屋）を削除する
+	 */
+	async deleteGame({ gameId }: { gameId: GameId }): Promise<void> {
+		await this.db.delete(gameTable).where(eq(gameTable.id, gameId));
+	}
+
+	/**
 	 * 有効な単語からテーマ牌(4枚)と手持ち牌(28枚)を重複なしでランダム抽出
 	 */
 	private getGameWords(): {

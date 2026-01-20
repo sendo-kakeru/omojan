@@ -328,7 +328,7 @@ export class GameDurableObject extends DurableObject<Env> {
 			this.turnIndex = 0; // ラウンド開始時はターン0から
 
 			// 各プレイヤーにROUND_STARTメッセージを送信
-			this.broadcastRoundStart();
+			await this.broadcastRoundStart();
 
 			// 2秒後にTURN_STARTを送信（開始オーバーレイ表示用の待機）
 			this.state = "START_PENDING";
@@ -457,7 +457,7 @@ export class GameDurableObject extends DurableObject<Env> {
 	/**
 	 * 全プレイヤーにROUND_STARTメッセージを送信する。
 	 */
-	private broadcastRoundStart(): void {
+	private async broadcastRoundStart(): Promise<void> {
 		// ラウンドに応じた順番でプレイヤーを並び替え
 		const orderedPlayers = this.sortTurnOrderPlayers();
 
@@ -500,7 +500,7 @@ export class GameDurableObject extends DurableObject<Env> {
 			} catch (error) {
 				const message = `プレイヤー ${player.id} へのROUND_START送信に失敗しました`;
 				console.error(message, error);
-				this.switchToCpu({ message, playerId: player.id });
+				await this.switchToCpu({ message, playerId: player.id });
 			}
 		}
 	}
@@ -551,21 +551,22 @@ export class GameDurableObject extends DurableObject<Env> {
 			} catch (error) {
 				const message = `プレイヤー ${player.id} へのTURN_START送信に失敗しました`;
 				console.error(message, error);
-				this.switchToCpu({ message, playerId: player.id });
+				await this.switchToCpu({ message, playerId: player.id });
 			}
 		}
 	}
 
 	/**
 	 * プレイヤーをCPUに切り替え、接続を切断する。
+	 * 全員がCPUになった場合は部屋を削除する。
 	 */
-	private switchToCpu({
+	private async switchToCpu({
 		message,
 		playerId,
 	}: {
 		message: string;
 		playerId: PlayerId;
-	}): void {
+	}): Promise<void> {
 		const playerIndex = this.players.findIndex(
 			(player) => player.id === playerId,
 		);
@@ -580,6 +581,22 @@ export class GameDurableObject extends DurableObject<Env> {
 			playerId,
 		});
 		socket?.close(1011, message);
+
+		// 全員がCPUになった場合は部屋を削除
+		if (this.areAllPlayersCpu()) {
+			await this.handleGameAbort({
+				message: "全プレイヤーが切断したためゲームを終了しました",
+			});
+		}
+	}
+
+	/**
+	 * 全プレイヤーがCPUかどうかを判定する
+	 */
+	private areAllPlayersCpu(): boolean {
+		return (
+			this.players.length > 0 && this.players.every((player) => player.isCpu)
+		);
 	}
 
 	/**
@@ -625,7 +642,7 @@ export class GameDurableObject extends DurableObject<Env> {
 			} catch (error) {
 				const message = `プレイヤー ${player.id} へのVOTE_START送信に失敗しました`;
 				console.error(message, error);
-				this.switchToCpu({ message, playerId: player.id });
+				await this.switchToCpu({ message, playerId: player.id });
 			}
 		}
 
@@ -650,13 +667,13 @@ export class GameDurableObject extends DurableObject<Env> {
 	/**
 	 * 全プレイヤーにRESULTメッセージを送信する。
 	 */
-	private broadcastResult({
+	private async broadcastResult({
 		playerVoteCounts,
 		winnerPlayerIds,
 	}: {
 		playerVoteCounts: Map<PlayerId, number>;
 		winnerPlayerIds: PlayerId[];
-	}): void {
+	}): Promise<void> {
 		// ラウンドに応じた順番でプレイヤーを並び替え
 		const orderedPlayers = this.sortTurnOrderPlayers();
 
@@ -695,7 +712,7 @@ export class GameDurableObject extends DurableObject<Env> {
 			} catch (error) {
 				const message = `プレイヤー ${player.id} へのRESULT送信に失敗しました`;
 				console.error(message, error);
-				this.switchToCpu({ message, playerId: player.id });
+				await this.switchToCpu({ message, playerId: player.id });
 			}
 		}
 	}
@@ -703,11 +720,11 @@ export class GameDurableObject extends DurableObject<Env> {
 	/**
 	 * 全プレイヤーにTURN_ENDメッセージを送信する。
 	 */
-	private broadcastTurnEnd({
+	private async broadcastTurnEnd({
 		submission,
 	}: {
 		submission: Pick<Submission, "position"> & Pick<PlayerCard, "text">;
-	}): void {
+	}): Promise<void> {
 		// ラウンドに応じた順番でプレイヤーを並び替え
 		const orderedPlayers = this.sortTurnOrderPlayers();
 
@@ -750,7 +767,7 @@ export class GameDurableObject extends DurableObject<Env> {
 			} catch (error) {
 				const message = `プレイヤー ${player.id} へのTURN_END送信に失敗しました`;
 				console.error(message, error);
-				this.switchToCpu({ message, playerId: player.id });
+				await this.switchToCpu({ message, playerId: player.id });
 			}
 		}
 	}
@@ -788,7 +805,7 @@ export class GameDurableObject extends DurableObject<Env> {
 		this.state = "SUBMITTED";
 
 		// TURN_ENDをブロードキャスト
-		this.broadcastTurnEnd({ submission });
+		await this.broadcastTurnEnd({ submission });
 
 		// 1秒後に次のターンへ進む
 		await this.ctx.storage.setAlarm(Date.now() + 1000);
@@ -840,7 +857,7 @@ export class GameDurableObject extends DurableObject<Env> {
 			);
 		} catch (error) {
 			console.error("投票の保存に失敗しました:", error);
-			this.switchToCpu({
+			await this.switchToCpu({
 				message: "投票の保存に失敗しました。CPUに切り替えます。",
 				playerId,
 			});
@@ -928,7 +945,7 @@ export class GameDurableObject extends DurableObject<Env> {
 			}
 
 			this.state = "RESULT";
-			this.broadcastResult({ playerVoteCounts, winnerPlayerIds });
+			await this.broadcastResult({ playerVoteCounts, winnerPlayerIds });
 			// 6秒後に次のラウンドへ（または終了処理）
 			await this.ctx.storage.setAlarm(Date.now() + 6000);
 		} catch (error) {
@@ -971,7 +988,7 @@ export class GameDurableObject extends DurableObject<Env> {
 		}
 
 		// ROUND_STARTを送信
-		this.broadcastRoundStart();
+		await this.broadcastRoundStart();
 
 		// 2秒後にTURN_STARTを送信（開始オーバーレイ表示用の待機）
 		this.state = "START_PENDING";
@@ -1024,7 +1041,7 @@ export class GameDurableObject extends DurableObject<Env> {
 
 	/**
 	 * ゲーム異常終了処理
-	 * - ゲームステータスを終了に更新
+	 * - 部屋を削除
 	 * - 全プレイヤーを切断
 	 * - クリーンアップ処理を実行
 	 */
@@ -1037,12 +1054,12 @@ export class GameDurableObject extends DurableObject<Env> {
 	}): Promise<void> {
 		console.error(`ゲーム異常終了: ${message}`);
 
-		// DBステータスを終了に更新
+		// 部屋を削除
 		if (this.gameId) {
 			try {
-				await this.gameService.endGame({ gameId: this.gameId });
+				await this.gameService.deleteGame({ gameId: this.gameId });
 			} catch (error) {
-				console.error("ゲームステータスの更新に失敗しました:", error);
+				console.error("部屋の削除に失敗しました:", error);
 			}
 		}
 
@@ -1138,7 +1155,7 @@ export class GameDurableObject extends DurableObject<Env> {
 			);
 		} catch (error) {
 			console.error("提出処理に失敗しました:", error);
-			this.switchToCpu({
+			await this.switchToCpu({
 				message: "提出処理に失敗しました。CPUに切り替えます。",
 				playerId,
 			});
@@ -1191,7 +1208,7 @@ export class GameDurableObject extends DurableObject<Env> {
 		await this.submitPlayerCard({ playerId, submission });
 
 		// TURN_ENDをブロードキャスト
-		this.broadcastTurnEnd({ submission });
+		await this.broadcastTurnEnd({ submission });
 	}
 
 	/**
