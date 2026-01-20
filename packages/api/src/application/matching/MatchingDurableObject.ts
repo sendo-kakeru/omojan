@@ -146,7 +146,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 		});
 
 		if (!playerId) {
-			ws.close(4409, "接続が見つかりません");
+			ws.close(1007, "接続が見つかりません");
 			return;
 		}
 
@@ -192,12 +192,12 @@ export class MatchingDurableObject extends DurableObject<Env> {
 
 		// ゲームが開始済み or 終了済みの場合、全接続を閉じてクリーンアップ
 		if (gameStatus !== "waiting") {
+			const isActive = gameStatus === "active";
 			await this.closeAllConnections({
-				code: 4200,
-				message:
-					gameStatus === "active"
-						? "ゲームが開始されました"
-						: "ゲームが終了しました",
+				code: isActive ? 1000 : 1007,
+				message: isActive
+					? "ゲームが開始されました"
+					: "この部屋は終了しています",
 			});
 			this.cleanup();
 			return;
