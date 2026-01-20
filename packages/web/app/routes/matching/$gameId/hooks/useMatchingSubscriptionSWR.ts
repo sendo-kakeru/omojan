@@ -100,6 +100,9 @@ export function useMatchingSubscriptionSWR({
 			};
 
 			const handleClose = (event: CloseEvent) => {
+				// 1000: 正常終了（ゲーム開始など）
+				// 4204: 退出
+				// 4410: 部屋削除
 				if (event.code !== 1000 && event.code !== 4204 && event.code !== 4410) {
 					console.error("接続が閉じられました。", event);
 					next(
