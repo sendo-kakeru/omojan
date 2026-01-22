@@ -6,9 +6,12 @@ import { Dialog } from "../Dialog";
 export function SigninModal({
 	isOpen,
 	setIsOpen,
+	// biome-ignore lint/correctness/noUnusedFunctionParameters: ログイン機能活性化時に必要
+	isAppBrowser = false,
 }: {
 	isOpen: boolean;
 	setIsOpen: Dispatch<SetStateAction<boolean>>;
+	isAppBrowser?: boolean;
 }) {
 	return (
 		<Dialog onOpenChange={setIsOpen} open={isOpen} title="ログイン">
