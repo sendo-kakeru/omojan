@@ -1,5 +1,6 @@
 import type { Dispatch, SetStateAction } from "react";
 import { FaRocket } from "react-icons/fa";
+import { XFollowButton } from "../button/XFollowButton";
 import { Dialog } from "../Dialog";
 
 export function SigninModal({
@@ -11,22 +12,27 @@ export function SigninModal({
 }) {
 	return (
 		<Dialog onOpenChange={setIsOpen} open={isOpen} title="ログイン">
-			<div className="grid w-full place-items-center gap-y-24">
-				<FaRocket className="size-56 text-neutral-400" />
-				<div className="grid gap-y-12">
+			<div className="grid place-items-center gap-y-48">
+				<div className="grid place-items-center gap-y-16">
+					<FaRocket className="size-56 text-neutral-400" />
 					<p className="text-center font-bold text-3xl text-neutral-400">
 						Coming Soon
 					</p>
-					<p className="text-lg text-neutral-500">
-						ログイン機能は近日公開予定。
-					</p>
-					{/* TODO: Xへの動線追加 */}
 				</div>
-				<ul className="grid list-disc gap-y-8 py-16 text-neutral-500">
-					<li>名前入力なしでゲーム参加</li>
-					<li>ゲーム中のアイコン設定</li>
-					<li>戦績確認</li>
-				</ul>
+				<div className="grid place-items-center gap-y-12 text-neutral-500">
+					<p className="text-lg">ログイン機能は近日公開予定です</p>
+					<ul className="grid list-disc gap-y-8">
+						<li>名前入力なしでゲーム参加</li>
+						<li>ゲーム中のアイコン設定</li>
+						<li>戦績</li>
+					</ul>
+				</div>
+				<div className="grid place-items-center gap-y-8">
+					<p className="text-neutral-500 text-sm">
+						最新情報は公式Xアカウントをチェック
+					</p>
+					<XFollowButton options={{ size: "large" }} username="omojan_online" />
+				</div>
 			</div>
 		</Dialog>
 	);
