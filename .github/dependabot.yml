@@ -8,9 +8,6 @@ updates:
       day: 'friday'
     assignees:
       - "sendo-kakeru"
-    ignore:
-      - dependency-name: '@types/node'
-        update-types: ['version-update:semver-major']
 
   - package-ecosystem: npm
     directory: /
@@ -19,6 +16,9 @@ updates:
       day: 'friday'
     assignees:
       - "sendo-kakeru"
+    ignore:
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
     open-pull-requests-limit: 20
     groups:
       react:

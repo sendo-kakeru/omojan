@@ -7,7 +7,7 @@
 		"typescript": "5.9.3"
 	},
 	"engines": {
-		"node": "25.0.0"
+		"node": "24.13.0"
 	},
 	"name": "omojan",
 	"packageManager": "pnpm@10.22.0",
