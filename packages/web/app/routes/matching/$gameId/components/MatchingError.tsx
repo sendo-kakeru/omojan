@@ -17,7 +17,7 @@ export function MatchingError({ errorType }: { errorType: MatchingErrorType }) {
 	return (
 		<main className="grid place-items-center gap-y-12">
 			<h2 className="font-bold text-xl">{ERROR_MESSAGES[errorType]}</h2>
-			<Button as="link" className="w-fit" to="/">
+			<Button as="link" className="w-fit" replace to="/">
 				トップに戻る
 			</Button>
 		</main>

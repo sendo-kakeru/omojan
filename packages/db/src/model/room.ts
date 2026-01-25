@@ -2,6 +2,7 @@ import { createSelectSchema } from "drizzle-valibot";
 import {
 	array,
 	type BrandSymbol,
+	boolean,
 	type InferOutput,
 	length,
 	literal,
@@ -15,6 +16,7 @@ import {
 	omit,
 	optional,
 	pick,
+	picklist,
 	pipe,
 	string,
 	variant,
@@ -29,32 +31,72 @@ import {
 	playerTable,
 	userSchema,
 } from "../schema";
+import {
+	paginatedResponseSchema,
+	paginationRequestQuerySchema,
+} from "./pagination";
 export type { BrandSymbol };
+
+/** 部屋一覧で使用するステータス */
+export const roomStatusSchema = picklist(["waiting", "finished"]);
+export type RoomStatus = InferOutput<typeof roomStatusSchema>;
 
 export const roomPasswordSchema = pipe(
 	string("パスワードを入力してください"),
 	length(6, "パスワードは6文字で入力してください"),
 );
 
+const roomPlayerSchema = object({
+	...pick(playerSchema, ["playerName", "seat"]).entries,
+	id: playerIdSchema,
+	image: nullable(userSchema.entries.image),
+});
+
 export const roomSchema = object({
 	...pick(gameSchema, ["title", "isPrivate", "password", "timeLimit"]).entries,
 	gameId: gameIdSchema,
-	players: array(
-		object({
-			...pick(playerSchema, ["playerName", "seat"]).entries,
-			id: playerIdSchema,
-			image: nullable(userSchema.entries.image),
-		}),
-	),
+	players: array(roomPlayerSchema),
 });
 export type Room = InferOutput<typeof roomSchema>;
 
-// find many
-export const getRoomListResponseBodySchema = array(
-	omit(roomSchema, ["password"]),
-);
-export type GetRoomListResponseBody = InferOutput<
-	typeof getRoomListResponseBodySchema
+// find many (query)
+export const getRoomListRequestQuerySchema = object({
+	...paginationRequestQuerySchema.entries,
+	/** 部屋のステータス（default: "waiting"） */
+	status: optional(roomStatusSchema),
+});
+export type GetRoomListQuery = InferOutput<
+	typeof getRoomListRequestQuerySchema
+>;
+
+/** 募集中の部屋（従来の形式） */
+export const waitingRoomSchema = omit(roomSchema, ["password"]);
+export type WaitingRoom = InferOutput<typeof waitingRoomSchema>;
+
+/** 終了済み部屋用スキーマ */
+export const finishedRoomSchema = object({
+	...omit(roomSchema, ["password"]).entries,
+	players: array(
+		object({
+			...roomPlayerSchema.entries,
+			isWinner: boolean(),
+		}),
+	),
+});
+export type FinishedRoom = InferOutput<typeof finishedRoomSchema>;
+
+/** 募集中部屋一覧レスポンス */
+export const getRoomListWaitingResponseBodySchema =
+	paginatedResponseSchema(waitingRoomSchema);
+export type GetRoomListWaitingResponseBody = InferOutput<
+	typeof getRoomListWaitingResponseBodySchema
+>;
+
+/** 終了済み部屋一覧レスポンス */
+export const getRoomListFinishedResponseBodySchema =
+	paginatedResponseSchema(finishedRoomSchema);
+export type GetRoomListFinishedResponseBody = InferOutput<
+	typeof getRoomListFinishedResponseBodySchema
 >;
 
 // find one

@@ -12,7 +12,7 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 	const gameToken = gameTokenLocalStorage.get({
 		onError() {
 			alert(LOCALSTORAGE_OPERATION_FAILED_MESSAGE);
-			void navigate("/");
+			void navigate("/", { replace: true });
 		},
 	});
 
@@ -38,7 +38,7 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 		return (
 			<main className="grid place-items-center gap-y-12">
 				<h2 className="font-bold text-xl">エラーが発生しました。</h2>
-				<Button as="link" className="w-fit" to="/">
+				<Button as="link" className="w-fit" replace to="/">
 					トップに戻る
 				</Button>
 			</main>

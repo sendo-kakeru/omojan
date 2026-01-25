@@ -411,7 +411,7 @@ export class GameService {
 	/**
 	 * 投票結果から勝者と得票数を計算する
 	 */
-	private calculateWinnersAndVoteCountsFromVotes({
+	calculateWinnersAndVoteCountsFromVotes({
 		submissions,
 		votes,
 	}: {
@@ -462,6 +462,13 @@ export class GameService {
 			.update(gameTable)
 			.set({ status: "finished" })
 			.where(eq(gameTable.id, gameId));
+	}
+
+	/**
+	 * ゲーム（部屋）を削除する
+	 */
+	async deleteGame({ gameId }: { gameId: GameId }): Promise<void> {
+		await this.db.delete(gameTable).where(eq(gameTable.id, gameId));
 	}
 
 	/**

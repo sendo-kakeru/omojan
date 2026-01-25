@@ -159,7 +159,7 @@ export const WORDS = [
 	{ enabled: true, text: "がいっぱい" },
 	{ enabled: true, text: "ウェットティッシュ" },
 	{ enabled: true, text: "ハイスピード" },
-	{ enabled: true, text: "エラ呼吸" },
+	{ enabled: true, text: "呼吸" },
 	{ enabled: true, text: "正しい" },
 	{ enabled: true, text: "完全無欠の" },
 	{ enabled: true, text: "ダウンロード" },

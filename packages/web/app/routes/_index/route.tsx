@@ -8,10 +8,11 @@ import { useRoomListSWR } from "~/routes/_index/hooks/useRoomListSWR";
 import { CreateRoomDialog } from "./components/CreateRoomDialog";
 import { JoinRoomCard } from "./components/JoinRoomCard";
 
+// TODO: タブ切り替え、ページネーション
 export default function () {
 	const [isOpen, setIsOpen] = useState(false);
 	const { data, error, isLoading, isValidating, mutate } = useRoomListSWR();
-	const gameList = data?.data;
+	const gameList = data?.data?.items;
 
 	return (
 		<>
