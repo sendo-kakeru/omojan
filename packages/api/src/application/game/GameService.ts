@@ -411,7 +411,7 @@ export class GameService {
 	/**
 	 * 投票結果から勝者と得票数を計算する
 	 */
-	private calculateWinnersAndVoteCountsFromVotes({
+	calculateWinnersAndVoteCountsFromVotes({
 		submissions,
 		votes,
 	}: {
