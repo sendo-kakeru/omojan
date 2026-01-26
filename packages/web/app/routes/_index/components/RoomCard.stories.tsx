@@ -19,6 +19,7 @@ export default meta;
 type Story = StoryFn<typeof RoomCard>;
 
 const createWaitingRoom = (overrides?: Partial<WaitingRoom>): WaitingRoom => ({
+	createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30分前
 	gameId: "game-123" as WaitingRoom["gameId"],
 	isPrivate: false,
 	players: [
@@ -37,6 +38,7 @@ const createWaitingRoom = (overrides?: Partial<WaitingRoom>): WaitingRoom => ({
 const createFinishedRoom = (
 	overrides?: Partial<FinishedRoom>,
 ): FinishedRoom => ({
+	finishedAt: new Date(2024, 0, 15).toISOString(), // 2024/01/15
 	gameId: "game-123" as FinishedRoom["gameId"],
 	isPrivate: false,
 	players: [

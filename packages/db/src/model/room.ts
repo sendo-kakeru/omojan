@@ -69,13 +69,19 @@ export type GetRoomListRequestQuery = InferOutput<
 	typeof getRoomListRequestQuerySchema
 >;
 
-/** 募集中の部屋（従来の形式） */
-export const waitingRoomSchema = omit(roomSchema, ["password"]);
+/** 募集中の部屋 */
+export const waitingRoomSchema = object({
+	...omit(roomSchema, ["password"]).entries,
+	/** 部屋作成日時（ISO文字列） */
+	createdAt: string(),
+});
 export type WaitingRoom = InferOutput<typeof waitingRoomSchema>;
 
 /** 終了済み部屋用スキーマ */
 export const finishedRoomSchema = object({
 	...omit(roomSchema, ["password"]).entries,
+	/** 終了日時（ISO文字列） */
+	finishedAt: string(),
 	players: array(
 		object({
 			...roomPlayerSchema.entries,
