@@ -65,7 +65,7 @@ export const getRoomListRequestQuerySchema = object({
 	/** 部屋のステータス（default: "waiting"） */
 	status: optional(roomStatusSchema),
 });
-export type GetRoomListQuery = InferOutput<
+export type GetRoomListRequestQuery = InferOutput<
 	typeof getRoomListRequestQuerySchema
 >;
 
@@ -79,7 +79,7 @@ export const finishedRoomSchema = object({
 	players: array(
 		object({
 			...roomPlayerSchema.entries,
-			isWinner: boolean(),
+			isWinner: optional(boolean()),
 		}),
 	),
 });
