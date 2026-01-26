@@ -6,7 +6,7 @@ import { Button } from "~/components/button/Button";
 import { Spinner } from "~/components/Spinner";
 import { useRoomListSWR } from "~/routes/_index/hooks/useRoomListSWR";
 import { CreateRoomDialog } from "./components/CreateRoomDialog";
-import { JoinRoomCard } from "./components/JoinRoomCard";
+import { RoomCard } from "./components/RoomCard";
 
 // TODO: タブ切り替え、ページネーション
 export default function () {
@@ -64,7 +64,7 @@ export default function () {
 					{gameList && (
 						<div className="grid gap-y-8">
 							{gameList.map((room) => (
-								<JoinRoomCard key={room.gameId} room={room} />
+								<RoomCard key={room.gameId} room={room} status="waiting" />
 							))}
 						</div>
 					)}
