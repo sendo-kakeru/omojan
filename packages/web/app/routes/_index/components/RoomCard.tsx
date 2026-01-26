@@ -6,6 +6,7 @@ import { FiUsers } from "react-icons/fi";
 import { IoIosLock } from "react-icons/io";
 import { Link } from "react-router";
 import { UserLabel } from "~/components/user/UserLabel";
+import { formatDate, formatRelativeTime } from "~/libs/formatDate";
 import { JoinRoomDialog } from "./JoinRoomDialog";
 
 export function RoomCard({
@@ -62,7 +63,7 @@ export function RoomCard({
 			<div className="flex flex-wrap gap-x-8 gap-y-8">
 				{room.players.map((player) => {
 					const isWinner =
-						status === "finished" && "isWinner" in player && player.isWinner;
+						!isWaiting && "isWinner" in player && player.isWinner;
 
 					return (
 						<div
@@ -86,6 +87,11 @@ export function RoomCard({
 					);
 				})}
 			</div>
+			<p className="w-full text-right text-neutral-400 text-xs">
+				{isWaiting
+					? formatRelativeTime(room.createdAt)
+					: formatDate(room.finishedAt)}
+			</p>
 		</>
 	);
 

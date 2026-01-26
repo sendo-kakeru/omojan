@@ -83,7 +83,11 @@ export default function () {
 							emptyMessage="現在募集している部屋はありません"
 							error={error}
 							isLoading={isLoading}
-							rooms={status === "waiting" ? data?.items : undefined}
+							rooms={
+								status === "waiting"
+									? (data?.items as WaitingRoom[] | undefined)
+									: undefined
+							}
 							status="waiting"
 						/>
 					</TabsContent>
@@ -93,7 +97,11 @@ export default function () {
 							emptyMessage="終了した部屋はありません"
 							error={error}
 							isLoading={isLoading}
-							rooms={status === "finished" ? data?.items : undefined}
+							rooms={
+								status === "finished"
+									? (data?.items as FinishedRoom[] | undefined)
+									: undefined
+							}
 							status="finished"
 						/>
 					</TabsContent>
@@ -129,11 +137,10 @@ type FinishedRoomListProps = RoomListPropsBase & {
 };
 
 function RoomList({
-	rooms,
-	status,
 	isLoading,
 	error,
 	emptyMessage,
+	...props
 }: WaitingRoomListProps | FinishedRoomListProps) {
 	if (isLoading) {
 		return (
@@ -150,14 +157,24 @@ function RoomList({
 		);
 	}
 
-	if (!rooms || rooms.length === 0) {
+	if (!props.rooms || props.rooms.length === 0) {
 		return <p className="py-16 text-center text-neutral-500">{emptyMessage}</p>;
+	}
+
+	if (props.status === "waiting") {
+		return (
+			<div className="grid gap-y-8">
+				{props.rooms.map((room) => (
+					<RoomCard key={room.gameId} room={room} status="waiting" />
+				))}
+			</div>
+		);
 	}
 
 	return (
 		<div className="grid gap-y-8">
-			{rooms.map((room) => (
-				<RoomCard key={room.gameId} room={room} status={status} />
+			{props.rooms.map((room) => (
+				<RoomCard key={room.gameId} room={room} status="finished" />
 			))}
 		</div>
 	);

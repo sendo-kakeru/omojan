@@ -141,6 +141,7 @@ export class RoomService {
 
 		return {
 			items: games.map((game) => ({
+				createdAt: game.createdAt.toISOString(),
 				gameId: game.id,
 				isPrivate: game.isPrivate,
 				players: (groupedPlayersByGameId.get(game.id) ?? [])
@@ -183,6 +184,7 @@ export class RoomService {
 		// game取得（ページネーション付き）
 		const games = await this.db
 			.select({
+				finishedAt: gameTable.updatedAt,
 				id: gameTable.id,
 				isPrivate: gameTable.isPrivate,
 				timeLimit: gameTable.timeLimit,
@@ -219,6 +221,7 @@ export class RoomService {
 			items: games.map((game) => {
 				const winnerIds = winnerIdsByGameId.get(game.id) ?? new Set<PlayerId>();
 				return {
+					finishedAt: game.finishedAt.toISOString(),
 					gameId: game.id,
 					isPrivate: game.isPrivate,
 					players: (groupedPlayersByGameId.get(game.id) ?? [])
