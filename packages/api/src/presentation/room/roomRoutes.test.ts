@@ -7,7 +7,11 @@ import {
 	gameTable,
 	type PlayerSeat,
 	playerTable,
+	type RoundNo,
+	roundTable,
+	submissionTable,
 	userTable,
+	voteTable,
 } from "@repo/db/schema";
 import { MOCK_USER } from "@repo/mock/model";
 import { eq } from "drizzle-orm";
@@ -38,6 +42,9 @@ describe("roomRoutes", () => {
 		const mockHonoClient = testClient<typeof app>(app);
 
 		beforeEach(async () => {
+			await db.delete(voteTable);
+			await db.delete(submissionTable);
+			await db.delete(roundTable);
 			await db.delete(playerTable);
 			await db.delete(gameTable);
 			await db.delete(userTable);
@@ -294,13 +301,6 @@ describe("roomRoutes", () => {
 						timeLimit: 60,
 						title: "Room 2",
 					},
-					{
-						isPrivate: false,
-						password: null,
-						status: "active" as const,
-						timeLimit: 45,
-						title: "Room 3",
-					},
 				];
 
 				for (const data of gameData) {
@@ -309,21 +309,388 @@ describe("roomRoutes", () => {
 					});
 				}
 
-				const response = await mockHonoClient.v1.rooms.$get();
+				const response = await mockHonoClient.v1.rooms.$get({
+					query: {},
+				});
 
 				expect(response.status).toBe(200);
 				const body = await response.json();
-				const rooms = body.data;
-				expect(rooms).toBeDefined();
-				expect(rooms?.length).toBe(3);
+				const data = body.data;
+				expect(data).toBeDefined();
+				expect(data?.items?.length).toBe(2);
+				expect(data?.meta).toEqual({
+					limit: 20,
+					page: 1,
+					total: 2,
+					totalPages: 1,
+				});
 
-				expect(rooms?.[0].title).toBe(gameData[2].title);
-				expect(rooms?.[0].isPrivate).toBe(gameData[2].isPrivate);
-				expect(rooms?.[0].players.length).toBe(1);
+				// 新しい順（Room 2 → Room 1）
+				expect(data?.items?.[0].title).toBe(gameData[1].title);
+				expect(data?.items?.[0].isPrivate).toBe(gameData[1].isPrivate);
+				expect(data?.items?.[0].players.length).toBe(1);
 
-				expect(rooms?.[1].title).toBe(gameData[1].title);
-				expect(rooms?.[1].isPrivate).toBe(gameData[1].isPrivate);
-				expect(rooms?.[1].players.length).toBe(1);
+				expect(data?.items?.[1].title).toBe(gameData[0].title);
+				expect(data?.items?.[1].isPrivate).toBe(gameData[0].isPrivate);
+				expect(data?.items?.[1].players.length).toBe(1);
+			});
+
+			test("status=waitingで募集中のルームのみ取得できる", async () => {
+				// 募集中ルーム
+				const [waitingGame] = await db
+					.insert(gameTable)
+					.values({
+						isPrivate: false,
+						password: null,
+						status: "waiting",
+						timeLimit: 30,
+						title: "Waiting Room",
+					})
+					.returning();
+				await db.insert(playerTable).values({
+					gameId: waitingGame.id,
+					gameTokenHash: hashGameToken("token-1"),
+					playerName: "Player 1",
+					seat: 1,
+					userId: null,
+				});
+
+				// アクティブなルーム（募集中ではない）
+				await db.insert(gameTable).values({
+					isPrivate: false,
+					password: null,
+					status: "active",
+					timeLimit: 30,
+					title: "Active Room",
+				});
+
+				// 終了済みルーム
+				await db.insert(gameTable).values({
+					isPrivate: false,
+					password: null,
+					status: "finished",
+					timeLimit: 30,
+					title: "Finished Room",
+				});
+
+				const response = await mockHonoClient.v1.rooms.$get({
+					query: { status: "waiting" },
+				});
+
+				expect(response.status).toBe(200);
+				const body = await response.json();
+				expect(body.data?.items?.length).toBe(1);
+				expect(body.data?.items?.[0].title).toBe("Waiting Room");
+			});
+
+			test("ページネーションが正しく動作する", async () => {
+				// 5つのルームを作成
+				for (let i = 1; i <= 5; i++) {
+					const [game] = await db
+						.insert(gameTable)
+						.values({
+							isPrivate: false,
+							password: null,
+							status: "waiting",
+							timeLimit: 30,
+							title: `Room ${i}`,
+						})
+						.returning();
+					await db.insert(playerTable).values({
+						gameId: game.id,
+						gameTokenHash: hashGameToken(`token-${i}`),
+						playerName: `Player ${i}`,
+						seat: 1,
+						userId: null,
+					});
+				}
+
+				// 1ページ目（limit=2）
+				const response1 = await app.request("/v1/rooms?limit=2&page=1");
+				expect(response1.status).toBe(200);
+				const body1 = await response1.json();
+				expect(body1.data?.items?.length).toBe(2);
+				expect(body1.data?.meta).toEqual({
+					limit: 2,
+					page: 1,
+					total: 5,
+					totalPages: 3,
+				});
+
+				// 2ページ目
+				const response2 = await app.request("/v1/rooms?limit=2&page=2");
+				expect(response2.status).toBe(200);
+				const body2 = await response2.json();
+				expect(body2.data?.items?.length).toBe(2);
+				expect(body2.data?.meta?.page).toBe(2);
+
+				// 3ページ目（残り1件）
+				const response3 = await app.request("/v1/rooms?limit=2&page=3");
+				expect(response3.status).toBe(200);
+				const body3 = await response3.json();
+				expect(body3.data?.items?.length).toBe(1);
+				expect(body3.data?.meta?.page).toBe(3);
+			});
+
+			test("無効なlimitの場合は400を返す", async () => {
+				// 非数値
+				const response1 = await app.request("/v1/rooms?limit=abc");
+				expect(response1.status).toBe(400);
+
+				// 0以下
+				const response2 = await app.request("/v1/rooms?limit=0");
+				expect(response2.status).toBe(400);
+
+				// 上限超過
+				const response3 = await app.request("/v1/rooms?limit=101");
+				expect(response3.status).toBe(400);
+			});
+
+			test("無効なpageの場合は400を返す", async () => {
+				// 非数値
+				const response1 = await app.request("/v1/rooms?page=abc");
+				expect(response1.status).toBe(400);
+
+				// 0以下
+				const response2 = await app.request("/v1/rooms?page=0");
+				expect(response2.status).toBe(400);
+
+				// 負の値
+				const response3 = await app.request("/v1/rooms?page=-1");
+				expect(response3.status).toBe(400);
+			});
+
+			test("ルームが存在しない場合、空配列を返す", async () => {
+				const response = await mockHonoClient.v1.rooms.$get({
+					query: {},
+				});
+
+				expect(response.status).toBe(200);
+				const body = await response.json();
+				expect(body.data?.items).toEqual([]);
+				expect(body.data?.meta).toEqual({
+					limit: 20,
+					page: 1,
+					total: 0,
+					totalPages: 0,
+				});
+			});
+
+			test("status=finishedで終了済みルームを取得できる", async () => {
+				// 終了済みルームを作成
+				const [finishedGame] = await db
+					.insert(gameTable)
+					.values({
+						isPrivate: false,
+						password: null,
+						status: "finished",
+						timeLimit: 30,
+						title: "Finished Room",
+					})
+					.returning();
+
+				// プレイヤーを作成
+				const players = await db
+					.insert(playerTable)
+					.values([
+						{
+							gameId: finishedGame.id,
+							gameTokenHash: hashGameToken("token-1"),
+							playerName: "Winner Player",
+							seat: 1 as PlayerSeat,
+							userId: null,
+						},
+						{
+							gameId: finishedGame.id,
+							gameTokenHash: hashGameToken("token-2"),
+							playerName: "Loser Player",
+							seat: 2 as PlayerSeat,
+							userId: null,
+						},
+					])
+					.returning();
+
+				// ラウンドを作成
+				const [round] = await db
+					.insert(roundTable)
+					.values({
+						gameId: finishedGame.id,
+						roundNo: 1 as RoundNo,
+					})
+					.returning();
+
+				// 提出を作成
+				const submissions = await db
+					.insert(submissionTable)
+					.values([
+						{
+							playerId: players[0].id,
+							position: "prefix",
+							roundId: round.id,
+						},
+						{
+							playerId: players[1].id,
+							position: "suffix",
+							roundId: round.id,
+						},
+					])
+					.returning();
+
+				// 投票を作成（Player 1に2票、Player 2に0票）
+				await db.insert(voteTable).values([
+					{
+						playerId: players[0].id,
+						roundId: round.id,
+						submissionId: submissions[0].id,
+					},
+					{
+						playerId: players[1].id,
+						roundId: round.id,
+						submissionId: submissions[0].id,
+					},
+				]);
+
+				const response = await app.request("/v1/rooms?status=finished");
+
+				expect(response.status).toBe(200);
+				const body = await response.json();
+				expect(body.data?.items?.length).toBe(1);
+
+				const room = body.data?.items?.[0];
+				expect(room?.title).toBe("Finished Room");
+				expect(room?.players?.length).toBe(2);
+
+				// 勝者の確認
+				type FinishedPlayer = { playerName: string; isWinner: boolean };
+				const winnerPlayer = room?.players?.find(
+					(p: FinishedPlayer) => p.playerName === "Winner Player",
+				);
+				const loserPlayer = room?.players?.find(
+					(p: FinishedPlayer) => p.playerName === "Loser Player",
+				);
+				expect(winnerPlayer?.isWinner).toBe(true);
+				expect(loserPlayer?.isWinner).toBe(false);
+			});
+
+			test("終了済みルームで複数ラウンドの勝者を正しく計算する", async () => {
+				const [finishedGame] = await db
+					.insert(gameTable)
+					.values({
+						isPrivate: false,
+						password: null,
+						status: "finished",
+						timeLimit: 30,
+						title: "Multi Round Game",
+					})
+					.returning();
+
+				const players = await db
+					.insert(playerTable)
+					.values([
+						{
+							gameId: finishedGame.id,
+							gameTokenHash: hashGameToken("token-1"),
+							playerName: "Player A",
+							seat: 1 as PlayerSeat,
+							userId: null,
+						},
+						{
+							gameId: finishedGame.id,
+							gameTokenHash: hashGameToken("token-2"),
+							playerName: "Player B",
+							seat: 2 as PlayerSeat,
+							userId: null,
+						},
+					])
+					.returning();
+
+				// 3ラウンド作成
+				const rounds = await db
+					.insert(roundTable)
+					.values([
+						{ gameId: finishedGame.id, roundNo: 1 as RoundNo },
+						{ gameId: finishedGame.id, roundNo: 2 as RoundNo },
+						{ gameId: finishedGame.id, roundNo: 3 as RoundNo },
+					])
+					.returning();
+
+				// 各ラウンドで提出と投票を作成
+				for (let i = 0; i < 3; i++) {
+					const submissions = await db
+						.insert(submissionTable)
+						.values([
+							{
+								playerId: players[0].id,
+								position: "prefix",
+								roundId: rounds[i].id,
+							},
+							{
+								playerId: players[1].id,
+								position: "suffix",
+								roundId: rounds[i].id,
+							},
+						])
+						.returning();
+
+					// ラウンド1,2はPlayer A勝利、ラウンド3はPlayer B勝利
+					const winnerSubmissionIndex = i < 2 ? 0 : 1;
+					await db.insert(voteTable).values([
+						{
+							playerId: players[0].id,
+							roundId: rounds[i].id,
+							submissionId: submissions[winnerSubmissionIndex].id,
+						},
+						{
+							playerId: players[1].id,
+							roundId: rounds[i].id,
+							submissionId: submissions[winnerSubmissionIndex].id,
+						},
+					]);
+				}
+
+				const response = await app.request("/v1/rooms?status=finished");
+
+				expect(response.status).toBe(200);
+				const body = await response.json();
+				const room = body.data?.items?.[0];
+
+				// Player Aが2勝、Player Bが1勝なのでPlayer Aが勝者
+				type FinishedPlayer = { playerName: string; isWinner: boolean };
+				const playerA = room?.players?.find(
+					(p: FinishedPlayer) => p.playerName === "Player A",
+				);
+				const playerB = room?.players?.find(
+					(p: FinishedPlayer) => p.playerName === "Player B",
+				);
+				expect(playerA?.isWinner).toBe(true);
+				expect(playerB?.isWinner).toBe(false);
+			});
+
+			test("終了済みルームのページネーションが正しく動作する", async () => {
+				// 3つの終了済みルームを作成
+				for (let i = 1; i <= 3; i++) {
+					await db.insert(gameTable).values({
+						isPrivate: false,
+						password: null,
+						status: "finished",
+						timeLimit: 30,
+						title: `Finished Room ${i}`,
+					});
+				}
+
+				const response = await app.request(
+					"/v1/rooms?status=finished&limit=2&page=1",
+				);
+
+				expect(response.status).toBe(200);
+				const body = await response.json();
+				expect(body.data?.items?.length).toBe(2);
+				expect(body.data?.meta).toEqual({
+					limit: 2,
+					page: 1,
+					total: 3,
+					totalPages: 2,
+				});
 			});
 		});
 
@@ -425,6 +792,9 @@ describe("roomRoutes", () => {
 		const mockHonoClient = testClient<typeof app>(app);
 
 		beforeEach(async () => {
+			await db.delete(voteTable);
+			await db.delete(submissionTable);
+			await db.delete(roundTable);
 			await db.delete(playerTable);
 			await db.delete(gameTable);
 			await db.delete(userTable);

@@ -1,9 +1,11 @@
 import {
 	type CreateRoomResponseBody,
 	createRoomRequestBodySchema,
-	type GetRoomListResponseBody,
+	type GetRoomListFinishedResponseBody,
+	type GetRoomListWaitingResponseBody,
 	type GetRoomResponseBody,
 	gameTokenHeaderSchema,
+	getRoomListRequestQuerySchema,
 	type JoinRoomResponseBody,
 	joinRoomRequestBodySchema,
 } from "@repo/db/model";
@@ -22,25 +24,51 @@ export const routes = new Hono<
 		c.set("roomService", roomService);
 		await next();
 	})
-	.get("/", async (c): Promise<HttpRespondReturn<GetRoomListResponseBody>> => {
-		const { roomService } = c.var;
+	// ページネーション付き部屋一覧
+	.get(
+		"/",
+		vValidator("query", getRoomListRequestQuerySchema),
+		async (
+			c,
+		): Promise<
+			HttpRespondReturn<
+				GetRoomListWaitingResponseBody | GetRoomListFinishedResponseBody
+			>
+		> => {
+			const { roomService } = c.var;
+			const query = c.req.valid("query");
+			const status = query.status ?? "waiting";
+			const page = query.page ?? 1;
+			const limit = query.limit ?? 20;
 
-		try {
-			const rooms = await roomService.findMany();
-			return c.json(
-				{
-					data: rooms,
-					message: "OK",
-				},
-				200,
-			);
-		} catch (error) {
-			console.error("Roomの取得に失敗しました:", error);
-			if (error instanceof HTTPException) throw error;
+			try {
+				if (status === "finished") {
+					const result = await roomService.findManyFinished({ limit, page });
+					return c.json(
+						{
+							data: result,
+							message: "OK",
+						},
+						200,
+					);
+				}
 
-			throw new HTTPException(500, { message: "Roomの取得に失敗しました" });
-		}
-	})
+				const result = await roomService.findManyWaiting({ limit, page });
+				return c.json(
+					{
+						data: result,
+						message: "OK",
+					},
+					200,
+				);
+			} catch (error) {
+				console.error("Roomの取得に失敗しました:", error);
+				if (error instanceof HTTPException) throw error;
+
+				throw new HTTPException(500, { message: "Roomの取得に失敗しました" });
+			}
+		},
+	)
 	.post(
 		"/",
 		vValidator("json", createRoomRequestBodySchema),

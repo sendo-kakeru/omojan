@@ -3,15 +3,14 @@
 		"@repo/shared": "workspace:*",
 		"@repo/tsup-config": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
-		"@types/node": "^24.10.1",
+		"@types/node": "^24.0.0",
 		"drizzle-kit": "^0.31.8",
 		"dotenv": "^17.2.3",
-		"drizzle-orm": "^0.45.0",
+		"drizzle-orm": "^0.45.1",
 		"drizzle-valibot": "^0.4.2",
 		"drizzle-seed": "^0.3.1",
-		"pg": "^8.16.3",
 		"tsx": "^4.20.6",
-		"valibot": "^1.1.0"
+		"valibot": "^1.2.0"
 	},
 	"exports": {
 		"./schema": {
@@ -44,7 +43,7 @@
 		"db:migrate:e2e": "ENV=e2e drizzle-kit migrate",
 		"db:drop:local": "drizzle-kit drop",
 		"db:push:local": "drizzle-kit push",
-		"db:dump": "rm -f src/dump.sql src/local.db && turso db shell omojan-main-stg .dump > src/dump.sql && cat src/dump.sql | sqlite3 src/local.db",
+		"db:dump": "rm -f src/dump.sql src/local.db && turso db shell omojan-main-local-sendo .dump > src/dump.sql && cat src/dump.sql | sqlite3 src/local.db",
 		"db:reset:local": "tsx ./src/reset.ts",
 		"db:changed": "pnpm run db:gen && pnpm run db:migrate:local && pnpm run db:migrate:e2e && pnpm run db:dump",
 		"studio": "drizzle-kit studio",

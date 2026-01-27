@@ -1,10 +1,13 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { HTTPException } from "hono/http-exception";
+import { CleanupService } from "./application/cleanup/CleanupService";
+import type { Env } from "./env";
 import { createDrizzleClient } from "./libs/drizzle";
 import { routes } from "./presentation/routes";
 import type { BaseContext, HttpRespondReturn } from "./types";
 
+export { GameDurableObject } from "./application/game/GameDurableObject";
 export { MatchingDurableObject } from "./application/matching/MatchingDurableObject";
 
 export const app = new Hono<BaseContext>()
@@ -36,4 +39,20 @@ export const app = new Hono<BaseContext>()
 
 export type Api = typeof routes;
 
-export default app;
+export default {
+	fetch: app.fetch,
+	async scheduled(
+		_controller: ScheduledController,
+		env: Env,
+		ctx: ExecutionContext,
+	): Promise<void> {
+		const db = createDrizzleClient(env);
+		const cleanupService = new CleanupService(db);
+
+		ctx.waitUntil(
+			cleanupService.runAll().then((result) => {
+				console.log("Cleanup completed:", result);
+			}),
+		);
+	},
+};

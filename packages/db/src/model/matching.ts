@@ -4,9 +4,15 @@ import {
 	literal,
 	nullable,
 	object,
+	pick,
 	variant,
 } from "valibot";
-import { playerIdSchema, playerNameSchema, userSchema } from "../schema";
+import {
+	playerIdSchema,
+	playerNameSchema,
+	playerSchema,
+	userSchema,
+} from "../schema";
 import {
 	heartbeatPingMessageSchema,
 	heartbeatPongMessageSchema,
@@ -23,11 +29,19 @@ export const matchingClientExitMessageSchema = object({
 	type: literal("EXIT"),
 });
 
+export const matchingClientStartMessageSchema = object({
+	/**
+	 * 募集中に不足人数をCPで埋めて開始する
+	 */
+	type: literal("START"),
+});
+
 /**
  * マッチング用WebSocketメッセージのスキーマ
  */
 export const matchingClientMessageSchema = variant("type", [
 	matchingClientExitMessageSchema,
+	matchingClientStartMessageSchema,
 	heartbeatPongMessageSchema,
 ]);
 
@@ -57,15 +71,23 @@ export const matchingServerParticipantsMessageSchema = object({
 	participants: array(matchingParticipantSchema),
 	type: literal("PARTICIPANTS"),
 });
-
 export type MatchingServerParticipantsMessage = InferOutput<
 	typeof matchingServerParticipantsMessageSchema
+>;
+
+export const matchingServerMePlayerMessageSchema = object({
+	player: pick(playerSchema, ["id", "isHost"]),
+	type: literal("ME_PLAYER"),
+});
+export type MatchingServerMePlayerMessage = InferOutput<
+	typeof matchingServerMePlayerMessageSchema
 >;
 
 /**
  * サーバーからクライアントへのメッセージ
  */
 export const matchingServerMessageSchema = variant("type", [
+	matchingServerMePlayerMessageSchema,
 	matchingServerParticipantsMessageSchema,
 	heartbeatPingMessageSchema,
 ]);

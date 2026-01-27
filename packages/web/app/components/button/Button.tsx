@@ -21,7 +21,7 @@ type ButtonProps = ShareProps &
 		as: "button";
 	};
 
-type AnchorProps = ShareProps &
+export type AnchorButtonProps = ShareProps &
 	LinkProps & {
 		as: "link";
 		to: To;
@@ -31,7 +31,7 @@ const buttonVariants = tv(
 	{
 		base: classNames(
 			"pointer-events-auto inline-flex h-fit shrink-0 items-center justify-center gap-x-4 rounded-full font-medium transition-colors",
-			"disabled:cursor-not-allowed disabled:border-none disabled:bg-gray-300 disabled:text-gray-500 disabled:opacity-50",
+			"disabled:cursor-not-allowed disabled:border-none disabled:bg-gray-300 disabled:text-neutral-500 disabled:opacity-50",
 		),
 		compoundVariants: [
 			// アイコンのみ
@@ -144,14 +144,14 @@ const buttonVariants = tv(
 			},
 			{
 				class:
-					"border-1 border-gray-700 bg-white text-gray-700 hover:bg-gray-200",
+					"border-1 border-gray-700 bg-white text-neutral-700 hover:bg-gray-200",
 				color: "black",
 				disabled: false,
 				variant: "outline",
 			},
 			{
 				class:
-					"border-1 border-gray-300 bg-white text-gray-500 hover:bg-gray-200",
+					"border-1 border-gray-300 bg-white text-neutral-500 hover:bg-gray-200",
 				color: "gray",
 				disabled: false,
 				variant: "outline",
@@ -257,7 +257,7 @@ export function Button({
 	"aria-label": ariaLabel,
 	children,
 	...props
-}: ButtonProps | AnchorProps) {
+}: ButtonProps | AnchorButtonProps) {
 	const disabled = props.as === "link" ? false : (props.disabled ?? false);
 
 	const buttonClassName = buttonVariants({

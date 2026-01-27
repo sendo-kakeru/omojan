@@ -15,7 +15,7 @@ type Story = StoryObj<typeof CircularTimerProgress>;
 
 export const Playground: Story = {
 	args: {
-		label: 12,
+		count: 12,
 		progress: 65,
 	},
 };
@@ -24,11 +24,12 @@ export const Steps: Story = {
 	args: {},
 	render: () => (
 		<div className="flex flex-wrap items-center gap-12">
-			<CircularTimerProgress label={30} progress={100} />
-			<CircularTimerProgress label={24} progress={80} />
-			<CircularTimerProgress label={15} progress={50} />
-			<CircularTimerProgress label={6} progress={20} />
-			<CircularTimerProgress label={0} progress={0} />
+			<CircularTimerProgress count={30} progress={100} />
+			<CircularTimerProgress count={24} progress={80} />
+			<CircularTimerProgress count={15} progress={50} />
+			<CircularTimerProgress count={6} progress={20} />
+			<CircularTimerProgress count={3} progress={10} />
+			<CircularTimerProgress count={0} progress={0} />
 		</div>
 	),
 };
@@ -44,8 +45,8 @@ export const Countdown: Story = {
 
 		return (
 			<div className="flex flex-col gap-8">
-				<CircularTimerProgress label={count} progress={progress} />
-				<p className="text-gray-600 text-sm">残り {count} 秒</p>
+				<CircularTimerProgress count={count} progress={progress} />
+				<p className="text-neutral-600 text-sm">残り {count} 秒</p>
 				<Button as="button" className="w-fit" onClick={() => start(30)}>
 					カウントダウン開始
 				</Button>

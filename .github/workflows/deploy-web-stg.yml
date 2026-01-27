@@ -2,7 +2,7 @@ name: Deploy Web Staging
 on:
   push:
     branches:
-      - develop
+      - staging
     paths:
       - packages/web/**
       - packages/db/**

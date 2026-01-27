@@ -1,11 +1,31 @@
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { createSelectSchema } from "drizzle-valibot";
-import { brand, type InferOutput, pipe, string, uuid } from "valibot";
+import {
+	brand,
+	type InferOutput,
+	is,
+	literal,
+	pipe,
+	string,
+	union,
+	uuid,
+} from "valibot";
 import { idBaseColumn, tableBaseColumns } from "./common";
 import { type GameId, gameIdSchema, gameTable } from "./game";
 
 export const roundIdSchema = pipe(string(), uuid(), brand("round_id"));
 export type RoundId = InferOutput<typeof roundIdSchema>;
+
+export const roundNoSchema = union([
+	literal(1),
+	literal(2),
+	literal(3),
+	literal(4),
+]);
+export type RoundNo = InferOutput<typeof roundNoSchema>;
+export function isRoundNo(value: unknown): value is RoundNo {
+	return is(roundNoSchema, value);
+}
 
 export const roundTable = sqliteTable("round", {
 	...tableBaseColumns,
@@ -14,14 +34,12 @@ export const roundTable = sqliteTable("round", {
 		.$type<GameId>()
 		.references(() => gameTable.id, { onDelete: "cascade" }),
 	id: idBaseColumn.$type<RoundId>(),
-	roundNo: integer("round_no").notNull(),
-	status: text("status", { enum: ["submitting", "voting", "closed"] })
-		.notNull()
-		.default("submitting"),
+	roundNo: integer("round_no").notNull().$type<RoundNo>(),
 });
 
 export const roundSchema = createSelectSchema(roundTable, {
 	gameId: gameIdSchema,
 	id: roundIdSchema,
+	roundNo: roundNoSchema,
 });
 export type Round = InferOutput<typeof roundSchema>;

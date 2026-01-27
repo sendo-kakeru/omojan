@@ -7,6 +7,7 @@ import {
 	literal,
 	maxLength,
 	minLength,
+	nullable,
 	pipe,
 	string,
 	union,
@@ -18,6 +19,17 @@ import { type UserId, userIdSchema, userTable } from "./user";
 
 export const playerIdSchema = pipe(string(), uuid(), brand("player_id"));
 export type PlayerId = InferOutput<typeof playerIdSchema>;
+export function isPlayerId(id: unknown): id is PlayerId {
+	return is(playerIdSchema, id);
+}
+
+export const playerSeatSchema = union([
+	literal(1),
+	literal(2),
+	literal(3),
+	literal(4),
+]);
+export type PlayerSeat = InferOutput<typeof playerSeatSchema>;
 
 export const playerTable = sqliteTable("player", {
 	...tableBaseColumns,
@@ -27,11 +39,17 @@ export const playerTable = sqliteTable("player", {
 		.references(() => gameTable.id, { onDelete: "cascade" }),
 	gameTokenHash: text("game_token_hash").notNull().unique(),
 	id: idBaseColumn.$type<PlayerId>(),
+	isCpu: integer("is_cpu", { mode: "boolean" }).notNull().default(false),
+	/**
+	 * ホストの機能は現状、募集人数が足りなくてもゲーム開始を実行できるのみ
+	 * ホストが部屋を退出してもホストがいない部屋として続行する
+	 */
+	isHost: integer("is_host", { mode: "boolean" }).notNull().default(false),
 	// NOTE: ログインユーザーはuserのname
 	// 匿名ユーザーは設定させる or `匿名1`のように割り振る
 	playerName: text("player_name").notNull(),
 	// NOTE: 席順 1~4
-	seat: integer("seat").notNull().$type<1 | 2 | 3 | 4>(),
+	seat: integer("seat").notNull().$type<PlayerSeat>(),
 	// NOTE: 匿名ユーザーの場合はnull
 	userId: text("user_id")
 		.$type<UserId | null>()
@@ -46,21 +64,13 @@ export const playerNameSchema = pipe(
 	maxLength(50, "プレイヤー名は50文字以下で入力してください"),
 );
 
-export const playerSeatSchema = union([
-	literal(1),
-	literal(2),
-	literal(3),
-	literal(4),
-]);
-
 export const playerSchema = createSelectSchema(playerTable, {
 	gameId: gameIdSchema,
 	id: playerIdSchema,
 	playerName: playerNameSchema,
 	seat: playerSeatSchema,
-	userId: userIdSchema,
+	userId: nullable(userIdSchema),
 });
-export type PlayerSeat = InferOutput<typeof playerSeatSchema>;
 export function isPlayerSeat(seat: number): seat is PlayerSeat {
 	return is(playerSeatSchema, seat);
 }

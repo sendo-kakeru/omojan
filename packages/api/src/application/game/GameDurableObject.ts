@@ -1,0 +1,1257 @@
+import { DurableObject } from "cloudflare:workers";
+import {
+	type GamePlayerCard,
+	type GamePlayerItem,
+	type GameServerGameEndMessage,
+	type GameServerResultMessage,
+	type GameServerRoundStartMessage,
+	type GameServerTurnEndMessage,
+	type GameServerTurnStartMessage,
+	type GameServerVoteMessage,
+	type GameState,
+	gameClientMessageSchema,
+} from "@repo/db/model";
+import {
+	type Game,
+	type GameId,
+	gameTable,
+	isGameId,
+	type Player,
+	type PlayerCard,
+	type PlayerId,
+	playerTable,
+	type RoundNo,
+	type RoundTheme,
+	type Submission,
+} from "@repo/db/schema";
+import { and, eq } from "drizzle-orm";
+import { HTTPException } from "hono/http-exception";
+import pRetry from "p-retry";
+import type { Env } from "../../env";
+import { createDrizzleClient, type DrizzleClient } from "../../libs/drizzle";
+import { RoomService } from "../room/RoomService";
+import { WebSocketService } from "../websocket/WebsocketService";
+import { GameService } from "./GameService";
+
+/** ctx.storageに永続化するゲーム状態のキー */
+const STORAGE_KEY = "GAME_STATE" as const;
+
+/** DurableObject内部で使用するプレイヤー情報（GamePlayerItemを拡張） */
+type PlayerState = GamePlayerItem & {
+	cards: GamePlayerCard[];
+	isCpu: Player["isCpu"];
+};
+
+/** 永続化するゲーム状態の型 */
+type PersistedGameState = {
+	gameId: GameId;
+	players: PlayerState[];
+	roundNo: RoundNo;
+	state: GameState;
+	themes: Array<[RoundNo, RoundTheme["text"]]>;
+	timeLimit: Game["timeLimit"];
+	turnIndex: 0 | 1 | 2 | 3;
+};
+
+export class GameDurableObject extends DurableObject<Env> {
+	private readonly db: DrizzleClient;
+	private readonly webSocketService = new WebSocketService();
+	private readonly gameService: GameService;
+	private readonly roomService: RoomService;
+	private gameId: GameId | null = null;
+	private state: GameState = "WAITING";
+	private roundNo: RoundNo = 1;
+	private turnIndex: 0 | 1 | 2 | 3 = 0; // 0〜3: ラウンド内のターン番号
+	private themes: Map<RoundNo, RoundTheme["text"]> = new Map();
+	private timeLimit = 30;
+	private players: PlayerState[] = [];
+
+	constructor(ctx: DurableObjectState, env: Env) {
+		super(ctx, env);
+		this.db = createDrizzleClient(env);
+		this.roomService = new RoomService(this.db);
+		this.gameService = new GameService(this.db);
+	}
+
+	/**
+	 * ゲーム状態をctx.storageに永続化する
+	 */
+	private async persistState(): Promise<void> {
+		if (!this.gameId) return;
+
+		await this.ctx.storage.put(STORAGE_KEY, {
+			gameId: this.gameId,
+			players: this.players,
+			roundNo: this.roundNo,
+			state: this.state,
+			themes: Array.from(this.themes.entries()),
+			timeLimit: this.timeLimit,
+			turnIndex: this.turnIndex,
+		} satisfies PersistedGameState);
+	}
+
+	/**
+	 * ctx.storageからゲーム状態を復元する
+	 */
+	private async restoreState(): Promise<void> {
+		const persistedState =
+			await this.ctx.storage.get<PersistedGameState>(STORAGE_KEY);
+
+		if (!persistedState) return;
+
+		this.gameId = persistedState.gameId;
+		this.state = persistedState.state;
+		this.roundNo = persistedState.roundNo;
+		this.turnIndex = persistedState.turnIndex;
+		this.themes = new Map(persistedState.themes);
+		this.timeLimit = persistedState.timeLimit;
+		this.players = persistedState.players;
+	}
+
+	/**
+	 * HTTP/WS のリクエストを受け取り、WebSocket のみを受け付ける。
+	 */
+	async fetch(request: Request): Promise<Response> {
+		const { gameId, token } = this.getSearchParams(request);
+		this.ensureGameId({ gameId });
+
+		// ゲームステータスをチェック（終了したゲームへの接続を拒否）
+		await this.ensureGameNotFinished({ gameId });
+
+		if (!this.webSocketService.isUpgradeRequest(request)) {
+			throw new HTTPException(426, {
+				message: "Upgrade: websocket を指定してください",
+			});
+		}
+
+		// WS リクエストをアップグレードし、参加者一覧を即時配信する。
+		const player = await this.verifyPlayer({ gameId, token });
+		const [client, server] = Object.values(new WebSocketPair());
+
+		if (!client || !server) {
+			throw new HTTPException(500, {
+				message: "WebSocket Pairの作成に失敗しました。",
+			});
+		}
+
+		// 既存の接続を閉じる（同じプレイヤーの再接続の場合）
+		const existingSocket = this.webSocketService.getPlayerSocket({
+			ctx: this.ctx,
+			playerId: player.id,
+		});
+		if (existingSocket) {
+			existingSocket.close(4001, "新しい接続に置き換えられました。");
+		}
+
+		// Durable Object の context で WebSocket を accept する
+		this.ctx.acceptWebSocket(server, [player.id]);
+
+		// CPUでないプレイヤーが全員接続したらゲーム開始
+		// acceptWebSocketの後に呼ぶことで、最後に接続したプレイヤーにもROUND_STARTが届く
+		if (this.areAllPlayersConnected()) {
+			if (this.state === "WAITING") {
+				await this.handleInitialize();
+			} else {
+				// 待機アラームの削除（waiting以外では再接続）
+				await this.ctx.storage.deleteAlarm();
+			}
+		}
+
+		// 接続待ちのカウント開始
+		// 先に入ったプレイヤーが既にalarmをセットしている可能性があるため確認
+		const currentAlarm = await this.ctx.storage.getAlarm();
+		if (currentAlarm === null) {
+			await this.ctx.storage.setAlarm(Date.now() + 10000);
+		}
+		return this.webSocketService.upgradeResponse({ client });
+	}
+
+	/**
+	 * WS エラー発生時に接続を切断状態にし、ログを出力する。
+	 */
+	async webSocketError(ws: WebSocket, error: unknown): Promise<void> {
+		ws.close(1011, "サーバーエラーが発生しました");
+		console.error("WebSocketでエラーが発生しました:", error);
+	}
+
+	/**
+	 * WebSocketメッセージ受信時のハンドラ
+	 */
+	async webSocketMessage(ws: WebSocket, message: string): Promise<void> {
+		await this.restoreState();
+
+		// 送信元のプレイヤーIDを特定
+		const senderId = this.getPlayerIdBySocket(ws);
+		if (!senderId) {
+			ws.close(1003, "送信元のプレイヤーが特定できませんでした。");
+			return;
+		}
+
+		const parsedMessage = this.webSocketService.parseClientMessage({
+			message,
+			schema: gameClientMessageSchema,
+			ws,
+		});
+		if (!parsedMessage) return;
+
+		switch (parsedMessage.type) {
+			case "SUBMIT":
+				await this.handleSubmission({
+					playerId: senderId,
+					submission: parsedMessage.submission,
+				});
+				break;
+			case "VOTE":
+				await this.handleVote({
+					playerId: senderId,
+					votePlayerId: parsedMessage.votePlayerId,
+				});
+				break;
+		}
+
+		await this.persistState();
+	}
+
+	async alarm(): Promise<void> {
+		await this.restoreState();
+		if (!this.gameId) return;
+		await this.ctx.storage.deleteAlarm();
+
+		switch (this.state) {
+			case "WAITING":
+				await this.handleInitialize();
+				break;
+			case "START_PENDING":
+				await this.handleStartFirstTurn();
+				break;
+			case "SUBMISSION":
+				await this.handleSubmissionTimeout();
+				break;
+			case "SUBMITTED":
+				await this.proceedToNextTurn();
+				break;
+			case "VOTING":
+				await this.handleVoteTimeout();
+				break;
+			case "RESULT":
+				await this.proceedToNextRound();
+				break;
+		}
+
+		await this.persistState();
+	}
+
+	/**
+	 * ラウンド開始オーバーレイ後、最初のターンを開始する
+	 */
+	private async handleStartFirstTurn(): Promise<void> {
+		const currentPlayer = this.getCurrentPlayer();
+		if (!currentPlayer) return;
+
+		// 最初のプレイヤーがCPUの場合は自動提出
+		if (currentPlayer.isCpu) {
+			await this.randomSubmission({ playerId: currentPlayer.id });
+			this.state = "SUBMITTED";
+			await this.ctx.storage.setAlarm(Date.now() + 1000);
+		} else {
+			// 人間プレイヤーの場合は提出待機へ
+			this.state = "SUBMISSION";
+			await this.broadcastTurnStart();
+			await this.ctx.storage.setAlarm(Date.now() + this.timeLimit * 1000);
+		}
+	}
+
+	/**
+	 * 提出タイムアウト時の処理
+	 * タイムアウトしたプレイヤーをランダム提出させる
+	 */
+	private async handleSubmissionTimeout(): Promise<void> {
+		const currentPlayerId = this.getCurrentPlayer()?.id;
+		if (!currentPlayerId) return;
+
+		await this.randomSubmission({ playerId: currentPlayerId });
+		this.state = "SUBMITTED";
+		await this.ctx.storage.setAlarm(Date.now() + 1000);
+	}
+
+	/**
+	 * 提出結果表示後、次のターンまたは投票フェーズへ進む
+	 */
+	private async proceedToNextTurn(): Promise<void> {
+		// 4人全員が提出完了した場合は投票フェーズへ移行
+		if (this.turnIndex >= 3) {
+			this.state = "VOTING";
+			await this.broadcastVoteStart();
+			return;
+		}
+
+		// 次のターンへ
+		this.turnIndex = (this.turnIndex + 1) as 0 | 1 | 2 | 3;
+		const nextPlayer = this.getCurrentPlayer();
+		if (!nextPlayer) return;
+
+		// 次のプレイヤーがCPUの場合は自動提出
+		if (nextPlayer.isCpu) {
+			await this.randomSubmission({ playerId: nextPlayer.id });
+			this.state = "SUBMITTED";
+			await this.ctx.storage.setAlarm(Date.now() + 1000);
+		} else {
+			// 人間プレイヤーの場合は提出待機へ
+			this.state = "SUBMISSION";
+			await this.broadcastTurnStart();
+			await this.ctx.storage.setAlarm(Date.now() + this.timeLimit * 1000);
+		}
+	}
+
+	/**
+	 * ゲーム開始処理
+	 * - ラウンド・テーマ・手持ち牌を初期化
+	 * - 全プレイヤーにROUND_STARTメッセージを送信
+	 */
+	private async handleInitialize(): Promise<void> {
+		if (!this.gameId) return;
+
+		// 重複実行を防ぐため、状態を先に変更
+		this.state = "INITIALIZING";
+
+		try {
+			const { players, roundNo, themes, timeLimit } =
+				await this.gameService.initializeGame({
+					gameId: this.gameId,
+				});
+
+			// ゲーム状態を更新
+			this.roundNo = roundNo;
+			this.themes = themes;
+			this.timeLimit = timeLimit;
+			this.players = players;
+			this.turnIndex = 0; // ラウンド開始時はターン0から
+
+			// 各プレイヤーにROUND_STARTメッセージを送信
+			await this.broadcastRoundStart();
+
+			// 2秒後にTURN_STARTを送信（開始オーバーレイ表示用の待機）
+			this.state = "START_PENDING";
+			await this.ctx.storage.setAlarm(Date.now() + 2000);
+		} catch (error) {
+			console.error("ゲーム開始処理に失敗しました:", error);
+			// エラー時は異常終了処理を実行
+			await this.handleGameAbort({ message: "ゲーム開始処理に失敗しました" });
+		}
+	}
+
+	/**
+	 * 入室トークンが該当ゲームのプレイヤーに属しているか検証する。
+	 */
+	private async verifyPlayer({
+		gameId,
+		token,
+	}: {
+		gameId: GameId;
+		token: string;
+	}): Promise<Pick<Player, "id">> {
+		const tokenHash = this.roomService.hashGameToken(token);
+		const [player] = await this.db
+			.select({
+				id: playerTable.id,
+			})
+			.from(playerTable)
+			.where(
+				and(
+					eq(playerTable.gameId, gameId),
+					eq(playerTable.gameTokenHash, tokenHash),
+				),
+			);
+
+		if (!player) {
+			throw new HTTPException(403, {
+				message: "入室トークンが正しくありません",
+			});
+		}
+
+		return player;
+	}
+
+	/**
+	 * 共通クエリ（token / gameId）を抽出し検証する。
+	 */
+	private getSearchParams(request: Request): { gameId: GameId; token: string } {
+		let url: URL;
+
+		try {
+			url = new URL(request.url);
+		} catch {
+			throw new HTTPException(400, { message: "URL が正しくありません" });
+		}
+
+		const token = url.searchParams.get("token");
+		if (!token) {
+			throw new HTTPException(401, { message: "認証情報が不足しています" });
+		}
+
+		const gameId = url.searchParams.get("gameId");
+		if (!isGameId(gameId)) {
+			throw new HTTPException(400, { message: "gameIdが正しくありません" });
+		}
+
+		return { gameId, token };
+	}
+
+	/**
+	 * DurableObject が単一の gameId だけを扱うよう制限する。
+	 */
+	private ensureGameId({ gameId }: { gameId: GameId }): void {
+		if (this.gameId && this.gameId !== gameId) {
+			throw new HTTPException(409, {
+				message: "DurableObjectが異なるgameIdで呼び出されました。",
+			});
+		}
+		this.gameId = gameId;
+	}
+
+	/**
+	 * ゲームが終了していないことを確認する。
+	 * 終了したゲームへの接続を拒否する。
+	 */
+	private async ensureGameNotFinished({
+		gameId,
+	}: {
+		gameId: GameId;
+	}): Promise<void> {
+		const [game] = await this.db
+			.select({ status: gameTable.status })
+			.from(gameTable)
+			.where(eq(gameTable.id, gameId));
+
+		if (!game) {
+			throw new HTTPException(404, {
+				message: "指定されたゲームが存在しません",
+			});
+		}
+
+		if (game.status === "finished") {
+			throw new HTTPException(410, {
+				message: "このゲームは終了しています",
+			});
+		}
+	}
+
+	/**
+	 * 全ての人間プレイヤーが接続済みかどうかを判定する。
+	 */
+	private areAllPlayersConnected(): boolean {
+		for (const player of this.players) {
+			if (
+				!player.isCpu &&
+				!this.webSocketService.getPlayerSocket({
+					ctx: this.ctx,
+					playerId: player.id,
+				})
+			) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * 全プレイヤーにROUND_STARTメッセージを送信する。
+	 */
+	private async broadcastRoundStart(): Promise<void> {
+		// ラウンドに応じた順番でプレイヤーを並び替え
+		const orderedPlayers = this.sortTurnOrderPlayers();
+
+		// turnIndexに基づいて現在のターンプレイヤーを取得（ラウンド開始時は0）
+		const currentPlayerId = orderedPlayers[this.turnIndex]?.id;
+		if (!currentPlayerId) return;
+
+		for (const player of this.players) {
+			const socket = this.webSocketService.getPlayerSocket({
+				ctx: this.ctx,
+				playerId: player.id,
+			});
+			if (!socket) continue;
+
+			try {
+				socket.send(
+					JSON.stringify({
+						currentPlayerId,
+						game: {
+							players: orderedPlayers.map((player) => ({
+								id: player.id,
+								image: player.image,
+								playerName: player.playerName,
+								seat: player.seat,
+								submission: null,
+								winCount: player.winCount,
+							})),
+							roundNo: this.roundNo,
+							submitted: null,
+							theme: this.themes.get(this.roundNo) ?? "",
+							timeLimit: this.timeLimit,
+						},
+						mePlayer: {
+							id: player.id,
+							playerCards: player.cards,
+						},
+						type: "ROUND_START",
+					} satisfies GameServerRoundStartMessage),
+				);
+			} catch (error) {
+				const message = `プレイヤー ${player.id} へのROUND_START送信に失敗しました`;
+				console.error(message, error);
+				await this.switchToCpu({ message, playerId: player.id });
+			}
+		}
+	}
+
+	/**
+	 * 全プレイヤーにTURN_STARTメッセージを送信し、タイムアウトアラームを設定する。
+	 */
+	private async broadcastTurnStart(): Promise<void> {
+		// ラウンドに応じた順番でプレイヤーを並び替え
+		const orderedPlayers = this.sortTurnOrderPlayers();
+
+		// turnIndexに基づいて現在のターンプレイヤーを取得
+		const currentPlayerId = orderedPlayers[this.turnIndex]?.id;
+		if (!currentPlayerId) return;
+
+		for (const player of this.players) {
+			const socket = this.webSocketService.getPlayerSocket({
+				ctx: this.ctx,
+				playerId: player.id,
+			});
+			if (!socket) continue;
+
+			try {
+				socket.send(
+					JSON.stringify({
+						currentPlayerId,
+						game: {
+							players: orderedPlayers.map((player) => ({
+								id: player.id,
+								image: player.image,
+								playerName: player.playerName,
+								seat: player.seat,
+								submission: player.submission,
+								winCount: player.winCount,
+							})),
+							roundNo: this.roundNo,
+							submitted: null,
+							theme: this.themes.get(this.roundNo) ?? "",
+							timeLimit: this.timeLimit,
+						},
+						mePlayer: {
+							id: player.id,
+							playerCards: player.cards,
+						},
+						type: "TURN_START",
+					} satisfies GameServerTurnStartMessage),
+				);
+			} catch (error) {
+				const message = `プレイヤー ${player.id} へのTURN_START送信に失敗しました`;
+				console.error(message, error);
+				await this.switchToCpu({ message, playerId: player.id });
+			}
+		}
+	}
+
+	/**
+	 * プレイヤーをCPUに切り替え、接続を切断する。
+	 * 全員がCPUになった場合は部屋を削除する。
+	 */
+	private async switchToCpu({
+		message,
+		playerId,
+	}: {
+		message: string;
+		playerId: PlayerId;
+	}): Promise<void> {
+		const playerIndex = this.players.findIndex(
+			(player) => player.id === playerId,
+		);
+		if (playerIndex !== -1) {
+			const player = this.players[playerIndex];
+			if (player) {
+				this.players[playerIndex] = { ...player, isCpu: true };
+			}
+		}
+		const socket = this.webSocketService.getPlayerSocket({
+			ctx: this.ctx,
+			playerId,
+		});
+		socket?.close(1011, message);
+
+		// 全員がCPUになった場合は部屋を削除
+		if (this.areAllPlayersCpu()) {
+			await this.handleGameAbort({
+				message: "全プレイヤーが切断したためゲームを終了しました",
+			});
+		}
+	}
+
+	/**
+	 * 全プレイヤーがCPUかどうかを判定する
+	 */
+	private areAllPlayersCpu(): boolean {
+		return (
+			this.players.length > 0 && this.players.every((player) => player.isCpu)
+		);
+	}
+
+	/**
+	 * 全プレイヤーにVOTE_STARTメッセージを送信し、CPUプレイヤーの自動投票を行い、
+	 * 投票タイムアウトアラームを設定する。
+	 */
+	private async broadcastVoteStart(): Promise<void> {
+		if (!this.gameId) return;
+
+		// ラウンドに応じた順番でプレイヤーを並び替え
+		const orderedPlayers = this.sortTurnOrderPlayers();
+
+		for (const player of this.players) {
+			const socket = this.webSocketService.getPlayerSocket({
+				ctx: this.ctx,
+				playerId: player.id,
+			});
+			if (!socket) continue;
+
+			try {
+				socket.send(
+					JSON.stringify({
+						game: {
+							players: orderedPlayers.map((player) => ({
+								id: player.id,
+								image: player.image,
+								playerName: player.playerName,
+								seat: player.seat,
+								submission: player.submission,
+								winCount: player.winCount,
+							})),
+							roundNo: this.roundNo,
+							theme: this.themes.get(this.roundNo) ?? "",
+							timeLimit: this.timeLimit,
+						},
+						mePlayer: {
+							id: player.id,
+							playerCards: player.cards,
+						},
+						type: "VOTE_START",
+					} satisfies GameServerVoteMessage),
+				);
+			} catch (error) {
+				const message = `プレイヤー ${player.id} へのVOTE_START送信に失敗しました`;
+				console.error(message, error);
+				await this.switchToCpu({ message, playerId: player.id });
+			}
+		}
+
+		// CPUプレイヤーの自動投票
+		for (const player of this.players) {
+			if (player.isCpu) {
+				try {
+					await this.randomVote({ playerId: player.id });
+				} catch (error) {
+					console.error(
+						`CPUプレイヤー ${player.id} の自動投票に失敗しました:`,
+						error,
+					);
+				}
+			}
+		}
+
+		// 投票タイムアウトアラームを設定（15秒）
+		await this.ctx.storage.setAlarm(Date.now() + 15000);
+	}
+
+	/**
+	 * 全プレイヤーにRESULTメッセージを送信する。
+	 */
+	private async broadcastResult({
+		playerVoteCounts,
+		winnerPlayerIds,
+	}: {
+		playerVoteCounts: Map<PlayerId, number>;
+		winnerPlayerIds: PlayerId[];
+	}): Promise<void> {
+		// ラウンドに応じた順番でプレイヤーを並び替え
+		const orderedPlayers = this.sortTurnOrderPlayers();
+
+		for (const player of this.players) {
+			const socket = this.webSocketService.getPlayerSocket({
+				ctx: this.ctx,
+				playerId: player.id,
+			});
+			if (!socket) continue;
+
+			try {
+				socket.send(
+					JSON.stringify({
+						game: {
+							players: orderedPlayers.map((player) => ({
+								id: player.id,
+								image: player.image,
+								playerName: player.playerName,
+								seat: player.seat,
+								submission: player.submission,
+								voteCount: playerVoteCounts.get(player.id) ?? 0,
+								winCount: player.winCount, // 消しても良い
+							})),
+							roundNo: this.roundNo,
+							theme: this.themes.get(this.roundNo) ?? "",
+							timeLimit: this.timeLimit,
+							winnerPlayerIds,
+						},
+						mePlayer: {
+							id: player.id,
+							playerCards: player.cards,
+						},
+						type: "RESULT",
+					} satisfies GameServerResultMessage),
+				);
+			} catch (error) {
+				const message = `プレイヤー ${player.id} へのRESULT送信に失敗しました`;
+				console.error(message, error);
+				await this.switchToCpu({ message, playerId: player.id });
+			}
+		}
+	}
+
+	/**
+	 * 全プレイヤーにTURN_ENDメッセージを送信する。
+	 */
+	private async broadcastTurnEnd({
+		submission,
+	}: {
+		submission: Pick<Submission, "position"> & Pick<PlayerCard, "text">;
+	}): Promise<void> {
+		// ラウンドに応じた順番でプレイヤーを並び替え
+		const orderedPlayers = this.sortTurnOrderPlayers();
+
+		// turnIndexに基づいて現在のターンプレイヤーを取得
+		const currentPlayerId = orderedPlayers[this.turnIndex]?.id;
+		if (!currentPlayerId) return;
+
+		for (const player of this.players) {
+			const socket = this.webSocketService.getPlayerSocket({
+				ctx: this.ctx,
+				playerId: player.id,
+			});
+			if (!socket) continue;
+
+			try {
+				socket.send(
+					JSON.stringify({
+						currentPlayerId,
+						game: {
+							players: orderedPlayers.map((player) => ({
+								id: player.id,
+								image: player.image,
+								playerName: player.playerName,
+								seat: player.seat,
+								submission: player.submission,
+								winCount: player.winCount,
+							})),
+							roundNo: this.roundNo,
+							submitted: submission,
+							theme: this.themes.get(this.roundNo) ?? "",
+							timeLimit: this.timeLimit,
+						},
+						mePlayer: {
+							id: player.id,
+							playerCards: player.cards,
+						},
+						type: "TURN_END",
+					} satisfies GameServerTurnEndMessage),
+				);
+			} catch (error) {
+				const message = `プレイヤー ${player.id} へのTURN_END送信に失敗しました`;
+				console.error(message, error);
+				await this.switchToCpu({ message, playerId: player.id });
+			}
+		}
+	}
+
+	/**
+	 * 提出処理
+	 */
+	private async handleSubmission({
+		playerId,
+		submission,
+	}: {
+		playerId: PlayerId;
+		submission: Pick<Submission, "position"> & Pick<PlayerCard, "text">;
+	}): Promise<void> {
+		if (this.state !== "SUBMISSION" || !this.gameId) return;
+
+		// 現在のターンプレイヤーか確認
+		const currentPlayerId = this.getCurrentPlayer()?.id;
+		if (currentPlayerId !== playerId) {
+			console.warn("提出したプレイヤーのターンではありません。");
+			return;
+		}
+
+		// 既に提出済みか確認
+		const submitPlayer = this.players.find((player) => player.id === playerId);
+		if (submitPlayer?.submission) {
+			console.warn("提出済みです。");
+			return;
+		}
+
+		// 提出を処理（DB保存、メモリ更新、カード使用済み）
+		await this.submitPlayerCard({ playerId, submission });
+
+		// 状態をSUBMITTEDに変更
+		this.state = "SUBMITTED";
+
+		// TURN_ENDをブロードキャスト
+		await this.broadcastTurnEnd({ submission });
+
+		// 1秒後に次のターンへ進む
+		await this.ctx.storage.setAlarm(Date.now() + 1000);
+	}
+
+	/**
+	 * 投票処理
+	 */
+	private async handleVote({
+		playerId,
+		votePlayerId,
+	}: {
+		playerId: PlayerId;
+		votePlayerId: PlayerId;
+	}): Promise<void> {
+		if (this.state !== "VOTING" || !this.gameId) return;
+
+		// 自分に投票することはできない
+		if (playerId === votePlayerId) {
+			console.warn("自分自身に投票することはできません。");
+			return;
+		}
+
+		// 投票先が存在するか確認
+		const targetPlayer = this.players.find(
+			(player) => player.id === votePlayerId,
+		);
+		if (!targetPlayer) {
+			console.warn("投票先のプレイヤーが存在しません。");
+			return;
+		}
+
+		// 投票をDBに保存
+		try {
+			await pRetry(
+				async () => {
+					if (!this.gameId) return;
+
+					await this.gameService.saveVote({
+						gameId: this.gameId,
+						playerId,
+						roundNo: this.roundNo,
+						votePlayerId,
+					});
+				},
+				{
+					retries: 3,
+				},
+			);
+		} catch (error) {
+			console.error("投票の保存に失敗しました:", error);
+			await this.switchToCpu({
+				message: "投票の保存に失敗しました。CPUに切り替えます。",
+				playerId,
+			});
+			return;
+		}
+
+		// 全員投票完了か確認
+		const votedPlayerIds = await this.gameService.getVotedPlayerIds({
+			gameId: this.gameId,
+			roundNo: this.roundNo,
+		});
+
+		if (votedPlayerIds.length >= this.players.length) {
+			await this.ctx.storage.deleteAlarm();
+			// 結果フェーズへ移行
+			await this.proceedToResult();
+		}
+	}
+
+	/**
+	 * 投票タイムアウト時の処理
+	 * 未投票のプレイヤーにランダム投票させ、結果フェーズへ移行する
+	 */
+	private async handleVoteTimeout(): Promise<void> {
+		if (!this.gameId) return;
+
+		// 投票済みのプレイヤーIDを取得
+		const votedPlayerIds = await this.gameService.getVotedPlayerIds({
+			gameId: this.gameId,
+			roundNo: this.roundNo,
+		});
+
+		// 未投票のプレイヤーにランダム投票
+		for (const player of this.players) {
+			if (!votedPlayerIds.includes(player.id)) {
+				try {
+					await this.randomVote({ playerId: player.id });
+				} catch (error) {
+					console.error(
+						`プレイヤー ${player.id} のランダム投票に失敗しました:`,
+						error,
+					);
+					await this.handleGameAbort({ message: "ランダム投票に失敗しました" });
+					return;
+				}
+			}
+		}
+
+		// 結果フェーズへ移行
+		await this.proceedToResult();
+	}
+
+	/**
+	 * 結果フェーズへ移行する
+	 * - 勝者と得票数を計算
+	 * - 勝者のwinCountを更新
+	 * - 結果をブロードキャスト
+	 * - 次のラウンドへのアラームを設定
+	 */
+	private async proceedToResult(): Promise<void> {
+		if (!this.gameId) return;
+
+		try {
+			// 勝者と得票数を計算
+			const { playerVoteCounts, winnerPlayerIds } =
+				await this.gameService.calculateRoundWinnersWithVoteCounts({
+					gameId: this.gameId,
+					roundNo: this.roundNo,
+				});
+
+			// 勝者のwinCountを更新
+			for (const winnerId of winnerPlayerIds) {
+				const playerIndex = this.players.findIndex(
+					(player) => player.id === winnerId,
+				);
+				if (playerIndex !== -1) {
+					const player = this.players[playerIndex];
+					if (player) {
+						this.players[playerIndex] = {
+							...player,
+							winCount: player.winCount + 1,
+						};
+					}
+				}
+			}
+
+			this.state = "RESULT";
+			await this.broadcastResult({ playerVoteCounts, winnerPlayerIds });
+			// 6秒後に次のラウンドへ（または終了処理）
+			await this.ctx.storage.setAlarm(Date.now() + 6000);
+		} catch (error) {
+			console.error("結果フェーズの処理に失敗しました:", error);
+			await this.handleGameAbort({
+				message: "結果フェーズの処理に失敗しました",
+			});
+			return;
+		}
+	}
+
+	/**
+	 * 次のラウンドへ進む、または全ラウンド終了時はゲーム終了処理を行う
+	 */
+	private async proceedToNextRound(): Promise<void> {
+		// 4ラウンド終了したらゲーム終了
+		if (this.roundNo === 4) {
+			await this.handleGameEnd();
+			return;
+		}
+
+		// 次のラウンドへ
+		const nextRoundNo = this.roundNo + 1;
+		if (nextRoundNo !== 2 && nextRoundNo !== 3 && nextRoundNo !== 4) {
+			return;
+		}
+
+		this.roundNo = nextRoundNo;
+		this.turnIndex = 0;
+
+		// プレイヤーの提出状態をリセット
+		for (let i = 0; i < this.players.length; i++) {
+			const player = this.players[i];
+			if (player) {
+				this.players[i] = {
+					...player,
+					submission: null,
+				};
+			}
+		}
+
+		// ROUND_STARTを送信
+		await this.broadcastRoundStart();
+
+		// 2秒後にTURN_STARTを送信（開始オーバーレイ表示用の待機）
+		this.state = "START_PENDING";
+		await this.ctx.storage.setAlarm(Date.now() + 2000);
+	}
+
+	/**
+	 * ゲーム終了処理（正常終了）
+	 * - ゲームステータスを終了に更新
+	 * - 全プレイヤーにENDメッセージを送信
+	 * - 全プレイヤーを切断
+	 * - クリーンアップ処理を実行
+	 */
+	private async handleGameEnd(): Promise<void> {
+		if (!this.gameId) return;
+
+		try {
+			await this.gameService.endGame({ gameId: this.gameId });
+		} catch (error) {
+			console.error("ゲームステータスの更新に失敗しました:", error);
+		}
+
+		// ENDメッセージを送信し、送信成功したプレイヤーを正常終了で切断
+		for (const player of this.players) {
+			const socket = this.webSocketService.getPlayerSocket({
+				ctx: this.ctx,
+				playerId: player.id,
+			});
+			if (!socket) continue;
+
+			try {
+				socket.send(
+					JSON.stringify({
+						type: "END",
+					} satisfies GameServerGameEndMessage),
+				);
+				socket.close(1000, "ゲーム終了");
+			} catch (error) {
+				console.error(
+					`プレイヤー ${player.id} へのEND送信に失敗しました`,
+					error,
+				);
+				socket.close(1011, "ゲーム終了処理に失敗しました");
+			}
+		}
+
+		// クリーンアップ処理
+		await this.cleanup();
+	}
+
+	/**
+	 * ゲーム異常終了処理
+	 * - 部屋を削除
+	 * - 全プレイヤーを切断
+	 * - クリーンアップ処理を実行
+	 */
+	private async handleGameAbort({
+		code = 1011,
+		message,
+	}: {
+		code?: number;
+		message: string;
+	}): Promise<void> {
+		console.error(`ゲーム異常終了: ${message}`);
+
+		// 部屋を削除
+		if (this.gameId) {
+			try {
+				await this.gameService.deleteGame({ gameId: this.gameId });
+			} catch (error) {
+				console.error("部屋の削除に失敗しました:", error);
+			}
+		}
+
+		// 全プレイヤーを切断
+		for (const player of this.players) {
+			const socket = this.webSocketService.getPlayerSocket({
+				ctx: this.ctx,
+				playerId: player.id,
+			});
+			socket?.close(code, message);
+		}
+
+		// クリーンアップ処理
+		await this.cleanup();
+	}
+
+	/**
+	 * DurableObjectのクリーンアップ処理
+	 * - アラームの削除
+	 * - 永続化データの削除
+	 * - メモリ状態のリセット
+	 */
+	private async cleanup(): Promise<void> {
+		// アラームの削除
+		try {
+			await this.ctx.storage.deleteAlarm();
+		} catch (error) {
+			console.error("アラームの削除に失敗しました:", error);
+		}
+
+		// 永続化データの削除
+		try {
+			await this.ctx.storage.delete(STORAGE_KEY);
+		} catch (error) {
+			console.error("永続化状態のクリアに失敗しました:", error);
+		}
+
+		// メモリ状態のリセット
+		this.gameId = null;
+		this.state = "WAITING";
+		this.roundNo = 1;
+		this.turnIndex = 0;
+		this.themes = new Map();
+		this.timeLimit = 30;
+		this.players = [];
+	}
+
+	/**
+	 * WebSocketからプレイヤーIDを特定する
+	 * acceptWebSocket時に設定したタグを使用して特定する
+	 */
+	private getPlayerIdBySocket(ws: WebSocket): PlayerId | null {
+		const playerId = this.webSocketService.getPlayerIdBySocket({
+			ctx: this.ctx,
+			ws,
+		});
+
+		if (!playerId) return null;
+
+		if (this.players.some((player) => player.id === playerId)) {
+			return playerId;
+		}
+		return null;
+	}
+
+	/**
+	 * プレイヤーの提出を処理する（DB保存、メモリ状態更新、カード使用済み）
+	 */
+	private async submitPlayerCard({
+		playerId,
+		submission,
+	}: {
+		playerId: PlayerId;
+		submission: Pick<Submission, "position"> & Pick<PlayerCard, "text">;
+	}): Promise<void> {
+		// DBに提出を保存
+		try {
+			await pRetry(
+				async () => {
+					if (!this.gameId) return;
+
+					await this.gameService.saveSubmission({
+						gameId: this.gameId,
+						playerId,
+						position: submission.position,
+						roundNo: this.roundNo,
+						text: submission.text,
+					});
+				},
+				{
+					retries: 3,
+				},
+			);
+		} catch (error) {
+			console.error("提出処理に失敗しました:", error);
+			await this.switchToCpu({
+				message: "提出処理に失敗しました。CPUに切り替えます。",
+				playerId,
+			});
+			return;
+		}
+
+		// メモリ上のプレイヤー状態を更新
+		const playerIndex = this.players.findIndex(
+			(player) => player.id === playerId,
+		);
+		if (playerIndex !== -1) {
+			const player = this.players[playerIndex];
+			if (player) {
+				this.players[playerIndex] = {
+					...player,
+					cards: player.cards.map((card) =>
+						card.word === submission.text ? { ...card, used: true } : card,
+					),
+					submission,
+				};
+			}
+		}
+	}
+
+	/**
+	 * ランダムに提出する（待機なし、alarmを設定しない）
+	 * CPUのターンと時間切れて使用
+	 */
+	private async randomSubmission({
+		playerId,
+	}: {
+		playerId: PlayerId;
+	}): Promise<void> {
+		const player = this.players.find((player) => player.id === playerId);
+		if (!player || !this.gameId) return;
+
+		// 未使用のカードからランダムに選択
+		const unusedCards = player.cards.filter((card) => !card.used);
+		const randomCard =
+			unusedCards[Math.floor(Math.random() * unusedCards.length)];
+		if (!randomCard) return;
+
+		// ランダムにprefixまたはsuffixを選択
+		const position: Submission["position"] =
+			Math.random() < 0.5 ? "prefix" : "suffix";
+
+		const submission = { position, text: randomCard.word };
+
+		// 提出を処理（DB保存、メモリ更新、カード使用済み）
+		await this.submitPlayerCard({ playerId, submission });
+
+		// TURN_ENDをブロードキャスト
+		await this.broadcastTurnEnd({ submission });
+	}
+
+	/**
+	 * 現在のターンプレイヤーを取得する。
+	 */
+	private getCurrentPlayer(): PlayerState | undefined {
+		return this.sortTurnOrderPlayers()[this.turnIndex];
+	}
+
+	/**
+	 * ラウンドに応じた順番でプレイヤーを並び替えて返す。
+	 */
+	private sortTurnOrderPlayers(): PlayerState[] {
+		return this.gameService.sortTurnOrderPlayers({
+			players: this.players,
+			roundNo: this.roundNo,
+		});
+	}
+
+	/**
+	 * 指定したプレイヤーにランダム投票
+	 */
+	private async randomVote({
+		playerId,
+	}: {
+		playerId: PlayerId;
+	}): Promise<void> {
+		if (!this.gameId) return;
+
+		// 自分以外のプレイヤーからランダムに選択
+		const otherPlayers = this.players.filter(
+			(player) => player.id !== playerId,
+		);
+		const randomTarget =
+			otherPlayers[Math.floor(Math.random() * otherPlayers.length)];
+
+		if (!randomTarget) return;
+
+		await this.gameService.saveVote({
+			gameId: this.gameId,
+			playerId,
+			roundNo: this.roundNo,
+			votePlayerId: randomTarget.id,
+		});
+	}
+}

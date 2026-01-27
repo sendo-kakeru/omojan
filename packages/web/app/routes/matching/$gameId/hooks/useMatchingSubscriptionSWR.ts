@@ -1,9 +1,11 @@
 import {
 	type HeartbeatPongMessage,
+	type MatchingClientMessage,
 	type MatchingParticipant,
 	matchingServerMessageSchema,
 } from "@repo/db/model";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router";
 import useSWRSubscription, {
 	type SWRSubscriptionOptions,
 } from "swr/subscription";
@@ -22,19 +24,17 @@ export function useMatchingSubscriptionSWR({
 	gameId,
 	gameToken,
 	onClose,
-	onCompleted,
 }: {
 	gameId: string;
 	gameToken: string | null;
 	onClose: (event: CloseEvent) => void;
-	onCompleted: () => void;
 }) {
+	const navigate = useNavigate();
 	const wsRef = useRef<WebSocket | null>(null);
-	const matchingCompletedTimeoutRef = useRef<number | null>(null);
+	const [isHost, setIsHost] = useState(false);
+	const [transitionCount, setTransitionCount] = useState<number | null>(null);
 
 	const url = getUrl({ gameId });
-	// なくても問題なく動いているのでコメントアウト
-	// url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
 
 	const subscription = useSWRSubscription<MatchingParticipant[], unknown>(
 		[url?.toString(), gameToken],
@@ -62,26 +62,25 @@ export function useMatchingSubscriptionSWR({
 					const payload = JSON.parse(event.data);
 					const message = parse(matchingServerMessageSchema, payload);
 
-					if (message.type === "PING") {
-						ws.send(
-							JSON.stringify({ type: "PONG" } satisfies HeartbeatPongMessage),
-						);
-						return;
-					}
-
-					if (message.type === "PARTICIPANTS") {
-						if (message.participants.length === 4) {
-							matchingCompletedTimeoutRef.current = window.setTimeout(() => {
-								onCompleted();
-								ws.close(1000, "マッチングが完了しました。");
-							}, 5000);
-						} else {
-							if (matchingCompletedTimeoutRef.current) {
-								clearTimeout(matchingCompletedTimeoutRef.current);
-								matchingCompletedTimeoutRef.current = null;
-							}
+					switch (message.type) {
+						case "PING": {
+							ws.send(
+								JSON.stringify({ type: "PONG" } satisfies HeartbeatPongMessage),
+							);
+							break;
 						}
-						next(null, message.participants);
+						case "PARTICIPANTS": {
+							if (message.participants.length === 4) {
+								setTransitionCount(3);
+							}
+							next(null, message.participants);
+							break;
+						}
+						case "ME_PLAYER": {
+							const { player } = message;
+							setIsHost(player.isHost);
+							break;
+						}
 					}
 				} catch (error) {
 					console.error("メッセージの形式が正しくありません:", error, event);
@@ -90,26 +89,25 @@ export function useMatchingSubscriptionSWR({
 							? error
 							: new Error("メッセージの形式が正しくありません。"),
 					);
-					ws.close(4500, "メッセージの解析に失敗しました。");
+					ws.close(1011, "メッセージの解析に失敗しました。");
 				}
 			};
 
 			const handleError = (event: Event) => {
 				console.error("接続に失敗しました。", event);
 				next(new Error("接続に失敗しました。"));
-				ws.close(4500, "接続エラーが発生しました。");
+				ws.close(1011, "接続エラーが発生しました。");
 			};
 
 			const handleClose = (event: CloseEvent) => {
+				// 1000: 正常終了（ゲーム開始など）
+				// 4204: 退出
+				// 4410: 部屋削除
 				if (event.code !== 1000 && event.code !== 4204 && event.code !== 4410) {
 					console.error("接続が閉じられました。", event);
 					next(
 						new Error("接続が切断されました。時間をおいて再接続してください。"),
 					);
-				}
-				if (matchingCompletedTimeoutRef.current) {
-					clearTimeout(matchingCompletedTimeoutRef.current);
-					matchingCompletedTimeoutRef.current = null;
 				}
 				onClose(event);
 			};
@@ -136,19 +134,46 @@ export function useMatchingSubscriptionSWR({
 		},
 	);
 
+	useEffect(() => {
+		if (transitionCount === null) return;
+
+		if (transitionCount <= 0) {
+			void navigate(`/game/${gameId}`, { replace: true });
+			wsRef.current?.close(1000, "マッチングが完了しました。");
+			return;
+		}
+
+		const timer = window.setTimeout(() => {
+			setTransitionCount((prev) => (prev === null ? null : prev - 1));
+		}, 1000);
+
+		return () => clearTimeout(timer);
+	}, [transitionCount, gameId, navigate]);
+
 	const sendExit = (): void => {
 		const ws = wsRef.current;
 		if (!ws || ws.readyState !== WebSocket.OPEN) {
 			throw new Error("WebSocketが接続されていません。");
 		}
 
-		ws.send(JSON.stringify({ type: "EXIT" }));
+		ws.send(JSON.stringify({ type: "EXIT" } satisfies MatchingClientMessage));
+	};
+
+	const sendStart = (): void => {
+		const ws = wsRef.current;
+		if (!ws || ws.readyState !== WebSocket.OPEN) {
+			throw new Error("WebSocketが接続されていません。");
+		}
+
+		ws.send(JSON.stringify({ type: "START" } satisfies MatchingClientMessage));
 	};
 
 	return {
 		...subscription,
-		matchingCompletedTimeoutRef,
+		isHost,
 		sendExit,
+		sendStart,
+		transitionCount,
 		wsRef,
 	};
 }

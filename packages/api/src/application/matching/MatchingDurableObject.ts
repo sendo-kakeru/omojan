@@ -1,6 +1,6 @@
 import { DurableObject } from "cloudflare:workers";
 import {
-	type MatchingClientMessage,
+	type MatchingServerMePlayerMessage,
 	type MatchingServerParticipantsMessage,
 	matchingClientMessageSchema,
 } from "@repo/db/model";
@@ -16,11 +16,9 @@ import {
 } from "@repo/db/schema";
 import { and, asc, eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
-import { safeParse } from "valibot";
 import type { Env } from "../../env";
 import { createDrizzleClient, type DrizzleClient } from "../../libs/drizzle";
 import { RoomService } from "../room/RoomService";
-import { ConnectionService } from "../websocket/ConnectionService";
 import { WebSocketService } from "../websocket/WebsocketService";
 
 /** ハートビート間隔（ミリ秒） */
@@ -29,11 +27,12 @@ const HEARTBEAT_INTERVAL_MS = 5_000 as const;
 const HEARTBEAT_TIMEOUT_MS = 10_000 as const;
 
 export class MatchingDurableObject extends DurableObject<Env> {
-	private readonly connectionService = new ConnectionService();
 	private readonly db: DrizzleClient;
 	private readonly roomService: RoomService;
 	private readonly webSocketService = new WebSocketService();
 	private gameId: GameId | null = null;
+	/** プレイヤーIDと最終PONG受信時刻のマップ */
+	private readonly lastPongAt = new Map<PlayerId, number>();
 
 	constructor(ctx: DurableObjectState, env: Env) {
 		super(ctx, env);
@@ -47,6 +46,9 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	async fetch(request: Request): Promise<Response> {
 		const { token, gameId } = this.getSearchParams(request);
 		this.ensureGameId(gameId);
+
+		// ゲームステータスをチェック（waiting以外は接続を拒否）
+		await this.ensureGameWaiting({ gameId });
 
 		if (!this.webSocketService.isUpgradeRequest(request)) {
 			throw new HTTPException(426, {
@@ -64,34 +66,33 @@ export class MatchingDurableObject extends DurableObject<Env> {
 			});
 		}
 
-		const existingConnection = this.connectionService.get(player.id);
-		if (existingConnection) {
-			existingConnection.close(4001, "新しい接続に置き換えられました。");
+		// 既存の接続を閉じる（同じプレイヤーの再接続の場合）
+		const existingSocket = this.webSocketService.getPlayerSocket({
+			ctx: this.ctx,
+			playerId: player.id,
+		});
+		if (existingSocket) {
+			existingSocket.close(4001, "新しい接続に置き換えられました。");
 		}
 
 		// Durable Object の context で WebSocket を accept する
-		this.ctx.acceptWebSocket(server);
+		this.ctx.acceptWebSocket(server, [player.id]);
 
-		// 接続を登録（ハートビート管理も含む）
-		this.connectionService.register({ id: player.id, socket: server });
+		// ハートビート管理用に最終PONG時刻を記録
+		this.lastPongAt.set(player.id, Date.now());
+
+		// 自身のプレイヤー情報を先に送信
+		await this.sendMePlayerMessage({ player, socket: server });
 
 		// ハートビートアラームを開始（既に設定されていなければ）
 		const currentAlarm = await this.ctx.storage.getAlarm();
 		if (currentAlarm === null) {
 			await this.ctx.storage.setAlarm(Date.now() + HEARTBEAT_INTERVAL_MS);
 		}
-		const participants = await this.fetchParticipants({ gameId });
+		const participants = await this.getParticipants({ gameId });
 		await this.broadcastParticipants({ participants });
 
 		return this.webSocketService.upgradeResponse({ client });
-	}
-
-	/**
-	 * WS 切断時に接続を切断状態にする。
-	 * ハートビート情報は保持し、再接続の猶予を与える
-	 */
-	async webSocketClose(ws: WebSocket): Promise<void> {
-		this.connectionService.disconnect(ws);
 	}
 
 	/**
@@ -103,19 +104,57 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	}
 
 	/**
+	 * WS 接続クローズ時の処理
+	 * ブラウザバック、タブ閉じ、ネットワーク切断などで呼ばれる
+	 */
+	async webSocketClose(ws: WebSocket): Promise<void> {
+		if (!this.gameId) return;
+
+		const playerId = this.webSocketService.getPlayerIdBySocket({
+			ctx: this.ctx,
+			ws,
+		});
+
+		if (!playerId) return;
+
+		// lastPongAtを現在時刻に設定し、タイムアウト猶予を与える
+		// これにより、一時的な切断からの復帰が可能
+		// 完全な削除はalarm()のタイムアウト処理に委ねる
+		const now = Date.now();
+
+		// 既に記録がある場合は更新しない（意図的な切断の可能性）
+		if (!this.lastPongAt.get(playerId)) {
+			this.lastPongAt.set(playerId, now);
+		}
+
+		// アラームが設定されていない場合は設定（クリーンアップ用）
+		const currentAlarm = await this.ctx.storage.getAlarm();
+		if (currentAlarm === null) {
+			await this.ctx.storage.setAlarm(now + HEARTBEAT_INTERVAL_MS);
+		}
+	}
+
+	/**
 	 * WS メッセージ受信時の処理
 	 */
 	async webSocketMessage(ws: WebSocket, message: string): Promise<void> {
 		if (!this.gameId) return;
 
-		const playerId = this.connectionService.findIdBySocket(ws);
+		const playerId = this.webSocketService.getPlayerIdBySocket({
+			ctx: this.ctx,
+			ws,
+		});
 
 		if (!playerId) {
-			ws.close(4409, "接続が見つかりません");
+			ws.close(1007, "接続が見つかりません");
 			return;
 		}
 
-		const parsedMessage = this.parseClientMessage({ message, ws });
+		const parsedMessage = this.webSocketService.parseClientMessage({
+			message,
+			schema: matchingClientMessageSchema,
+			ws,
+		});
 		if (!parsedMessage) return;
 
 		switch (parsedMessage.type) {
@@ -123,7 +162,10 @@ export class MatchingDurableObject extends DurableObject<Env> {
 				await this.handleExit({ playerId, ws });
 				break;
 			case "PONG":
-				this.connectionService.recordPong(playerId);
+				this.lastPongAt.set(playerId, Date.now());
+				break;
+			case "START":
+				await this.handleStart({ playerId, ws });
 				break;
 		}
 	}
@@ -133,38 +175,64 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	 * 定期的にPINGを送信し、切断されたプレイヤーをクリーンアップする
 	 */
 	async alarm(): Promise<void> {
-		if (!this.gameId) return;
+		if (!this.gameId) {
+			// gameIdがない場合、残っている接続を全て閉じる
+			await this.closeAllConnections({ message: "部屋が見つかりません" });
+			return;
+		}
+
 		const gameStatus = await this.roomService.getStatus(this.gameId);
-		if (gameStatus && gameStatus !== "waiting") return;
+
+		// ゲームが存在しない場合、全接続を閉じてクリーンアップ
+		if (!gameStatus) {
+			await this.closeAllConnections({ message: "部屋が削除されました" });
+			this.cleanup();
+			return;
+		}
+
+		// ゲームが開始済み or 終了済みの場合、全接続を閉じてクリーンアップ
+		if (gameStatus !== "waiting") {
+			const isActive = gameStatus === "active";
+			await this.closeAllConnections({
+				code: isActive ? 1000 : 1007,
+				message: isActive
+					? "ゲームが開始されました"
+					: "この部屋は終了しています",
+			});
+			this.cleanup();
+			return;
+		}
 
 		// 全接続にPINGを送信
-		this.connectionService.sendPingToAll();
+		this.webSocketService.sendPingToAll({ ctx: this.ctx });
 
 		// DBから現在のプレイヤー一覧を取得
-		const players = await this.fetchParticipants({ gameId: this.gameId });
+		const players = await this.getParticipants({ gameId: this.gameId });
 
 		// 接続がなく、タイムアウトしたプレイヤーを格納
 		const disconnectedPlayerIds: PlayerId[] = [];
+		const now = Date.now();
 
 		for (const player of players) {
-			const isTimedOut = this.connectionService.isTimedOut({
-				id: player.id,
-				timeoutMs: HEARTBEAT_TIMEOUT_MS,
+			// アクティブな接続があるプレイヤーはスキップ
+			const ws = this.webSocketService.getPlayerSocket({
+				ctx: this.ctx,
+				playerId: player.id,
 			});
+			if (ws) {
+				// 接続があるがlastPongAtがない場合（Durable Object再起動後など）は記録を初期化
+				if (!this.lastPongAt.has(player.id)) {
+					this.lastPongAt.set(player.id, now);
+				}
+				continue;
+			}
+
+			// 接続がないプレイヤーはタイムアウト判定
+			const lastPong = this.lastPongAt.get(player.id);
+			const isTimedOut = !lastPong || now - lastPong > HEARTBEAT_TIMEOUT_MS;
 
 			if (isTimedOut) {
-				// タイムアウトしていたら、接続解除
-				const ws = this.connectionService.get(player.id);
-				if (ws) {
-					try {
-						ws.close(4408, "ハートビートタイムアウト");
-					} catch {
-						// noop
-						console.log("websocketのcloseに失敗しました。");
-					}
-				}
-
-				this.connectionService.unregister(player.id);
+				this.lastPongAt.delete(player.id);
 				disconnectedPlayerIds.push(player.id);
 			}
 		}
@@ -175,12 +243,13 @@ export class MatchingDurableObject extends DurableObject<Env> {
 		}
 
 		// 残りのプレイヤーを確認
-		const remainingParticipants = await this.fetchParticipants({
+		const remainingParticipants = await this.getParticipants({
 			gameId: this.gameId,
 		});
 
 		if (remainingParticipants.length === 0) {
 			await this.deleteRoom({ gameId: this.gameId });
+			this.cleanup();
 			return;
 		}
 
@@ -189,9 +258,88 @@ export class MatchingDurableObject extends DurableObject<Env> {
 			await this.broadcastParticipants({ participants: remainingParticipants });
 		}
 
-		// 接続が残っている場合は次のアラームを設定
-		if (this.connectionService.size > 0 || remainingParticipants.length > 0) {
-			await this.ctx.storage.setAlarm(Date.now() + HEARTBEAT_INTERVAL_MS);
+		// 次のアラームを設定（プレイヤーがいる限り継続）
+		await this.ctx.storage.setAlarm(Date.now() + HEARTBEAT_INTERVAL_MS);
+	}
+
+	/**
+	 * 全ての接続をクローズする
+	 */
+	private async closeAllConnections({
+		code = 4410,
+		message,
+	}: {
+		code?: number;
+		message: string;
+	}): Promise<void> {
+		for (const socket of this.ctx.getWebSockets()) {
+			socket.close(code, message);
+		}
+	}
+
+	/**
+	 * DurableObjectの状態をクリーンアップする
+	 */
+	private cleanup(): void {
+		this.lastPongAt.clear();
+	}
+
+	/**
+	 * 不足分をCPで埋めてゲームを開始する
+	 */
+	private async handleStart({
+		playerId,
+		ws,
+	}: {
+		playerId: PlayerId;
+		ws: WebSocket;
+	}): Promise<void> {
+		if (!this.gameId) return;
+
+		const [player] = await this.db
+			.select({ isHost: playerTable.isHost })
+			.from(playerTable)
+			.where(eq(playerTable.id, playerId));
+
+		if (!player?.isHost) {
+			ws.close(4403, "ホストのみが開始を実行できます");
+			return;
+		}
+
+		const gameStatus = await this.roomService.getStatus(this.gameId);
+		if (gameStatus !== "waiting") return;
+
+		try {
+			await this.roomService.startWithCpu({ gameId: this.gameId });
+		} catch (error) {
+			console.error("CPUを追加したゲームの開始に失敗しました:", error);
+			ws.close(1011, "ゲームの開始に失敗しました");
+			return;
+		}
+
+		const participants = await this.getParticipants({ gameId: this.gameId });
+		await this.broadcastParticipants({ participants });
+	}
+
+	/**
+	 * クライアント自身のプレイヤー情報を送信する
+	 */
+	private async sendMePlayerMessage({
+		player,
+		socket,
+	}: {
+		player: MatchingServerMePlayerMessage["player"];
+		socket: WebSocket;
+	}): Promise<void> {
+		try {
+			socket.send(
+				JSON.stringify({
+					player,
+					type: "ME_PLAYER",
+				} satisfies MatchingServerMePlayerMessage),
+			);
+		} catch (error) {
+			console.error("ME_PLAYERメッセージの送信に失敗しました:", error);
 		}
 	}
 
@@ -210,14 +358,13 @@ export class MatchingDurableObject extends DurableObject<Env> {
 		const gameStatus = await this.roomService.getStatus(this.gameId);
 
 		// NOTE: 既に4人メンバーが確定し、activeになっていたら接続だけ解除。（確定からゲーム移動までの時間は退出操作不可なので、通常は発生し得ない）
-		this.connectionService.unregister(playerId);
 		if (gameStatus === "waiting") {
 			await this.db.delete(playerTable).where(eq(playerTable.id, playerId));
 		}
 
 		ws.close(4204, "退出しました");
 
-		const participants = await this.fetchParticipants({ gameId: this.gameId });
+		const participants = await this.getParticipants({ gameId: this.gameId });
 
 		if (participants.length === 0) {
 			await this.deleteRoom({ gameId: this.gameId });
@@ -232,35 +379,8 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	 */
 	private async deleteRoom({ gameId }: { gameId: GameId }): Promise<void> {
 		await this.db.delete(gameTable).where(eq(gameTable.id, gameId));
-		for (const socket of this.connectionService.getSockets()) {
+		for (const socket of this.ctx.getWebSockets()) {
 			socket.close(4410, "部屋が削除されました");
-		}
-		this.connectionService.clear();
-	}
-
-	/**
-	 * クライアントメッセージをパースして検証する
-	 */
-	private parseClientMessage({
-		ws,
-		message,
-	}: {
-		ws: WebSocket;
-		message: string;
-	}): MatchingClientMessage | null {
-		try {
-			const json = JSON.parse(message);
-			const result = safeParse(matchingClientMessageSchema, json);
-
-			if (!result.success) {
-				ws.close(4400, "メッセージの形式が正しくありません");
-				return null;
-			}
-
-			return result.output;
-		} catch {
-			ws.close(4400, "メッセージのパースに失敗しました");
-			return null;
 		}
 	}
 
@@ -273,11 +393,12 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	}: {
 		gameId: GameId;
 		token: string;
-	}): Promise<Pick<Player, "id">> {
+	}): Promise<MatchingServerMePlayerMessage["player"]> {
 		const tokenHash = this.roomService.hashGameToken(token);
 		const [player] = await this.db
 			.select({
 				id: playerTable.id,
+				isHost: playerTable.isHost,
 			})
 			.from(playerTable)
 			.where(
@@ -299,7 +420,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	/**
 	 * ゲームに属する全プレイヤーを seat 順に取得する。
 	 */
-	private async fetchParticipants({
+	private async getParticipants({
 		gameId,
 	}: {
 		gameId: GameId;
@@ -333,7 +454,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 				participants,
 				type: "PARTICIPANTS",
 			} satisfies MatchingServerParticipantsMessage,
-			sockets: this.connectionService.getSockets(),
+			sockets: this.ctx.getWebSockets(),
 		});
 	}
 
@@ -372,5 +493,38 @@ export class MatchingDurableObject extends DurableObject<Env> {
 			});
 		}
 		this.gameId = gameId;
+	}
+
+	/**
+	 * ゲームが募集中（waiting）状態であることを確認する。
+	 * 開始済み・終了済みのゲームへの接続を拒否する。
+	 */
+	private async ensureGameWaiting({
+		gameId,
+	}: {
+		gameId: GameId;
+	}): Promise<void> {
+		const [game] = await this.db
+			.select({ status: gameTable.status })
+			.from(gameTable)
+			.where(eq(gameTable.id, gameId));
+
+		if (!game) {
+			throw new HTTPException(404, {
+				message: "指定された部屋が存在しません",
+			});
+		}
+
+		if (game.status === "active") {
+			throw new HTTPException(409, {
+				message: "この部屋は既にゲームが開始しています",
+			});
+		}
+
+		if (game.status === "finished") {
+			throw new HTTPException(410, {
+				message: "この部屋は終了しています",
+			});
+		}
 	}
 }

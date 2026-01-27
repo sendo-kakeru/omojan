@@ -131,11 +131,11 @@ export function JoinRoomDialog({
 			<div className="grid gap-y-16">
 				<div className="grid gap-y-4 rounded-lg border border-gray-200 bg-gray-50 p-12">
 					<div className="grid gap-y-4">
-						<div className="flex items-center gap-x-4 text-gray-500">
+						<div className="flex items-center gap-x-4 text-neutral-500">
 							<FaRegClock />
 							<p className="text-sm">制限時間: {room.timeLimit}秒</p>
 						</div>
-						<div className="flex items-center gap-x-4 text-gray-500">
+						<div className="flex items-center gap-x-4 text-neutral-500">
 							<FiUsers />
 							<p className="text-sm">参加者: {room.players.length}/4</p>
 						</div>
