@@ -47,6 +47,10 @@
 				]
 			},
 			"routes": [{ "custom_domain": true, "pattern": "api.omojan.com" }],
+			// 2時間ごとにクリーンアップを実行
+			"triggers": {
+				"crons": ["0 */2 * * *"]
+			},
 			"vars": {
 				"ENV": "production",
 				"WEB_URL": "https://omojan.com"
