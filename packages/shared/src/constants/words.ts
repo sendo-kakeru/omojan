@@ -564,6 +564,7 @@ export const WORDS = [
 	{ enabled: true, text: "縞模様" },
 	{ enabled: true, text: "光る" },
 	{ enabled: true, text: "輝く" },
+	{ enabled: true, text: "猛" },
 	{ enabled: true, text: "ギラギラ" },
 	{ enabled: true, text: "ボロボロ" },
 	{ enabled: true, text: "ドロドロ" },
