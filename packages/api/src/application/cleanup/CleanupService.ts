@@ -1,9 +1,9 @@
 import { gameTable, playerTable } from "@repo/db/schema";
-import { and, eq, gte, lt, notInArray, sql } from "drizzle-orm";
+import { and, eq, gte, lt, sql } from "drizzle-orm";
 import type { DrizzleClient } from "../../libs/drizzle";
 
-/** 募集中の部屋の有効期限（30分） */
-const WAITING_ROOM_TTL_MS = 30 * 60 * 1000;
+/** 募集中の部屋の有効期限（1時間） */
+const WAITING_ROOM_TTL_MS = 60 * 60 * 1000;
 
 /** アクティブな部屋の有効期限（1時間） */
 const ACTIVE_ROOM_TTL_MS = 60 * 60 * 1000;
@@ -28,7 +28,7 @@ export class CleanupService {
 			staleWaitingRooms: 0,
 		};
 
-		// 1. 募集中で30分以上経過した部屋を削除
+		// 1. 募集中で1時間以上経過した部屋を削除
 		results.staleWaitingRooms = await this.deleteStaleWaitingRooms();
 
 		// 2. プレイヤーが3人以下の非募集中の部屋を削除
@@ -45,7 +45,7 @@ export class CleanupService {
 	}
 
 	/**
-	 * 募集中で最終更新から30分以上経過した部屋を削除
+	 * 募集中で最終更新から1時間以上経過した部屋を削除
 	 * ただし、作成から2週間以上経過したものは対象外
 	 */
 	private async deleteStaleWaitingRooms(): Promise<number> {
@@ -135,28 +135,12 @@ export class CleanupService {
 	private async deleteOrphanedPlayers(): Promise<number> {
 		const maxAgeThreshold = new Date(Date.now() - MAX_AGE_MS);
 
-		// 存在するゲームIDのリストを取得
-		const existingGameIds = await this.db
-			.select({ id: gameTable.id })
-			.from(gameTable);
-
-		const gameIdList = existingGameIds.map((g) => g.id);
-
-		// ゲームが存在しないプレイヤーを削除（作成から2週間以内のみ）
-		if (gameIdList.length === 0) {
-			// ゲームが1つもない場合、2週間以内に作成されたプレイヤーを削除
-			const result = await this.db
-				.delete(playerTable)
-				.where(gte(playerTable.createdAt, maxAgeThreshold))
-				.returning({ id: playerTable.id });
-			return result.length;
-		}
-
+		// NOT EXISTS サブクエリで孤立プレイヤーを直接削除
 		const result = await this.db
 			.delete(playerTable)
 			.where(
 				and(
-					notInArray(playerTable.gameId, gameIdList),
+					sql`NOT EXISTS (SELECT 1 FROM ${gameTable} WHERE ${gameTable.id} = ${playerTable.gameId})`,
 					gte(playerTable.createdAt, maxAgeThreshold),
 				),
 			)
