@@ -5,6 +5,7 @@ import type {
 	GameServerTurnStartMessage,
 } from "@repo/db/model";
 import type { PlayerCardId, PlayerId, PlayerSeat } from "@repo/db/schema";
+import { WORDS } from "@repo/shared/constants/words";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
 	gameScreenDecorator,
@@ -234,6 +235,68 @@ export const Round2: Story = {
 		sendSubmission: noop,
 	},
 	name: "ラウンド2（使用済みカードあり）",
+};
+
+// ラウンド3の自分のターン（3番目のプレイヤー、上位2人は提出済み・ランダム単語）
+export const Round3MyTurn: Story = {
+	name: "ラウンド3（自分のターン・単語ランダム）",
+	render: () => {
+		const enabledWords = WORDS.filter((w) => w.enabled);
+		const shuffled = [...enabledWords].sort(() => Math.random() - 0.5);
+
+		// テーマ用に1つ、提出済み2人分に2つ、手札用に7つ選ぶ
+		const selected = shuffled.slice(0, 10);
+		const themeWord = selected[0]?.text ?? "カレー";
+		const sub1Word = selected[1]?.text ?? "激辛";
+		const sub2Word = selected[2]?.text ?? "伝説";
+		const handWords = selected.slice(3);
+
+		const randomPosition = () =>
+			Math.random() > 0.5 ? ("prefix" as const) : ("suffix" as const);
+
+		const players = mockPlayers.map((p) => {
+			if (p.id === createPlayerId("1")) {
+				return {
+					...p,
+					submission: { position: randomPosition(), text: sub1Word },
+				};
+			}
+			if (p.id === createPlayerId("2")) {
+				return {
+					...p,
+					submission: { position: randomPosition(), text: sub2Word },
+				};
+			}
+			return p;
+		});
+
+		const playerCards = handWords.slice(0, 7).map((w, i) => ({
+			id: createPlayerCardId(String(i + 1)),
+			used: i < 2,
+			word: w.text,
+		}));
+
+		return (
+			<GameSubmission
+				data={{
+					currentPlayerId: createPlayerId("3"),
+					game: {
+						...baseGameData,
+						players,
+						roundNo: 3 as const,
+						submitted: null,
+						theme: themeWord,
+					},
+					mePlayer: {
+						id: createPlayerId("3"),
+						playerCards,
+					},
+					type: "TURN_START",
+				}}
+				sendSubmission={noop}
+			/>
+		);
+	},
 };
 
 // 勝利数表示

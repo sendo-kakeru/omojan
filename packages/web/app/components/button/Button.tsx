@@ -21,7 +21,7 @@ type ButtonProps = ShareProps &
 		as: "button";
 	};
 
-type AnchorProps = ShareProps &
+export type AnchorButtonProps = ShareProps &
 	LinkProps & {
 		as: "link";
 		to: To;
@@ -257,7 +257,7 @@ export function Button({
 	"aria-label": ariaLabel,
 	children,
 	...props
-}: ButtonProps | AnchorProps) {
+}: ButtonProps | AnchorButtonProps) {
 	const disabled = props.as === "link" ? false : (props.disabled ?? false);
 
 	const buttonClassName = buttonVariants({
