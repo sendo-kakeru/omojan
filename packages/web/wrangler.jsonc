@@ -4,15 +4,24 @@
 	"compatibility_flags": ["nodejs_compat"],
 	"env": {
 		"production": {
-			"routes": [{ "custom_domain": true, "pattern": "omojan.com" }]
+			"routes": [{ "custom_domain": true, "pattern": "omojan.com" }],
+			"vars": {
+				"MAINTENANCE_MODE": "false"
+			}
 		},
 		"staging": {
-			"routes": [{ "custom_domain": true, "pattern": "stg.omojan.com" }]
+			"routes": [{ "custom_domain": true, "pattern": "stg.omojan.com" }],
+			"vars": {
+				"MAINTENANCE_MODE": "false"
+			}
 		}
 	},
 	"main": "./workers/app.ts",
 	"name": "web",
 	"observability": {
 		"enabled": true
+	},
+	"vars": {
+		"MAINTENANCE_MODE": "false"
 	}
 }
