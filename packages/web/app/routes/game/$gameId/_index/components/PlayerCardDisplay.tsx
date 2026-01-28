@@ -38,14 +38,14 @@ export function PlayerCardDisplay({
 						return (
 							<button
 								className={classNames(
-									"flex rounded-md border px-8 py-4 text-center font-bold text-sm xs:text-base transition sm:text-lg",
+									"flex rounded-md border px-8 py-4 text-center font-bold text-neutral-800 text-sm xs:text-base transition sm:text-lg",
 									card.used
 										? "cursor-not-allowed border-gray-300 bg-gray-200 opacity-50"
 										: isSelected && isConfirmed
 											? "border-green-500 bg-green-100 opacity-50"
 											: isSelected
 												? "border-green-400 bg-green-50 shadow-sm"
-												: "border-gray-200 bg-gray-100 text-neutral-800 hover:bg-green-50",
+												: "border-gray-200 bg-gray-100 hover:bg-green-50",
 								)}
 								disabled={card.used || isConfirmed}
 								key={card.id}

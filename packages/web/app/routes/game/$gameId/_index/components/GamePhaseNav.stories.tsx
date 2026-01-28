@@ -52,7 +52,7 @@ export const AllRounds: Story = {
 					key={roundNo}
 					message={`ラウンド ${roundNo} のメッセージ`}
 					messageVariant={roundNo % 2 === 1 ? "active" : "inactive"}
-					roundNo={roundNo as 1 | 2 | 3 | 4}
+					roundNo={roundNo}
 					timerCount={30 - (roundNo - 1) * 5}
 					timerProgress={100 - (roundNo - 1) * 20}
 				/>
