@@ -1,21 +1,17 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { MatchingError } from "./MatchingError";
 
-const meta: Meta<typeof MatchingError> = {
+const meta = {
 	component: MatchingError,
-	decorators: [
-		(Story) => (
-			<div className="mx-auto max-w-800">
-				<Story />
-			</div>
-		),
-	],
+	parameters: {
+		layout: "fullscreen",
+	},
 	tags: ["autodocs"],
 	title: "Matching/Error",
-};
+} satisfies Meta<typeof MatchingError>;
 
 export default meta;
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj<typeof MatchingError>;
 
 export const NotFound: Story = {
 	args: {

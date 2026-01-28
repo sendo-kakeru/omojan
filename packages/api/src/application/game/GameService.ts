@@ -191,9 +191,9 @@ export class GameService {
 	/**
 	 * ラウンド番号と席順から、そのラウンドでのターン順を算出する。
 	 * - ラウンド1: 席順1→2→3→4
-	 * - ラウンド2: 席順2→3→4→1
+	 * - ラウンド2: 席順4→1→2→3
 	 * - ラウンド3: 席順3→4→1→2
-	 * - ラウンド4: 席順4→1→2→3
+	 * - ラウンド4: 席順2→3→4→1
 	 */
 	calculateTurnOrder({
 		roundNo,
@@ -202,8 +202,8 @@ export class GameService {
 		roundNo: RoundNo;
 		seat: PlayerSeat;
 	}): number {
-		// (seat - roundNo) mod 4 で0-3の順番を得て、1-4に変換
-		return ((seat - roundNo + 4) % 4) + 1;
+		// (seat + roundNo + 2) mod 4 で0-3の順番を得て、1-4に変換
+		return ((seat + roundNo + 2) % 4) + 1;
 	}
 
 	/**

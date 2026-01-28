@@ -1,4 +1,4 @@
-import { Button } from "~/components/button/Button";
+import { InPageError } from "~/components/InPageError";
 
 export type MatchingErrorType =
 	| "notFound"
@@ -6,20 +6,36 @@ export type MatchingErrorType =
 	| "unauthorized"
 	| "connectionError";
 
-const ERROR_MESSAGES: Record<MatchingErrorType, string> = {
-	connectionError: "部屋の接続に失敗しました。",
-	forbidden: "入室権限がありません。",
-	notFound: "この部屋は削除されています。",
-	unauthorized: "入室権限がありません。",
+const ERROR_CONFIG: Record<
+	MatchingErrorType,
+	{ description: string; heading: string }
+> = {
+	connectionError: {
+		description: "部屋への接続に失敗しました。時間をおいて再度お試しください。",
+		heading: "接続エラー",
+	},
+	forbidden: {
+		description: "この部屋に入室する権限がありません。",
+		heading: "アクセスが拒否されました",
+	},
+	notFound: {
+		description: "この部屋は削除されたか、存在しません。",
+		heading: "部屋が見つかりません",
+	},
+	unauthorized: {
+		description: "この部屋に入室するにはログインが必要です。",
+		heading: "認証が必要です",
+	},
 };
 
 export function MatchingError({ errorType }: { errorType: MatchingErrorType }) {
+	const config = ERROR_CONFIG[errorType];
+
 	return (
-		<main className="grid place-items-center gap-y-12">
-			<h2 className="font-bold text-xl">{ERROR_MESSAGES[errorType]}</h2>
-			<Button as="link" className="w-fit" replace to="/">
-				トップに戻る
-			</Button>
-		</main>
+		<InPageError
+			description={config.description}
+			heading={config.heading}
+			replaceNavigation
+		/>
 	);
 }
