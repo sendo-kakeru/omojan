@@ -1,20 +1,20 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { AuthHeader } from "./AuthHeader";
+import { Header } from "./Header";
 
 const meta = {
-	component: AuthHeader,
+	component: Header,
 	tags: ["autodocs"],
-	title: "Components/Auth/AuthHeader",
-} satisfies Meta<typeof AuthHeader>;
+	title: "Components/Auth/Header",
+} satisfies Meta<typeof Header>;
 
 export default meta;
-type Story = StoryObj<typeof AuthHeader>;
+type Story = StoryObj<typeof Header>;
 
 export const Unauthenticated: Story = {
 	args: {},
 	render: () => (
 		<div className="grid h-800 w-full grid-cols-1">
-			<AuthHeader />
+			<Header />
 		</div>
 	),
 };
@@ -26,7 +26,7 @@ export const Authenticated: Story = {
 	},
 	render: () => (
 		<div className="grid h-800 w-full grid-cols-1">
-			<AuthHeader />
+			<Header />
 		</div>
 	),
 };
