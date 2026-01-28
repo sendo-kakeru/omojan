@@ -11,6 +11,7 @@ import { Spinner } from "~/components/Spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/Tabs";
 import { CreateRoomDialog } from "./components/CreateRoomDialog";
 import { RoomCard } from "./components/RoomCard";
+import { RoomCardSkeleton } from "./components/RoomCardSkeleton";
 import { useRoomListSWR } from "./hooks/useRoomListSWR";
 
 export default function () {
@@ -151,9 +152,16 @@ function RoomList({
 }: WaitingRoomListProps | FinishedRoomListProps) {
 	if (isLoading) {
 		return (
-			<div className="grid place-items-center gap-y-4 py-16 text-neutral-500">
-				<Spinner className="size-32" />
-				<p className="text-center">部屋一覧を取得中...</p>
+			<div className="grid gap-y-8">
+				{Array.from({ length: props.status === "waiting" ? 1 : 4 }).map(
+					(_, index) => (
+						<RoomCardSkeleton
+							// biome-ignore lint/suspicious/noArrayIndexKey: ローディングのため問題ない
+							key={index}
+							srText={index === 0 ? "部屋一覧を取得中" : undefined}
+						/>
+					),
+				)}
 			</div>
 		);
 	}
