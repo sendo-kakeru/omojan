@@ -4,65 +4,9 @@
 		{
 			"breakpoints": true,
 			"idx": 0,
-			"tag": "0000_overjoyed_praxagora",
+			"tag": "0000_faithful_christian_walker",
 			"version": "6",
-			"when": 1765191260543
-		},
-		{
-			"breakpoints": true,
-			"idx": 1,
-			"tag": "0001_fluffy_dormammu",
-			"version": "6",
-			"when": 1765286580259
-		},
-		{
-			"breakpoints": true,
-			"idx": 2,
-			"tag": "0002_cpu_players",
-			"version": "7",
-			"when": 1765371200000
-		},
-		{
-			"breakpoints": true,
-			"idx": 3,
-			"tag": "0003_host_flag",
-			"version": "7",
-			"when": 1765372200000
-		},
-		{
-			"breakpoints": true,
-			"idx": 4,
-			"tag": "0004_fluffy_surge",
-			"version": "6",
-			"when": 1767142655235
-		},
-		{
-			"breakpoints": true,
-			"idx": 5,
-			"tag": "0005_fine_maverick",
-			"version": "6",
-			"when": 1767162558179
-		},
-		{
-			"breakpoints": true,
-			"idx": 6,
-			"tag": "0006_adorable_malcolm_colcord",
-			"version": "6",
-			"when": 1767168780437
-		},
-		{
-			"breakpoints": true,
-			"idx": 7,
-			"tag": "0007_illegal_red_hulk",
-			"version": "6",
-			"when": 1767514044682
-		},
-		{
-			"breakpoints": true,
-			"idx": 8,
-			"tag": "0008_aspiring_moondragon",
-			"version": "6",
-			"when": 1767518525634
+			"when": 1769601198466
 		}
 	],
 	"version": "7"

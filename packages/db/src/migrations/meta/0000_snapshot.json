@@ -6,7 +6,7 @@
 	},
 	"dialect": "sqlite",
 	"enums": {},
-	"id": "7583ed42-49a2-47df-8849-1389733f3420",
+	"id": "2f643578-dec0-48fe-a699-13dcec179f6b",
 	"internal": {
 		"indexes": {}
 	},
@@ -111,6 +111,22 @@
 					"primaryKey": true,
 					"type": "text"
 				},
+				"is_cpu": {
+					"autoincrement": false,
+					"default": false,
+					"name": "is_cpu",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "integer"
+				},
+				"is_host": {
+					"autoincrement": false,
+					"default": false,
+					"name": "is_host",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "integer"
+				},
 				"player_name": {
 					"autoincrement": false,
 					"name": "player_name",
@@ -181,6 +197,13 @@
 					"primaryKey": false,
 					"type": "text"
 				},
+				"game_id": {
+					"autoincrement": false,
+					"name": "game_id",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
 				"id": {
 					"autoincrement": false,
 					"name": "id",
@@ -198,13 +221,20 @@
 				"round_id": {
 					"autoincrement": false,
 					"name": "round_id",
-					"notNull": true,
+					"notNull": false,
 					"primaryKey": false,
 					"type": "text"
 				},
 				"submission_id": {
 					"autoincrement": false,
 					"name": "submission_id",
+					"notNull": false,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"text": {
+					"autoincrement": false,
+					"name": "text",
 					"notNull": true,
 					"primaryKey": false,
 					"type": "text"
@@ -219,6 +249,15 @@
 			},
 			"compositePrimaryKeys": {},
 			"foreignKeys": {
+				"player_card_game_id_game_id_fk": {
+					"columnsFrom": ["game_id"],
+					"columnsTo": ["id"],
+					"name": "player_card_game_id_game_id_fk",
+					"onDelete": "cascade",
+					"onUpdate": "no action",
+					"tableFrom": "player_card",
+					"tableTo": "game"
+				},
 				"player_card_player_id_player_id_fk": {
 					"columnsFrom": ["player_id"],
 					"columnsTo": ["id"],
@@ -241,7 +280,7 @@
 					"columnsFrom": ["submission_id"],
 					"columnsTo": ["id"],
 					"name": "player_card_submission_id_submission_id_fk",
-					"onDelete": "cascade",
+					"onDelete": "set null",
 					"onUpdate": "no action",
 					"tableFrom": "player_card",
 					"tableTo": "submission"
@@ -281,14 +320,6 @@
 					"notNull": true,
 					"primaryKey": false,
 					"type": "integer"
-				},
-				"status": {
-					"autoincrement": false,
-					"default": "'submitting'",
-					"name": "status",
-					"notNull": true,
-					"primaryKey": false,
-					"type": "text"
 				},
 				"updated_at": {
 					"autoincrement": false,
@@ -338,6 +369,13 @@
 					"primaryKey": false,
 					"type": "text"
 				},
+				"text": {
+					"autoincrement": false,
+					"name": "text",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
 				"updated_at": {
 					"autoincrement": false,
 					"name": "updated_at",
@@ -360,70 +398,6 @@
 			},
 			"indexes": {},
 			"name": "round_theme",
-			"uniqueConstraints": {}
-		},
-		"round_winner": {
-			"checkConstraints": {},
-			"columns": {
-				"created_at": {
-					"autoincrement": false,
-					"name": "created_at",
-					"notNull": true,
-					"primaryKey": false,
-					"type": "text"
-				},
-				"id": {
-					"autoincrement": false,
-					"name": "id",
-					"notNull": true,
-					"primaryKey": true,
-					"type": "text"
-				},
-				"player_id": {
-					"autoincrement": false,
-					"name": "player_id",
-					"notNull": true,
-					"primaryKey": false,
-					"type": "text"
-				},
-				"round_id": {
-					"autoincrement": false,
-					"name": "round_id",
-					"notNull": true,
-					"primaryKey": false,
-					"type": "text"
-				},
-				"updated_at": {
-					"autoincrement": false,
-					"name": "updated_at",
-					"notNull": true,
-					"primaryKey": false,
-					"type": "text"
-				}
-			},
-			"compositePrimaryKeys": {},
-			"foreignKeys": {
-				"round_winner_player_id_player_id_fk": {
-					"columnsFrom": ["player_id"],
-					"columnsTo": ["id"],
-					"name": "round_winner_player_id_player_id_fk",
-					"onDelete": "cascade",
-					"onUpdate": "no action",
-					"tableFrom": "round_winner",
-					"tableTo": "player"
-				},
-				"round_winner_round_id_round_id_fk": {
-					"columnsFrom": ["round_id"],
-					"columnsTo": ["id"],
-					"name": "round_winner_round_id_round_id_fk",
-					"onDelete": "cascade",
-					"onUpdate": "no action",
-					"tableFrom": "round_winner",
-					"tableTo": "round"
-				}
-			},
-			"indexes": {},
-			"name": "round_winner",
 			"uniqueConstraints": {}
 		},
 		"submission": {
