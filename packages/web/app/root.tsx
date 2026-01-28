@@ -9,7 +9,11 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
-import { PROD_SITE_URL, SITE_NAME } from "@repo/shared/constants/config";
+import {
+	OFFICIAL_X_ID,
+	PROD_SITE_URL,
+	SITE_NAME,
+} from "@repo/shared/constants/config";
 import type { PropsWithChildren } from "react";
 import { ErrorPage } from "./components/ErrorPage";
 import { ToastProvider } from "./components/Toast";
@@ -32,7 +36,7 @@ export const meta: Route.MetaFunction = () => [
 	{ content: OGP_IMAGE, property: "og:image" },
 	// Twitter Card
 	{ content: "summary_large_image", name: "twitter:card" },
-	{ content: "@omojan_online", name: "twitter:site" },
+	{ content: `@${OFFICIAL_X_ID}`, name: "twitter:site" },
 	{ content: SITE_NAME, name: "twitter:title" },
 	{ content: SITE_DESCRIPTION, name: "twitter:description" },
 	{ content: OGP_IMAGE, name: "twitter:image" },

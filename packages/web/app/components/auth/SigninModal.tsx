@@ -1,3 +1,4 @@
+import { OFFICIAL_X_ID } from "@repo/shared/constants/config";
 import type { Dispatch, SetStateAction } from "react";
 import { FaRocket } from "react-icons/fa";
 import { XFollowButton } from "../button/XFollowButton";
@@ -14,7 +15,7 @@ export function SigninModal({
 	isAppBrowser?: boolean;
 }) {
 	return (
-		<Dialog onOpenChange={setIsOpen} open={isOpen} title="ログイン">
+		<Dialog onOpenChange={setIsOpen} open={isOpen}>
 			<div className="grid place-items-center gap-y-48">
 				<div className="grid place-items-center gap-y-16">
 					<FaRocket className="size-56 text-neutral-400" />
@@ -23,8 +24,10 @@ export function SigninModal({
 					</p>
 				</div>
 				<div className="grid place-items-center gap-y-12 text-neutral-500">
-					<p className="text-lg">ログイン機能は近日公開予定です</p>
-					<ul className="grid list-disc gap-y-8">
+					<p className="font-bold text-lg text-neutral-600">
+						ログイン機能は近日公開予定です
+					</p>
+					<ul className="grid list-disc gap-y-2">
 						<li>名前入力なしでゲーム参加</li>
 						<li>ゲーム中のアイコン設定</li>
 						<li>戦績</li>
@@ -34,7 +37,10 @@ export function SigninModal({
 					<p className="text-neutral-500 text-sm">
 						最新情報は公式Xアカウントをチェック
 					</p>
-					<XFollowButton options={{ size: "large" }} username="omojan_online" />
+					<XFollowButton
+						options={{ lang: "ja", size: "large" }}
+						username={OFFICIAL_X_ID}
+					/>
 				</div>
 			</div>
 		</Dialog>
