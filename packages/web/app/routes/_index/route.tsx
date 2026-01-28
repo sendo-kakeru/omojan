@@ -63,7 +63,7 @@ export default function () {
 					<div className="flex">
 						<TabsList variant="line">
 							<TabsTrigger value="waiting">募集中</TabsTrigger>
-							<TabsTrigger value="finished">終了済み</TabsTrigger>
+							<TabsTrigger value="finished">過去履歴</TabsTrigger>
 						</TabsList>
 						<div className="ml-auto flex gap-x-4 sm:gap-x-8">
 							<Button
