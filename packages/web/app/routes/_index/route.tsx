@@ -16,6 +16,8 @@ export default function () {
 	const [isOpen, setIsOpen] = useState(false);
 	const [searchParams, setSearchParams] = useSearchParams();
 
+	const limit = Number(searchParams.get("limit")) ?? 20;
+	const page = Number(searchParams.get("page")) ?? 1;
 	const status = (() => {
 		const statusParam = searchParams.get("status");
 		if (statusParam !== "waiting" && statusParam !== "finished") {
@@ -23,10 +25,9 @@ export default function () {
 		}
 		return statusParam;
 	})();
-	const page = Number(searchParams.get("page")) || 1;
 
 	const { data, error, isLoading, isValidating, mutate } = useRoomListSWR({
-		limit: 3,
+		limit,
 		page,
 		status,
 	});
