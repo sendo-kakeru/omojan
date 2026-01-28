@@ -73,10 +73,29 @@ export function Layout({ children }: PropsWithChildren) {
 			<head>
 				<meta charSet="utf-8" />
 				<meta content="width=device-width, initial-scale=1" name="viewport" />
+				<script
+					// biome-ignore lint/security/noDangerouslySetInnerHtml: GTM requires inline script
+					dangerouslySetInnerHTML={{
+						__html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-N9PLX5GD');`,
+					}}
+				/>
 				<Meta />
 				<Links />
 			</head>
 			<body className="overflow-x-hidden bg-yellow-50 font-[Inter] text-neutral-800">
+				<noscript>
+					<iframe
+						height="0"
+						src="https://www.googletagmanager.com/ns.html?id=GTM-N9PLX5GD"
+						style={{ display: "none", visibility: "hidden" }}
+						title="GTM"
+						width="0"
+					/>
+				</noscript>
 				<ToastProvider>{children}</ToastProvider>
 				<ScrollRestoration />
 				<Scripts />
