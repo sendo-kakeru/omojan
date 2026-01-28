@@ -8,10 +8,12 @@ import { useEffect, useState } from "react";
 import { Avatar } from "~/components/Avatar";
 import { Badge } from "~/components/Badge";
 import { Button } from "~/components/button/Button";
-import { CircularTimerProgress } from "~/components/CircularTimerProgress";
 import { Separator } from "~/components/Separator";
 import { useCountdown } from "~/hooks/useCountdown";
 import { createCombination } from "../libs/gameUtils";
+import { GamePhaseLayout } from "./GamePhaseLayout";
+import { GamePhaseNav } from "./GamePhaseNav";
+import { PlayerCardDisplay } from "./PlayerCardDisplay";
 
 export function GameVote({
 	data,
@@ -44,30 +46,25 @@ export function GameVote({
 		startCountdown(15);
 	}, [startCountdown]);
 
+	const getMessage = () => {
+		if (confirmedPlayerId) {
+			return "投票しました。他のプレイヤーの投票を待っています。";
+		}
+		return "面白いと思う組み合わせに投票してください。";
+	};
+
 	return (
-		<div className="grid h-full grid-rows-[auto_1fr] gap-y-8 pt-8 xs:pt-16">
-			<nav className="flex w-full items-center gap-x-8">
-				<div className="grid w-fit place-items-center rounded-lg border border-gray-200 bg-white px-8 py-2 font-mono text-neutral-600">
-					<span className="text-xs">Round</span>
-					<div className="flex items-center">
-						<span className="text-base">{game.roundNo}</span>/
-						<span className="text-base">4</span>
-					</div>
-				</div>
-				<p
-					className={classNames(
-						"flex h-full flex-1 items-center rounded-lg border bg-white px-8 py-2 text-sm",
-						confirmedPlayerId
-							? "border-gray-300 bg-gray-50 text-neutral-500"
-							: "border-green-300 text-green-600",
-					)}
-				>
-					{confirmedPlayerId
-						? "投票しました。他のプレイヤーの投票を待っています。"
-						: "面白いと思う組み合わせに投票してください。"}
-				</p>
-				<CircularTimerProgress count={count} progress={progress} />
-			</nav>
+		<GamePhaseLayout
+			nav={
+				<GamePhaseNav
+					message={getMessage()}
+					messageVariant={confirmedPlayerId ? "inactive" : "active"}
+					roundNo={game.roundNo}
+					timerCount={count}
+					timerProgress={progress}
+				/>
+			}
+		>
 			<main className="grid grid-rows-[auto_1fr]">
 				<section className="grid rounded-lg border border-gray-200 bg-white">
 					{game.players.map((player, index) => {
@@ -195,25 +192,8 @@ export function GameVote({
 					</div>
 				</section>
 
-				<section className="relative right-1/2 left-1/2 -mx-[50vw] w-screen border-t-2 border-t-gray-300 bg-white py-8 xs:pt-16 sm:py-24">
-					<div className="mx-auto flex max-w-800 flex-wrap gap-8 px-16">
-						{mePlayer.playerCards.map((card) => (
-							<div
-								className={classNames(
-									"flex rounded-md border px-8 py-4 text-center font-bold text-sm xs:text-base sm:text-lg",
-									card.used
-										? "border-gray-300 bg-gray-200 text-neutral-400"
-										: "border-gray-200 bg-gray-100 text-neutral-800",
-								)}
-								key={card.id}
-							>
-								{card.word}
-							</div>
-						))}
-					</div>
-					<div className="absolute inset-0 z-50 bg-gray-600 opacity-50" />
-				</section>
+				<PlayerCardDisplay cards={mePlayer.playerCards} disabled />
 			</main>
-		</div>
+		</GamePhaseLayout>
 	);
 }

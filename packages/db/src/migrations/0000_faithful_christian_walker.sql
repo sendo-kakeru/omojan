@@ -15,6 +15,8 @@ CREATE TABLE `player` (
 	`game_id` text NOT NULL,
 	`game_token_hash` text NOT NULL,
 	`id` text PRIMARY KEY NOT NULL,
+	`is_cpu` integer DEFAULT false NOT NULL,
+	`is_host` integer DEFAULT false NOT NULL,
 	`player_name` text NOT NULL,
 	`seat` integer NOT NULL,
 	`user_id` text,
@@ -26,13 +28,16 @@ CREATE UNIQUE INDEX `player_game_token_hash_unique` ON `player` (`game_token_has
 CREATE TABLE `player_card` (
 	`created_at` text NOT NULL,
 	`updated_at` text NOT NULL,
+	`game_id` text NOT NULL,
 	`id` text PRIMARY KEY NOT NULL,
 	`player_id` text NOT NULL,
-	`round_id` text NOT NULL,
-	`submission_id` text NOT NULL,
+	`round_id` text,
+	`submission_id` text,
+	`text` text NOT NULL,
+	FOREIGN KEY (`game_id`) REFERENCES `game`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`player_id`) REFERENCES `player`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`round_id`) REFERENCES `round`(`id`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`submission_id`) REFERENCES `submission`(`id`) ON UPDATE no action ON DELETE cascade
+	FOREIGN KEY (`submission_id`) REFERENCES `submission`(`id`) ON UPDATE no action ON DELETE set null
 );
 --> statement-breakpoint
 CREATE TABLE `round` (
@@ -41,7 +46,6 @@ CREATE TABLE `round` (
 	`game_id` text NOT NULL,
 	`id` text PRIMARY KEY NOT NULL,
 	`round_no` integer NOT NULL,
-	`status` text DEFAULT 'submitting' NOT NULL,
 	FOREIGN KEY (`game_id`) REFERENCES `game`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
@@ -50,16 +54,7 @@ CREATE TABLE `round_theme` (
 	`updated_at` text NOT NULL,
 	`id` text PRIMARY KEY NOT NULL,
 	`round_id` text NOT NULL,
-	FOREIGN KEY (`round_id`) REFERENCES `round`(`id`) ON UPDATE no action ON DELETE cascade
-);
---> statement-breakpoint
-CREATE TABLE `round_winner` (
-	`created_at` text NOT NULL,
-	`updated_at` text NOT NULL,
-	`id` text PRIMARY KEY NOT NULL,
-	`player_id` text NOT NULL,
-	`round_id` text NOT NULL,
-	FOREIGN KEY (`player_id`) REFERENCES `player`(`id`) ON UPDATE no action ON DELETE cascade,
+	`text` text NOT NULL,
 	FOREIGN KEY (`round_id`) REFERENCES `round`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
