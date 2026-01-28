@@ -3,9 +3,8 @@ import { useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { RxUpdate } from "react-icons/rx";
 import { useSearchParams } from "react-router";
-import { AuthHeader } from "~/components/auth/AuthHeader";
 import { Button } from "~/components/button/Button";
-import { XFollowButton } from "~/components/button/XFollowButton";
+import { Header } from "~/components/Header";
 import { Pagination } from "~/components/Pagination";
 import { Spinner } from "~/components/Spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/Tabs";
@@ -44,14 +43,29 @@ export default function () {
 
 	return (
 		<>
-			<AuthHeader />
+			<Header />
 			<main className="grid gap-y-8 pb-24">
 				<div className="flex items-center justify-between">
 					<h2 className="font-bold text-lg">部屋一覧</h2>
-					<XFollowButton
-						options={{ lang: "ja", showScreenName: false, size: "large" }}
-						username="omojan_online"
-					/>
+					<div className="ml-auto flex gap-x-8">
+						<Button
+							as="button"
+							color="gray"
+							disabled={isValidating}
+							leftIcon={isValidating ? <Spinner /> : <RxUpdate />}
+							onClick={() => mutate()}
+							variant="outline"
+						>
+							更新
+						</Button>
+						<Button
+							as="button"
+							leftIcon={<FaPlus />}
+							onClick={() => setIsOpen(true)}
+						>
+							部屋作成
+						</Button>
+					</div>
 				</div>
 
 				<Tabs
@@ -60,31 +74,10 @@ export default function () {
 					}
 					value={status}
 				>
-					<div className="flex">
-						<TabsList variant="line">
-							<TabsTrigger value="waiting">募集中</TabsTrigger>
-							<TabsTrigger value="finished">過去履歴</TabsTrigger>
-						</TabsList>
-						<div className="ml-auto flex gap-x-4 sm:gap-x-8">
-							<Button
-								as="button"
-								color="gray"
-								disabled={isValidating}
-								leftIcon={isValidating ? <Spinner /> : <RxUpdate />}
-								onClick={() => mutate()}
-								variant="outline"
-							>
-								更新
-							</Button>
-							<Button
-								as="button"
-								leftIcon={<FaPlus />}
-								onClick={() => setIsOpen(true)}
-							>
-								部屋作成
-							</Button>
-						</div>
-					</div>
+					<TabsList className="mx-auto" variant="line">
+						<TabsTrigger value="waiting">募集中</TabsTrigger>
+						<TabsTrigger value="finished">過去履歴</TabsTrigger>
+					</TabsList>
 					<TabsContent className="mt-12" value="waiting">
 						<RoomList
 							emptyMessage="現在募集している部屋はありません"

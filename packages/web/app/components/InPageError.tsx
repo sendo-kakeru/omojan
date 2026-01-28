@@ -23,9 +23,9 @@ export function InPageError({
 					{showLogo && (
 						<img
 							alt="おもじゃんオンライン"
-							height={100}
+							height={72}
 							src="/logo.png"
-							width={100}
+							width={72}
 						/>
 					)}
 					<h1 className="font-bold text-2xl text-neutral-800">{heading}</h1>
