@@ -5,6 +5,7 @@ import { RxUpdate } from "react-icons/rx";
 import { useSearchParams } from "react-router";
 import { AuthHeader } from "~/components/auth/AuthHeader";
 import { Button } from "~/components/button/Button";
+import { XFollowButton } from "~/components/button/XFollowButton";
 import { Pagination } from "~/components/Pagination";
 import { Spinner } from "~/components/Spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/Tabs";
@@ -16,6 +17,8 @@ export default function () {
 	const [isOpen, setIsOpen] = useState(false);
 	const [searchParams, setSearchParams] = useSearchParams();
 
+	const limit = Number(searchParams.get("limit")) ?? 20;
+	const page = Number(searchParams.get("page")) ?? 1;
 	const status = (() => {
 		const statusParam = searchParams.get("status");
 		if (statusParam !== "waiting" && statusParam !== "finished") {
@@ -23,10 +26,9 @@ export default function () {
 		}
 		return statusParam;
 	})();
-	const page = Number(searchParams.get("page")) || 1;
 
 	const { data, error, isLoading, isValidating, mutate } = useRoomListSWR({
-		limit: 3,
+		limit,
 		page,
 		status,
 	});
@@ -43,28 +45,13 @@ export default function () {
 	return (
 		<>
 			<AuthHeader />
-			<main className="grid gap-y-16 pb-24">
+			<main className="grid gap-y-8 pb-24">
 				<div className="flex items-center justify-between">
 					<h2 className="font-bold text-lg">部屋一覧</h2>
-					<div className="flex gap-x-8">
-						<Button
-							as="button"
-							color="gray"
-							disabled={isValidating}
-							leftIcon={isValidating ? <Spinner /> : <RxUpdate />}
-							onClick={() => mutate()}
-							variant="outline"
-						>
-							更新
-						</Button>
-						<Button
-							as="button"
-							leftIcon={<FaPlus />}
-							onClick={() => setIsOpen(true)}
-						>
-							部屋作成
-						</Button>
-					</div>
+					<XFollowButton
+						options={{ lang: "ja", showScreenName: false, size: "large" }}
+						username="omojan_online"
+					/>
 				</div>
 
 				<Tabs
@@ -73,12 +60,32 @@ export default function () {
 					}
 					value={status}
 				>
-					<TabsList variant="line">
-						<TabsTrigger value="waiting">募集中</TabsTrigger>
-						<TabsTrigger value="finished">終了したゲーム</TabsTrigger>
-					</TabsList>
-
-					<TabsContent className="mt-16" value="waiting">
+					<div className="flex">
+						<TabsList variant="line">
+							<TabsTrigger value="waiting">募集中</TabsTrigger>
+							<TabsTrigger value="finished">終了済み</TabsTrigger>
+						</TabsList>
+						<div className="ml-auto flex gap-x-4 sm:gap-x-8">
+							<Button
+								as="button"
+								color="gray"
+								disabled={isValidating}
+								leftIcon={isValidating ? <Spinner /> : <RxUpdate />}
+								onClick={() => mutate()}
+								variant="outline"
+							>
+								更新
+							</Button>
+							<Button
+								as="button"
+								leftIcon={<FaPlus />}
+								onClick={() => setIsOpen(true)}
+							>
+								部屋作成
+							</Button>
+						</div>
+					</div>
+					<TabsContent className="mt-12" value="waiting">
 						<RoomList
 							emptyMessage="現在募集している部屋はありません"
 							error={error}
@@ -92,7 +99,7 @@ export default function () {
 						/>
 					</TabsContent>
 
-					<TabsContent className="mt-16" value="finished">
+					<TabsContent className="mt-12" value="finished">
 						<RoomList
 							emptyMessage="終了した部屋はありません"
 							error={error}

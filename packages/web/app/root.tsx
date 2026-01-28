@@ -9,8 +9,13 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
-import { PROD_SITE_URL, SITE_NAME } from "@repo/shared/constants/config";
+import {
+	OFFICIAL_X_ID,
+	PROD_SITE_URL,
+	SITE_NAME,
+} from "@repo/shared/constants/config";
 import type { PropsWithChildren } from "react";
+import { ErrorPage } from "./components/ErrorPage";
 import { ToastProvider } from "./components/Toast";
 import { MeProvider } from "./context/me/provider";
 
@@ -31,7 +36,7 @@ export const meta: Route.MetaFunction = () => [
 	{ content: OGP_IMAGE, property: "og:image" },
 	// Twitter Card
 	{ content: "summary_large_image", name: "twitter:card" },
-	{ content: "@omojan_online", name: "twitter:site" },
+	{ content: `@${OFFICIAL_X_ID}`, name: "twitter:site" },
 	{ content: SITE_NAME, name: "twitter:title" },
 	{ content: SITE_DESCRIPTION, name: "twitter:description" },
 	{ content: OGP_IMAGE, name: "twitter:image" },
@@ -68,10 +73,29 @@ export function Layout({ children }: PropsWithChildren) {
 			<head>
 				<meta charSet="utf-8" />
 				<meta content="width=device-width, initial-scale=1" name="viewport" />
+				<script
+					// biome-ignore lint/security/noDangerouslySetInnerHtml: GTM requires inline script
+					dangerouslySetInnerHTML={{
+						__html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-N9PLX5GD');`,
+					}}
+				/>
 				<Meta />
 				<Links />
 			</head>
 			<body className="overflow-x-hidden bg-yellow-50 font-[Inter] text-neutral-800">
+				<noscript>
+					<iframe
+						height="0"
+						src="https://www.googletagmanager.com/ns.html?id=GTM-N9PLX5GD"
+						style={{ display: "none", visibility: "hidden" }}
+						title="GTM"
+						width="0"
+					/>
+				</noscript>
 				<ToastProvider>{children}</ToastProvider>
 				<ScrollRestoration />
 				<Scripts />
@@ -92,32 +116,31 @@ export default function App() {
 	);
 }
 
-// TODO: 整備
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
-	let message = "Oops!";
-	let details = "An unexpected error occurred.";
-	let stack: string | undefined;
-
 	if (isRouteErrorResponse(error)) {
-		message = error.status === 404 ? "404" : "Error";
-		details =
-			error.status === 404
-				? "The requested page could not be found."
-				: error.statusText || details;
-	} else if (import.meta.env.DEV && error && error instanceof Error) {
-		details = error.message;
-		stack = error.stack;
+		const statusCode = [401, 403, 404, 500].includes(error.status)
+			? (error.status as 401 | 403 | 404 | 500)
+			: 500;
+		return <ErrorPage statusCode={statusCode} />;
 	}
 
-	return (
-		<main className="container mx-auto p-4 pt-16">
-			<h1>{message}</h1>
-			<p>{details}</p>
-			{stack && (
-				<pre className="w-full overflow-x-auto p-4">
-					<code>{stack}</code>
-				</pre>
-			)}
-		</main>
-	);
+	// 本番以外ではスタックトレースを表示
+	if (!import.meta.env.PROD && error instanceof Error) {
+		return (
+			<div className="flex min-h-svh flex-col items-center justify-center px-16">
+				<div className="grid max-w-600 gap-y-16">
+					<h1 className="font-bold text-2xl text-red-500">
+						開発環境エラー: {error.message}
+					</h1>
+					{error.stack && (
+						<pre className="overflow-x-auto rounded-lg bg-neutral-100 p-16 text-sm">
+							<code>{error.stack}</code>
+						</pre>
+					)}
+				</div>
+			</div>
+		);
+	}
+
+	return <ErrorPage statusCode={500} />;
 }

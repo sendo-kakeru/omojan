@@ -1,3 +1,5 @@
+import { OFFICIAL_X_ID } from "@repo/shared/constants/config";
+
 export const maintenanceHtml = () => `<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -74,9 +76,9 @@ export const maintenanceHtml = () => `<!DOCTYPE html>
     <div class="x">
       <p>進捗は公式Xでお知らせします。</p>
       <a class="twitter-follow-button"
-      href="https://twitter.com/omojan_online"
+      href="https://twitter.com/${OFFICIAL_X_ID}"
       data-size="large">
-      Follow @omojan_online</a>
+      Follow @${OFFICIAL_X_ID}</a>
     </div>
   </div>
 <script>window.twttr = (function(d, s, id) {

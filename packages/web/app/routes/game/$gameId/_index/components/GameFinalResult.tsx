@@ -1,18 +1,21 @@
 import type { GameResultResponseBody } from "@repo/db/model";
+import { OFFICIAL_X_ID } from "@repo/shared/constants/config";
 import classNames from "classnames";
 import { FaCrown } from "react-icons/fa";
 import { Avatar } from "~/components/Avatar";
 import { Badge } from "~/components/Badge";
 import { Button } from "~/components/button/Button";
+import { XFollowButton } from "~/components/button/XFollowButton";
 import { useMe } from "~/context/me/hooks";
 
 export type GameFinalResultProps = {
 	result: GameResultResponseBody;
 };
 
-export function GameFinalResult({ result }: GameFinalResultProps) {
+export function GameFinalResult({
+	result: { title, winners, rounds },
+}: GameFinalResultProps) {
 	const { me } = useMe();
-	const { winners, rounds } = result;
 
 	return (
 		<main className="grid min-h-full gap-y-24 pt-16 pb-36">
@@ -23,7 +26,8 @@ export function GameFinalResult({ result }: GameFinalResultProps) {
 				</Button>
 			</div>
 			<div className="grid gap-y-4">
-				<section className="grid place-items-center gap-y-12 rounded-2xl border-1 border-yellow-300 bg-yellow-100 p-16 shadow">
+				<section className="grid place-items-center gap-y-12 rounded-2xl border border-yellow-300 bg-yellow-100 p-16 shadow">
+					<p className="font-bold text-lg text-neutral-600">{title}</p>
 					<div className="flex items-center gap-x-8">
 						<FaCrown className="size-20 text-yellow-500" />
 						<h2 className="font-bold text-yellow-700">優勝者</h2>
@@ -56,6 +60,23 @@ export function GameFinalResult({ result }: GameFinalResultProps) {
 					</div>
 				</section>
 			</div>
+
+			<aside className="grid place-items-center gap-y-8 rounded-xl border border-gray-200 bg-white p-16">
+				<div className="grid gap-y-4 text-center">
+					<p className="font-bold text-neutral-700">
+						最新情報は公式Xをチェック
+					</p>
+					<p className="text-neutral-500 text-sm">
+						不具合の報告や追加してほしい単語など
+						<br />
+						お気軽にご連絡ください
+					</p>
+				</div>
+				<XFollowButton
+					options={{ lang: "ja", showScreenName: false, size: "large" }}
+					username={OFFICIAL_X_ID}
+				/>
+			</aside>
 
 			{/* Round History */}
 			<section className="grid gap-y-4">
