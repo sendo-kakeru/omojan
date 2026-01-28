@@ -7,11 +7,13 @@ import classNames from "classnames";
 import { useEffect, useState } from "react";
 import { Avatar } from "~/components/Avatar";
 import { Badge } from "~/components/Badge";
-import { CircularTimerProgress } from "~/components/CircularTimerProgress";
 import { Separator } from "~/components/Separator";
 import { Spinner } from "~/components/Spinner";
 import { useCountdown } from "~/hooks/useCountdown";
 import { createCombination } from "../libs/gameUtils";
+import { GamePhaseLayout } from "./GamePhaseLayout";
+import { GamePhaseNav } from "./GamePhaseNav";
+import { PlayerCardDisplay } from "./PlayerCardDisplay";
 import {
 	SelectSubmissionCard,
 	type SelectSubmissionCardProps,
@@ -149,6 +151,14 @@ export function GameSubmission({
 		return "他のプレイヤーの提出を待っています。";
 	};
 
+	const handleCardClick = (cardId: PlayerCardId) => {
+		if (isConfirmed) return;
+		const card = mePlayer.playerCards.find((c) => c.id === cardId);
+		if (card?.used) return;
+		setSelectedCardId(cardId);
+		setPendingPosition(null);
+	};
+
 	return (
 		<>
 			{isStarting && (
@@ -174,27 +184,17 @@ export function GameSubmission({
 					</div>
 				</div>
 			)}
-			<div className="grid h-full grid-rows-[auto_1fr] gap-y-8 pt-8 xs:pt-16">
-				<nav className="flex w-full items-center gap-x-8">
-					<div className="grid w-fit place-items-center rounded-lg border border-gray-200 bg-white px-8 py-2 font-mono text-neutral-600">
-						<span className="text-xs">Round</span>
-						<div className="flex items-center">
-							<span className="text-base">{game.roundNo}</span>/
-							<span className="text-base">4</span>
-						</div>
-					</div>
-					<p
-						className={classNames(
-							"flex h-full flex-1 items-center rounded-lg border px-8 py-2 text-sm",
-							isMyTurn
-								? "border-green-300 bg-white text-green-600"
-								: "border-gray-300 bg-gray-50 text-neutral-500",
-						)}
-					>
-						{getMessage()}
-					</p>
-					<CircularTimerProgress count={count} progress={progress} />
-				</nav>
+			<GamePhaseLayout
+				nav={
+					<GamePhaseNav
+						message={getMessage()}
+						messageVariant={isMyTurn ? "active" : "inactive"}
+						roundNo={game.roundNo}
+						timerCount={count}
+						timerProgress={progress}
+					/>
+				}
+			>
 				<main className="grid grid-rows-[auto_1fr_auto]">
 					<section className="grid rounded-lg border border-gray-200 bg-white">
 						{game.players.map((player, index) => {
@@ -252,43 +252,15 @@ export function GameSubmission({
 						</div>
 					</section>
 
-					{/* cqwを使って画面いっぱいに広げると　safariで崩れる。若干ズレはあるが最もマシな形をとっている。 */}
-					<section className="relative right-1/2 left-1/2 -mx-[50vw] w-screen border-t-2 border-t-gray-300 bg-white py-8 xs:pt-16 sm:py-24">
-						<div className="mx-auto flex max-w-800 flex-wrap gap-8 px-16">
-							{mePlayer.playerCards.map((card) => {
-								const isSelected = card.id === selectedCardId;
-								return (
-									<button
-										className={classNames(
-											"flex rounded-md border px-8 py-4 text-center font-bold text-neutral-800 text-sm xs:text-base transition sm:text-lg",
-											card.used
-												? "cursor-not-allowed border-gray-300 bg-gray-200 opacity-50"
-												: isSelected && isConfirmed
-													? "border-green-500 bg-green-100 opacity-50"
-													: isSelected
-														? "border-green-400 bg-green-50 shadow-sm"
-														: "border-gray-200 bg-gray-100 hover:bg-green-50",
-										)}
-										disabled={card.used || isConfirmed || !isMyTurn}
-										key={card.id}
-										onClick={() => {
-											if (isConfirmed || card.used) return;
-											setSelectedCardId(card.id);
-											setPendingPosition(null);
-										}}
-										type="button"
-									>
-										{card.word}
-									</button>
-								);
-							})}
-						</div>
-						{!isMyTurn && (
-							<div className="absolute inset-0 z-50 bg-gray-600 opacity-50" />
-						)}
-					</section>
+					<PlayerCardDisplay
+						cards={mePlayer.playerCards}
+						disabled={!isMyTurn}
+						isConfirmed={isConfirmed}
+						onCardClick={isMyTurn ? handleCardClick : undefined}
+						selectedCardId={selectedCardId}
+					/>
 				</main>
-			</div>
+			</GamePhaseLayout>
 		</>
 	);
 }
