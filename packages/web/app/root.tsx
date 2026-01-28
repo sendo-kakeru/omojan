@@ -11,6 +11,7 @@ import type { Route } from "./+types/root";
 import "./app.css";
 import { PROD_SITE_URL, SITE_NAME } from "@repo/shared/constants/config";
 import type { PropsWithChildren } from "react";
+import { ErrorPage } from "./components/ErrorPage";
 import { ToastProvider } from "./components/Toast";
 import { MeProvider } from "./context/me/provider";
 
@@ -92,32 +93,31 @@ export default function App() {
 	);
 }
 
-// TODO: 整備
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
-	let message = "Oops!";
-	let details = "An unexpected error occurred.";
-	let stack: string | undefined;
-
 	if (isRouteErrorResponse(error)) {
-		message = error.status === 404 ? "404" : "Error";
-		details =
-			error.status === 404
-				? "The requested page could not be found."
-				: error.statusText || details;
-	} else if (import.meta.env.DEV && error && error instanceof Error) {
-		details = error.message;
-		stack = error.stack;
+		const statusCode = [401, 403, 404, 500].includes(error.status)
+			? (error.status as 401 | 403 | 404 | 500)
+			: 500;
+		return <ErrorPage statusCode={statusCode} />;
 	}
 
-	return (
-		<main className="container mx-auto p-4 pt-16">
-			<h1>{message}</h1>
-			<p>{details}</p>
-			{stack && (
-				<pre className="w-full overflow-x-auto p-4">
-					<code>{stack}</code>
-				</pre>
-			)}
-		</main>
-	);
+	// 本番以外ではスタックトレースを表示
+	if (!import.meta.env.PROD && error instanceof Error) {
+		return (
+			<div className="flex min-h-svh flex-col items-center justify-center px-16">
+				<div className="grid max-w-600 gap-y-16">
+					<h1 className="font-bold text-2xl text-red-500">
+						開発環境エラー: {error.message}
+					</h1>
+					{error.stack && (
+						<pre className="overflow-x-auto rounded-lg bg-neutral-100 p-16 text-sm">
+							<code>{error.stack}</code>
+						</pre>
+					)}
+				</div>
+			</div>
+		);
+	}
+
+	return <ErrorPage statusCode={500} />;
 }
