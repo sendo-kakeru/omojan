@@ -4,7 +4,10 @@
 	"compatibility_flags": ["nodejs_compat"],
 	"env": {
 		"production": {
-			"routes": [{ "custom_domain": true, "pattern": "omojan.com" }],
+			"routes": [
+				{ "custom_domain": true, "pattern": "omojan.com" },
+				{ "custom_domain": true, "pattern": "www.omojan.com" }
+			],
 			"vars": {
 				"MAINTENANCE_MODE": "false"
 			}
