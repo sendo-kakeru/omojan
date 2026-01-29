@@ -1,6 +1,7 @@
 import type { FinishedRoom, WaitingRoom } from "@repo/db/model";
 import type { Meta, StoryFn } from "@storybook/react-vite";
 import { RoomCard } from "./RoomCard";
+import { RoomCardSkeleton } from "./RoomCardSkeleton";
 
 const meta: Meta = {
 	component: RoomCard,
@@ -275,3 +276,5 @@ export const DifferentTimeLimits: Story = () => (
 		/>
 	</div>
 );
+
+export const Loading: Story = () => <RoomCardSkeleton />;

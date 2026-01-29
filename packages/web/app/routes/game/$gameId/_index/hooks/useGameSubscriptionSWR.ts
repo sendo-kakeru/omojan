@@ -24,11 +24,9 @@ function getUrl({ gameId }: { gameId: string }): URL | undefined {
 export function useGameSubscriptionSWR({
 	gameId,
 	gameToken,
-	onClose,
 }: {
 	gameId: string;
 	gameToken: string | null;
-	onClose: (event: CloseEvent) => void;
 }) {
 	const wsRef = useRef<WebSocket | null>(null);
 	const navigate = useNavigate();
@@ -86,7 +84,6 @@ export function useGameSubscriptionSWR({
 						new Error("接続が切断されました。時間をおいて再接続してください。"),
 					);
 				}
-				onClose(event);
 			};
 
 			ws.addEventListener("message", handleMessage);

@@ -60,7 +60,7 @@ export function RoomCard({
 					</div>
 				)}
 			</div>
-			<div className="flex flex-wrap gap-x-8 gap-y-8">
+			<div className="flex flex-wrap gap-x-8">
 				{room.players.map((player) => {
 					const isWinner =
 						!isWaiting && "isWinner" in player && player.isWinner;
