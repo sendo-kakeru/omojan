@@ -55,6 +55,12 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 
 			stopExiting();
 
+			if (event.code === 1000) {
+				// NOTE: ゲーム開始時（正常終了）はゲームページへ遷移
+				void navigate(`/game/${gameId}`, { replace: true });
+				return;
+			}
+
 			if (event.code === 4204 || event.code === 4410) {
 				// NOTE: 退出時、部屋削除時はページ遷移
 				void navigate("/", { replace: true });
