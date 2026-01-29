@@ -47,8 +47,15 @@ export class MatchingDurableObject extends DurableObject<Env> {
 		const { token, gameId } = this.getSearchParams(request);
 		this.ensureGameId(gameId);
 
-		// ゲームステータスをチェック（waiting以外は接続を拒否）
-		await this.ensureGameWaiting({ gameId });
+		// ゲームステータスをチェック
+		const gameStatus = await this.getGameStatus({ gameId });
+
+		// 終了済みのゲームは接続を拒否
+		if (gameStatus === "finished") {
+			throw new HTTPException(410, {
+				message: "この部屋は終了しています",
+			});
+		}
 
 		if (!this.webSocketService.isUpgradeRequest(request)) {
 			throw new HTTPException(426, {
@@ -77,6 +84,12 @@ export class MatchingDurableObject extends DurableObject<Env> {
 
 		// Durable Object の context で WebSocket を accept する
 		this.ctx.acceptWebSocket(server, [player.id]);
+
+		// ゲームが既にactive状態の場合は、接続後すぐに閉じてゲーム画面へリダイレクトを促す
+		if (gameStatus === "active") {
+			server.close(1000, "ゲームが開始されました");
+			return this.webSocketService.upgradeResponse({ client });
+		}
 
 		// ハートビート管理用に最終PONG時刻を記録
 		this.lastPongAt.set(player.id, Date.now());
@@ -496,14 +509,14 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	}
 
 	/**
-	 * ゲームが募集中（waiting）状態であることを確認する。
-	 * 開始済み・終了済みのゲームへの接続を拒否する。
+	 * ゲームのステータスを取得する。
+	 * 存在しない場合は404エラーを投げる。
 	 */
-	private async ensureGameWaiting({
+	private async getGameStatus({
 		gameId,
 	}: {
 		gameId: GameId;
-	}): Promise<void> {
+	}): Promise<"waiting" | "active" | "finished"> {
 		const [game] = await this.db
 			.select({ status: gameTable.status })
 			.from(gameTable)
@@ -515,16 +528,6 @@ export class MatchingDurableObject extends DurableObject<Env> {
 			});
 		}
 
-		if (game.status === "active") {
-			throw new HTTPException(409, {
-				message: "この部屋は既にゲームが開始しています",
-			});
-		}
-
-		if (game.status === "finished") {
-			throw new HTTPException(410, {
-				message: "この部屋は終了しています",
-			});
-		}
+		return game.status;
 	}
 }

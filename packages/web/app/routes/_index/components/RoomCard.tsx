@@ -6,7 +6,11 @@ import { FiUsers } from "react-icons/fi";
 import { IoIosLock } from "react-icons/io";
 import { Link } from "react-router";
 import { UserLabel } from "~/components/user/UserLabel";
-import { formatDate, formatRelativeTime } from "~/libs/formatDate";
+import {
+	formatDate,
+	formatDateHyphen,
+	formatRelativeTime,
+} from "~/libs/formatDate";
 import { JoinRoomDialog } from "./JoinRoomDialog";
 
 export function RoomCard({
@@ -27,8 +31,8 @@ export function RoomCard({
 	const [isOpen, setIsOpen] = useState(false);
 	const isWaiting = status === "waiting";
 	const cardClassName = classNames(
-		"grid gap-y-12 rounded-lg border border-gray-300 bg-white p-12 shadow-sm transition-colors",
-		"hover:border-gray-400 hover:bg-gray-50",
+		"grid w-full rounded-lg border border-gray-300 bg-white p-12 shadow-sm transition-colors",
+		"hover:bg-gray-50",
 		className,
 	);
 
@@ -47,20 +51,21 @@ export function RoomCard({
 						</div>
 					)}
 				</div>
-
-				<div className="flex items-center gap-x-4 text-neutral-500">
-					<FaRegClock />
-					<p className="text-sm">制限時間: {room.timeLimit}秒</p>
-				</div>
-
-				{isWaiting && (
+				<div className="flex gap-x-24">
 					<div className="flex items-center gap-x-4 text-neutral-500">
-						<FiUsers />
-						<p className="text-sm">参加者: {room.players.length}/4</p>
+						<FaRegClock />
+						<p className="text-sm">制限時間 - {room.timeLimit}秒</p>
 					</div>
-				)}
+
+					{isWaiting && (
+						<div className="flex items-center gap-x-4 text-neutral-500">
+							<FiUsers />
+							<p className="text-sm">参加者 - {room.players.length}/4</p>
+						</div>
+					)}
+				</div>
 			</div>
-			<div className="flex flex-wrap gap-x-8 gap-y-8">
+			<div className="mt-12 flex flex-wrap gap-x-8">
 				{room.players.map((player) => {
 					const isWinner =
 						!isWaiting && "isWinner" in player && player.isWinner;
@@ -87,37 +92,42 @@ export function RoomCard({
 					);
 				})}
 			</div>
-			<p className="w-full text-right text-neutral-400 text-xs">
+			<time
+				className="mt-6 w-full text-right text-neutral-400 text-xs"
+				dateTime={formatDateHyphen(
+					isWaiting ? room.createdAt : room.finishedAt,
+				)}
+			>
 				{isWaiting
 					? formatRelativeTime(room.createdAt)
 					: formatDate(room.finishedAt)}
-			</p>
+			</time>
 		</>
 	);
 
-	if (isWaiting) {
-		return (
-			<>
-				<button
-					aria-label={`${room.title}に参加`}
+	return (
+		<article>
+			{isWaiting ? (
+				<>
+					<button
+						aria-label={`${room.title}に参加`}
+						className={cardClassName}
+						onClick={() => setIsOpen(true)}
+						type="button"
+					>
+						{content}
+					</button>
+					<JoinRoomDialog isOpen={isOpen} room={room} setIsOpen={setIsOpen} />
+				</>
+			) : (
+				<Link
+					aria-label={`${room.title}の結果を見る`}
 					className={cardClassName}
-					onClick={() => setIsOpen(true)}
-					type="button"
+					to={`/game/${room.gameId}/result`}
 				>
 					{content}
-				</button>
-				<JoinRoomDialog isOpen={isOpen} room={room} setIsOpen={setIsOpen} />
-			</>
-		);
-	}
-
-	return (
-		<Link
-			aria-label={`${room.title}の結果を見る`}
-			className={cardClassName}
-			to={`/game/${room.gameId}/result`}
-		>
-			{content}
-		</Link>
+				</Link>
+			)}
+		</article>
 	);
 }
