@@ -55,8 +55,8 @@ export const links: Route.LinksFunction = () => [
 		href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
 		rel: "stylesheet",
 	},
-	{ href: "/favicon.ico", rel: "icon", sizes: "any" },
-	{ href: "/favicon.svg", rel: "icon", type: "image/svg+xml" },
+	{ href: "/favicon.ico", rel: "icon", sizes: "48x48" },
+	{ href: "/favicon.svg", rel: "icon", sizes: "any", type: "image/svg+xml" },
 	{
 		href: "/favicon-96x96.png",
 		rel: "icon",
