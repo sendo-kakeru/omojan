@@ -87,17 +87,6 @@ export const ErrorState: Story = () => (
 	/>
 );
 
-/** すべて見るリンクなし */
-export const WithoutMoreLink: Story = () => (
-	<FinishedRoomSection
-		isLoading={false}
-		rooms={[
-			createFinishedRoom({ title: "ゲーム1" }),
-			createFinishedRoom({ title: "ゲーム2" }),
-		]}
-	/>
-);
-
 /** 5件表示（トップページの最大表示数） */
 export const FiveRooms: Story = () => (
 	<FinishedRoomSection

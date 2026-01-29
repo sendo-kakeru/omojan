@@ -23,7 +23,7 @@ async function createRoom({
 }) {
 	await page.goto("/");
 	await expect(
-		page.getByRole("heading", { name: "募集中の部屋一覧" }),
+		page.getByRole("heading", { name: "募集中の部屋" }),
 	).toBeVisible();
 	await page.getByRole("button", { name: "部屋作成" }).click();
 	await expect(page.getByLabel("部屋名")).toBeVisible({ timeout: 15_000 });
@@ -51,7 +51,7 @@ async function joinRoom({
 }) {
 	await page.goto("/");
 	await expect(
-		page.getByRole("heading", { name: "募集中の部屋一覧" }),
+		page.getByRole("heading", { name: "募集中の部屋" }),
 	).toBeVisible();
 	const joinButton = page.getByRole("button", { name: `${roomTitle}に参加` });
 	await expect(joinButton).toBeVisible();

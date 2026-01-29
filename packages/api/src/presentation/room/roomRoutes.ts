@@ -39,7 +39,7 @@ export const routes = new Hono<
 			const query = c.req.valid("query");
 			const status = query.status ?? "waiting";
 			const page = query.page ?? 1;
-			const limit = query.limit;
+			const limit = query.limit ?? 20;
 
 			try {
 				if (status === "finished") {

@@ -18,6 +18,8 @@ export default function () {
 		isLoading: waitingLoading,
 		mutate: waitingMutate,
 	} = useRoomListSWR({
+		// 実質全件
+		limit: 9999,
 		status: "waiting",
 	});
 
