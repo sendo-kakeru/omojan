@@ -119,7 +119,9 @@ export function GameResult({ data }: { data: GameServerResultMessage }) {
 							</div>
 						)}
 						<p className="text-center text-neutral-500 text-sm">
-							次のラウンドに進みます...
+							{game.roundNo === 4
+								? "結果に進みます..."
+								: "次のラウンドに進みます..."}
 						</p>
 					</div>
 				</section>
