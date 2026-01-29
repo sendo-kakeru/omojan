@@ -28,6 +28,7 @@ export class WebSocketService {
 		payload: unknown;
 	}): void {
 		for (const socket of sockets) {
+			if (socket.readyState !== WebSocket.OPEN) continue;
 			try {
 				socket.send(JSON.stringify(payload));
 			} catch (error) {

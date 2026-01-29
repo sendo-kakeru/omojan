@@ -19,7 +19,7 @@ export default function () {
 		mutate: waitingMutate,
 	} = useRoomListSWR({
 		// 実質全件
-		limit: 9999,
+		limit: 100,
 		status: "waiting",
 	});
 

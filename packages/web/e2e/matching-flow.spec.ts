@@ -143,9 +143,18 @@ test("参加者3人の部屋に入るとマッチング完了後にゲーム画�
 
 	await joinRoom({ page, playerName: playerD, roomTitle });
 
-	await expect(
-		page.getByText(/参加者が集まりました。\d秒後にゲーム画面へ移動します。/),
-	).toBeVisible({ timeout: 15_000 });
+	// 4人揃うとカウントダウンが始まりゲーム画面へ遷移する
+	// タイミングによってはカウントダウンメッセージ表示をスキップして直接ゲーム画面に遷移することがある
+	const countdownMessage = page.getByText(
+		/参加者が集まりました。\d+\s*秒後にゲーム画面へ移動します。/,
+	);
+
+	// カウントダウンメッセージまたはゲーム画面遷移を待つ
+	await expect(async () => {
+		const hasCountdown = await countdownMessage.isVisible();
+		const isOnGamePage = page.url().includes(`/game/${gameId}`);
+		expect(hasCountdown || isOnGamePage).toBe(true);
+	}).toPass({ timeout: 15_000 });
 
 	await page.waitForURL(`/game/${gameId}`, { timeout: 30_000 });
 	// ゲーム画面に遷移したことを確認（ローディング中またはゲーム中のテキストを待つ）
