@@ -20,12 +20,19 @@ import { ToastProvider } from "./components/Toast";
 import { MeProvider } from "./context/me/provider";
 
 const SITE_DESCRIPTION =
-	"単語をつなげるオンラインゲーム。面白い組み合わせを作った人が勝ち！";
+	"おもじゃん(omojan)は単語をつなげて面白い組み合わせを作るオンラインワードゲーム。笑える組み合わせを作った人が勝ち！";
 const OGP_IMAGE = `${PROD_SITE_URL}/ogp.png`;
 
 export const meta: Route.MetaFunction = () => [
 	{ title: SITE_NAME },
 	{ content: SITE_DESCRIPTION, name: "description" },
+	{
+		content:
+			"おもじゃん, omojan, ワードゲーム, オンラインゲーム, パーティーゲーム, 言葉遊び",
+		name: "keywords",
+	},
+	// Canonical
+	{ href: PROD_SITE_URL, rel: "canonical", tagName: "link" },
 	// OGP
 	{ content: SITE_NAME, property: "og:title" },
 	{ content: SITE_DESCRIPTION, property: "og:description" },
@@ -34,6 +41,8 @@ export const meta: Route.MetaFunction = () => [
 	{ content: SITE_NAME, property: "og:site_name" },
 	{ content: "ja_JP", property: "og:locale" },
 	{ content: OGP_IMAGE, property: "og:image" },
+	{ content: "1200", property: "og:image:width" },
+	{ content: "630", property: "og:image:height" },
 	// Twitter Card
 	{ content: "summary_large_image", name: "twitter:card" },
 	{ content: `@${OFFICIAL_X_ID}`, name: "twitter:site" },
