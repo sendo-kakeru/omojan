@@ -19,7 +19,7 @@ export function Header() {
 			<div className="flex gap-x-8">
 				<Link
 					className="flex rounded-full bg-black p-8 transition-opacity hover:opacity-70"
-					to={`https://x.com/${OFFICIAL_X_ID}}`}
+					to={`https://x.com/${OFFICIAL_X_ID}`}
 				>
 					<img alt="x" height={16} src="/x.svg" width={16} />
 				</Link>
