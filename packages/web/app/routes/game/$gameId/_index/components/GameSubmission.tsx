@@ -149,19 +149,6 @@ export function GameSubmission({
 		};
 	};
 
-	const getMessage = () => {
-		if (isStarting) {
-			return "ゲームを開始しています";
-		}
-		if (!isMyTurn) {
-			return "他のプレイヤーの提出を待っています";
-		}
-		if (isConfirmed) {
-			return "提出完了！他のプレイヤーを待っています";
-		}
-		return null;
-	};
-
 	const handleCardClick = (cardId: PlayerCardId) => {
 		if (isConfirmed) return;
 		const card = mePlayer.playerCards.find((c) => c.id === cardId);
@@ -198,7 +185,6 @@ export function GameSubmission({
 			<GamePhaseLayout
 				nav={
 					<GamePhaseNav
-						message={getMessage()}
 						messageVariant={isMyTurn ? "active" : "inactive"}
 						roundNo={game.roundNo}
 						timerCount={count}
@@ -209,6 +195,18 @@ export function GameSubmission({
 				{/* 自分の番でオーバーレイ（手札・配置エリア以外を暗く） */}
 				{isMyTurn && !isConfirmed && (
 					<div className="pointer-events-none fixed inset-0 z-20 bg-black/50" />
+				)}
+
+				{/* 他プレイヤーの提出待機中メッセージ */}
+				{!isMyTurn && !isStarting && (
+					<div className="pointer-events-none fixed bottom-120 left-1/2 z-20 -translate-x-1/2">
+						<div className="flex items-center gap-x-8 rounded-full bg-neutral-900/60 px-24 py-12 shadow-2xl">
+							<Spinner className="size-24 text-white" />
+							<p className="whitespace-nowrap text-white">
+								他のプレイヤーが選択中...
+							</p>
+						</div>
+					</div>
 				)}
 
 				<main className="relative grid grid-rows-[auto_1fr_auto]">
@@ -273,8 +271,13 @@ export function GameSubmission({
 							<SelectSubmissionCard
 								{...buildSelectSubmissionCardProps("prefix")}
 							/>
-							{/* テーマカード */}
-							<p className="grid min-h-56 xs:min-h-64 w-full place-items-center rounded-md border border-yellow-300 bg-yellow-50 p-8 px-12 font-bold text-sm shadow sm:text-base">
+							{/* テーマカード - 自分の番では常にオーバーレイの上に表示 */}
+							<p
+								className={classNames(
+									"grid min-h-56 xs:min-h-64 w-full place-items-center rounded-md border border-yellow-300 bg-yellow-50 p-8 px-12 font-bold text-sm shadow sm:text-base",
+									isMyTurn && !isConfirmed && "relative z-30",
+								)}
+							>
 								{game.theme}
 							</p>
 							<SelectSubmissionCard
