@@ -13,6 +13,19 @@ description: 修正と自己レビューを3回繰り返す。「修正して」
 
 ---
 
+## レビュー対象の確認
+
+AskUserQuestion ツールを使って質問する。
+
+**質問内容:**
+- question: "レビュー対象は？"
+- header: "対象"
+- options:
+  - label: "ローカルブランチ", description: "現在のブランチと main の差分をレビュー"
+  - label: "GitHub PR", description: "現在のブランチPRの差分をレビュー"
+  - label: "ローカル差分", description: "ローカルにある差分をレビュー"
+  - label: "ステージ済みのローカル差分", description: "ローカルにあるステージ済みの差分をレビュー"
+
 ## 実行手順
 
 以下のサイクルを **3回** 繰り返す:

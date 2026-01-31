@@ -63,7 +63,8 @@ async function joinRoom({
 	}
 	await page.getByRole("button", { name: "参加する" }).click();
 
-	await page.waitForURL(/\/matching\//);
+	// 4人目の参加時はゲーム画面に直接遷移する可能性がある
+	await page.waitForURL(/\/(matching|game)\//);
 	const gameId = extractGameIdFromUrl(page.url());
 
 	return { gameId };
@@ -156,45 +157,45 @@ test("参加者3人の部屋に入るとマッチング完了後にゲーム画�
 		expect(hasCountdown || isOnGamePage).toBe(true);
 	}).toPass({ timeout: 15_000 });
 
-	await page.waitForURL(`/game/${gameId}`, { timeout: 30_000 });
-	// ゲーム画面に遷移したことを確認（ローディング中またはゲーム中のテキストを待つ）
-	await expect(
-		page.getByText("ゲームを開始しています…").or(page.getByText("Round")),
-	).toBeVisible({
-		timeout: 15_000,
-	});
+	// 全プレイヤーがゲーム画面へ遷移することを確認
+	// waitUntil: "commit"を使用して、URLが変更されたら次へ進む（load待ちによるタイムアウトを防ぐ）
+	await Promise.all([
+		hostPage.waitForURL(`/game/${gameId}`, {
+			timeout: 30_000,
+			waitUntil: "commit",
+		}),
+		pageB.waitForURL(`/game/${gameId}`, {
+			timeout: 30_000,
+			waitUntil: "commit",
+		}),
+		pageC.waitForURL(`/game/${gameId}`, {
+			timeout: 30_000,
+			waitUntil: "commit",
+		}),
+		page.waitForURL(`/game/${gameId}`, {
+			timeout: 30_000,
+			waitUntil: "commit",
+		}),
+	]);
+
+	// 全プレイヤーでゲーム開始を確認
+	const verifyGameStart = async (targetPage: typeof page, label: string) => {
+		await expect(
+			targetPage.getByRole("navigation").getByText("Round"),
+			`${label} should see "Round" in nav`,
+		).toBeVisible({ timeout: 30_000 });
+	};
+
+	await Promise.all([
+		verifyGameStart(hostPage, "Host"),
+		verifyGameStart(pageB, "PlayerB"),
+		verifyGameStart(pageC, "PlayerC"),
+		verifyGameStart(page, "PlayerD"),
+	]);
 
 	await contextB.close();
 	await contextC.close();
 	await hostContext.close();
-});
-
-test("開始ボタンでCPを補充してゲームを開始できる", async ({ page }) => {
-	const roomTitle = `途中開始-${uniqueSuffix()}`;
-	const playerName = `プレイヤー-${uniqueSuffix()}`;
-
-	const { gameId } = await createRoom({
-		page,
-		playerName: playerName,
-		roomTitle,
-	});
-
-	const startButton = page.getByRole("button", { name: "今すぐ開始" });
-	await expect(startButton).toBeVisible();
-
-	await startButton.click();
-
-	await expect(
-		page.getByText(/参加者が集まりました。\d秒後にゲーム画面へ移動します。/),
-	).toBeVisible({ timeout: 15_000 });
-
-	await page.waitForURL(`/game/${gameId}`, { timeout: 30_000 });
-	// ゲーム画面に遷移したことを確認（ローディング中またはゲーム中のテキストを待つ）
-	await expect(
-		page.getByText("ゲームを開始しています…").or(page.getByText("Round")),
-	).toBeVisible({
-		timeout: 15_000,
-	});
 });
 
 test("退出ボタンで退出が行える", async ({ page }) => {
@@ -232,4 +233,66 @@ test("ページを閉じたら数秒後に離席となる", async ({ browser, pa
 
 	await expect(page.getByText(guestName)).not.toBeVisible({ timeout: 30_000 });
 	expect(page.url()).toContain(`/matching/${gameId}`);
+});
+
+test("1人でCPUを補充してゲームを開始し、ゲーム開始画面が表示される", async ({
+	page,
+}) => {
+	const roomTitle = `1人開始-${uniqueSuffix()}`;
+	const playerName = `プレイヤー-${uniqueSuffix()}`;
+
+	const { gameId } = await createRoom({
+		page,
+		playerName: playerName,
+		roomTitle,
+	});
+
+	const startButton = page.getByRole("button", { name: "今すぐ開始" });
+	await expect(startButton).toBeVisible();
+	await startButton.click();
+
+	await page.waitForURL(`/game/${gameId}`, { timeout: 30_000 });
+
+	// ゲーム画面が表示されることを確認
+	await expect(page.getByRole("navigation").getByText("Round")).toBeVisible({
+		timeout: 30_000,
+	});
+});
+
+test("2人でCPUを補充してゲームを開始し、ゲーム開始画面が表示される", async ({
+	browser,
+	page,
+}) => {
+	const roomTitle = `2人開始-${uniqueSuffix()}`;
+	const playerName = `プレイヤー-${uniqueSuffix()}`;
+	const guestName = `ゲスト-${uniqueSuffix()}`;
+	const baseURL = test.info().project.use.baseURL;
+
+	// ホストが部屋を作成
+	const hostContext = await browser.newContext({ baseURL });
+	const hostPage = await hostContext.newPage();
+	const { gameId } = await createRoom({
+		page: hostPage,
+		playerName: playerName,
+		roomTitle,
+	});
+
+	// ゲストが参加
+	await joinRoom({ page, playerName: guestName, roomTitle });
+	await expect(page.getByText(playerName)).toBeVisible({ timeout: 20_000 });
+
+	// ホストが「今すぐ開始」をクリック
+	const startButton = hostPage.getByRole("button", { name: "今すぐ開始" });
+	await expect(startButton).toBeVisible();
+	await startButton.click();
+
+	// ゲスト側でゲーム画面への遷移を確認
+	await page.waitForURL(`/game/${gameId}`, { timeout: 30_000 });
+
+	// ゲーム画面が表示されることを確認
+	await expect(page.getByRole("navigation").getByText("Round")).toBeVisible({
+		timeout: 30_000,
+	});
+
+	await hostContext.close();
 });
