@@ -7,8 +7,6 @@ import classNames from "classnames";
 import { useEffect, useState } from "react";
 import { Avatar } from "~/components/Avatar";
 import { Badge } from "~/components/Badge";
-import { Button } from "~/components/button/Button";
-import { Separator } from "~/components/Separator";
 import { useCountdown } from "~/hooks/useCountdown";
 import { createCombination } from "../libs/gameUtils";
 import { GamePhaseLayout } from "./GamePhaseLayout";
@@ -32,15 +30,11 @@ export function GameVote({
 	const [confirmedPlayerId, setConfirmedPlayerId] = useState<PlayerId | null>(
 		null,
 	);
+	// 送信中フラグ（重複送信防止）
+	// Note: useIsLoadingは1秒の遅延があるため、即時リセットが必要な重複送信防止には不適切
+	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	const { count, progress, start: startCountdown } = useCountdown();
-
-	const selectedPlayer = game.players.find(
-		(player) => player.id === selectedPlayerId,
-	);
-	const confirmedPlayer = game.players.find(
-		(player) => player.id === confirmedPlayerId,
-	);
 
 	useEffect(() => {
 		startCountdown(15);
@@ -48,9 +42,29 @@ export function GameVote({
 
 	const getMessage = () => {
 		if (confirmedPlayerId) {
-			return "投票しました。他のプレイヤーの投票を待っています。";
+			return "投票完了！他のプレイヤーを待っています";
 		}
-		return "面白いと思う組み合わせに投票してください。";
+		return null;
+	};
+
+	const handlePlayerClick = async (playerId: PlayerId) => {
+		if (playerId === mePlayer.id) return;
+		if (confirmedPlayerId || isSubmitting) return;
+
+		// 既に選択中の場合は投票を確定
+		if (selectedPlayerId === playerId) {
+			setIsSubmitting(true);
+			setConfirmedPlayerId(playerId);
+			try {
+				await sendVote(playerId);
+			} finally {
+				setIsSubmitting(false);
+			}
+			return;
+		}
+
+		// 未選択または別のプレイヤーを選択
+		setSelectedPlayerId(playerId);
 	};
 
 	return (
@@ -65,11 +79,31 @@ export function GameVote({
 				/>
 			}
 		>
-			<main className="grid grid-rows-[auto_1fr]">
-				<section className="grid rounded-lg border border-gray-200 bg-white">
-					{game.players.map((player, index) => {
+			{/* プレイヤーカード以外を暗くするオーバーレイ */}
+			{!confirmedPlayerId && (
+				<div className="pointer-events-none fixed inset-0 z-20 bg-black/50" />
+			)}
+
+			<main className="grid grid-rows-[1fr_auto]">
+				{/* プレイヤー選択エリア - z-indexを上げてオーバーレイの上に表示 */}
+				<section
+					className={classNames(
+						"relative my-auto grid h-fit content-center rounded-lg",
+						!confirmedPlayerId && "z-30",
+					)}
+				>
+					{/* 投票時のガイダンスメッセージ */}
+					{!confirmedPlayerId && !selectedPlayerId && (
+						<div className="absolute -top-40 left-1/2 z-10 -translate-x-1/2 animate-bounce">
+							<p className="whitespace-nowrap rounded-full bg-green-500 px-16 py-4 font-bold text-sm text-white shadow-lg">
+								↓ 面白い組み合わせをタップ ↓
+							</p>
+						</div>
+					)}
+					{game.players.map((player) => {
 						const isSelf = player.id === mePlayer.id;
 						const isSelected = selectedPlayerId === player.id;
+						const isConfirmed = confirmedPlayerId === player.id;
 						const combination = createCombination({
 							position: player.submission?.position,
 							text: player.submission?.text,
@@ -77,122 +111,68 @@ export function GameVote({
 						});
 
 						return (
-							<div className="w-full" key={player.id}>
+							<div className="relative w-full" key={player.id}>
 								<button
 									className={classNames(
-										"flex w-full items-center gap-x-8 rounded-lg border-green-400 px-8 py-4 transition-colors md:px-12",
+										"flex w-full items-center gap-x-12 rounded-lg px-12 py-8 transition-colors md:py-12",
 										isSelf
-											? "cursor-not-allowed bg-gray-200 opacity-40"
-											: isSelected
-												? "border bg-green-50"
-												: "hover:bg-green-50",
+											? "cursor-not-allowed border-2 border-transparent bg-gray-200 opacity-90"
+											: isConfirmed
+												? "border-2 border-green-500 bg-green-100"
+												: isSelected
+													? "border-2 border-green-500 bg-green-50"
+													: "border border-gray-200 bg-white hover:bg-green-50",
 									)}
 									disabled={isSelf || !!confirmedPlayerId}
-									onClick={() => {
-										if (player.id === mePlayer.id) return;
-										if (confirmedPlayerId) return;
-										setSelectedPlayerId(player.id);
-									}}
+									onClick={() => handlePlayerClick(player.id)}
 									type="button"
 								>
-									<div className="grid flex-1 gap-y-8 md:min-h-64 md:grid-cols-[auto_1fr] md:items-center">
-										<div className="flex items-center gap-x-4">
+									<div className="grid flex-1 gap-y-2">
+										<div className="flex items-center gap-x-8">
 											<Avatar
 												name={player.playerName}
 												size="S"
 												src={player.image ?? undefined}
 											/>
-											<p className="font-semibold text-neutral-500 text-xs">
+											<p className="font-semibold text-neutral-400 text-xs">
 												{player.playerName}
 												{isSelf && (
 													<span className="text-neutral-400">（自分）</span>
 												)}
 											</p>
 										</div>
-										<p className="font-bold text-sm md:text-base">
+										<p
+											className={classNames(
+												"font-bold text-base md:text-lg",
+												isSelf && "text-neutral-400",
+											)}
+										>
 											{combination}
 										</p>
+										{/* 選択中のみ「タップで投票」を表示 */}
+										{isSelected && !confirmedPlayerId && (
+											<span className="text-green-600 text-xs mt-4">
+												タップで投票
+											</span>
+										)}
 									</div>
-									<Badge color="gray">{player.winCount}勝</Badge>
+									{/* 固定幅でバッジの位置を安定させる */}
+									<div className="grid w-64 place-items-center">
+										{isConfirmed ? (
+											<span className="whitespace-nowrap rounded-full bg-green-600 px-8 py-2 text-white text-xs">
+												投票済み
+											</span>
+										) : (
+											<Badge color="gray">{player.winCount}勝</Badge>
+										)}
+									</div>
 								</button>
-								{index !== game.players.length - 1 && <Separator />}
 							</div>
 						);
 					})}
 				</section>
 
-				<section className="mt-16 flex flex-1 items-center justify-center rounded-t-2xl border border-gray-300 border-b-0 bg-white p-16">
-					<div className="grid w-full max-w-480 place-items-center gap-y-16">
-						{selectedPlayer && !confirmedPlayerId ? (
-							<div className="grid w-full gap-y-16">
-								<p className="text-center text-neutral-600 text-sm">
-									<span className="font-semibold">
-										{selectedPlayer.playerName}
-									</span>
-									さんの
-									<span className="font-bold">
-										「
-										{createCombination({
-											position: selectedPlayer.submission?.position,
-											text: selectedPlayer.submission?.text,
-											theme: game.theme,
-										})}
-										」
-									</span>
-									に投票しますか？
-								</p>
-								<div className="flex justify-center gap-x-12">
-									<Button
-										as="button"
-										color="gray"
-										onClick={() => setSelectedPlayerId(null)}
-										variant="outline"
-									>
-										キャンセル
-									</Button>
-									<Button
-										as="button"
-										onClick={async () => {
-											if (!selectedPlayerId) return;
-											setConfirmedPlayerId(selectedPlayerId);
-											await sendVote(selectedPlayerId);
-										}}
-									>
-										投票する
-									</Button>
-								</div>
-							</div>
-						) : confirmedPlayer ? (
-							<div className="grid w-full place-items-center gap-y-12">
-								<p className="text-center text-neutral-600">
-									<span className="font-semibold">
-										{confirmedPlayer.playerName}
-									</span>
-									さんの
-									<span className="font-bold text-neutral-800">
-										「
-										{createCombination({
-											position: confirmedPlayer.submission?.position,
-											text: confirmedPlayer.submission?.text,
-											theme: game.theme,
-										})}
-										」
-									</span>
-									に投票しました
-								</p>
-								<p className="text-center text-neutral-500 text-sm">
-									他のプレイヤーの投票を待っています...
-								</p>
-							</div>
-						) : (
-							<p className="text-center text-neutral-500">
-								一覧から投票先を選んでください
-							</p>
-						)}
-					</div>
-				</section>
-
-				<PlayerCardDisplay cards={mePlayer.playerCards} disabled />
+				<PlayerCardDisplay cards={mePlayer.playerCards} />
 			</main>
 		</GamePhaseLayout>
 	);

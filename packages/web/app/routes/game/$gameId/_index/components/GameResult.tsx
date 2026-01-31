@@ -26,7 +26,6 @@ export function GameResult({ data }: { data: GameServerResultMessage }) {
 		<GamePhaseLayout
 			nav={
 				<GamePhaseNav
-					message="ラウンド結果"
 					messageVariant="inactive"
 					roundNo={game.roundNo}
 					timerCount={count}
@@ -34,7 +33,13 @@ export function GameResult({ data }: { data: GameServerResultMessage }) {
 				/>
 			}
 		>
-			<main className="grid grid-rows-[auto_1fr]">
+			<main className="grid grid-rows-[auto_auto_1fr]">
+				{/* 結果表示のガイダンスメッセージ */}
+				<div className="mb-8 flex justify-center">
+					<p className="rounded-full bg-yellow-500 px-16 py-4 font-bold text-sm text-white shadow-lg">
+						🏆 ラウンド {game.roundNo} 結果発表 🏆
+					</p>
+				</div>
 				<section className="grid rounded-lg border border-gray-200 bg-white">
 					{game.players.map((player, index) => {
 						const isWinner = game.winnerPlayerIds.includes(player.id);
@@ -126,7 +131,7 @@ export function GameResult({ data }: { data: GameServerResultMessage }) {
 					</div>
 				</section>
 
-				<PlayerCardDisplay cards={mePlayer.playerCards} disabled />
+				<PlayerCardDisplay cards={mePlayer.playerCards} />
 			</main>
 		</GamePhaseLayout>
 	);
