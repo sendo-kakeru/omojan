@@ -1,11 +1,9 @@
 import classNames from "classnames";
-import { PiHandTap } from "react-icons/pi";
-import { Button } from "~/components/button/Button";
 
 export type SelectSubmissionCardProps = (
 	| { state: "idle" }
 	| { state: "ready"; onSelect: () => void; disabled?: boolean }
-	| { state: "selected"; word: string; onConfirm: () => Promise<void> }
+	| { state: "selected"; word: string; onSubmit: () => Promise<void> }
 	| { state: "placed"; word: string }
 ) & { label: string };
 
@@ -23,7 +21,7 @@ export function SelectSubmissionCard({
 	return (
 		<div
 			className={classNames(
-				"relative grid min-h-56 xs:min-h-64 w-full place-items-center rounded-xl border px-8 pt-10 pb-4 xs:pb-8 transition-all duration-300",
+				"relative grid min-h-60 xs:min-h-64 w-full place-items-center rounded-xl border px-8 pt-10 pb-4 xs:pb-8 transition-all duration-300",
 				isIdle && "border-gray-300 border-dashed bg-gray-50/10",
 				isReady && "border-green-400 border-dashed bg-green-50/10",
 				isSelected && "border-green-500 border-solid bg-green-50/50 shadow-md",
@@ -35,30 +33,24 @@ export function SelectSubmissionCard({
 				{label}
 			</p>
 
-			{/* 決定ボタン（選択状態時のみ表示） */}
-			{isSelected && (
-				<Button
-					as="button"
-					className="absolute top-0 left-1/2 z-20 animate-button-pop"
-					leftIcon={<PiHandTap />}
-					onClick={props.onConfirm}
-					size="S"
-					variant="fill"
-				>
-					決定
-				</Button>
-			)}
-
 			{/* コンテンツエリア */}
-			{isSelected || isPlaced ? (
-				<div
-					className={classNames(
-						"text-center font-bold text-neutral-700 text-sm transition-all duration-600 sm:text-base",
-						isPlaced && "animate-place-card",
-					)}
-				>
+			{isPlaced ? (
+				<div className="animate-place-card text-center font-bold text-neutral-700 text-sm transition-all duration-600 sm:text-base">
 					{props.word}
 				</div>
+			) : isSelected ? (
+				<button
+					className="absolute inset-0 grid cursor-pointer place-items-center rounded-xl bg-green-50/50 transition-all duration-200 hover:bg-green-100"
+					onClick={props.onSubmit}
+					type="button"
+				>
+					<div className="grid place-items-center gap-y-2">
+						<span className="font-bold text-neutral-700 text-sm sm:text-base">
+							{props.word}
+						</span>
+						<span className="text-green-600 text-xs">タップで決定</span>
+					</div>
+				</button>
 			) : (
 				<button
 					className={classNames(

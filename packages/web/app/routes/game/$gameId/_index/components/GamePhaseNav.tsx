@@ -19,8 +19,8 @@ export function GamePhaseNav({
 	roundNo: number;
 	/** 総ラウンド数 */
 	totalRounds?: number;
-	/** メッセージ内容 */
-	message: ReactNode;
+	/** メッセージ内容（nullの場合は非表示） */
+	message?: ReactNode;
 	/** メッセージエリアのスタイルバリエーション */
 	messageVariant?: "active" | "inactive";
 	/** タイマーのカウント（秒） */
@@ -29,19 +29,27 @@ export function GamePhaseNav({
 	timerProgress: number;
 }) {
 	return (
-		<nav className="flex w-full items-center gap-x-8">
+		<nav className="relative flex w-full items-center gap-x-8">
+			{/* Round表示はオーバーレイの下に配置 */}
 			<RoundIndicator roundNo={roundNo} totalRounds={totalRounds} />
-			<p
-				className={classNames(
-					"flex h-full flex-1 items-center rounded-lg border px-8 py-2 text-sm",
-					messageVariant === "active"
-						? "border-green-300 bg-white text-green-600"
-						: "border-gray-300 bg-gray-50 text-neutral-500",
-				)}
-			>
-				{message}
-			</p>
-			<CircularTimerProgress count={timerCount} progress={timerProgress} />
+			{/* メッセージとタイマーはオーバーレイの上に表示 */}
+			{message ? (
+				<p
+					className={classNames(
+						"relative z-40 flex h-full flex-1 items-center rounded-lg border px-8 py-2 text-sm",
+						messageVariant === "active"
+							? "border-green-300 bg-white text-green-600"
+							: "border-gray-300 bg-gray-50 text-neutral-500",
+					)}
+				>
+					{message}
+				</p>
+			) : (
+				<div className="flex-1" />
+			)}
+			<div className="relative z-40">
+				<CircularTimerProgress count={timerCount} progress={timerProgress} />
+			</div>
 		</nav>
 	);
 }
