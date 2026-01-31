@@ -14,7 +14,8 @@ export function GamePhaseLayout({
 }>) {
 	return (
 		<div className="grid h-full grid-rows-[auto_1fr] gap-y-8 pt-8 xs:pt-16">
-			{nav}
+			{/* ナビ要素ごとにz-indexを制御 */}
+			<div className="relative">{nav}</div>
 			{children}
 		</div>
 	);

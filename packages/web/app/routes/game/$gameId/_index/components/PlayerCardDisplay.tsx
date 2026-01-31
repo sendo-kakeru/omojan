@@ -14,6 +14,7 @@ export function PlayerCardDisplay({
 	onCardClick,
 	selectedCardId,
 	isConfirmed = false,
+	overlayMessage,
 }: {
 	/** プレイヤーの手札 */
 	cards: GamePlayerCard[];
@@ -25,6 +26,8 @@ export function PlayerCardDisplay({
 	selectedCardId?: PlayerCardId | null;
 	/** 確定済みかどうか（選択後の状態を変えるため） */
 	isConfirmed?: boolean;
+	/** オーバーレイ上に表示するメッセージ */
+	overlayMessage?: string;
 }) {
 	const isInteractive = !!onCardClick && !disabled;
 
@@ -73,7 +76,13 @@ export function PlayerCardDisplay({
 				})}
 			</div>
 			{disabled && (
-				<div className="absolute inset-0 z-50 bg-gray-600 opacity-50" />
+				<div className="absolute inset-0 z-50 grid place-items-center bg-black/50">
+					{overlayMessage && (
+						<p className="text-center font-medium text-sm text-white">
+							{overlayMessage}
+						</p>
+					)}
+				</div>
 			)}
 		</section>
 	);

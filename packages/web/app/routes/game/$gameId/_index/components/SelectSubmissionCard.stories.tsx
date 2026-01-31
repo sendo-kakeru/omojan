@@ -51,15 +51,15 @@ export const ReadyEnabled: Story = {
 	name: "準備完了（手札選択済み）",
 };
 
-// 選択中（決定ボタン表示中）
+// 選択中（タップで決定）
 export const Selected: Story = {
 	args: {
 		label: "前",
-		onConfirm: async () => {},
+		onSubmit: async () => {},
 		state: "selected",
 		word: "激辛",
 	},
-	name: "選択中（決定ボタン表示）",
+	name: "選択中（タップで決定）",
 };
 
 // 配置完了
@@ -112,7 +112,7 @@ export const Interactive: Story = {
 			}
 			if (isSelected && selectedWord) {
 				return {
-					onConfirm: handleConfirm,
+					onSubmit: handleConfirm,
 					state: "selected" as const,
 					word: selectedWord,
 				};
@@ -197,12 +197,12 @@ export const AllStates: Story = {
 
 			<div>
 				<p className="mb-8 font-bold text-neutral-600 text-sm">
-					選択中（決定ボタン表示）
+					選択中（タップで決定）
 				</p>
 				<div className="w-280">
 					<SelectSubmissionCard
 						label="前"
-						onConfirm={async () => {}}
+						onSubmit={async () => {}}
 						state="selected"
 						word="激辛"
 					/>
