@@ -85,9 +85,12 @@ export class MatchingDurableObject extends DurableObject<Env> {
 		// Durable Object の context で WebSocket を accept する
 		this.ctx.acceptWebSocket(server, [player.id]);
 
-		// ゲームが既にactive状態の場合は、接続後すぐに閉じてゲーム画面へリダイレクトを促す
+		// ゲームが既にactive状態の場合は、既存の接続も含めて全てクローズし、ゲーム画面へリダイレクトを促す
+		// これにより、4人目が参加してゲームがactiveになった際に、他のプレイヤーも即座に通知される
 		if (gameStatus === "active") {
-			server.close(1000, "ゲームが開始されました");
+			this.lastPongAt.set(player.id, Date.now());
+			await this.sendMePlayerMessage({ player, socket: server });
+			await this.handleGameBecameActive();
 			return this.webSocketService.upgradeResponse({ client });
 		}
 
@@ -205,13 +208,14 @@ export class MatchingDurableObject extends DurableObject<Env> {
 
 		// ゲームが開始済み or 終了済みの場合、全接続を閉じてクリーンアップ
 		if (gameStatus !== "waiting") {
-			const isActive = gameStatus === "active";
-			await this.closeAllConnections({
-				code: isActive ? 1000 : 1007,
-				message: isActive
-					? "ゲームが開始されました"
-					: "この部屋は終了しています",
-			});
+			if (gameStatus === "active") {
+				await this.handleGameBecameActive();
+			} else {
+				await this.closeAllConnections({
+					code: 1007,
+					message: "この部屋は終了しています",
+				});
+			}
 			this.cleanup();
 			return;
 		}
@@ -219,36 +223,9 @@ export class MatchingDurableObject extends DurableObject<Env> {
 		// 全接続にPINGを送信
 		this.webSocketService.sendPingToAll({ ctx: this.ctx });
 
-		// DBから現在のプレイヤー一覧を取得
+		// DBから現在のプレイヤー一覧を取得し、切断プレイヤーを検出
 		const players = await this.getParticipants({ gameId: this.gameId });
-
-		// 接続がなく、タイムアウトしたプレイヤーを格納
-		const disconnectedPlayerIds: PlayerId[] = [];
-		const now = Date.now();
-
-		for (const player of players) {
-			// アクティブな接続があるプレイヤーはスキップ
-			const ws = this.webSocketService.getPlayerSocket({
-				ctx: this.ctx,
-				playerId: player.id,
-			});
-			if (ws) {
-				// 接続があるがlastPongAtがない場合（Durable Object再起動後など）は記録を初期化
-				if (!this.lastPongAt.has(player.id)) {
-					this.lastPongAt.set(player.id, now);
-				}
-				continue;
-			}
-
-			// 接続がないプレイヤーはタイムアウト判定
-			const lastPong = this.lastPongAt.get(player.id);
-			const isTimedOut = !lastPong || now - lastPong > HEARTBEAT_TIMEOUT_MS;
-
-			if (isTimedOut) {
-				this.lastPongAt.delete(player.id);
-				disconnectedPlayerIds.push(player.id);
-			}
-		}
+		const disconnectedPlayerIds = this.findDisconnectedPlayers(players);
 
 		// タイムアウトしたプレイヤーを削除
 		for (const playerId of disconnectedPlayerIds) {
@@ -288,6 +265,65 @@ export class MatchingDurableObject extends DurableObject<Env> {
 		for (const socket of this.ctx.getWebSockets()) {
 			socket.close(code, message);
 		}
+	}
+
+	/**
+	 * タイムアウトした切断プレイヤーを検出する
+	 */
+	private findDisconnectedPlayers(
+		players: { id: PlayerId; createdAt: Date }[],
+	): PlayerId[] {
+		const disconnectedPlayerIds: PlayerId[] = [];
+		const now = Date.now();
+
+		for (const player of players) {
+			// アクティブな接続があるプレイヤーはスキップ
+			const ws = this.webSocketService.getPlayerSocket({
+				ctx: this.ctx,
+				playerId: player.id,
+			});
+			if (ws) {
+				// 接続があるがlastPongAtがない場合（Durable Object再起動後など）は記録を初期化
+				if (!this.lastPongAt.has(player.id)) {
+					this.lastPongAt.set(player.id, now);
+				}
+				continue;
+			}
+
+			// 新規作成されたプレイヤーには猶予期間を与える
+			// （joinしてからWebSocket接続するまでの時間を考慮）
+			const playerAge = now - player.createdAt.getTime();
+			if (playerAge < HEARTBEAT_TIMEOUT_MS) {
+				continue;
+			}
+
+			// 接続がないプレイヤーはタイムアウト判定
+			const lastPong = this.lastPongAt.get(player.id);
+			const isTimedOut = !lastPong || now - lastPong > HEARTBEAT_TIMEOUT_MS;
+
+			if (isTimedOut) {
+				this.lastPongAt.delete(player.id);
+				disconnectedPlayerIds.push(player.id);
+			}
+		}
+
+		return disconnectedPlayerIds;
+	}
+
+	/**
+	 * ゲームがアクティブになった時の共通処理
+	 * - 参加者一覧をブロードキャスト（カウントダウン開始用）
+	 * - 全接続をクローズ
+	 */
+	private async handleGameBecameActive(): Promise<void> {
+		if (!this.gameId) return;
+
+		const participants = await this.getParticipants({ gameId: this.gameId });
+		await this.broadcastParticipants({ participants });
+		await this.closeAllConnections({
+			code: 1000,
+			message: "ゲームが開始されました",
+		});
 	}
 
 	/**
@@ -437,9 +473,12 @@ export class MatchingDurableObject extends DurableObject<Env> {
 		gameId,
 	}: {
 		gameId: GameId;
-	}): Promise<(Pick<Player, "id" | "playerName"> & Pick<User, "image">)[]> {
+	}): Promise<
+		(Pick<Player, "id" | "playerName" | "createdAt"> & Pick<User, "image">)[]
+	> {
 		const players = await this.db
 			.select({
+				createdAt: playerTable.createdAt,
 				id: playerTable.id,
 				image: userTable.image,
 				playerName: playerTable.playerName,
