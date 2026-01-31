@@ -37,7 +37,7 @@ export default function () {
 	return (
 		<>
 			<Header />
-			<main className="grid gap-y-12 pt-24 pb-40">
+			<main className="grid gap-y-12 pb-40 sm:mt-24">
 				<h1 className="sr-only">おもじゃんオンライン</h1>
 				<div className="grid gap-y-24">
 					<WaitingRoomSection

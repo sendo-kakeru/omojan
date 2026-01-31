@@ -151,7 +151,7 @@ export function GameVote({
 										</p>
 										{/* 選択中のみ「タップで投票」を表示 */}
 										{isSelected && !confirmedPlayerId && (
-											<span className="text-green-600 text-xs mt-4">
+											<span className="mt-4 text-green-600 text-xs">
 												タップで投票
 											</span>
 										)}
