@@ -543,10 +543,16 @@ export class RoomService {
 				userId: authUser?.id,
 			});
 
-			if (
-				participatingPlayers.length + 1 >= 4 &&
-				findGame.status === "waiting"
-			) {
+			// INSERT後に実際のプレイヤー数をDBから取得して、4人揃ったらactivateする
+			// これにより同時参加時の競合を防ぐ
+			const [playerCountResult] = await tx
+				.select({ count: count() })
+				.from(playerTable)
+				.where(eq(playerTable.gameId, findGame.id));
+
+			const actualPlayerCount = playerCountResult?.count ?? 0;
+
+			if (actualPlayerCount >= 4 && findGame.status === "waiting") {
 				await this.activate({
 					db: tx,
 					gameId: findGame.id,

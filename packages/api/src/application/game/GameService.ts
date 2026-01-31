@@ -25,7 +25,7 @@ import {
 	voteTable,
 } from "@repo/db/schema";
 import { WORDS } from "@repo/shared/constants/words";
-import { and, asc, eq, inArray } from "drizzle-orm";
+import { and, asc, count, eq, inArray } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import type { DrizzleClient } from "../../libs/drizzle";
 
@@ -58,6 +58,21 @@ export class GameService {
 
 			if (!game) {
 				throw new HTTPException(404, { message: "ゲームが見つかりません。" });
+			}
+
+			// 既にラウンドが存在するか確認（重複初期化防止）
+			const existingRounds = await tx
+				.select({ id: roundTable.id })
+				.from(roundTable)
+				.where(eq(roundTable.gameId, gameId));
+
+			if (existingRounds.length > 0) {
+				// 既に初期化済みの場合は、既存データを取得して返す
+				return await this.getExistingGameData({
+					gameId,
+					timeLimit: game.timeLimit,
+					tx,
+				});
 			}
 
 			// プレイヤー一覧を取得
@@ -280,7 +295,8 @@ export class GameService {
 	}
 
 	/**
-	 * 投票をDBに保存する
+	 * 投票をDBに保存し、現在の投票済みプレイヤー数を返す
+	 * 投票保存と投票数取得を同一トランザクションで行い、競合を防ぐ
 	 */
 	async saveVote({
 		gameId,
@@ -292,8 +308,8 @@ export class GameService {
 		playerId: PlayerId;
 		roundNo: RoundNo;
 		votePlayerId: PlayerId;
-	}): Promise<void> {
-		await this.db.transaction(async (tx) => {
+	}): Promise<{ voteCount: number }> {
+		return await this.db.transaction(async (tx) => {
 			// gameIdとroundNoからラウンドIDを取得
 			const [round] = await tx
 				.select({ id: roundTable.id })
@@ -329,6 +345,14 @@ export class GameService {
 				roundId: round.id,
 				submissionId: submission.id,
 			});
+
+			// 同一トランザクション内で投票済みプレイヤー数を取得
+			const [countResult] = await tx
+				.select({ count: count() })
+				.from(voteTable)
+				.where(eq(voteTable.roundId, round.id));
+
+			return { voteCount: countResult?.count ?? 0 };
 		});
 	}
 
@@ -679,6 +703,105 @@ export class GameService {
 			rounds: roundResults,
 			title: game.title,
 			winners,
+		};
+	}
+
+	/**
+	 * 既に初期化済みのゲームデータを取得する（重複初期化時に使用）
+	 */
+	private async getExistingGameData({
+		gameId,
+		timeLimit,
+		tx,
+	}: {
+		gameId: GameId;
+		timeLimit: number;
+		tx: Parameters<Parameters<DrizzleClient["transaction"]>[0]>[0];
+	}): Promise<
+		Omit<GameServerRoundStartMessage["game"], "theme" | "players"> & {
+			themes: Map<RoundNo, RoundTheme["text"]>;
+			players: (GamePlayerItem & {
+				cards: GamePlayerCard[];
+				isCpu: boolean;
+			})[];
+		}
+	> {
+		// プレイヤー一覧を取得
+		const players = await tx
+			.select({
+				id: playerTable.id,
+				image: userTable.image,
+				isCpu: playerTable.isCpu,
+				playerName: playerTable.playerName,
+				seat: playerTable.seat,
+			})
+			.from(playerTable)
+			.leftJoin(userTable, eq(playerTable.userId, userTable.id))
+			.where(eq(playerTable.gameId, gameId));
+
+		// 既存のラウンドとテーマを取得
+		const rounds = await tx
+			.select({
+				id: roundTable.id,
+				roundNo: roundTable.roundNo,
+			})
+			.from(roundTable)
+			.where(eq(roundTable.gameId, gameId));
+
+		const roundIds = rounds.map((r) => r.id);
+		const themes = await tx
+			.select({
+				roundId: roundThemeTable.roundId,
+				text: roundThemeTable.text,
+			})
+			.from(roundThemeTable)
+			.where(inArray(roundThemeTable.roundId, roundIds));
+
+		// 既存のプレイヤーカードを取得
+		const playerCards = await tx
+			.select({
+				id: playerCardTable.id,
+				playerId: playerCardTable.playerId,
+				submissionId: playerCardTable.submissionId,
+				text: playerCardTable.text,
+			})
+			.from(playerCardTable)
+			.where(eq(playerCardTable.gameId, gameId));
+
+		// テーマをラウンドごとにグルーピング
+		const roundGroupedThemes = new Map<RoundNo, RoundTheme["text"]>();
+		for (const round of rounds) {
+			const theme = themes.find((t) => t.roundId === round.id);
+			if (theme) {
+				roundGroupedThemes.set(round.roundNo, theme.text);
+			}
+		}
+
+		// プレイヤーカードをプレイヤーごとにグルーピング
+		const playerCardsMap = new Map<PlayerId, GamePlayerCard[]>();
+		for (const card of playerCards) {
+			const cards = playerCardsMap.get(card.playerId) ?? [];
+			cards.push({
+				id: card.id,
+				used: card.submissionId !== null,
+				word: card.text,
+			});
+			playerCardsMap.set(card.playerId, cards);
+		}
+
+		return {
+			players: players
+				.sort((a, b) => a.seat - b.seat)
+				.map((player) => ({
+					...player,
+					cards: playerCardsMap.get(player.id) ?? [],
+					submission: null,
+					winCount: 0,
+				})),
+			roundNo: 1,
+			submitted: null,
+			themes: roundGroupedThemes,
+			timeLimit,
 		};
 	}
 }
