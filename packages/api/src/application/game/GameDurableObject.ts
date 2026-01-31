@@ -355,8 +355,8 @@ export class GameDurableObject extends DurableObject<Env> {
 			this.state = "START_PENDING";
 
 			// 各プレイヤーにROUND_STARTメッセージを送信
-			// isInitialStart=true: 接続タイミングでソケットが見つからなくてもCPUに切り替えない
-			await this.broadcastRoundStart(true);
+			// ソケットが見つからない場合はスキップ（fetch()でsendCurrentStateToPlayer()が呼ばれる）
+			await this.broadcastRoundStart();
 
 			// 2秒後にTURN_STARTを送信（開始オーバーレイ表示用の待機）
 			await this.ctx.storage.setAlarm(Date.now() + TIMING.OVERLAY_DISPLAY_MS);
@@ -513,10 +513,8 @@ export class GameDurableObject extends DurableObject<Env> {
 
 	/**
 	 * 全プレイヤーにROUND_STARTメッセージを送信する。
-	 * @param isInitialStart 初回ゲーム開始時かどうか。trueの場合、ソケットが見つからなくてもCPUに切り替えない
-	 *                       （fetch()のsendCurrentStateToPlayer()で後から状態を送信するため）
 	 */
-	private async broadcastRoundStart(isInitialStart = false): Promise<void> {
+	private async broadcastRoundStart(): Promise<void> {
 		const orderedPlayers = this.sortTurnOrderPlayers();
 		const currentPlayerId = orderedPlayers[this.turnIndex]?.id;
 		if (!currentPlayerId) return;
@@ -545,7 +543,6 @@ export class GameDurableObject extends DurableObject<Env> {
 					},
 					type: "ROUND_START",
 				}) satisfies GameServerRoundStartMessage,
-			skipCpuSwitch: isInitialStart,
 		});
 	}
 
@@ -585,16 +582,15 @@ export class GameDurableObject extends DurableObject<Env> {
 	}
 
 	/**
-	 * 各プレイヤーにメッセージを送信し、送信できなかったプレイヤーをCPUに切り替える。
+	 * 各プレイヤーにメッセージを送信する。
+	 * ソケットが見つからない場合はスキップ（再接続時にfetch()でsendCurrentStateToPlayer()が呼ばれる）。
+	 * 送信に失敗した場合はCPUに切り替える。
 	 * @param createMessage 各プレイヤーに対して送信するメッセージを生成する関数
-	 * @param skipCpuSwitch trueの場合、ソケットが見つからなくてもCPUに切り替えない
 	 */
 	private async broadcastToPlayers({
 		createMessage,
-		skipCpuSwitch = false,
 	}: {
 		createMessage: (player: PlayerState) => object;
-		skipCpuSwitch?: boolean;
 	}): Promise<void> {
 		const playersToSwitch: PlayerId[] = [];
 
@@ -604,18 +600,19 @@ export class GameDurableObject extends DurableObject<Env> {
 				playerId: player.id,
 			});
 
+			// ソケットが見つからない場合はスキップ
+			// 一時的な切断や再接続中の可能性があり、fetch()でsendCurrentStateToPlayer()が呼ばれる
+			// タイムアウトはalarmで処理される
 			if (!socket) {
-				if (!player.isCpu && !skipCpuSwitch) {
-					playersToSwitch.push(player.id);
-				}
 				continue;
 			}
 
 			try {
 				socket.send(JSON.stringify(createMessage(player)));
 			} catch (error) {
+				// 送信失敗はソケットの問題なのでCPUに切り替え
 				console.error(`プレイヤー ${player.id} への送信に失敗しました:`, error);
-				if (!skipCpuSwitch) {
+				if (!player.isCpu) {
 					playersToSwitch.push(player.id);
 				}
 			}
@@ -623,8 +620,7 @@ export class GameDurableObject extends DurableObject<Env> {
 
 		for (const playerId of playersToSwitch) {
 			await this.switchToCpu({
-				message:
-					"ソケットが見つからないかメッセージ送信に失敗したためCPUに切り替えます",
+				message: "メッセージ送信に失敗したためCPUに切り替えます",
 				playerId,
 			});
 		}
