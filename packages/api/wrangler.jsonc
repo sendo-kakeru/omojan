@@ -46,13 +46,25 @@
 					}
 				]
 			},
-			"routes": [{ "custom_domain": true, "pattern": "api.omojan.com" }],
+			"r2_buckets": [
+				{
+					"binding": "MEDIA_BUCKET",
+					"bucket_name": "omojan-media-prod"
+				}
+			],
+			"routes": [
+				{
+					"custom_domain": true,
+					"pattern": "api.omojan.com"
+				}
+			],
 			// 2時間ごとにクリーンアップを実行
 			"triggers": {
 				"crons": ["0 */2 * * *"]
 			},
 			"vars": {
 				"ENV": "production",
+				"MEDIA_BUCKET_PUBLIC_URL": "https://media.omojan.com",
 				"WEB_URL": "https://omojan.com"
 			}
 		},
@@ -69,9 +81,21 @@
 					}
 				]
 			},
-			"routes": [{ "custom_domain": true, "pattern": "api-stg.omojan.com" }],
+			"r2_buckets": [
+				{
+					"binding": "MEDIA_BUCKET",
+					"bucket_name": "omojan-media-stg"
+				}
+			],
+			"routes": [
+				{
+					"custom_domain": true,
+					"pattern": "api-stg.omojan.com"
+				}
+			],
 			"vars": {
 				"ENV": "staging",
+				"MEDIA_BUCKET_PUBLIC_URL": "https://media-stg.omojan.com",
 				"WEB_URL": "https://stg.omojan.com"
 			}
 		}
@@ -90,5 +114,11 @@
 	"name": "api",
 	"observability": {
 		"enabled": true
-	}
+	},
+	"r2_buckets": [
+		{
+			"binding": "MEDIA_BUCKET",
+			"bucket_name": "omojan-media-local"
+		}
+	]
 }
