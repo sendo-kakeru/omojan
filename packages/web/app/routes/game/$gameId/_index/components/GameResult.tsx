@@ -3,7 +3,6 @@ import classNames from "classnames";
 import { useEffect } from "react";
 import { FaCrown } from "react-icons/fa";
 import { Avatar } from "~/components/Avatar";
-import { Separator } from "~/components/Separator";
 import { useCountdown } from "~/hooks/useCountdown";
 import { createCombination } from "../libs/gameUtils";
 import { GamePhaseLayout } from "./GamePhaseLayout";
@@ -18,15 +17,10 @@ export function GameResult({ data }: { data: GameServerResultMessage }) {
 		startCountdown(6);
 	}, [startCountdown]);
 
-	const winners = game.players.filter((player) =>
-		game.winnerPlayerIds.includes(player.id),
-	);
-
 	return (
 		<GamePhaseLayout
 			nav={
 				<GamePhaseNav
-					message="ラウンド結果"
 					messageVariant="inactive"
 					roundNo={game.roundNo}
 					timerCount={count}
@@ -34,22 +28,34 @@ export function GameResult({ data }: { data: GameServerResultMessage }) {
 				/>
 			}
 		>
-			<main className="grid grid-rows-[auto_1fr]">
-				<section className="grid rounded-lg border border-gray-200 bg-white">
-					{game.players.map((player, index) => {
+			<main className="grid grid-rows-[1fr_auto]">
+				{/* プレイヤー結果エリア */}
+				<section className="relative my-auto grid h-fit content-center rounded-lg">
+					{/* 結果表示ラベル */}
+					<p className="mb-12 text-center font-semibold text-neutral-600">
+						ラウンド {game.roundNo} 結果
+					</p>
+					{game.players.map((player) => {
 						const isWinner = game.winnerPlayerIds.includes(player.id);
 						const isSelf = player.id === mePlayer.id;
+						const combination = createCombination({
+							position: player.submission?.position,
+							text: player.submission?.text,
+							theme: game.theme,
+						});
 
 						return (
-							<div className="w-full" key={player.id}>
+							<div className="relative w-full" key={player.id}>
 								<div
 									className={classNames(
-										"flex items-center gap-x-8 rounded-lg px-8 py-4 md:px-12",
-										isWinner && "border border-yellow-400 bg-yellow-50",
+										"flex w-full items-center gap-x-12 rounded-lg px-12 py-8 md:py-12",
+										isWinner
+											? "border-2 border-yellow-400 bg-yellow-50"
+											: "border border-gray-200 bg-white",
 									)}
 								>
-									<div className="grid flex-1 gap-y-8">
-										<div className="flex items-center gap-x-4">
+									<div className="grid flex-1 gap-y-2">
+										<div className="flex items-center gap-x-8">
 											<Avatar
 												name={player.playerName}
 												size="S"
@@ -58,75 +64,30 @@ export function GameResult({ data }: { data: GameServerResultMessage }) {
 											{isWinner && (
 												<FaCrown className="size-20 text-yellow-500" />
 											)}
-											<p className="font-semibold text-xs">
+											<p className="font-semibold text-neutral-400 text-xs">
 												{player.playerName}
 												{isSelf && (
-													<span className="font-normal text-neutral-400">
-														（自分）
-													</span>
+													<span className="text-neutral-400">（自分）</span>
 												)}
 											</p>
 										</div>
-										<p className="font-bold text-sm md:text-base">
-											{createCombination({
-												position: player.submission?.position,
-												text: player.submission?.text,
-												theme: game.theme,
-											})}
+										<p className="font-bold text-base md:text-lg">
+											{combination}
 										</p>
 									</div>
-									<p className="inline-flex w-fit shrink-0 items-center overflow-hidden whitespace-nowrap rounded-full border-2 border-green-200 bg-green-100 px-12 py-2 font-medium text-green-700 text-sm transition-colors">
-										{player.voteCount}票
-									</p>
+									{/* 固定幅でバッジの位置を安定させる */}
+									<div className="grid w-64 place-items-center">
+										<p className="whitespace-nowrap rounded-full border-2 border-green-200 bg-green-100 px-12 py-2 font-medium text-green-700 text-sm">
+											{player.voteCount}票
+										</p>
+									</div>
 								</div>
-								{index !== game.players.length - 1 && <Separator />}
 							</div>
 						);
 					})}
 				</section>
 
-				<section className="mt-16 flex flex-1 items-center justify-center rounded-t-2xl border border-yellow-300 border-b-0 bg-white p-16">
-					<div className="grid w-full max-w-560 place-items-center gap-y-16">
-						{winners.length > 0 && (
-							<div className="grid place-items-center gap-y-12">
-								<p className="text-center font-bold text-yellow-700">
-									ラウンド勝者
-								</p>
-								<div className="flex flex-wrap justify-center gap-16">
-									{winners.map((winner) => (
-										<div
-											className="grid place-items-center gap-y-8"
-											key={winner.id}
-										>
-											<div className="flex items-center gap-x-4">
-												<Avatar
-													name={winner.playerName}
-													size="S"
-													src={winner.image ?? undefined}
-												/>
-												<p className="font-bold text-sm">{winner.playerName}</p>
-											</div>
-											<p className="rounded-lg border border-yellow-300 bg-yellow-50 px-8 py-2 font-bold text-sm">
-												{createCombination({
-													position: winner.submission?.position,
-													text: winner.submission?.text,
-													theme: game.theme,
-												})}
-											</p>
-										</div>
-									))}
-								</div>
-							</div>
-						)}
-						<p className="text-center text-neutral-500 text-sm">
-							{game.roundNo === 4
-								? "結果に進みます..."
-								: "次のラウンドに進みます..."}
-						</p>
-					</div>
-				</section>
-
-				<PlayerCardDisplay cards={mePlayer.playerCards} disabled />
+				<PlayerCardDisplay cards={mePlayer.playerCards} />
 			</main>
 		</GamePhaseLayout>
 	);

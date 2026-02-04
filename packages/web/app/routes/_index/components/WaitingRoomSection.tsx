@@ -1,7 +1,9 @@
 import type { WaitingRoom } from "@repo/db/model";
+import { OFFICIAL_X_ID } from "@repo/shared/constants/config";
 import { IoGameController } from "react-icons/io5";
 import { RxUpdate } from "react-icons/rx";
 import { Button } from "~/components/button/Button";
+import { XFollowButton } from "~/components/button/XFollowButton";
 import { RoomCard } from "./RoomCard";
 import { RoomCardSkeleton } from "./RoomCardSkeleton";
 
@@ -44,11 +46,14 @@ function SectionHeader({
 }) {
 	return (
 		<div className="flex items-end justify-between">
-			<div className="flex items-center gap-x-8">
-				<h2 className="font-bold">募集中の部屋</h2>
-				<span className="text-neutral-500 text-xs sm:text-sm">
-					( {isLoading || count === undefined ? "読み込み中" : `${count}件`} )
-				</span>
+			<div className="grid gap-y-12">
+				<XFollowButton username={OFFICIAL_X_ID} />
+				<div className="flex items-center gap-x-8">
+					<h2 className="font-bold">募集中の部屋</h2>
+					<span className="text-neutral-500 text-xs sm:text-sm">
+						( {isLoading || count === undefined ? "読み込み中" : `${count}件`} )
+					</span>
+				</div>
 			</div>
 			<div className="flex flex-col gap-y-8 sm:flex-row sm:items-center sm:gap-x-8">
 				<Button
