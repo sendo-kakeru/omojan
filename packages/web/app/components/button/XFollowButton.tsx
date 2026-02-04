@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ensureXWidgets, type XFollowButtonOptions } from "~/libs/xWidgets";
 
 export function XFollowButton({
@@ -16,6 +16,7 @@ export function XFollowButton({
 }) {
 	/** X公式ウィジェットを挿入するコンテナ要素への参照 */
 	const containerRef = useRef<HTMLSpanElement>(null);
+	const [isLoaded, setIsLoaded] = useState(false);
 
 	/**
 	 * useEffect の実行世代番号
@@ -47,8 +48,18 @@ export function XFollowButton({
 				container,
 				options,
 			);
+			if (runRef.current === runId) {
+				setIsLoaded(true);
+			}
 		})();
 	}, [normalizedUsername, options]);
 
-	return <span className={className} ref={containerRef} />;
+	return (
+		<span className={className}>
+			{!isLoaded && (
+				<span className="inline-block h-20 w-171 animate-pulse rounded-full bg-neutral-200" />
+			)}
+			<span className={isLoaded ? undefined : "hidden"} ref={containerRef} />
+		</span>
+	);
 }
