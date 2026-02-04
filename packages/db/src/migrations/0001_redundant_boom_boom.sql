@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX `vote_player_round_unique` ON `vote` (`player_id`,`round_id`);

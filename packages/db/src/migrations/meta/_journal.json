@@ -7,6 +7,13 @@
 			"tag": "0000_faithful_christian_walker",
 			"version": "6",
 			"when": 1769601198466
+		},
+		{
+			"breakpoints": true,
+			"idx": 1,
+			"tag": "0001_redundant_boom_boom",
+			"version": "6",
+			"when": 1770208896815
 		}
 	],
 	"version": "7"

@@ -339,12 +339,15 @@ export class GameService {
 				});
 			}
 
-			// 投票レコードを作成
-			await tx.insert(voteTable).values({
-				playerId,
-				roundId: round.id,
-				submissionId: submission.id,
-			});
+			// 投票レコードを作成（同一プレイヤー・ラウンドの重複投票はスキップ）
+			await tx
+				.insert(voteTable)
+				.values({
+					playerId,
+					roundId: round.id,
+					submissionId: submission.id,
+				})
+				.onConflictDoNothing();
 
 			// 同一トランザクション内で投票済みプレイヤー数を取得
 			const [countResult] = await tx
