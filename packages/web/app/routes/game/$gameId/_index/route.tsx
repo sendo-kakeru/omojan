@@ -22,6 +22,10 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 			gameToken,
 		});
 
+	if (error) {
+		return <GameError errorType="unknown" />;
+	}
+
 	if (!WebSocket || wsRef.current?.readyState !== WebSocket.OPEN || !data) {
 		return (
 			<main className="grid place-items-center gap-y-4 py-24 text-neutral-500">
@@ -33,10 +37,6 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 				</p>
 			</main>
 		);
-	}
-
-	if (error) {
-		return <GameError errorType="unknown" />;
 	}
 
 	return (
