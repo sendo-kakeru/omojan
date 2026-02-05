@@ -67,7 +67,7 @@ export default function ({ loaderData }: Route.ComponentProps) {
 		<>
 			<Header />
 			<main className="grid gap-y-12 pb-40 sm:mt-24">
-				<h1 className="sr-only">おもじゃんオンライン</h1>
+				<h1 className="sr-only">おもじゃんオンライン(OMOJAN)</h1>
 				<div className="grid gap-y-24">
 					<WaitingRoomSection
 						error={waitingError}
