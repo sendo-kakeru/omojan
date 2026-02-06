@@ -366,6 +366,29 @@ class Cognito {
 		return session?.getAccessToken().getJwtToken() ?? null;
 	}
 
+	async refreshSession(): Promise<void> {
+		const cognitoUser = this.userPool.getCurrentUser();
+		if (!cognitoUser) {
+			throw new Error("ユーザーが見つかりません");
+		}
+
+		const session = await this.getCurrentSession();
+		if (!session) {
+			throw new Error("セッションの取得に失敗しました");
+		}
+
+		const refreshToken = session.getRefreshToken();
+		return new Promise((resolve, reject) => {
+			cognitoUser.refreshSession(refreshToken, (error) => {
+				if (error) {
+					reject(error);
+					return;
+				}
+				resolve();
+			});
+		});
+	}
+
 	async decodeIdToken(idToken: string): Promise<CognitoIdTokenPayload | null> {
 		try {
 			const payload = jwtDecode(idToken);
