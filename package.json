@@ -1,7 +1,7 @@
 {
 	"devDependencies": {
 		"@biomejs/biome": "^2.3.13",
-		"lefthook": "^2.0.16",
+		"lefthook": "^2.1.0",
 		"tsup": "^8.5.1",
 		"turbo": "^2.8.0",
 		"typescript": "5.9.3"
