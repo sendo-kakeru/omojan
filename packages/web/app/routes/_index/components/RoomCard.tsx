@@ -6,11 +6,7 @@ import { FiUsers } from "react-icons/fi";
 import { IoIosLock } from "react-icons/io";
 import { Link } from "react-router";
 import { UserLabel } from "~/components/user/UserLabel";
-import {
-	formatDate,
-	formatDateHyphen,
-	formatRelativeTime,
-} from "~/libs/formatDate";
+import { formatDateHyphen, formatRelativeTime } from "~/libs/formatDate";
 import { JoinRoomDialog } from "./JoinRoomDialog";
 
 export function RoomCard({
@@ -100,7 +96,7 @@ export function RoomCard({
 			>
 				{isWaiting
 					? formatRelativeTime(room.createdAt)
-					: formatDate(room.finishedAt)}
+					: formatRelativeTime(room.finishedAt)}
 			</time>
 		</>
 	);
