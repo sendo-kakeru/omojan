@@ -18,7 +18,7 @@ color: green
 
 - @.claude/rules/api.md - バックエンド コーディングルール
 - @.claude/rules/coding.md - ベースとなるコーディング規約
-- @.claude/rules/frontend/web.md - フロントエンド ルール
+- @.claude/rules/web.md - フロントエンド ルール
 
 ## 検証対象
 
