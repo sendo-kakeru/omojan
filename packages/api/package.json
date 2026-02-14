@@ -13,7 +13,7 @@
 		"valibot": "^1.2.0"
 	},
 	"devDependencies": {
-		"@faker-js/faker": "^10.2.0",
+		"@faker-js/faker": "^10.3.0",
 		"@repo/mock": "workspace:*",
 		"@repo/tsup-config": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
