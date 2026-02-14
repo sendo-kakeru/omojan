@@ -20,7 +20,7 @@ import { ToastProvider } from "./components/Toast";
 import { MeProvider } from "./context/me/provider";
 
 const SITE_DESCRIPTION =
-	"おもじゃん(omojan)は単語をつなげて面白い組み合わせを作るオンラインワードゲーム。笑える組み合わせを作った人が勝ち！";
+	"おもじゃん(OMOJAN)をオンラインで遊ぼう！言葉を組み合わせて一番面白い人が勝ち。4人対戦ワードゲーム。";
 const OGP_IMAGE = `${PROD_SITE_URL}/ogp.png`;
 
 export const meta: Route.MetaFunction = () => [
@@ -28,7 +28,7 @@ export const meta: Route.MetaFunction = () => [
 	{ content: SITE_DESCRIPTION, name: "description" },
 	{
 		content:
-			"おもじゃん, omojan, ワードゲーム, オンラインゲーム, パーティーゲーム, 言葉遊び",
+			"おもじゃん, OMOJAN, ワードゲーム, オンラインゲーム, おもじゃん荘, 言葉遊び",
 		name: "keywords",
 	},
 	// Canonical

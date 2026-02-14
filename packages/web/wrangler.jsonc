@@ -1,5 +1,8 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
+	"assets": {
+		"directory": "./build/client"
+	},
 	"compatibility_date": "2025-09-22",
 	"compatibility_flags": ["nodejs_compat"],
 	"env": {
@@ -9,13 +12,15 @@
 				{ "custom_domain": true, "pattern": "www.omojan.com" }
 			],
 			"vars": {
-				"MAINTENANCE_MODE": "false"
+				"MAINTENANCE_MODE": "false",
+				"VITE_API_URL": "https://api.omojan.com"
 			}
 		},
 		"staging": {
 			"routes": [{ "custom_domain": true, "pattern": "stg.omojan.com" }],
 			"vars": {
-				"MAINTENANCE_MODE": "false"
+				"MAINTENANCE_MODE": "false",
+				"VITE_API_URL": "https://api-stg.omojan.com"
 			}
 		}
 	},
@@ -25,6 +30,7 @@
 		"enabled": true
 	},
 	"vars": {
-		"MAINTENANCE_MODE": "false"
+		"MAINTENANCE_MODE": "false",
+		"VITE_API_URL": "http://localhost:8787"
 	}
 }

@@ -16,7 +16,7 @@ function InputOTP({
 		<OTPInput
 			className={classNames("disabled:cursor-not-allowed", className)}
 			containerClassName={classNames(
-				"flex items-center gap-8 has-disabled:opacity-50",
+				"flex items-center gap-8 overflow-hidden has-disabled:opacity-50",
 				containerClassName,
 			)}
 			data-slot="input-otp"

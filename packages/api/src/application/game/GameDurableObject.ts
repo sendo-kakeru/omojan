@@ -243,25 +243,36 @@ export class GameDurableObject extends DurableObject<Env> {
 		if (!this.gameId) return;
 		await this.ctx.storage.deleteAlarm();
 
-		switch (this.state) {
-			case "WAITING":
-				await this.handleInitialize();
-				break;
-			case "START_PENDING":
-				await this.handleStartFirstTurn();
-				break;
-			case "SUBMISSION":
-				await this.handleSubmissionTimeout();
-				break;
-			case "SUBMITTED":
-				await this.proceedToNextTurn();
-				break;
-			case "VOTING":
-				await this.handleVoteTimeout();
-				break;
-			case "RESULT":
-				await this.proceedToNextRound();
-				break;
+		try {
+			switch (this.state) {
+				case "WAITING":
+					await this.handleInitialize();
+					break;
+				case "START_PENDING":
+					await this.handleStartFirstTurn();
+					break;
+				case "SUBMISSION":
+					await this.handleSubmissionTimeout();
+					break;
+				case "SUBMITTED":
+					await this.proceedToNextTurn();
+					break;
+				case "VOTING":
+					await this.handleVoteTimeout();
+					break;
+				case "RESULT":
+					await this.proceedToNextRound();
+					break;
+			}
+		} catch (error) {
+			console.error(
+				`alarmハンドラで未処理エラーが発生しました (state=${this.state}):`,
+				error,
+			);
+			await this.handleGameAbort({
+				message: `alarmハンドラで未処理エラーが発生しました (state=${this.state})`,
+			});
+			return;
 		}
 
 		await this.persistState();
@@ -714,13 +725,14 @@ export class GameDurableObject extends DurableObject<Env> {
 		});
 
 		// CPUプレイヤーの自動投票
+		// 失敗した場合は投票タイムアウト（handleVoteTimeout）で再試行される
 		for (const player of this.players) {
 			if (player.isCpu) {
 				try {
 					await this.randomVote({ playerId: player.id });
 				} catch (error) {
-					console.error(
-						`CPUプレイヤー ${player.id} の自動投票に失敗しました:`,
+					console.warn(
+						`CPUプレイヤー ${player.id} の自動投票に失敗しました。投票タイムアウト時に再試行されます:`,
 						error,
 					);
 				}
@@ -919,10 +931,19 @@ export class GameDurableObject extends DurableObject<Env> {
 		if (!this.gameId) return;
 
 		// 投票済みのプレイヤーIDを取得
-		const votedPlayerIds = await this.gameService.getVotedPlayerIds({
-			gameId: this.gameId,
-			roundNo: this.roundNo,
-		});
+		let votedPlayerIds: PlayerId[];
+		try {
+			votedPlayerIds = await this.gameService.getVotedPlayerIds({
+				gameId: this.gameId,
+				roundNo: this.roundNo,
+			});
+		} catch (error) {
+			console.error("投票済みプレイヤーの取得に失敗しました:", error);
+			await this.handleGameAbort({
+				message: "投票済みプレイヤーの取得に失敗しました",
+			});
+			return;
+		}
 
 		// 未投票のプレイヤーにランダム投票
 		for (const player of this.players) {

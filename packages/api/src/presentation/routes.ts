@@ -12,7 +12,6 @@ import type {
 import { routes as gameRoutes } from "./game/gameRoutes";
 import { routes as matchingRoutes } from "./matching/matchingRoutes";
 import { routes as meRoutes } from "./me/meRoutes";
-import { routes as mediaRoutes } from "./media/mediaRoutes";
 import { routes as roomRoutes } from "./room/roomRoutes";
 
 const publicRoutes = new Hono<BaseContext>()
@@ -25,8 +24,7 @@ const hybridRoutes = new Hono<HybridRouteContext>()
 
 const privateRoutes = new Hono<PrivateRouteContext>()
 	.use(privateAuthMiddleware())
-	.route("/v1/me", meRoutes)
-	.route("/v1/media", mediaRoutes);
+	.route("/v1/me", meRoutes);
 
 // Aggregate
 export const routes = new Hono<BaseContext>()
