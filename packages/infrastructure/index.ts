@@ -4,6 +4,7 @@ import { object, optional, parse, picklist, string } from "valibot";
 config();
 
 import * as aws from "@pulumi/aws";
+import * as cloudflare from "@pulumi/cloudflare";
 
 export const infrastructureEnvSchema = object({
 	GOOGLE_CLIENT_ID: string(),
@@ -152,13 +153,65 @@ export const userPoolClient = new aws.cognito.UserPoolClient(
 	},
 );
 
+// Cloudflare DNS
+const zone = cloudflare.getZoneOutput({
+	filter: { name: "omojan.com" },
+});
+
+// ACM証明書（Cognitoカスタムドメインはus-east-1必須）
+const usEast1Provider = new aws.Provider("us-east-1", {
+	region: "us-east-1",
+});
+
+const certificate = new aws.acm.Certificate(
+	"cognito-custom-domain-cert",
+	{
+		domainName: "auth.omojan.com",
+		validationMethod: "DNS",
+	},
+	{ provider: usEast1Provider },
+);
+
+// ACM証明書のDNS検証レコード
+new cloudflare.DnsRecord("acm-validation-record", {
+	content: certificate.domainValidationOptions.apply(
+		(opts) => opts[0]?.resourceRecordValue ?? "",
+	),
+	name: certificate.domainValidationOptions.apply(
+		(opts) => opts[0]?.resourceRecordName ?? "",
+	),
+	proxied: false,
+	ttl: 1, // automatic
+	type: "CNAME",
+	zoneId: zone.zoneId,
+});
+
+const certValidation = new aws.acm.CertificateValidation(
+	"cognito-cert-validation",
+	{
+		certificateArn: certificate.arn,
+	},
+	{ provider: usEast1Provider },
+);
+
 export const userPoolDomain = new aws.cognito.UserPoolDomain(
 	"user-pool-domain",
 	{
-		domain: "omojan-dev",
+		certificateArn: certValidation.certificateArn,
+		domain: "auth.omojan.com",
 		userPoolId: userPool.id,
 	},
 	{
 		dependsOn: [userPool],
 	},
 );
+
+// カスタムドメインのCNAMEレコード（プロキシ無効必須）
+new cloudflare.DnsRecord("cognito-custom-domain-record", {
+	content: userPoolDomain.cloudfrontDistribution,
+	name: "auth",
+	proxied: false,
+	ttl: 1, // automatic
+	type: "CNAME",
+	zoneId: zone.zoneId,
+});
