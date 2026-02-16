@@ -210,6 +210,7 @@ export function JoinRoomDialog({
 												autoComplete="off"
 												disabled={isLoading}
 												id={id}
+												inputMode="text"
 												maxLength={6}
 												onBlur={field.handleBlur}
 												onChange={(value) => {

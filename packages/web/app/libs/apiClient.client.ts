@@ -1,9 +1,9 @@
 import type { Api } from "@repo/api";
+import { hasStatusCode } from "@repo/shared/utils";
 import { type ClientResponse, hc, parseResponse } from "hono/client";
 import type { StatusCode } from "hono/utils/http-status";
 import { cognito } from "~/libs/cognito";
 
-// TODO: リフレッシュ後の再リクエスト
 export const honoClient = hc<Api>(import.meta.env.VITE_API_URL, {
 	async headers() {
 		const accessToken = await cognito.getAccessToken();
@@ -17,8 +17,23 @@ export const honoClient = hc<Api>(import.meta.env.VITE_API_URL, {
 	},
 });
 
+let refreshPromise: Promise<void> | null = null;
+
 export async function honoFetcher<T>(
 	fn: () => Promise<ClientResponse<T, StatusCode>>,
 ) {
-	return parseResponse(fn()) as T;
+	try {
+		return (await parseResponse(fn())) as T;
+	} catch (error) {
+		if (hasStatusCode(error) && error.statusCode === 401) {
+			if (!refreshPromise) {
+				refreshPromise = cognito.refreshSession().finally(() => {
+					refreshPromise = null;
+				});
+			}
+			await refreshPromise;
+			return (await parseResponse(fn())) as T;
+		}
+		throw error;
+	}
 }

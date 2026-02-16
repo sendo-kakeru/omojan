@@ -1,5 +1,8 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
+	"assets": {
+		"directory": "./build/client"
+	},
 	"compatibility_date": "2025-09-22",
 	"compatibility_flags": ["nodejs_compat"],
 	"env": {
