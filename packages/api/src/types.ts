@@ -12,7 +12,6 @@ export type BaseContext = HonoEnv & {
 	Bindings: Env & {
 		GAME_DURABLE_OBJECT: DurableObjectNamespace;
 		MATCHING_DURABLE_OBJECT: DurableObjectNamespace;
-		MEDIA_BUCKET: R2Bucket;
 	};
 	Variables: { db: DrizzleClient };
 };
