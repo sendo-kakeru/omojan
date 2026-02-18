@@ -24,7 +24,7 @@ export function InPageError({
 						<img
 							alt="おもじゃんオンライン"
 							height={72}
-							src="/logo.png"
+							src="/icons/omojan.webp"
 							width={72}
 						/>
 					)}
