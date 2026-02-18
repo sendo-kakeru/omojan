@@ -2,6 +2,7 @@ import type { Api } from "@repo/api";
 import type { FinishedRoom, WaitingRoom } from "@repo/db/model";
 import { hc } from "hono/client";
 import { useState } from "react";
+import { Footer } from "~/components/Footer";
 import { Header } from "~/components/Header";
 import type { Route } from "./+types/route";
 import { CreateRoomDialog } from "./components/CreateRoomDialog";
@@ -87,6 +88,7 @@ export default function ({ loaderData }: Route.ComponentProps) {
 					/>
 				</div>
 			</main>
+			<Footer />
 			<CreateRoomDialog isOpen={isOpen} setIsOpen={setIsOpen} />
 		</>
 	);

@@ -1,4 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
+import { Link } from "react-router";
 import { cognito } from "~/libs/cognito";
 import { GoogleSigninButton } from "../button/GoogleSigninButton";
 import { Dialog } from "../Dialog";
@@ -13,15 +14,26 @@ export function SigninModal({
 	isAppBrowser?: boolean;
 }) {
 	return (
-		<Dialog onOpenChange={setIsOpen} open={isOpen} title="ログイン">
+		<Dialog onOpenChange={setIsOpen} open={isOpen}>
 			<div className="grid place-items-center gap-y-16">
-				<p className="w-full">ログインしてOmojanをもっと楽しみましょう！</p>
+				<p>ログインしてOmojanをもっと楽しみましょう！</p>
 				<GoogleSigninButton
 					disabled={isAppBrowser}
 					onClick={() => cognito.signInWithGoogle()}
 				>
 					Sign in with Google
 				</GoogleSigninButton>
+				<p className="text-center text-neutral-500 text-xs">
+					ログインすることで
+					<Link className="text-blue-600 underline" to="/terms">
+						利用規約
+					</Link>
+					と
+					<Link className="text-blue-600 underline" to="/privacy">
+						プライバシーポリシー
+					</Link>
+					に同意したものとみなします
+				</p>
 			</div>
 			{isAppBrowser && (
 				<div className="grid gap-y-8 rounded-lg border border-yellow-300 bg-yellow-50 p-12 text-sm">

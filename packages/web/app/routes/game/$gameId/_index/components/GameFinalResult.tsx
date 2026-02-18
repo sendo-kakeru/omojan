@@ -6,6 +6,7 @@ import { Avatar } from "~/components/Avatar";
 import { Badge } from "~/components/Badge";
 import { Button } from "~/components/button/Button";
 import { XFollowButton } from "~/components/button/XFollowButton";
+import { Footer } from "~/components/Footer";
 import { Header } from "~/components/Header";
 import { useMe } from "~/context/me/hooks";
 
@@ -158,6 +159,7 @@ export function GameFinalResult({
 					</Button>
 				</section>
 			</main>
+			<Footer />
 		</>
 	);
 }
