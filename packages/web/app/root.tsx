@@ -16,6 +16,7 @@ import {
 } from "@repo/shared/constants/config";
 import type { PropsWithChildren } from "react";
 import { ErrorPage } from "./components/ErrorPage";
+import { GlobalNavigationProgress } from "./components/GlobalNavigationProgress";
 import { ToastProvider } from "./components/Toast";
 import { MeProvider } from "./context/me/provider";
 
@@ -116,6 +117,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 export default function App() {
 	return (
 		<MeProvider>
+			<GlobalNavigationProgress />
 			<div className="mx-auto grid min-h-svh max-w-800 px-16">
 				<div>
 					<Outlet />
