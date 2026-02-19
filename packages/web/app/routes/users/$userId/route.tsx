@@ -2,7 +2,8 @@ import type { Api } from "@repo/api";
 import type { PublicUser } from "@repo/db/model";
 import { hc } from "hono/client";
 import { FaUser } from "react-icons/fa";
-import { LuPen } from "react-icons/lu";
+import { FiChevronLeft, FiEdit } from "react-icons/fi";
+import { useNavigate } from "react-router";
 import { Button } from "~/components/button/Button";
 import { Footer } from "~/components/Footer";
 import { Header } from "~/components/Header";
@@ -38,7 +39,7 @@ export default function UserPage({
 	return (
 		<div className="grid min-h-full grid-rows-[auto_1fr_auto]">
 			<Header />
-			<main className="grid content-start gap-y-24 pb-40 sm:mt-24">
+			<main className="grid content-start gap-y-24 pb-40">
 				<UserProfile user={user} />
 			</main>
 			<Footer />
@@ -48,42 +49,54 @@ export default function UserPage({
 
 function UserProfile({ user }: { user: PublicUser }) {
 	const { me } = useMe();
+	const navigate = useNavigate();
 	const isMe = me?.userId === user.userId;
 
 	return (
-		<div className="grid place-items-center gap-y-20 py-24">
-			{user.image ? (
-				<img
-					alt={user.name}
-					className="size-96 rounded-full object-cover"
-					src={user.image}
-				/>
-			) : (
-				<FaUser className="size-96 rounded-full bg-gray-300 p-16 text-gray-500" />
-			)}
-
-			<h1 className="font-bold text-xl">{user.name}</h1>
-
-			{isMe && (
-				<Button
-					as="link"
-					color="gray"
-					leftIcon={<LuPen />}
-					to={`/users/${user.userId}/edit`}
-					variant="outline"
+		<div className="grid">
+			<div className="flex justify-between">
+				<button
+					aria-label="戻る"
+					onClick={() => void navigate(-1)}
+					type="button"
 				>
-					プロフィールを編集
-				</Button>
-			)}
+					<FiChevronLeft className="size-20" />
+				</button>
 
-			<div className="flex gap-x-32">
-				<div className="grid place-items-center gap-y-2">
-					<span className="font-bold text-xl">{user.playCount}</span>
-					<span className="text-neutral-500 text-sm">プレイ</span>
-				</div>
-				<div className="grid place-items-center gap-y-2">
-					<span className="font-bold text-xl">{user.winCount}</span>
-					<span className="text-neutral-500 text-sm">勝利</span>
+				{isMe && (
+					<Button
+						as="link"
+						color="gray"
+						leftIcon={<FiEdit />}
+						to={`/users/${user.userId}/edit`}
+						variant="outline"
+					>
+						プロフィールを編集
+					</Button>
+				)}
+			</div>
+			<div className="grid place-items-center gap-y-20 py-24">
+				{user.image ? (
+					<img
+						alt={user.name}
+						className="size-96 rounded-full object-cover"
+						src={user.image}
+					/>
+				) : (
+					<FaUser className="size-96 rounded-full bg-gray-300 p-16 text-gray-500" />
+				)}
+
+				<h1 className="font-bold text-xl">{user.name}</h1>
+
+				<div className="flex gap-x-32">
+					<div className="grid place-items-center gap-y-2">
+						<span className="font-bold text-xl">{user.playCount}</span>
+						<span className="text-neutral-500 text-sm">プレイ</span>
+					</div>
+					<div className="grid place-items-center gap-y-2">
+						<span className="font-bold text-xl">{user.winCount}</span>
+						<span className="text-neutral-500 text-sm">勝利</span>
+					</div>
 				</div>
 			</div>
 		</div>
