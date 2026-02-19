@@ -31,7 +31,7 @@ export default function TermsPage() {
 						<h2 className="font-bold text-base">第3条（アカウント）</h2>
 						<ol className="grid list-decimal gap-y-4 pl-20">
 							<li>
-								ユーザーはGoogleアカウントを使用してログインすることで、本サービスのアカウントを作成できます。
+								ユーザーはLINEアカウントを使用してログインすることで、本サービスのアカウントを作成できます。
 							</li>
 							<li>
 								ユーザーは、自己の責任において本サービスのアカウントを管理するものとします。

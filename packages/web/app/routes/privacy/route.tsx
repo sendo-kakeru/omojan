@@ -16,7 +16,7 @@ export default function PrivacyPage() {
 					<section className="grid gap-y-8">
 						<h2 className="font-bold text-base">第1条（収集する情報）</h2>
 						<p>
-							本サービスは、Googleアカウントを利用したログイン時に、以下の情報を取得します。
+							本サービスは、LINEアカウントを利用したログイン時に、以下の情報を取得します。
 						</p>
 						<ol className="grid list-decimal gap-y-4 pl-20">
 							<li>メールアドレス</li>
