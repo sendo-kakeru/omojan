@@ -1,7 +1,3 @@
-/**
- * 初期リリースではGoogle認証のみ対応。ユーザーからの要望が多ければパスワード認証など他の方法を検討
- */
-
 import { emailSchema } from "@repo/shared/schema";
 import {
 	CognitoUserPool,
@@ -15,7 +11,6 @@ import {
 	parse,
 	safeParse,
 	string,
-	ValiError,
 } from "valibot";
 
 const COGNITO_LOCALSTORAGE_KEY_PREFIX = `CognitoIdentityServiceProvider.${import.meta.env.VITE_COGNITO_CLIENT_ID}`;
@@ -25,8 +20,7 @@ const NONCE_STORAGE_KEY = "oauth_nonce";
 
 export const cognitoIdTokenPayloadSchema = object({
 	email: emailSchema,
-	// NOTE: 現在はGoogle認証のみ対応しているためnameは非optional
-	name: string(),
+	name: optional(string()),
 	picture: optional(string()),
 	sub: string(),
 });
@@ -37,28 +31,9 @@ const tokenResponseSchema = object({
 	refresh_token: string(),
 });
 
-// export const signinSchema = object({
-// 	email: emailSchema,
-// 	password: passwordSchema,
-// });
-
-// export const signupSchema = object({
-// 	confirmPassword: string(),
-// 	email: emailSchema,
-// 	name: pipe(string(), minLength(2, "名前は2文字以上である必要があります")),
-// 	password: passwordSchema,
-// });
-
-// export const verifySchema = object({
-// 	code: pipe(string(), length(6, "確認コードは6桁である必要があります")),
-// });
-
 export type CognitoIdTokenPayload = InferOutput<
 	typeof cognitoIdTokenPayloadSchema
 >;
-// export type SigninFormInput = InferInput<typeof signinSchema>;
-// export type SignupFormInput = InferInput<typeof signupSchema>;
-// export type VerifyFormInput = InferInput<typeof verifySchema>;
 
 class Cognito {
 	private readonly userPool: CognitoUserPool;
@@ -90,108 +65,28 @@ class Cognito {
 			.replace(/=/g, "");
 	}
 
-	// async signUp({
-	// 	email,
-	// 	password,
-	// 	name,
-	// }: Omit<SignupFormInput, "confirmPassword">): Promise<ISignUpResult> {
-	// 	return new Promise((resolve, reject) => {
-	// 		this.userPool.signUp(
-	// 			email,
-	// 			password,
-	// 			[
-	// 				new CognitoUserAttribute({ Name: "email", Value: email }),
-	// 				new CognitoUserAttribute({ Name: "name", Value: name }),
-	// 			],
-	// 			[],
-	// 			(error, result) => {
-	// 				if (error) {
-	// 					reject(error);
-	// 					return;
-	// 				}
-	// 				if (!result) {
-	// 					reject(new Error("サインアップに失敗しました"));
-	// 					return;
-	// 				}
-	// 				resolve(result);
-	// 			},
-	// 		);
-	// 	});
-	// }
-
-	// async confirmSignUp({
-	// 	email,
-	// 	code,
-	// }: VerifyFormInput & { email: string }): Promise<void> {
-	// 	const cognitoUser = new CognitoUser({
-	// 		Pool: this.userPool,
-	// 		Username: email,
-	// 	});
-
-	// 	return new Promise((resolve, reject) => {
-	// 		cognitoUser.confirmRegistration(code, true, (error) => {
-	// 			if (error) {
-	// 				reject(error);
-	// 				return;
-	// 			}
-	// 			resolve();
-	// 		});
-	// 	});
-	// }
-
-	// async signIn({
-	// 	email,
-	// 	password,
-	// }: SigninFormInput): Promise<CognitoUserSession> {
-	// 	const cognitoUser = new CognitoUser({
-	// 		Pool: this.userPool,
-	// 		Username: email,
-	// 	});
-
-	// 	return new Promise((resolve, reject) => {
-	// 		cognitoUser.authenticateUser(
-	// 			new AuthenticationDetails({
-	// 				Password: password,
-	// 				Username: email,
-	// 			}),
-	// 			{
-	// 				onFailure: (error) => {
-	// 					reject(error);
-	// 				},
-	// 				onSuccess: (session) => {
-	// 					resolve(session);
-	// 				},
-	// 			},
-	// 		);
-	// 	});
-	// }
-
-	async signInWithGoogle(): Promise<void> {
-		// PKCE Code Verifierを生成して保存
+	async signInWithLine(): Promise<void> {
 		const codeVerifier = this.generateRandomString(64);
 		localStorage.setItem(PKCE_STORAGE_KEY, codeVerifier);
 
-		// State（CSRF対策）を生成して保存
 		const state = this.generateRandomString(32);
 		localStorage.setItem(STATE_STORAGE_KEY, state);
 
-		// Nonce（リプレイ攻撃対策）を生成して保存
 		const nonce = this.generateRandomString(32);
 		localStorage.setItem(NONCE_STORAGE_KEY, nonce);
 
-		// Code Challengeを生成
 		const codeChallenge = await this.generateCodeChallenge(codeVerifier);
 
 		const searchParams = new URLSearchParams({
 			client_id: import.meta.env.VITE_COGNITO_CLIENT_ID,
 			code_challenge: codeChallenge,
 			code_challenge_method: "S256",
-			identity_provider: "Google",
-			nonce: nonce,
+			identity_provider: "LINE",
+			nonce,
 			redirect_uri: `${window.location.origin}/auth/callback`,
 			response_type: "code",
 			scope: "email openid profile",
-			state: state,
+			state,
 		});
 		window.location.href = `${import.meta.env.VITE_COGNITO_DOMAIN}/oauth2/authorize?${searchParams.toString()}`;
 	}
@@ -205,6 +100,7 @@ class Cognito {
 	}): Promise<{
 		idToken: string;
 		accessToken: string;
+		payload: CognitoIdTokenPayload;
 	}> {
 		if (!code) {
 			throw new Error("認証コードが見つかりません");
@@ -232,6 +128,8 @@ class Cognito {
 			redirect_uri: `${window.location.origin}/auth/callback`,
 		});
 
+		// Nonce検証のため保存してから削除
+		const savedNonce = localStorage.getItem(NONCE_STORAGE_KEY);
 		localStorage.removeItem(PKCE_STORAGE_KEY);
 		localStorage.removeItem(NONCE_STORAGE_KEY);
 
@@ -262,10 +160,16 @@ class Cognito {
 			throw new Error("トークンレスポンスの検証に失敗しました");
 		}
 
-		const payload = await this.decodeIdToken(tokenData.id_token);
-		if (!payload) {
-			throw new Error("IDトークンのデコードに失敗しました");
+		// IDトークンのデコード
+		const decodedToken = jwtDecode(tokenData.id_token);
+		// Nonce検証（リプレイ攻撃対策）
+		if (savedNonce) {
+			const tokenNonce = (decodedToken as Record<string, unknown>).nonce;
+			if (tokenNonce !== savedNonce) {
+				throw new Error("nonceが一致しません");
+			}
 		}
+		const payload = parse(cognitoIdTokenPayloadSchema, decodedToken);
 
 		localStorage.setItem(
 			`${COGNITO_LOCALSTORAGE_KEY_PREFIX}.${payload.sub}.idToken`,
@@ -291,38 +195,9 @@ class Cognito {
 		return {
 			accessToken: tokenData.access_token,
 			idToken: tokenData.id_token,
+			payload,
 		};
 	}
-
-	// パスワードリセット要求
-	// async forgotPassword(email: string): Promise<void> {
-	//   const cognitoUser = new CognitoUser({
-	//     Username: email,
-	//     Pool: this.userPool,
-	//   });
-
-	//   return new Promise((resolve, reject) => {
-	//     cognitoUser.forgotPassword({
-	//       onSuccess: () => resolve(),
-	//       onFailure: (error) => reject(error),
-	//     });
-	//   });
-	// }
-
-	// パスワードリセット確認
-	// async confirmPassword(email: string, code: string, newPassword: string): Promise<void> {
-	//   const cognitoUser = new CognitoUser({
-	//     Username: email,
-	//     Pool: this.userPool,
-	//   });
-
-	//   return new Promise((resolve, reject) => {
-	//     cognitoUser.confirmPassword(code, newPassword, {
-	//       onSuccess: () => resolve(),
-	//       onFailure: (error) => reject(error),
-	//     });
-	//   });
-	// }
 
 	signOut(): void {
 		const cognitoUser = this.userPool.getCurrentUser();
@@ -356,11 +231,6 @@ class Cognito {
 		});
 	}
 
-	// async getIdToken(): Promise<string | null> {
-	// 	const session = await this.getCurrentSession();
-	// 	return session?.getIdToken().getJwtToken() ?? null;
-	// }
-
 	async getAccessToken(): Promise<string | null> {
 		const session = await this.getCurrentSession();
 		return session?.getAccessToken().getJwtToken() ?? null;
@@ -387,21 +257,6 @@ class Cognito {
 				resolve();
 			});
 		});
-	}
-
-	async decodeIdToken(idToken: string): Promise<CognitoIdTokenPayload | null> {
-		try {
-			const payload = jwtDecode(idToken);
-			return parse(cognitoIdTokenPayloadSchema, payload);
-		} catch (error) {
-			console.error(
-				error instanceof ValiError
-					? "IDトークンのデコード結果が不足しています"
-					: "IDトークンのデコード中にエラーが発生しました:",
-				error,
-			);
-			return null;
-		}
 	}
 }
 

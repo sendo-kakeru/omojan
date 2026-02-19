@@ -8,8 +8,8 @@ import * as cloudflare from "@pulumi/cloudflare";
 import * as pulumi from "@pulumi/pulumi";
 
 export const infrastructureEnvSchema = object({
-	GOOGLE_CLIENT_ID: string(),
-	GOOGLE_CLIENT_SECRET: string(),
+	LINE_CHANNEL_ID: string(),
+	LINE_CHANNEL_SECRET: string(),
 	RUN_TYPE: optional(picklist(["UP", "DESTROY"]), "UP"),
 });
 
@@ -111,8 +111,8 @@ export const userPool = new aws.cognito.UserPool("user-pool", {
 	usernameAttributes: ["email"],
 });
 
-export const googleIdentityProvider = new aws.cognito.IdentityProvider(
-	"google-identity-provider",
+export const lineIdentityProvider = new aws.cognito.IdentityProvider(
+	"line-identity-provider",
 	{
 		attributeMapping: {
 			email: "email",
@@ -121,12 +121,14 @@ export const googleIdentityProvider = new aws.cognito.IdentityProvider(
 			username: "sub",
 		},
 		providerDetails: {
-			authorize_scopes: "email openid profile",
-			client_id: env.GOOGLE_CLIENT_ID,
-			client_secret: env.GOOGLE_CLIENT_SECRET,
+			attributes_request_method: "GET",
+			authorize_scopes: "openid profile email",
+			client_id: env.LINE_CHANNEL_ID,
+			client_secret: env.LINE_CHANNEL_SECRET,
+			oidc_issuer: "https://access.line.me",
 		},
-		providerName: "Google",
-		providerType: "Google",
+		providerName: "LINE",
+		providerType: "OIDC",
 		userPoolId: userPool.id,
 	},
 	{
@@ -134,7 +136,7 @@ export const googleIdentityProvider = new aws.cognito.IdentityProvider(
 	},
 );
 
-// Cognito User Pool Client（googleIdentityProviderの後に作成する必要あり）
+// Cognito User Pool Client（Identity Providerの後に作成する必要あり）
 export const userPoolClient = new aws.cognito.UserPoolClient(
 	"user-pool-client",
 	{
@@ -164,7 +166,7 @@ export const userPoolClient = new aws.cognito.UserPoolClient(
 		refreshTokenValidity: 30, // 30日
 
 		// OAuth設定
-		supportedIdentityProviders: ["COGNITO", "Google"],
+		supportedIdentityProviders: ["COGNITO", "LINE"],
 		tokenValidityUnits: {
 			accessToken: "hours",
 			idToken: "hours",
@@ -173,7 +175,7 @@ export const userPoolClient = new aws.cognito.UserPoolClient(
 		userPoolId: userPool.id,
 	},
 	{
-		dependsOn: [userPool, googleIdentityProvider],
+		dependsOn: [userPool, lineIdentityProvider],
 	},
 );
 
