@@ -75,6 +75,17 @@ function UserProfile({ user }: { user: PublicUser }) {
 					プロフィールを編集
 				</Button>
 			)}
+
+			<div className="flex gap-x-32">
+				<div className="grid place-items-center gap-y-2">
+					<span className="font-bold text-xl">{user.playCount}</span>
+					<span className="text-neutral-500 text-sm">プレイ</span>
+				</div>
+				<div className="grid place-items-center gap-y-2">
+					<span className="font-bold text-xl">{user.winCount}</span>
+					<span className="text-neutral-500 text-sm">勝利</span>
+				</div>
+			</div>
 		</div>
 	);
 }

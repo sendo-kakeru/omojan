@@ -1,10 +1,12 @@
-import { type InferOutput, nullable, object, string } from "valibot";
+import { type InferOutput, nullable, number, object, string } from "valibot";
 import { userIdSchema, userSchema } from "../schema";
 
 export const publicUserSchema = object({
 	image: nullable(string()),
 	name: userSchema.entries.name,
+	playCount: number(),
 	userId: userIdSchema,
+	winCount: number(),
 });
 export type PublicUser = InferOutput<typeof publicUserSchema>;
 
