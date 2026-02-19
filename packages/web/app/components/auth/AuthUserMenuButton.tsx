@@ -49,12 +49,8 @@ export function UserMenuButton({ me }: { me: Me }) {
 				/>
 			}
 		>
-			{/* TODO: メニュー内容の実装 */}
 			<DropdownMenuItem asChild>
-				<Link to="/">プロフィール</Link>
-			</DropdownMenuItem>
-			<DropdownMenuItem asChild>
-				<Link to="/">アカウント設定</Link>
+				<Link to={`/users/${me.userId}`}>プロフィール</Link>
 			</DropdownMenuItem>
 			<DropdownMenuSeparator />
 			<DropdownMenuItem asChild>
