@@ -21,13 +21,15 @@ export async function loader({
 	});
 
 	if (!response.ok) {
-		throw new Response("ユーザーが見つかりません", { status: 404 });
+		throw new Response("ユーザーが見つかりません", {
+			status: response.status,
+		});
 	}
 
 	const { data } = await response.json();
 
 	if (!data) {
-		throw new Response("ユーザーの取得に失敗しました", { status: 500 });
+		throw new Response("ユーザーが見つかりません", { status: 404 });
 	}
 
 	return { user: data };

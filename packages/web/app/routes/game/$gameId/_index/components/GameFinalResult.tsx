@@ -34,39 +34,43 @@ export function GameFinalResult({
 						</div>
 						<div className="flex flex-wrap justify-center gap-16">
 							{winners.map((winner) => {
-								const Wrapper = winner.userId
-									? (props: { children: React.ReactNode }) => (
-											<Link to={`/users/${winner.userId}`} {...props} />
-										)
-									: (props: { children: React.ReactNode }) => (
-											<div {...props} />
-										);
-								return (
-									<Wrapper key={winner.id}>
-										<div className="grid place-items-center">
-											<div className="relative">
-												<Avatar
-													name={winner.playerName}
-													size="L"
-													src={winner.image ?? undefined}
-												/>
-												{me && winner.userId === me.userId && (
-													<Badge
-														className="absolute -bottom-2/5 left-1/2 -translate-x-1/2"
-														color="primary"
-													>
-														自分
-													</Badge>
-												)}
-											</div>
-											<p className="mt-20 font-bold text-sm">
-												{winner.playerName}
-											</p>
-											<p className="font-medium text-sm text-yellow-600">
-												{winner.winCount}勝
-											</p>
+								const winnerContent = (
+									<>
+										<div className="relative">
+											<Avatar
+												name={winner.playerName}
+												size="L"
+												src={winner.image ?? undefined}
+											/>
+											{me && winner.userId === me.userId && (
+												<Badge
+													className="absolute -bottom-2/5 left-1/2 -translate-x-1/2"
+													color="primary"
+												>
+													自分
+												</Badge>
+											)}
 										</div>
-									</Wrapper>
+										<p className="mt-20 font-bold text-sm">
+											{winner.playerName}
+										</p>
+										<p className="font-medium text-sm text-yellow-600">
+											{winner.winCount}勝
+										</p>
+									</>
+								);
+								return winner.userId ? (
+									<Link
+										className="grid place-items-center"
+										key={winner.id}
+										to={`/users/${winner.userId}`}
+									>
+										{winnerContent}
+									</Link>
+								) : (
+									<div className="grid place-items-center" key={winner.id}>
+										{winnerContent}
+									</div>
 								);
 							})}
 						</div>
@@ -110,6 +114,21 @@ export function GameFinalResult({
 									{/* Round Content */}
 									<div className="grid gap-y-8 p-16">
 										{round.players.map((player) => {
+											const playerInfo = (
+												<>
+													<Avatar
+														name={player.playerName}
+														size="S"
+														src={player.image ?? undefined}
+													/>
+													<p className="flex-1 text-xs md:flex-none">
+														{player.playerName}
+														{me && player.userId === me.userId && (
+															<span className="text-neutral-400">（自分）</span>
+														)}
+													</p>
+												</>
+											);
 											return (
 												<div
 													className={classNames(
@@ -126,36 +145,10 @@ export function GameFinalResult({
 																className="flex items-center gap-x-4 md:gap-x-8"
 																to={`/users/${player.userId}`}
 															>
-																<Avatar
-																	name={player.playerName}
-																	size="S"
-																	src={player.image ?? undefined}
-																/>
-																<p className="flex-1 text-xs md:flex-none">
-																	{player.playerName}
-																	{me && player.userId === me.userId && (
-																		<span className="text-neutral-400">
-																			（自分）
-																		</span>
-																	)}
-																</p>
+																{playerInfo}
 															</Link>
 														) : (
-															<>
-																<Avatar
-																	name={player.playerName}
-																	size="S"
-																	src={player.image ?? undefined}
-																/>
-																<p className="flex-1 text-xs md:flex-none">
-																	{player.playerName}
-																	{me && player.userId === me.userId && (
-																		<span className="text-neutral-400">
-																			（自分）
-																		</span>
-																	)}
-																</p>
-															</>
+															playerInfo
 														)}
 														{player.isWinner && (
 															<FaCrown className="size-16 text-yellow-500 md:hidden" />
