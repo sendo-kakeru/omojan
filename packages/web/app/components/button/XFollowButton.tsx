@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { tv } from "tailwind-variants";
+import { tv, type VariantProps } from "tailwind-variants";
 import { ensureXWidgets, type XFollowButtonOptions } from "~/libs/xWidgets";
 
-const skeltonVariants = tv(
+const sizeVariants = tv(
 	{
-		base: "inline-block animate-pulse rounded-full bg-neutral-200",
+		base: "inline-block overflow-hidden",
 		compoundVariants: [
 			{
 				class: "h-20 w-171",
@@ -45,6 +45,8 @@ const skeltonVariants = tv(
 	},
 	{ twMerge: false },
 );
+
+type SizeVariantProps = VariantProps<typeof sizeVariants>;
 
 export function XFollowButton({
 	username,
@@ -99,16 +101,16 @@ export function XFollowButton({
 		})();
 	}, [normalizedUsername, options]);
 
+	const variantProps: SizeVariantProps = {
+		lang: options?.lang as SizeVariantProps["lang"],
+		showScreenName: options?.showScreenName,
+		size: options?.size,
+	};
+
 	return (
-		<span className={className}>
+		<span className={sizeVariants({ ...variantProps, className })}>
 			{!isLoaded && (
-				<span
-					className={skeltonVariants({
-						lang: options?.lang as "ja" | "en" | undefined,
-						showScreenName: options?.showScreenName,
-						size: options?.size as "large" | "normal" | undefined,
-					})}
-				/>
+				<span className="block h-full w-full animate-pulse rounded-full bg-neutral-200" />
 			)}
 			<span className={isLoaded ? undefined : "hidden"} ref={containerRef} />
 		</span>
