@@ -25,17 +25,3 @@ export const Default: Story = {
 		);
 	},
 };
-
-export const InAppBrowser: Story = {
-	render: () => {
-		const [isOpen, setIsOpen] = useState(true);
-		return (
-			<>
-				<Button as="button" onClick={() => setIsOpen(true)} type="button">
-					モーダルを開く
-				</Button>
-				<SigninModal isAppBrowser isOpen={isOpen} setIsOpen={setIsOpen} />
-			</>
-		);
-	},
-};

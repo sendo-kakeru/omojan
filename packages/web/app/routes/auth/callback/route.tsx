@@ -7,13 +7,13 @@ export async function clientLoader({ request }: Route.LoaderArgs) {
 	const url = new URL(request.url);
 	const code = url.searchParams.get("code");
 	const state = url.searchParams.get("state");
-	const error = url.searchParams.get("error");
+	const oauthError = url.searchParams.get("error");
 	try {
-		if (error) {
-			throw new Error(`OAuth error: ${error}`);
+		if (oauthError) {
+			throw new Error(`OAuth error: ${oauthError}`);
 		}
 
-		const tokens = await cognito.handleOAuthCallback({
+		const { payload } = await cognito.handleOAuthCallback({
 			code,
 			state,
 		});
@@ -26,16 +26,11 @@ export async function clientLoader({ request }: Route.LoaderArgs) {
 			return;
 		}
 
-		const payload = await cognito.decodeIdToken(tokens.idToken);
-		if (!payload) {
-			throw new Error("IDトークンのデコード結果がありません");
-		}
-
 		const createMeResponse = await honoClient.v1.me.$post({
 			json: {
 				email: payload.email,
 				image: payload.picture,
-				name: payload.name,
+				name: payload.name ?? payload.email.split("@")[0] ?? payload.email,
 			},
 		});
 		const createdMeResult = await createMeResponse.json();
@@ -52,7 +47,8 @@ export async function clientLoader({ request }: Route.LoaderArgs) {
 	}
 }
 
-export function HydrateFallback() {
+function AuthenticatingView() {
+	// TODO: UI
 	return (
 		<div className="flex min-h-screen items-center justify-center">
 			<p>認証中...</p>
@@ -60,10 +56,10 @@ export function HydrateFallback() {
 	);
 }
 
-export default function () {
-	return (
-		<div className="flex min-h-screen items-center justify-center">
-			<p>認証中...</p>
-		</div>
-	);
+export function HydrateFallback() {
+	return <AuthenticatingView />;
+}
+
+export default function AuthCallbackPage() {
+	return <AuthenticatingView />;
 }
