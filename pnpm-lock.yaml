@@ -131,8 +131,8 @@ importers:
   packages/infrastructure:
     devDependencies:
       '@pulumi/aws':
-        specifier: ^7.19.0
-        version: 7.19.0(typescript@5.9.3)
+        specifier: ^7.20.0
+        version: 7.20.0(typescript@5.9.3)
       '@pulumi/pulumi':
         specifier: ^3.220.0
         version: 3.220.0(typescript@5.9.3)
@@ -2073,8 +2073,8 @@ packages:
   '@protobufjs/utf8@1.1.0':
     resolution: {integrity: sha512-Vvn3zZrhQZkkBE8LSuW3em98c0FwgO4nxzv6OdSxPKJIEKY2bGbHn+mhGIPerzI4twdxaP8/0+06HBpwf345Lw==}
 
-  '@pulumi/aws@7.19.0':
-    resolution: {integrity: sha512-LntexkhvL8BBC8VKo8pleeOfrIA07+w5SvjgNjV1gZjZDIRjUSc8ZUyl5DNQc3QplB5rCbNqDuaY0Zr+5aOJdw==}
+  '@pulumi/aws@7.20.0':
+    resolution: {integrity: sha512-f8efmjHXKRUQY4fojfw7vuWN7Q07Cz0bjqbIwD/qtOuz+qs+zrKWU50uAB0HcWXAxjI0ll4KslGu2oLRiMTxng==}
 
   '@pulumi/pulumi@3.220.0':
     resolution: {integrity: sha512-WfFu4Qv5r/9uv4bh6jxZPKLc945RtdjIq29mDa6c9sIXzQtRtv/Voo58E6u6lhA1RKaK+ocymqgykZ6QV7OnGQ==}
@@ -5683,6 +5683,7 @@ packages:
   tar@7.5.7:
     resolution: {integrity: sha512-fov56fJiRuThVFXD6o6/Q354S7pnWMJIVlDBYijsTNx6jKSE4pvrDTs6lUnmGvNyfJwFQQwWy3owKz1ucIhveQ==}
     engines: {node: '>=18'}
+    deprecated: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 
   thenify-all@1.6.0:
     resolution: {integrity: sha512-RNxQH/qI8/t3thXJDwcstUO4zeqo64+Uy/+sNVRBx4Xn2OX+OZ9oP+iJnNFqplFra2ZUVeKCSa2oVWi3T4uVmA==}
@@ -7518,7 +7519,7 @@ snapshots:
 
   '@protobufjs/utf8@1.1.0': {}
 
-  '@pulumi/aws@7.19.0(typescript@5.9.3)':
+  '@pulumi/aws@7.20.0(typescript@5.9.3)':
     dependencies:
       '@pulumi/pulumi': 3.220.0(typescript@5.9.3)
       mime: 2.6.0
