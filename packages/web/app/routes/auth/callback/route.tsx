@@ -1,3 +1,4 @@
+import { Spinner } from "~/components/Spinner";
 import { honoClient } from "~/libs/apiClient.client";
 import { cognito } from "~/libs/cognito";
 import type { Route } from "./+types/route";
@@ -48,10 +49,19 @@ export async function clientLoader({ request }: Route.LoaderArgs) {
 }
 
 function AuthenticatingView() {
-	// TODO: UI
 	return (
-		<div className="flex min-h-screen items-center justify-center">
-			<p>認証中...</p>
+		<div className="flex min-h-svh flex-col items-center justify-center gap-y-24">
+			<img
+				alt="おもじゃんオンライン"
+				className="size-80 animate-bounce"
+				src="/icons/omojan.webp"
+			/>
+			<div className="flex items-center gap-x-8">
+				<Spinner className="size-20 text-gray-500" />
+				<p className="font-medium text-14 text-neutral-600">
+					ログインしています…
+				</p>
+			</div>
 		</div>
 	);
 }

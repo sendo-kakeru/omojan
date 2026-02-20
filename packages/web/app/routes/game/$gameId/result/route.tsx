@@ -9,6 +9,7 @@ export default function ({ params: { gameId } }: Route.ComponentProps) {
 	const result = data?.data;
 
 	if (isLoading) {
+		// TODO: 必要であればスケルトン
 		return (
 			<div className="grid place-items-center gap-y-4 py-16 text-neutral-500">
 				<Spinner className="size-32" />
