@@ -365,6 +365,19 @@ const imageUrl = `${CDN_URL}/images/${user.image}?w=200&h=200`;
 画像のアップロード・削除は CDN Worker に直接リクエストする。
 omojan API Worker はDB上の画像キーの管理（保存・更新・削除）のみを担当する。
 
+**設計方針: 画像と名前の独立更新**
+
+プロフィール編集において、画像と名前はそれぞれ独立して更新する。
+
+- 画像選択時: CDN Workerへ即アップロード → URL取得 → `PATCH /v1/me` に `{ image: "新URL" }` を送信
+- 名前変更時: `PATCH /v1/me` に `{ name: "新しい名前" }` を送信
+- APIは `PATCH /v1/me` の1エンドポイントで、渡されたフィールドのみ更新する（name, image いずれか必須）
+
+この方式により:
+- 画像と名前の更新が互いに独立し、UXが直感的
+- 画像のキャンセル不要（選択時点で即確定）
+- 旧画像は PATCH 時に API 側で CDN Worker の DELETE を呼び出して R2 から削除可能
+
 ```mermaid
 sequenceDiagram
     participant C as Client
@@ -379,8 +392,15 @@ sequenceDiagram
     CDN->>R2: R2 Binding 書き込み
     CDN-->>C: 201 { success, key }
 
-    C->>API: PATCH /users/{id} { image: "users/{id}/{uuid}.png" }
-    API->>DB: UPDATE user SET image = ? WHERE id = ?
+    C->>API: PATCH /v1/me { image: "users/{id}/{uuid}.png" }
+    API->>DB: UPDATE user SET image = ? WHERE sub = ?
+    Note over API: 旧画像キーがあれば CDN Worker に DELETE を発行
+    API-->>C: 200 OK
+
+    Note over C: ユーザーが名前を変更
+
+    C->>API: PATCH /v1/me { name: "新しい名前" }
+    API->>DB: UPDATE user SET name = ? WHERE sub = ?
     API-->>C: 200 OK
 ```
 
@@ -405,10 +425,12 @@ sequenceDiagram
 5. wrangler.jsonc の環境別設定
 
 ### Phase 4: omojanとの統合
-1. フロントエンドにアバター画像アップロードUIを実装
-2. API Worker にユーザー画像キーの更新エンドポイントを追加
-3. `Avatar` コンポーネントを Image CDN URL に対応させる
-4. LINE OIDCの`picture`クレームからの初回画像取り込みフロー
+1. ~~API Worker にユーザープロフィール更新エンドポイントを追加~~ → **実装済み**（`PATCH /v1/me`、name/image いずれかを optional で受け取り更新）
+2. ~~プロフィール編集ページを作成~~ → **実装済み**（`/users/:userId/edit`、自分のみアクセス可、名前のみ編集可能）
+3. プロフィール編集ページに画像アップロードUIを追加（CDN Worker へ PUT → 取得した URL で `PATCH /v1/me`）
+4. API Worker で画像更新時に旧画像を CDN Worker 経由で R2 から削除するロジックを追加
+5. `Avatar` コンポーネントを Image CDN URL に対応させる（`?w=200&h=200` 等のリサイズパラメータ付き）
+6. LINE OIDCの`picture`クレームからの初回画像取り込みフロー
 
 ### Phase 5: CI/CD
 1. GitHub Actions ワークフロー追加（cdn, image-processor）

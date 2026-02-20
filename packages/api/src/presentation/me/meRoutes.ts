@@ -2,6 +2,8 @@ import {
 	type CreateMeResponseBody,
 	createMeRequestBodySchema,
 	type GetMeResponseBody,
+	type UpdateMeResponseBody,
+	updateMeRequestBodySchema,
 } from "@repo/db/model";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
@@ -68,6 +70,29 @@ export const routes = new Hono<
 
 				throw new HTTPException(500, {
 					message: "Meの作成に失敗しました",
+				});
+			}
+		},
+	)
+	.patch(
+		"/",
+		vValidator("json", updateMeRequestBodySchema),
+		async (c): Promise<HttpRespondReturn<UpdateMeResponseBody>> => {
+			const body = c.req.valid("json");
+			const { meService, sub } = c.var;
+
+			try {
+				const updatedMe = await meService.update({
+					...body,
+					sub,
+				});
+				return c.json({ data: updatedMe, message: "OK" }, 200);
+			} catch (error) {
+				console.error("Meの更新に失敗しました:", error);
+				if (error instanceof HTTPException) throw error;
+
+				throw new HTTPException(500, {
+					message: "Meの更新に失敗しました",
 				});
 			}
 		},
