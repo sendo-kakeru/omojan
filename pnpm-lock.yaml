@@ -51,8 +51,8 @@ importers:
         specifier: ^0.4.2
         version: 0.4.2(drizzle-orm@0.45.1(@libsql/client@0.17.0(encoding@0.1.13))(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@types/pg@8.15.6)(pg@8.16.3)(postgres@3.4.7))(valibot@1.2.0(typescript@5.9.3))
       hono:
-        specifier: ^4.11.9
-        version: 4.11.9
+        specifier: ^4.12.0
+        version: 4.12.0
       p-retry:
         specifier: ^7.1.1
         version: 7.1.1
@@ -311,8 +311,8 @@ importers:
         specifier: ^2.5.1
         version: 2.5.1
       hono:
-        specifier: ^4.11.9
-        version: 4.11.9
+        specifier: ^4.12.0
+        version: 4.12.0
       input-otp:
         specifier: ^1.4.2
         version: 1.4.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -4354,8 +4354,8 @@ packages:
     resolution: {integrity: sha512-0hJU9SCPvmMzIBdZFqNPXWa6dqh7WdH0cII9y+CyS8rG3nL48Bclra9HmKhVVUHyPWNH5Y7xDwAB7bfgSjkUMQ==}
     engines: {node: '>= 0.4'}
 
-  hono@4.11.9:
-    resolution: {integrity: sha512-Eaw2YTGM6WOxA6CXbckaEvslr2Ne4NFsKrvc0v97JD5awbmeBLO5w9Ho9L9kmKonrwF9RJlW6BxT1PVv/agBHQ==}
+  hono@4.12.0:
+    resolution: {integrity: sha512-NekXntS5M94pUfiVZ8oXXK/kkri+5WpX2/Ik+LVsl+uvw+soj4roXIsPqO+XsWrAw20mOzaXOZf3Q7PfB9A/IA==}
     engines: {node: '>=16.9.0'}
 
   hosted-git-info@7.0.2:
@@ -9983,7 +9983,7 @@ snapshots:
     dependencies:
       function-bind: 1.1.2
 
-  hono@4.11.9: {}
+  hono@4.12.0: {}
 
   hosted-git-info@7.0.2:
     dependencies:
