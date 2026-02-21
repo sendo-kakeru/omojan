@@ -7,7 +7,7 @@ import { GameError } from "./components/GameError";
 import { GamePresenter } from "./components/GamePresenter";
 import { useGameSubscriptionSWR } from "./hooks/useGameSubscriptionSWR";
 
-export default function ({ params: { gameId } }: Route.ComponentProps) {
+export default function Page({ params: { gameId } }: Route.ComponentProps) {
 	const navigate = useNavigate();
 	const gameToken = gameTokenLocalStorage.get({
 		onError() {

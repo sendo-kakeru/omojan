@@ -4,7 +4,7 @@ import { GameFinalResult } from "~/routes/game/$gameId/_index/components/GameFin
 import type { Route } from "./+types/route";
 import { useGameResultSWR } from "./hooks/useGameResultSWR";
 
-export default function ({ params: { gameId } }: Route.ComponentProps) {
+export default function Page({ params: { gameId } }: Route.ComponentProps) {
 	const { data, error, isLoading } = useGameResultSWR(gameId as GameId);
 	const result = data?.data;
 
