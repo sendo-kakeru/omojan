@@ -7,7 +7,6 @@ on:
       - packages/api/**
       - packages/db/**
       - packages/shared/**
-      - packages/env/**
       - packages/typescript-config/**
       - .github/workflows/deploy-api-stg.yml
 jobs:
