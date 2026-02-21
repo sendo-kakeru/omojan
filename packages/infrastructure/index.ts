@@ -244,3 +244,8 @@ new cloudflare.DnsRecord("cognito-custom-domain-record", {
 
 // 画像配信基盤
 export { registry, registryUrl } from "./artifact-registry";
+export {
+	invokerServiceAccountEmail,
+	serviceAccountEmail,
+	workloadIdentityProvider,
+} from "./workload-identity";
