@@ -4,10 +4,10 @@ use bytes::Bytes;
 use exif::{In, Tag};
 use fast_image_resize as fr;
 use image::codecs::webp::WebPEncoder;
-use image::{DynamicImage, ImageReader};
+use image::{DynamicImage, ImageReader, Limits};
 
-const MAX_DIMENSION: u32 = 4096;
-const MAX_PIXELS: u32 = MAX_DIMENSION * MAX_DIMENSION; // 16,777,216
+const MAX_DIMENSION: u32 = 4000;
+const MAX_PIXELS: u32 = MAX_DIMENSION * MAX_DIMENSION; // 16,000,000
 
 #[derive(Debug, thiserror::Error)]
 pub enum TransformError {
@@ -38,7 +38,7 @@ impl TransformParams {
     }
 }
 
-/// 画像変換のエントリポイント。EXIF回転適用 → バリデーション → リサイズ → WebPエンコードを行う。
+/// 画像変換のエントリポイント。EXIF回転適用 → バリデーション → リサイズ → WebP エンコードを行う。
 pub fn transform(input: &Bytes, params: &TransformParams) -> Result<Bytes, TransformError> {
     validate_params(params)?;
 
@@ -59,17 +59,24 @@ pub fn transform(input: &Bytes, params: &TransformParams) -> Result<Bytes, Trans
 }
 
 /// マジックバイトからフォーマットを推定し、画像バイト列をデコードする。
+/// デコーダリミットを設定し、画像爆弾（巨大画像による OOM）を防御する。
 fn decode_image(input: &Bytes) -> Result<DynamicImage, TransformError> {
-    let reader = ImageReader::new(Cursor::new(input))
+    let mut reader = ImageReader::new(Cursor::new(input))
         .with_guessed_format()
         .map_err(|e| TransformError::Decode(e.to_string()))?;
+
+    let mut limits = Limits::default();
+    limits.max_image_width = Some(MAX_DIMENSION);
+    limits.max_image_height = Some(MAX_DIMENSION);
+    limits.max_alloc = Some(256 * 1024 * 1024); // 256MB
+    reader.limits(limits);
 
     reader
         .decode()
         .map_err(|e| TransformError::Decode(e.to_string()))
 }
 
-/// EXIF Orientationタグを読み取る。失敗時は1（変換なし）を返す。
+/// EXIF Orientation タグを読み取る。失敗時は 1（変換なし）を返す。
 fn read_exif_orientation(data: &[u8]) -> u32 {
     let Ok(exif) = exif::Reader::new().read_from_container(&mut Cursor::new(data)) else {
         return 1;
@@ -79,7 +86,7 @@ fn read_exif_orientation(data: &[u8]) -> u32 {
         .unwrap_or(1)
 }
 
-/// Orientation値(1-8)に基づきピクセルを回転・反転する。メタデータは再エンコードで除去される。
+/// Orientation 値(1-8)に基づきピクセルを回転・反転する。メタデータは再エンコードで除去される。
 fn apply_orientation(img: DynamicImage, orientation: u32) -> DynamicImage {
     match orientation {
         2 => img.fliph(),
@@ -93,7 +100,7 @@ fn apply_orientation(img: DynamicImage, orientation: u32) -> DynamicImage {
     }
 }
 
-/// ソース画像の総ピクセル数を検証し、メモリ枯渇を防ぐ（上限 4096x4096）。
+/// ソース画像の総ピクセル数を検証し、メモリ枯渇を防ぐ（上限 4000x4000）。
 fn validate_source_dimensions(image: &DynamicImage) -> Result<(), TransformError> {
     let (w, h) = (image.width(), image.height());
     let pixels = w.saturating_mul(h);
@@ -108,43 +115,44 @@ fn validate_source_dimensions(image: &DynamicImage) -> Result<(), TransformError
     Ok(())
 }
 
-/// w/hパラメータが有効範囲(1-4096)内であることを検証する。
+/// w/h パラメータが有効範囲(1-4000)内であることを検証する。
 fn validate_params(params: &TransformParams) -> Result<(), TransformError> {
-    if let Some(w) = params.width {
-        if w == 0 || w > MAX_DIMENSION {
-            return Err(TransformError::InvalidParams(format!(
-                "width must be 1-{MAX_DIMENSION}, got {w}"
-            )));
-        }
+    if let Some(w) = params.width
+        && (w == 0 || w > MAX_DIMENSION)
+    {
+        return Err(TransformError::InvalidParams(format!(
+            "width must be 1-{MAX_DIMENSION}, got {w}"
+        )));
     }
-    if let Some(h) = params.height {
-        if h == 0 || h > MAX_DIMENSION {
-            return Err(TransformError::InvalidParams(format!(
-                "height must be 1-{MAX_DIMENSION}, got {h}"
-            )));
-        }
+    if let Some(h) = params.height
+        && (h == 0 || h > MAX_DIMENSION)
+    {
+        return Err(TransformError::InvalidParams(format!(
+            "height must be 1-{MAX_DIMENSION}, got {h}"
+        )));
     }
     Ok(())
 }
 
-/// containモードで出力サイズを計算する。アスペクト比を維持しバウンディングボックス内に収める。
+/// contain モードで出力サイズを計算する。アスペクト比を維持しバウンディングボックス内に収める。
+#[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
 fn calculate_contain_dimensions(image: &DynamicImage, params: &TransformParams) -> (u32, u32) {
-    let (src_w, src_h) = (image.width() as f64, image.height() as f64);
+    let (src_w, src_h) = (f64::from(image.width()), f64::from(image.height()));
 
     match (params.width, params.height) {
         (Some(w), Some(h)) => {
-            let scale = (w as f64 / src_w).min(h as f64 / src_h);
+            let scale = (f64::from(w) / src_w).min(f64::from(h) / src_h);
             let new_w = (src_w * scale).round().max(1.0) as u32;
             let new_h = (src_h * scale).round().max(1.0) as u32;
             (new_w, new_h)
         }
         (Some(w), None) => {
-            let scale = w as f64 / src_w;
+            let scale = f64::from(w) / src_w;
             let new_h = (src_h * scale).round().max(1.0) as u32;
             (w, new_h)
         }
         (None, Some(h)) => {
-            let scale = h as f64 / src_h;
+            let scale = f64::from(h) / src_h;
             let new_w = (src_w * scale).round().max(1.0) as u32;
             (new_w, h)
         }
@@ -152,7 +160,7 @@ fn calculate_contain_dimensions(image: &DynamicImage, params: &TransformParams) 
     }
 }
 
-/// Lanczos3フィルタでRGBA画像をリサイズする。SIMD最適化のfast_image_resizeを使用。
+/// Lanczos3 フィルタで RGBA 画像をリサイズする。SIMD 最適化の `fast_image_resize` を使用。
 fn resize_image(
     image: &DynamicImage,
     width: u32,
@@ -161,13 +169,9 @@ fn resize_image(
     let src_image = image.to_rgba8();
     let (src_w, src_h) = (src_image.width(), src_image.height());
 
-    let src = fr::images::Image::from_vec_u8(
-        src_w,
-        src_h,
-        src_image.into_raw(),
-        fr::PixelType::U8x4,
-    )
-    .map_err(|e| TransformError::Resize(e.to_string()))?;
+    let src =
+        fr::images::Image::from_vec_u8(src_w, src_h, src_image.into_raw(), fr::PixelType::U8x4)
+            .map_err(|e| TransformError::Resize(e.to_string()))?;
 
     let mut dst = fr::images::Image::new(width, height, fr::PixelType::U8x4);
 
@@ -185,7 +189,7 @@ fn resize_image(
     Ok(DynamicImage::ImageRgba8(img_buf))
 }
 
-/// DynamicImageをロスレスWebPにエンコードする。
+/// `DynamicImage` をロスレス WebP にエンコードする。
 fn encode_webp(image: &DynamicImage) -> Result<Bytes, TransformError> {
     let mut buf = Cursor::new(Vec::new());
     let encoder = WebPEncoder::new_lossless(&mut buf);

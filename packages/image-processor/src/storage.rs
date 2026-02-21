@@ -1,6 +1,6 @@
 use aws_config::Region;
 use aws_credential_types::Credentials;
-use aws_sdk_s3::{config::Builder as S3ConfigBuilder, Client};
+use aws_sdk_s3::{Client, config::Builder as S3ConfigBuilder};
 use bytes::Bytes;
 
 const MAX_INPUT_SIZE: usize = 10 * 1024 * 1024; // 10MB
@@ -60,11 +60,11 @@ impl R2Client {
                 }
             })?;
 
-        if let Some(len) = resp.content_length() {
-            let len = len as usize;
-            if len > MAX_INPUT_SIZE {
-                return Err(StorageError::TooLarge { size: len });
-            }
+        if let Some(len) = resp.content_length()
+            && let Ok(len) = usize::try_from(len)
+            && len > MAX_INPUT_SIZE
+        {
+            return Err(StorageError::TooLarge { size: len });
         }
 
         let body = resp

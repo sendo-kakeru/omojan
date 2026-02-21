@@ -31,12 +31,14 @@ async fn main() {
 
     tracing::info!("listening on {addr}");
 
-    let listener = TcpListener::bind(&addr).await.unwrap();
+    let listener = TcpListener::bind(&addr)
+        .await
+        .expect("failed to bind TCP listener");
 
     axum::serve(listener, app)
         .with_graceful_shutdown(shutdown_signal())
         .await
-        .unwrap();
+        .expect("server exited with error");
 }
 
 async fn shutdown_signal() {

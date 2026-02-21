@@ -1,5 +1,5 @@
 use axum::extract::{Path, Query, State};
-use axum::http::{header, StatusCode};
+use axum::http::{StatusCode, header};
 use axum::response::IntoResponse;
 use serde::Deserialize;
 
@@ -35,9 +35,9 @@ impl From<TransformError> for AppError {
         match e {
             TransformError::InvalidParams(msg) => AppError::BadRequest(msg),
             TransformError::SourceTooLarge { .. } => AppError::BadRequest(e.to_string()),
-            TransformError::Decode(msg) => AppError::TransformFailed(msg),
-            TransformError::Encode(msg) => AppError::TransformFailed(msg),
-            TransformError::Resize(msg) => AppError::TransformFailed(msg),
+            TransformError::Decode(msg)
+            | TransformError::Encode(msg)
+            | TransformError::Resize(msg) => AppError::TransformFailed(msg),
         }
     }
 }
@@ -66,8 +66,11 @@ impl IntoResponse for AppError {
     }
 }
 
-const ALLOWED_KEY_CHARS: &str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/-_.";
 const MAX_KEY_LENGTH: usize = 1024;
+
+fn is_allowed_key_char(c: char) -> bool {
+    matches!(c, 'a'..='z' | 'A'..='Z' | '0'..='9' | '/' | '-' | '_' | '.')
+}
 
 fn validate_key(key: &str) -> Result<(), AppError> {
     if key.is_empty() {
@@ -89,10 +92,14 @@ fn validate_key(key: &str) -> Result<(), AppError> {
         return Err(AppError::BadRequest("key must not contain //".into()));
     }
     if key.contains('\\') {
-        return Err(AppError::BadRequest("key must not contain backslash".into()));
+        return Err(AppError::BadRequest(
+            "key must not contain backslash".into(),
+        ));
     }
-    if !key.chars().all(|c| ALLOWED_KEY_CHARS.contains(c)) {
-        return Err(AppError::BadRequest("key contains invalid characters".into()));
+    if !key.chars().all(is_allowed_key_char) {
+        return Err(AppError::BadRequest(
+            "key contains invalid characters".into(),
+        ));
     }
     Ok(())
 }
@@ -117,16 +124,15 @@ pub async fn transform(
         height: query.h,
     };
 
-    let output = transform::transform(&data, &params)?;
+    let output = tokio::task::spawn_blocking(move || transform::transform(&data, &params))
+        .await
+        .map_err(|e| AppError::Internal(e.to_string()))??;
 
     Ok((
         StatusCode::OK,
         [
             (header::CONTENT_TYPE, "image/webp"),
-            (
-                header::CACHE_CONTROL,
-                "public, max-age=31536000, immutable",
-            ),
+            (header::CACHE_CONTROL, "public, max-age=31536000, immutable"),
         ],
         output,
     ))
