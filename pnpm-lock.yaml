@@ -88,6 +88,22 @@ importers:
         specifier: ^4.67.0
         version: 4.67.0
 
+  packages/cdn:
+    dependencies:
+      hono:
+        specifier: ^4.12.0
+        version: 4.12.0
+    devDependencies:
+      '@repo/tsup-config':
+        specifier: workspace:*
+        version: link:../tsup-config
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      wrangler:
+        specifier: ^4.4.0
+        version: 4.67.0
+
   packages/db:
     dependencies:
       uuidv7:
