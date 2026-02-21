@@ -18,6 +18,7 @@
 		"typecheck": "pnpm run cf-typegen && tsc --noEmit"
 	},
 	"dependencies": {
+		"@repo/shared": "workspace:*",
 		"hono": "^4.12.0"
 	},
 	"devDependencies": {
