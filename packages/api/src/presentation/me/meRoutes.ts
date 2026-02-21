@@ -54,9 +54,7 @@ export const routes = new Hono<
 		vValidator("json", createMeRequestBodySchema),
 		async (c): Promise<HttpRespondReturn<CreateMeResponseBody>> => {
 			const body = c.req.valid("json");
-			const { db, sub } = c.var;
-
-			const meService = new MeService(db);
+			const { meService, sub } = c.var;
 
 			try {
 				const createdMe = await meService.register({

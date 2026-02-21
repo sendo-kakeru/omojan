@@ -161,13 +161,13 @@ class Cognito {
 		}
 
 		// IDトークンのデコード
-		const decodedToken = jwtDecode(tokenData.id_token);
+		const decodedToken = jwtDecode<{ nonce?: string }>(tokenData.id_token);
 		// Nonce検証（リプレイ攻撃対策）
-		if (savedNonce) {
-			const tokenNonce = (decodedToken as Record<string, unknown>).nonce;
-			if (tokenNonce !== savedNonce) {
-				throw new Error("nonceが一致しません");
-			}
+		if (!savedNonce) {
+			throw new Error("nonceが見つかりません");
+		}
+		if (decodedToken.nonce !== savedNonce) {
+			throw new Error("nonceが一致しません");
 		}
 		const payload = parse(cognitoIdTokenPayloadSchema, decodedToken);
 

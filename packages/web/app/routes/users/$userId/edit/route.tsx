@@ -1,4 +1,3 @@
-"use client";
 import { type Me, meProfileSchema } from "@repo/db/model";
 import { useForm } from "@tanstack/react-form";
 import { useId } from "react";
