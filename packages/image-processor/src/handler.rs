@@ -1,5 +1,5 @@
 use axum::extract::{Path, Query, State};
-use axum::http::{header, StatusCode};
+use axum::http::{StatusCode, header};
 use axum::response::IntoResponse;
 use serde::Deserialize;
 
@@ -35,9 +35,9 @@ impl From<TransformError> for AppError {
         match e {
             TransformError::InvalidParams(msg) => AppError::BadRequest(msg),
             TransformError::SourceTooLarge { .. } => AppError::BadRequest(e.to_string()),
-            TransformError::Decode(msg) => AppError::TransformFailed(msg),
-            TransformError::Encode(msg) => AppError::TransformFailed(msg),
-            TransformError::Resize(msg) => AppError::TransformFailed(msg),
+            TransformError::Decode(msg)
+            | TransformError::Encode(msg)
+            | TransformError::Resize(msg) => AppError::TransformFailed(msg),
         }
     }
 }
@@ -66,7 +66,8 @@ impl IntoResponse for AppError {
     }
 }
 
-const ALLOWED_KEY_CHARS: &str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/-_.";
+const ALLOWED_KEY_CHARS: &str =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/-_.";
 const MAX_KEY_LENGTH: usize = 1024;
 
 fn validate_key(key: &str) -> Result<(), AppError> {
@@ -89,10 +90,14 @@ fn validate_key(key: &str) -> Result<(), AppError> {
         return Err(AppError::BadRequest("key must not contain //".into()));
     }
     if key.contains('\\') {
-        return Err(AppError::BadRequest("key must not contain backslash".into()));
+        return Err(AppError::BadRequest(
+            "key must not contain backslash".into(),
+        ));
     }
     if !key.chars().all(|c| ALLOWED_KEY_CHARS.contains(c)) {
-        return Err(AppError::BadRequest("key contains invalid characters".into()));
+        return Err(AppError::BadRequest(
+            "key contains invalid characters".into(),
+        ));
     }
     Ok(())
 }
@@ -123,10 +128,7 @@ pub async fn transform(
         StatusCode::OK,
         [
             (header::CONTENT_TYPE, "image/webp"),
-            (
-                header::CACHE_CONTROL,
-                "public, max-age=31536000, immutable",
-            ),
+            (header::CACHE_CONTROL, "public, max-age=31536000, immutable"),
         ],
         output,
     ))
