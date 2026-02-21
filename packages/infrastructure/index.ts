@@ -241,3 +241,6 @@ new cloudflare.DnsRecord("cognito-custom-domain-record", {
 	type: "CNAME",
 	zoneId: zone.zoneId,
 });
+
+// 画像配信基盤
+export { registry, registryUrl } from "./artifact-registry";

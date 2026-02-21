@@ -207,7 +207,7 @@ Rust / Axum で構築する画像加工オリジンサーバー。Google Cloud R
 
 - **Cloudflare R2バケット** - 環境別バケット作成（APAC リージョン）
 - **GCP Artifact Registry** - image-processorのDockerイメージ格納
-  - クリーンアップポリシー: 最新1つ保持、未タグは7日後削除
+  - クリーンアップポリシー: 最新3つ保持、未タグは7日後削除
 
 ※ CDN Worker のカスタムドメイン（`cdn.omojan.com`, `cdn-stg.omojan.com`）は wrangler.jsonc の `routes` で設定する（API Worker と同じパターン）。
 
