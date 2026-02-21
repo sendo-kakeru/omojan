@@ -35,7 +35,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 	};
 }
 
-export default function ({ loaderData }: Route.ComponentProps) {
+export default function Page({ loaderData }: Route.ComponentProps) {
 	const [isOpen, setIsOpen] = useState(false);
 
 	// 募集中は全件取得
