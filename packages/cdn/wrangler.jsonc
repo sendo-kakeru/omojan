@@ -1,0 +1,56 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"compatibility_date": "2026-02-21",
+	"env": {
+		"production": {
+			"r2_buckets": [
+				{
+					"binding": "R2",
+					"bucket_name": "omojan-ugc-prod"
+				}
+			],
+			"routes": [
+				{
+					"custom_domain": true,
+					"pattern": "cdn.omojan.com"
+				}
+			],
+			"vars": {
+				"WEB_URL": "https://omojan.com"
+			}
+		},
+		"staging": {
+			"r2_buckets": [
+				{
+					"binding": "R2",
+					"bucket_name": "omojan-ugc-stg"
+				}
+			],
+			"routes": [
+				{
+					"custom_domain": true,
+					"pattern": "cdn-stg.omojan.com"
+				}
+			],
+			"vars": {
+				"WEB_URL": "https://stg.omojan.com"
+			}
+		}
+	},
+	"main": "src/index.ts",
+	"name": "cdn",
+	"observability": {
+		"enabled": true
+	},
+	"r2_buckets": [
+		{
+			"binding": "R2",
+			"bucket_name": "omojan-ugc-dev",
+			"remote": true
+		}
+	],
+	"vars": {
+		"ORIGIN_URL": "http://localhost:8080",
+		"WEB_URL": "http://localhost:5173"
+	}
+}

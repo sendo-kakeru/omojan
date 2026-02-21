@@ -12,7 +12,7 @@ import { MatchingPresenter } from "./components/MatchingPresenter";
 import { useMatchingSubscriptionSWR } from "./hooks/useMatchingSubscriptionSWR";
 import { useRoomSWR } from "./hooks/useRoomSWR";
 
-export default function ({ params: { gameId } }: Route.ComponentProps) {
+export default function Page({ params: { gameId } }: Route.ComponentProps) {
 	const navigate = useNavigate();
 	const exitTimeoutRef = useRef<number | null>(null);
 	const { showToast } = useToast();
