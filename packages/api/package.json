@@ -8,20 +8,20 @@
 		"aws-jwt-verify": "^5.1.1",
 		"drizzle-orm": "^0.45.1",
 		"drizzle-valibot": "^0.4.2",
-		"hono": "^4.11.9",
+		"hono": "^4.11.7",
 		"p-retry": "^7.1.1",
 		"valibot": "^1.2.0"
 	},
 	"devDependencies": {
-		"@faker-js/faker": "^10.3.0",
+		"@faker-js/faker": "^10.2.0",
 		"@repo/mock": "workspace:*",
 		"@repo/tsup-config": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
-		"@types/node": "^24.10.13",
+		"@types/node": "^24.0.0",
 		"drizzle-seed": "^0.3.1",
 		"tsx": "^4.20.6",
 		"vitest": "^4.0.18",
-		"wrangler": "^4.65.0"
+		"wrangler": "^4.61.1"
 	},
 	"exports": {
 		".": "./dist/index.d.ts"

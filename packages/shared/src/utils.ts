@@ -7,15 +7,6 @@ export function hasCode(obj: unknown): obj is { code: string } {
 	);
 }
 
-export function hasStatusCode(obj: unknown): obj is { statusCode: number } {
-	return (
-		typeof obj === "object" &&
-		obj !== null &&
-		"statusCode" in obj &&
-		typeof obj.statusCode === "number"
-	);
-}
-
 export function hasMessage(obj: unknown): obj is { message: string } {
 	return (
 		typeof obj === "object" &&

@@ -1,5 +1,5 @@
 ---
-paths: ["packages/web/**/*.{ts,tsx}"]
+paths: "packages/web/**/*.{ts,tsx}"
 ---
 
 ## フロントエンド コーディング規約

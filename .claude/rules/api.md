@@ -1,5 +1,5 @@
 ---
-paths: ["packages/api/**/*.ts"]
+paths: "packages/api/**/*.ts"
 ---
 
 ## API コーディング規約
