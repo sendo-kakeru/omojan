@@ -1,8 +1,8 @@
-import type { HttpResponseBody } from "@repo/shared/types";
 import type { ValidationTargets } from "hono";
 import { validator } from "hono/validator";
 import type { GenericSchema, GenericSchemaAsync } from "valibot";
 import { safeParseAsync } from "valibot";
+import type { HttpResponseBody } from "../types";
 
 export const vValidator = <
 	Target extends keyof ValidationTargets,

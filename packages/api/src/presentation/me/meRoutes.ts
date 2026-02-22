@@ -5,11 +5,12 @@ import {
 	type UpdateMeResponseBody,
 	updateMeRequestBodySchema,
 } from "@repo/db/model";
+import { vValidator } from "@repo/shared/libs/vValidator";
+import type { HttpRespondReturn } from "@repo/shared/types";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { MeService } from "../../application/me/MeService";
-import { vValidator } from "../../libs/vValidator";
-import type { HttpRespondReturn, PrivateRouteContext } from "../../types";
+import type { PrivateRouteContext } from "../../types";
 
 export const routes = new Hono<
 	PrivateRouteContext & { Variables: { meService: MeService } }

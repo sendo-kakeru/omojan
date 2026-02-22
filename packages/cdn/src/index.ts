@@ -1,6 +1,6 @@
+import { honoErrorHandler } from "@repo/shared/libs/honoErrorHandler";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { HTTPException } from "hono/http-exception";
 import { imageRoutes } from "./images";
 
 const app = new Hono<{ Bindings: CloudflareBindings }>()
@@ -13,13 +13,7 @@ const app = new Hono<{ Bindings: CloudflareBindings }>()
 		});
 		return corsMiddleware(c, next);
 	})
-	.onError((error, c) => {
-		if (error instanceof HTTPException) {
-			return c.json({ error: error.message }, error.status);
-		}
-		console.error("予期しないエラー:", error);
-		return c.json({ error: "Internal Server Error" }, 500);
-	})
+	.onError(honoErrorHandler)
 	.route("/images", imageRoutes)
 	.get("/health", (c) => c.text("ok"));
 

@@ -1,11 +1,11 @@
+import { honoErrorHandler } from "@repo/shared/libs/honoErrorHandler";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { HTTPException } from "hono/http-exception";
 import { CleanupService } from "./application/cleanup/CleanupService";
 import type { Env } from "./env";
 import { createDrizzleClient } from "./libs/drizzle";
 import { routes } from "./presentation/routes";
-import type { BaseContext, HttpRespondReturn } from "./types";
+import type { BaseContext } from "./types";
 
 export { GameDurableObject } from "./application/game/GameDurableObject";
 export { MatchingDurableObject } from "./application/matching/MatchingDurableObject";
@@ -28,13 +28,7 @@ export const app = new Hono<BaseContext>()
 		});
 		return corsMiddleware(c, next);
 	})
-	.onError((error, c): HttpRespondReturn => {
-		console.error("Error:", error);
-		if (error instanceof HTTPException) {
-			return c.json({ data: null, message: error.message }, error.status);
-		}
-		return c.json({ data: null, message: "Internal Server Error" }, 500);
-	})
+	.onError(honoErrorHandler)
 	.route("", routes);
 
 export type Api = typeof routes;
