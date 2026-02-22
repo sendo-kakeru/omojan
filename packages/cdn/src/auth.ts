@@ -1,23 +1,27 @@
 import { CognitoService } from "@repo/shared/libs/cognito";
 import type { MiddlewareHandler } from "hono";
 import { HTTPException } from "hono/http-exception";
-import type { Env } from "./env";
+import type { PrivateContext } from "./types";
+
+/**
+ * CognitoService のインスタンスキャッシュ。
+ * リクエストごとの再生成を避け、内部の JWKS キャッシュを
+ * 同一 isolate 内で再利用する。
+ */
+let cognitoService: CognitoService | null = null;
 
 /**
  * 認証ミドルウェア
  * Cognito アクセストークンを検証し、認証されたユーザーのみアクセスを許可する。
  */
-export function authMiddleware(): MiddlewareHandler<{
-	Bindings: Env & { R2: R2Bucket };
-	Variables: { sub: string };
-}> {
+export function authMiddleware(): MiddlewareHandler<PrivateContext> {
 	return async (c, next) => {
 		try {
-			const cognito = new CognitoService({
+			cognitoService ??= new CognitoService({
 				clientId: c.env.COGNITO_CLIENT_ID,
 				userPoolId: c.env.COGNITO_USER_POOL_ID,
 			});
-			const token = cognito.extractToken({
+			const token = cognitoService.extractToken({
 				authorizationHeader: c.req.header("Authorization"),
 			});
 
@@ -27,7 +31,9 @@ export function authMiddleware(): MiddlewareHandler<{
 				});
 			}
 
-			const tokenPayload = await cognito.verifyAccessToken({ token });
+			const tokenPayload = await cognitoService.verifyAccessToken({
+				token,
+			});
 			c.set("sub", tokenPayload.sub);
 
 			await next();
