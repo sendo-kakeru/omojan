@@ -12,12 +12,23 @@ export function SigninModal({
 	setIsOpen: Dispatch<SetStateAction<boolean>>;
 }) {
 	return (
-		<Dialog onOpenChange={setIsOpen} open={isOpen}>
-			<div className="grid place-items-center gap-y-16">
-				<p>ログインしてOmojanをもっと楽しみましょう！</p>
-				<LineSigninButton onClick={() => cognito.signInWithLine()}>
-					LINEでログイン
-				</LineSigninButton>
+		<Dialog
+			onOpenAutoFocus={(e) => e.preventDefault()}
+			onOpenChange={setIsOpen}
+			open={isOpen}
+		>
+			<div className="grid place-items-center gap-y-32 mt-16">
+				<div className="grid place-items-center gap-y-12">
+					<p className="text-center font-semibold">
+						ログインしてもっと楽しみましょう！
+					</p>
+					<LineSigninButton
+						className="w-fit"
+						onClick={() => cognito.signInWithLine()}
+					>
+						LINEでログイン
+					</LineSigninButton>
+				</div>
 				<p className="text-center text-neutral-500 text-xs">
 					ログインすることで
 					<Link className="text-blue-600 underline" to="/terms">
