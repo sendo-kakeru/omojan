@@ -9,6 +9,7 @@ import { Footer } from "~/components/Footer";
 import { Header } from "~/components/Header";
 import { Spinner } from "~/components/Spinner";
 import { useMe } from "~/context/me/hooks";
+import { buildImageUrl, PROFILE_IMAGE_DIMENSIONS } from "~/libs/image";
 import type { Route } from "./+types/route";
 
 export async function loader({
@@ -82,7 +83,10 @@ function UserProfile({ user }: { user: PublicUser }) {
 					<img
 						alt={user.name}
 						className="size-96 rounded-full object-cover"
-						src={user.image}
+						src={buildImageUrl({
+							image: user.image,
+							size: PROFILE_IMAGE_DIMENSIONS,
+						})}
 					/>
 				) : (
 					<FaUser className="size-96 rounded-full bg-gray-300 p-16 text-gray-500" />

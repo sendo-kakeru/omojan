@@ -4,6 +4,7 @@ import { LuLogIn } from "react-icons/lu";
 import { Link } from "react-router";
 import { useMe } from "~/context/me/hooks";
 import { cognito } from "~/libs/cognito";
+import { AVATAR_IMAGE_DIMENSIONS, buildImageUrl } from "~/libs/image";
 import { Avatar } from "../Avatar";
 import { Button } from "../button/Button";
 import {
@@ -45,7 +46,10 @@ export function UserMenuButton({ me }: { me: Me }) {
 					className="transition-opacity hover:opacity-80"
 					name={me.name}
 					size="M"
-					src={me.image ?? undefined}
+					src={buildImageUrl({
+						image: me.image,
+						size: AVATAR_IMAGE_DIMENSIONS.M,
+					})}
 				/>
 			}
 		>

@@ -13,14 +13,16 @@
 			],
 			"vars": {
 				"MAINTENANCE_MODE": "false",
-				"VITE_API_URL": "https://api.omojan.com"
+				"VITE_API_URL": "https://api.omojan.com",
+				"VITE_CDN_URL": "https://cdn.omojan.com"
 			}
 		},
 		"staging": {
 			"routes": [{ "custom_domain": true, "pattern": "stg.omojan.com" }],
 			"vars": {
 				"MAINTENANCE_MODE": "false",
-				"VITE_API_URL": "https://api-stg.omojan.com"
+				"VITE_API_URL": "https://api-stg.omojan.com",
+				"VITE_CDN_URL": "https://cdn-stg.omojan.com"
 			}
 		}
 	},
@@ -31,6 +33,7 @@
 	},
 	"vars": {
 		"MAINTENANCE_MODE": "false",
-		"VITE_API_URL": "http://localhost:8787"
+		"VITE_API_URL": "http://localhost:8787",
+		"VITE_CDN_URL": "http://localhost:8788"
 	}
 }

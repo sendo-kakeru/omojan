@@ -10,6 +10,7 @@ import { XFollowButton } from "~/components/button/XFollowButton";
 import { Footer } from "~/components/Footer";
 import { Header } from "~/components/Header";
 import { useMe } from "~/context/me/hooks";
+import { AVATAR_IMAGE_DIMENSIONS, buildImageUrl } from "~/libs/image";
 
 export type GameFinalResultProps = {
 	result: GameResultResponseBody;
@@ -40,7 +41,10 @@ export function GameFinalResult({
 											<Avatar
 												name={winner.playerName}
 												size="L"
-												src={winner.image ?? undefined}
+												src={buildImageUrl({
+													image: winner.image,
+													size: AVATAR_IMAGE_DIMENSIONS.L,
+												})}
 											/>
 											{me && winner.userId === me.userId && (
 												<Badge
@@ -119,7 +123,10 @@ export function GameFinalResult({
 													<Avatar
 														name={player.playerName}
 														size="S"
-														src={player.image ?? undefined}
+														src={buildImageUrl({
+															image: player.image,
+															size: AVATAR_IMAGE_DIMENSIONS.S,
+														})}
 													/>
 													<p className="flex-1 text-xs md:flex-none">
 														{player.playerName}
