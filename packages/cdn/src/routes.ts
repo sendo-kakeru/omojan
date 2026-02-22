@@ -4,7 +4,7 @@ import type { HttpRespondReturn } from "@repo/shared/types";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { authMiddleware } from "./auth";
-import { getCached, normalizeCacheKey, setCached } from "./cache";
+import { getCached, normalizeCacheKey, purgeCached, setCached } from "./cache";
 import type { Env } from "./env";
 import { validateKey } from "./key";
 import { detectMime } from "./mime";
@@ -87,6 +87,16 @@ const privateRoutes = new Hono<PrivateContext>()
 		});
 
 		return c.json({ data: { key }, message: "Created" }, 201);
+	})
+	.delete("/*", async (c): Promise<HttpRespondReturn> => {
+		const key = c.req.path.replace(/^\/images\//, "");
+		validateKey(key);
+
+		await c.env.R2.delete(key);
+
+		c.executionCtx.waitUntil(purgeCached(new URL(c.req.url)));
+
+		return c.json({ data: null, message: "Deleted" }, 200);
 	});
 
 export const imageRoutes = new Hono<BaseContext>()
