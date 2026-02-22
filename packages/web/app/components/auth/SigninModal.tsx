@@ -17,7 +17,7 @@ export function SigninModal({
 			onOpenChange={setIsOpen}
 			open={isOpen}
 		>
-			<div className="grid place-items-center gap-y-32 mt-16">
+			<div className="mt-16 grid place-items-center gap-y-32">
 				<div className="grid place-items-center gap-y-12">
 					<p className="text-center font-semibold">
 						ログインしてもっと楽しみましょう！
