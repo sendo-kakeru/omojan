@@ -1,3 +1,8 @@
+import {
+	ALLOWED_IMAGE_MIME_TYPES,
+	MAX_IMAGE_FILE_SIZE,
+} from "@repo/shared/constants/image";
+
 /**
  * Avatar サイズ → Retina 2x リサイズパラメータ
  * Tailwind --spacing: 1px 基準: S=24px, M=32px, L=40px → 各2倍
@@ -9,10 +14,10 @@ export const AVATAR_IMAGE_DIMENSIONS: Record<
 	L: { h: 80, w: 80 },
 	M: { h: 64, w: 64 },
 	S: { h: 48, w: 48 },
-};
+} as const;
 
 /** プロフィールページ用リサイズパラメータ (96px × Retina 2x) */
-export const PROFILE_IMAGE_DIMENSIONS = { h: 192, w: 192 };
+export const PROFILE_IMAGE_DIMENSIONS = { h: 192, w: 192 } as const;
 
 /**
  * 画像キーまたは外部 URL から表示用 URL を構築する。
@@ -38,8 +43,20 @@ export function buildImageUrl({
 	const base = `${import.meta.env.VITE_CDN_URL}/images/${image}`;
 	if (!size) return base;
 
-	const params = new URLSearchParams();
-	params.set("w", String(size.w));
-	params.set("h", String(size.h));
-	return `${base}?${params.toString()}`;
+	return `${base}?w=${size.w}&h=${size.h}`;
+}
+
+/** クライアント側の画像ファイルバリデーション */
+export function validateImageFile(file: File): string | null {
+	if (
+		!ALLOWED_IMAGE_MIME_TYPES.includes(
+			file.type as (typeof ALLOWED_IMAGE_MIME_TYPES)[number],
+		)
+	) {
+		return "対応していない画像フォーマットです（JPEG/PNG/GIF/WebP/AVIF のみ）";
+	}
+	if (file.size > MAX_IMAGE_FILE_SIZE) {
+		return "ファイルサイズが10MBを超えています";
+	}
+	return null;
 }
