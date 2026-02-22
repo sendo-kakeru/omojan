@@ -4,21 +4,23 @@ import type { HttpRespondReturn } from "@repo/shared/types";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { authMiddleware } from "./auth";
-import { getCached, normalizeCacheKey, purgeCached, setCached } from "./cache";
-import type { Env } from "./env";
+import { getCached, normalizeCacheKey, setCached } from "./cache";
 import { validateKey } from "./key";
 import { detectMime } from "./mime";
 import { proxyToOrigin } from "./originProxy";
 import { imageDeliveryQuerySchema } from "./schemas";
+import type { BaseContext, PrivateContext } from "./types";
 
-type BaseContext = { Bindings: Env & { R2: R2Bucket } };
-type PrivateContext = BaseContext & { Variables: { sub: string } };
+/** リクエストパスから画像キーを抽出する。 */
+function extractImageKey(path: string): string {
+	return path.replace(/^\/images\//, "");
+}
 
 const publicRoutes = new Hono<BaseContext>().get(
 	"/*",
 	vValidator("query", imageDeliveryQuerySchema),
 	async (c): Promise<Response> => {
-		const key = c.req.path.replace(/^\/images\//, "");
+		const key = extractImageKey(c.req.path);
 		validateKey(key);
 
 		const query = c.req.valid("query");
@@ -52,7 +54,7 @@ const publicRoutes = new Hono<BaseContext>().get(
 const privateRoutes = new Hono<PrivateContext>()
 	.use(authMiddleware())
 	.put("/*", async (c): Promise<HttpRespondReturn<{ key: string }>> => {
-		const key = c.req.path.replace(/^\/images\//, "");
+		const key = extractImageKey(c.req.path);
 		validateKey(key);
 
 		const contentLength = Number(c.req.header("content-length") ?? 0);
@@ -89,12 +91,10 @@ const privateRoutes = new Hono<PrivateContext>()
 		return c.json({ data: { key }, message: "Created" }, 201);
 	})
 	.delete("/*", async (c): Promise<HttpRespondReturn> => {
-		const key = c.req.path.replace(/^\/images\//, "");
+		const key = extractImageKey(c.req.path);
 		validateKey(key);
 
 		await c.env.R2.delete(key);
-
-		c.executionCtx.waitUntil(purgeCached(new URL(c.req.url)));
 
 		return c.json({ data: null, message: "Deleted" }, 200);
 	});

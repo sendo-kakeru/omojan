@@ -33,10 +33,10 @@ export class CognitoService {
 	}: {
 		authorizationHeader?: string;
 	}): string | undefined {
-		if (!authorizationHeader || !authorizationHeader.startsWith("Bearer")) {
+		if (!authorizationHeader?.startsWith("Bearer ")) {
 			return;
 		}
-		return authorizationHeader.split("Bearer")[1]?.trim();
+		return authorizationHeader.slice("Bearer ".length).trim();
 	}
 }
 

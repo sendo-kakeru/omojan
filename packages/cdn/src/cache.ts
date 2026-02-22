@@ -18,16 +18,6 @@ export async function getCached(
 	return defaultCache.match(cacheKey);
 }
 
-/**
- * 指定キーに対応するキャッシュエントリを削除する。
- * クエリパラメータなしのベースURLを対象にパージする。
- */
-export async function purgeCached(url: URL): Promise<void> {
-	const base = new URL(url);
-	base.search = "";
-	await defaultCache.delete(new Request(base.toString()));
-}
-
 /** レスポンスを Cache API に格納する。 */
 export async function setCached({
 	cacheKey,
