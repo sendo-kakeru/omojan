@@ -1,8 +1,12 @@
 import type { GameId } from "@repo/db/schema";
 import { Spinner } from "~/components/Spinner";
+import { buildNoindexMeta } from "~/libs/meta";
 import { GameFinalResult } from "~/routes/game/$gameId/_index/components/GameFinalResult";
 import type { Route } from "./+types/route";
 import { useGameResultSWR } from "./hooks/useGameResultSWR";
+
+export const meta: Route.MetaFunction = ({ matches }) =>
+	buildNoindexMeta(matches.flatMap((m) => m?.meta ?? []));
 
 export default function Page({ params: { gameId } }: Route.ComponentProps) {
 	const { data, error, isLoading } = useGameResultSWR(gameId as GameId);

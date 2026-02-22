@@ -1,7 +1,11 @@
 import { Spinner } from "~/components/Spinner";
 import { honoClient } from "~/libs/apiClient.client";
 import { cognito } from "~/libs/cognito";
+import { buildNoindexMeta } from "~/libs/meta";
 import type { Route } from "./+types/route";
+
+export const meta: Route.MetaFunction = ({ matches }) =>
+	buildNoindexMeta(matches.flatMap((m) => m?.meta ?? []));
 
 // TODO: UI
 export async function clientLoader({ request }: Route.LoaderArgs) {

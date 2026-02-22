@@ -22,7 +22,11 @@ import { useImageUpload } from "~/hooks/useImageUpload";
 import { useIsLoading } from "~/hooks/useIsLoading";
 import { honoClient } from "~/libs/apiClient.client";
 import { buildImageUrl, PROFILE_IMAGE_DIMENSIONS } from "~/libs/image";
+import { buildNoindexMeta } from "~/libs/meta";
 import type { Route } from "./+types/route";
+
+export const meta: Route.MetaFunction = ({ matches }) =>
+	buildNoindexMeta(matches.flatMap((m) => m?.meta ?? []));
 
 export default function UserEditPage({
 	params: { userId },

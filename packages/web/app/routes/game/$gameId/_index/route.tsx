@@ -2,10 +2,14 @@ import { LOCALSTORAGE_OPERATION_FAILED_MESSAGE } from "@repo/shared/error";
 import { useNavigate } from "react-router";
 import { Spinner } from "~/components/Spinner";
 import { gameTokenLocalStorage } from "~/libs/gameTokenLocalStorage";
+import { buildNoindexMeta } from "~/libs/meta";
 import type { Route } from "./+types/route";
 import { GameError } from "./components/GameError";
 import { GamePresenter } from "./components/GamePresenter";
 import { useGameSubscriptionSWR } from "./hooks/useGameSubscriptionSWR";
+
+export const meta: Route.MetaFunction = ({ matches }) =>
+	buildNoindexMeta(matches.flatMap((m) => m?.meta ?? []));
 
 export default function Page({ params: { gameId } }: Route.ComponentProps) {
 	const navigate = useNavigate();
