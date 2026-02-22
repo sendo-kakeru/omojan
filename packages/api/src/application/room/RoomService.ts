@@ -18,6 +18,7 @@ import {
 	isPlayerSeat,
 	type PlayerId,
 	type PlayerSeat,
+	playerNameExpression,
 	playerTable,
 	roundTable,
 	submissionTable,
@@ -252,7 +253,7 @@ export class RoomService {
 				gameId: playerTable.gameId,
 				id: playerTable.id,
 				image: userTable.image,
-				playerName: playerTable.playerName,
+				playerName: playerNameExpression,
 				seat: playerTable.seat,
 			})
 			.from(playerTable)

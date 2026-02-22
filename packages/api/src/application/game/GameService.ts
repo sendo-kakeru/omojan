@@ -12,6 +12,7 @@ import {
 	type PlayerId,
 	type PlayerSeat,
 	playerCardTable,
+	playerNameExpression,
 	playerTable,
 	type RoundId,
 	type RoundNo,
@@ -81,7 +82,7 @@ export class GameService {
 					id: playerTable.id,
 					image: userTable.image,
 					isCpu: playerTable.isCpu,
-					playerName: playerTable.playerName,
+					playerName: playerNameExpression,
 					seat: playerTable.seat,
 				})
 				.from(playerTable)
@@ -565,7 +566,7 @@ export class GameService {
 			.select({
 				id: playerTable.id,
 				image: userTable.image,
-				playerName: playerTable.playerName,
+				playerName: playerNameExpression,
 				seat: playerTable.seat,
 				userId: playerTable.userId,
 			})
@@ -739,7 +740,7 @@ export class GameService {
 				id: playerTable.id,
 				image: userTable.image,
 				isCpu: playerTable.isCpu,
-				playerName: playerTable.playerName,
+				playerName: playerNameExpression,
 				seat: playerTable.seat,
 			})
 			.from(playerTable)
