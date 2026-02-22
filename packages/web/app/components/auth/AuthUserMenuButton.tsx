@@ -1,10 +1,9 @@
 import type { Me } from "@repo/db/model";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { LuLogIn } from "react-icons/lu";
 import { Link } from "react-router";
 import { useMe } from "~/context/me/hooks";
 import { cognito } from "~/libs/cognito";
-import { isAppBrowser } from "~/libs/isAppBrowser";
 import { Avatar } from "../Avatar";
 import { Button } from "../button/Button";
 import {
@@ -50,12 +49,8 @@ export function UserMenuButton({ me }: { me: Me }) {
 				/>
 			}
 		>
-			{/* TODO: メニュー内容の実装 */}
 			<DropdownMenuItem asChild>
-				<Link to="/">プロフィール</Link>
-			</DropdownMenuItem>
-			<DropdownMenuItem asChild>
-				<Link to="/">アカウント設定</Link>
+				<Link to={`/users/${me.userId}`}>プロフィール</Link>
 			</DropdownMenuItem>
 			<DropdownMenuSeparator />
 			<DropdownMenuItem asChild>
@@ -72,11 +67,6 @@ export function UserMenuButton({ me }: { me: Me }) {
  */
 function SigninButton() {
 	const [isOpen, setIsOpen] = useState(false);
-	const [isInAppBrowser, setIsInAppBrowser] = useState(false);
-
-	useEffect(() => {
-		setIsInAppBrowser(isAppBrowser());
-	}, []);
 
 	return (
 		<>
@@ -90,11 +80,7 @@ function SigninButton() {
 			>
 				<LuLogIn aria-hidden="true" />
 			</Button>
-			<SigninModal
-				isAppBrowser={isInAppBrowser}
-				isOpen={isOpen}
-				setIsOpen={setIsOpen}
-			/>
+			<SigninModal isOpen={isOpen} setIsOpen={setIsOpen} />
 		</>
 	);
 }

@@ -432,13 +432,16 @@ export class GameService {
 			.from(voteTable)
 			.where(eq(voteTable.roundId, round.id));
 
-		return this.calculateWinnersAndVoteCountsFromVotes({ submissions, votes });
+		return GameService.calculateWinnersAndVoteCountsFromVotes({
+			submissions,
+			votes,
+		});
 	}
 
 	/**
 	 * 投票結果から勝者と得票数を計算する
 	 */
-	calculateWinnersAndVoteCountsFromVotes({
+	static calculateWinnersAndVoteCountsFromVotes({
 		submissions,
 		votes,
 	}: {
@@ -631,10 +634,11 @@ export class GameService {
 				(submission) => submission.roundId === round.id,
 			);
 			const roundVotes = votes.filter((vote) => vote.roundId === round.id);
-			const { winnerPlayerIds } = this.calculateWinnersAndVoteCountsFromVotes({
-				submissions: roundSubmissions,
-				votes: roundVotes,
-			});
+			const { winnerPlayerIds } =
+				GameService.calculateWinnersAndVoteCountsFromVotes({
+					submissions: roundSubmissions,
+					votes: roundVotes,
+				});
 			roundWinnersByRoundId.set(round.id, winnerPlayerIds);
 			for (const playerId of winnerPlayerIds) {
 				const currentCount = winCountByPlayer.get(playerId) ?? 0;

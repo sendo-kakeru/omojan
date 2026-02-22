@@ -13,10 +13,12 @@ import { routes as gameRoutes } from "./game/gameRoutes";
 import { routes as matchingRoutes } from "./matching/matchingRoutes";
 import { routes as meRoutes } from "./me/meRoutes";
 import { routes as roomRoutes } from "./room/roomRoutes";
+import { routes as userRoutes } from "./user/userRoutes";
 
 const publicRoutes = new Hono<BaseContext>()
 	.route("/v1/games", gameRoutes)
-	.route("/v1/matchings", matchingRoutes);
+	.route("/v1/matchings", matchingRoutes)
+	.route("/v1/users", userRoutes);
 
 const hybridRoutes = new Hono<HybridRouteContext>()
 	.use(hybridAuthMiddleware())

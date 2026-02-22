@@ -67,7 +67,7 @@ export const maintenanceHtml = () => `<!DOCTYPE html>
 </head>
 <body>
   <div class="container">
-    <img src="/logo.png" alt="omojan" class="logo">
+    <img src="/icons/omojan.webp" alt="omojan" class="logo">
     <h1>メンテナンス中</h1>
     <div class="message">
       <p>現在メンテナンスを行っています。</p>

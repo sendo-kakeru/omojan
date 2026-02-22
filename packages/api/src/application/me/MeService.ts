@@ -3,6 +3,8 @@ import type {
 	CreateMeResponseBody,
 	GetMeResponseBody,
 	Me,
+	UpdateMeRequestBody,
+	UpdateMeResponseBody,
 } from "@repo/db/model";
 import { type User, type UserId, userTable } from "@repo/db/schema";
 import { isUniqueConstraintError } from "@repo/shared/error";
@@ -55,6 +57,31 @@ export class MeService {
 			}
 			throw error;
 		}
+	}
+
+	async update(
+		dto: UpdateMeRequestBody & Pick<User, "sub">,
+	): Promise<UpdateMeResponseBody> {
+		const { sub, ...setValues } = dto;
+
+		const [updatedUser] = await this.db
+			.update(userTable)
+			.set(setValues)
+			.where(eq(userTable.sub, sub))
+			.returning({
+				email: userTable.email,
+				id: userTable.id,
+				image: userTable.image,
+				name: userTable.name,
+			});
+
+		if (!updatedUser) {
+			throw new HTTPException(404, {
+				message: "ユーザーが存在しません",
+			});
+		}
+
+		return this.convertUserToMe(updatedUser);
 	}
 
 	private convertUserToMe(

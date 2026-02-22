@@ -89,6 +89,7 @@ export function CreateRoomDialog({
 							const id = `${formId}_title`;
 							return (
 								<FieldItem
+									className="md:grid-cols-[160px_minmax(0,1fr)]"
 									errorMessage={
 										!field.state.meta.isValid &&
 										field.state.meta.errors[0]?.message
@@ -114,6 +115,7 @@ export function CreateRoomDialog({
 								const id = `${formId}_playerName`;
 								return (
 									<FieldItem
+										className="md:grid-cols-[160px_minmax(0,1fr)]"
 										errorMessage={
 											!field.state.meta.isValid &&
 											field.state.meta.errors[0]?.message
@@ -140,6 +142,7 @@ export function CreateRoomDialog({
 							const id = `${formId}_timeLimit`;
 							return (
 								<FieldItem
+									className="md:grid-cols-[160px_minmax(0,1fr)]"
 									errorMessage={
 										!field.state.meta.isValid &&
 										field.state.meta.errors[0]?.message
@@ -184,6 +187,7 @@ export function CreateRoomDialog({
 							const id = `${formId}_isPrivate`;
 							return (
 								<FieldItem
+									className="md:grid-cols-[160px_minmax(0,1fr)]"
 									errorMessage={
 										!field.state.meta.isValid &&
 										field.state.meta.errors[0]?.message

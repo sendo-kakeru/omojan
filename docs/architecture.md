@@ -8,7 +8,7 @@
   - Test:
     - E2E: Turso `omojan-main-e2e`
     - Unit: `local.db`ローカルファイル
-- 認証: AWS Cognito(Google OAuth)
+- 認証: AWS Cognito(LINE Login / OIDC)
 - オブジェクトストレージ: Cloudflare R2
 
 ```mermaid

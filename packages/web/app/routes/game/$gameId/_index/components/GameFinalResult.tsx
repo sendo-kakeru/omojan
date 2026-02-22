@@ -2,10 +2,12 @@ import type { GameResultResponseBody } from "@repo/db/model";
 import { OFFICIAL_X_ID } from "@repo/shared/constants/config";
 import classNames from "classnames";
 import { FaCrown } from "react-icons/fa";
+import { Link } from "react-router";
 import { Avatar } from "~/components/Avatar";
 import { Badge } from "~/components/Badge";
 import { Button } from "~/components/button/Button";
 import { XFollowButton } from "~/components/button/XFollowButton";
+import { Footer } from "~/components/Footer";
 import { Header } from "~/components/Header";
 import { useMe } from "~/context/me/hooks";
 
@@ -31,29 +33,46 @@ export function GameFinalResult({
 							<FaCrown className="size-20 text-yellow-500" />
 						</div>
 						<div className="flex flex-wrap justify-center gap-16">
-							{winners.map((winner) => (
-								<div className="grid place-items-center" key={winner.id}>
-									<div className="relative">
-										<Avatar
-											name={winner.playerName}
-											size="L"
-											src={winner.image ?? undefined}
-										/>
-										{me && winner.userId === me.userId && (
-											<Badge
-												className="absolute -bottom-2/5 left-1/2 -translate-x-1/2"
-												color="primary"
-											>
-												自分
-											</Badge>
-										)}
+							{winners.map((winner) => {
+								const winnerContent = (
+									<>
+										<div className="relative">
+											<Avatar
+												name={winner.playerName}
+												size="L"
+												src={winner.image ?? undefined}
+											/>
+											{me && winner.userId === me.userId && (
+												<Badge
+													className="absolute -bottom-2/5 left-1/2 -translate-x-1/2"
+													color="primary"
+												>
+													自分
+												</Badge>
+											)}
+										</div>
+										<p className="mt-20 font-bold text-sm">
+											{winner.playerName}
+										</p>
+										<p className="font-medium text-sm text-yellow-600">
+											{winner.winCount}勝
+										</p>
+									</>
+								);
+								return winner.userId ? (
+									<Link
+										className="grid place-items-center"
+										key={winner.id}
+										to={`/users/${winner.userId}`}
+									>
+										{winnerContent}
+									</Link>
+								) : (
+									<div className="grid place-items-center" key={winner.id}>
+										{winnerContent}
 									</div>
-									<p className="mt-20 font-bold text-sm">{winner.playerName}</p>
-									<p className="font-medium text-sm text-yellow-600">
-										{winner.winCount}勝
-									</p>
-								</div>
-							))}
+								);
+							})}
 						</div>
 					</section>
 				</div>
@@ -95,6 +114,21 @@ export function GameFinalResult({
 									{/* Round Content */}
 									<div className="grid gap-y-8 p-16">
 										{round.players.map((player) => {
+											const playerInfo = (
+												<>
+													<Avatar
+														name={player.playerName}
+														size="S"
+														src={player.image ?? undefined}
+													/>
+													<p className="flex-1 text-xs md:flex-none">
+														{player.playerName}
+														{me && player.userId === me.userId && (
+															<span className="text-neutral-400">（自分）</span>
+														)}
+													</p>
+												</>
+											);
 											return (
 												<div
 													className={classNames(
@@ -106,19 +140,16 @@ export function GameFinalResult({
 													key={player.id}
 												>
 													<div className="flex items-center gap-x-4 md:gap-x-8">
-														<Avatar
-															name={player.playerName}
-															size="S"
-															src={player.image ?? undefined}
-														/>
-														<p className="flex-1 text-xs md:flex-none">
-															{player.playerName}
-															{me && player.userId === me.userId && (
-																<span className="text-neutral-400">
-																	（自分）
-																</span>
-															)}
-														</p>
+														{player.userId ? (
+															<Link
+																className="flex items-center gap-x-4 md:gap-x-8"
+																to={`/users/${player.userId}`}
+															>
+																{playerInfo}
+															</Link>
+														) : (
+															playerInfo
+														)}
 														{player.isWinner && (
 															<FaCrown className="size-16 text-yellow-500 md:hidden" />
 														)}
@@ -158,6 +189,7 @@ export function GameFinalResult({
 					</Button>
 				</section>
 			</main>
+			<Footer />
 		</>
 	);
 }

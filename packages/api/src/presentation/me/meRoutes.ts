@@ -2,12 +2,15 @@ import {
 	type CreateMeResponseBody,
 	createMeRequestBodySchema,
 	type GetMeResponseBody,
+	type UpdateMeResponseBody,
+	updateMeRequestBodySchema,
 } from "@repo/db/model";
+import { vValidator } from "@repo/shared/libs/vValidator";
+import type { HttpRespondReturn } from "@repo/shared/types";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { MeService } from "../../application/me/MeService";
-import { vValidator } from "../../libs/vValidator";
-import type { HttpRespondReturn, PrivateRouteContext } from "../../types";
+import type { PrivateRouteContext } from "../../types";
 
 export const routes = new Hono<
 	PrivateRouteContext & { Variables: { meService: MeService } }
@@ -52,9 +55,7 @@ export const routes = new Hono<
 		vValidator("json", createMeRequestBodySchema),
 		async (c): Promise<HttpRespondReturn<CreateMeResponseBody>> => {
 			const body = c.req.valid("json");
-			const { db, sub } = c.var;
-
-			const meService = new MeService(db);
+			const { meService, sub } = c.var;
 
 			try {
 				const createdMe = await meService.register({
@@ -68,6 +69,29 @@ export const routes = new Hono<
 
 				throw new HTTPException(500, {
 					message: "Meの作成に失敗しました",
+				});
+			}
+		},
+	)
+	.patch(
+		"/",
+		vValidator("json", updateMeRequestBodySchema),
+		async (c): Promise<HttpRespondReturn<UpdateMeResponseBody>> => {
+			const body = c.req.valid("json");
+			const { meService, sub } = c.var;
+
+			try {
+				const updatedMe = await meService.update({
+					...body,
+					sub,
+				});
+				return c.json({ data: updatedMe, message: "OK" }, 200);
+			} catch (error) {
+				console.error("Meの更新に失敗しました:", error);
+				if (error instanceof HTTPException) throw error;
+
+				throw new HTTPException(500, {
+					message: "Meの更新に失敗しました",
 				});
 			}
 		},

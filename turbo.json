@@ -35,5 +35,6 @@
 		"test:run": {},
 		"typecheck": {},
 		"up": {}
-	}
+	},
+	"ui": "stream"
 }

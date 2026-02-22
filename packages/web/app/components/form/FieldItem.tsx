@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import type { PropsWithChildren } from "react";
 import { FaCircleExclamation } from "react-icons/fa6";
 import { Label } from "./Label";
@@ -11,6 +12,7 @@ export function FieldItem({
 	errorMessage,
 	note,
 	supportText,
+	className,
 }: PropsWithChildren<{
 	/** ラベル用htmlFor */
 	htmlFor?: string;
@@ -32,9 +34,15 @@ export function FieldItem({
 
 	/** サポートテキスト */
 	supportText?: React.ReactNode;
+	className?: string;
 }>) {
 	return (
-		<div className="grid grid-cols-1 items-start gap-x-8 gap-y-4 md:grid-cols-[160px_minmax(0,1fr)]">
+		<div
+			className={classNames(
+				"grid grid-cols-1 items-center gap-x-8 gap-y-4",
+				className,
+			)}
+		>
 			<div className="grid gap-y-8">
 				<div className="inline-flex cursor-pointer items-center gap-x-4">
 					<Label className="font-bold text-sm md:text-base" htmlFor={htmlFor}>

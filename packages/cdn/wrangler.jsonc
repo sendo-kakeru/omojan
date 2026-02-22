@@ -1,6 +1,11 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"compatibility_date": "2026-02-21",
+	"compatibility_flags": ["nodejs_compat"],
+	"dev": {
+		"inspector_port": 9230,
+		"port": 8788
+	},
 	"env": {
 		"production": {
 			"r2_buckets": [
@@ -16,6 +21,7 @@
 				}
 			],
 			"vars": {
+				"ORIGIN_URL": "https://image-processor-prod-xxx.run.app",
 				"WEB_URL": "https://omojan.com"
 			}
 		},
@@ -33,6 +39,7 @@
 				}
 			],
 			"vars": {
+				"ORIGIN_URL": "https://image-processor-stg-xxx.run.app",
 				"WEB_URL": "https://stg.omojan.com"
 			}
 		}

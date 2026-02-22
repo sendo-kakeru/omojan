@@ -1,3 +1,4 @@
+import { Spinner } from "~/components/Spinner";
 import { honoClient } from "~/libs/apiClient.client";
 import { cognito } from "~/libs/cognito";
 import type { Route } from "./+types/route";
@@ -7,13 +8,13 @@ export async function clientLoader({ request }: Route.LoaderArgs) {
 	const url = new URL(request.url);
 	const code = url.searchParams.get("code");
 	const state = url.searchParams.get("state");
-	const error = url.searchParams.get("error");
+	const oauthError = url.searchParams.get("error");
 	try {
-		if (error) {
-			throw new Error(`OAuth error: ${error}`);
+		if (oauthError) {
+			throw new Error(`OAuth error: ${oauthError}`);
 		}
 
-		const tokens = await cognito.handleOAuthCallback({
+		const { payload } = await cognito.handleOAuthCallback({
 			code,
 			state,
 		});
@@ -26,16 +27,11 @@ export async function clientLoader({ request }: Route.LoaderArgs) {
 			return;
 		}
 
-		const payload = await cognito.decodeIdToken(tokens.idToken);
-		if (!payload) {
-			throw new Error("IDトークンのデコード結果がありません");
-		}
-
 		const createMeResponse = await honoClient.v1.me.$post({
 			json: {
 				email: payload.email,
 				image: payload.picture,
-				name: payload.name,
+				name: payload.name ?? payload.email.split("@")[0] ?? payload.email,
 			},
 		});
 		const createdMeResult = await createMeResponse.json();
@@ -52,18 +48,28 @@ export async function clientLoader({ request }: Route.LoaderArgs) {
 	}
 }
 
-export function HydrateFallback() {
+function AuthenticatingView() {
 	return (
-		<div className="flex min-h-screen items-center justify-center">
-			<p>認証中...</p>
+		<div className="flex min-h-svh flex-col items-center justify-center gap-y-24">
+			<img
+				alt="おもじゃんオンライン"
+				className="size-80 animate-bounce"
+				src="/icons/omojan.webp"
+			/>
+			<div className="flex items-center gap-x-8">
+				<Spinner className="size-20 text-gray-500" />
+				<p className="font-medium text-14 text-neutral-600">
+					ログインしています…
+				</p>
+			</div>
 		</div>
 	);
 }
 
-export default function () {
-	return (
-		<div className="flex min-h-screen items-center justify-center">
-			<p>認証中...</p>
-		</div>
-	);
+export function HydrateFallback() {
+	return <AuthenticatingView />;
+}
+
+export default function AuthCallbackPage() {
+	return <AuthenticatingView />;
 }

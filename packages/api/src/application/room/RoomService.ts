@@ -40,11 +40,8 @@ import { GameService } from "../game/GameService";
 
 export class RoomService {
 	private readonly encoder = new TextEncoder();
-	private readonly gameService: GameService;
 
-	constructor(private readonly db: DrizzleClient) {
-		this.gameService = new GameService(db);
-	}
+	constructor(private readonly db: DrizzleClient) {}
 
 	/**
 	 * ルームを単体取得する
@@ -328,7 +325,7 @@ export class RoomService {
 				const roundVotes = votes.filter((v) => v.roundId === round.id);
 
 				const { winnerPlayerIds } =
-					this.gameService.calculateWinnersAndVoteCountsFromVotes({
+					GameService.calculateWinnersAndVoteCountsFromVotes({
 						submissions: roundSubmissions,
 						votes: roundVotes,
 					});

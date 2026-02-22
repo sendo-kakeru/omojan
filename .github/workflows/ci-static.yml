@@ -7,7 +7,7 @@ on:
       - synchronize
 
 jobs:
-  ci:
+  typescript:
     runs-on: ubuntu-latest
     env:
       VITE_API_URL: http://temp.com
@@ -28,3 +28,33 @@ jobs:
 
       - name: Run CI
         run: pnpm biome ci && pnpm turbo run typecheck --concurrency=100%
+
+  rust:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/image-processor
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            packages/image-processor/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('packages/image-processor/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-
+
+      - name: Install nasm
+        run: sudo apt-get update && sudo apt-get install -y nasm
+
+      - name: Check formatting
+        run: cargo fmt -- --check
+
+      - name: Run clippy
+        run: cargo clippy -- -D warnings -W clippy::pedantic
+
+      - name: Build release
+        run: cargo build --release
