@@ -48,7 +48,7 @@
 				]
 			},
 			"routes": [{ "custom_domain": true, "pattern": "api.omojan.com" }],
-			"services": [{ "binding": "CDN_WORKER", "service": "cdn" }],
+			"services": [{ "binding": "CDN_WORKER", "service": "cdn-production" }],
 			// 2時間ごとにクリーンアップを実行
 			"triggers": {
 				"crons": ["0 */2 * * *"]
@@ -72,7 +72,7 @@
 				]
 			},
 			"routes": [{ "custom_domain": true, "pattern": "api-stg.omojan.com" }],
-			"services": [{ "binding": "CDN_WORKER", "service": "cdn" }],
+			"services": [{ "binding": "CDN_WORKER", "service": "cdn-staging" }],
 			"vars": {
 				"ENV": "staging",
 				"WEB_URL": "https://stg.omojan.com"
