@@ -1,6 +1,6 @@
+import { CognitoService } from "@repo/shared/libs/cognito";
 import type { MiddlewareHandler } from "hono";
 import { HTTPException } from "hono/http-exception";
-import { CognitoService } from "../application/CognitoService";
 import type { HybridRouteContext, PrivateRouteContext } from "../types";
 
 /**
@@ -11,7 +11,10 @@ import type { HybridRouteContext, PrivateRouteContext } from "../types";
 export function hybridAuthMiddleware(): MiddlewareHandler<HybridRouteContext> {
 	return async (c, next): Promise<void> => {
 		try {
-			const cognito = new CognitoService(c.env);
+			const cognito = new CognitoService({
+				clientId: c.env.COGNITO_CLIENT_ID,
+				userPoolId: c.env.COGNITO_USER_POOL_ID,
+			});
 			const token = cognito.extractToken({
 				authorizationHeader: c.req.header("Authorization"),
 			});
@@ -39,7 +42,10 @@ export function hybridAuthMiddleware(): MiddlewareHandler<HybridRouteContext> {
 export function privateAuthMiddleware(): MiddlewareHandler<PrivateRouteContext> {
 	return async (c, next): Promise<void> => {
 		try {
-			const cognito = new CognitoService(c.env);
+			const cognito = new CognitoService({
+				clientId: c.env.COGNITO_CLIENT_ID,
+				userPoolId: c.env.COGNITO_USER_POOL_ID,
+			});
 			const token = cognito.extractToken({
 				authorizationHeader: c.req.header("Authorization"),
 			});

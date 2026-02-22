@@ -2,6 +2,7 @@ import { MAX_IMAGE_FILE_SIZE } from "@repo/shared/constants/image";
 import { vValidator } from "@repo/shared/libs/vValidator";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
+import { authMiddleware } from "./auth";
 import { getCached, normalizeCacheKey, setCached } from "./cache";
 import type { Env } from "./env";
 import { validateKey } from "./key";
@@ -9,10 +10,13 @@ import { detectMime } from "./mime";
 import { proxyToOrigin } from "./originProxy";
 import { imageDeliveryQuerySchema } from "./schemas";
 
-export const imageRoutes = new Hono<{
-	Bindings: Env & { R2: R2Bucket };
-}>()
-	.get("/*", vValidator("query", imageDeliveryQuerySchema), async (c) => {
+type BaseContext = { Bindings: Env & { R2: R2Bucket } };
+type PrivateContext = BaseContext & { Variables: { sub: string } };
+
+const publicRoutes = new Hono<BaseContext>().get(
+	"/*",
+	vValidator("query", imageDeliveryQuerySchema),
+	async (c) => {
 		const key = c.req.path.replace(/^\/images\//, "");
 		validateKey(key);
 
@@ -41,7 +45,11 @@ export const imageRoutes = new Hono<{
 		);
 
 		return response;
-	})
+	},
+);
+
+const privateRoutes = new Hono<PrivateContext>()
+	.use(authMiddleware())
 	.put("/*", async (c) => {
 		const key = c.req.path.replace(/^\/images\//, "");
 		validateKey(key);
@@ -79,3 +87,7 @@ export const imageRoutes = new Hono<{
 
 		return c.json({ key }, 201);
 	});
+
+export const imageRoutes = new Hono<BaseContext>()
+	.route("", publicRoutes)
+	.route("", privateRoutes);

@@ -1,6 +1,7 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"compatibility_date": "2026-02-21",
+	"compatibility_flags": ["nodejs_compat"],
 	"dev": {
 		"inspector_port": 9230,
 		"port": 8788

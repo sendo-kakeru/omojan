@@ -106,6 +106,9 @@ importers:
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
+      '@types/node':
+        specifier: ^24.10.13
+        version: 24.10.13
       wrangler:
         specifier: ^4.4.0
         version: 4.67.0
@@ -202,6 +205,9 @@ importers:
 
   packages/shared:
     dependencies:
+      aws-jwt-verify:
+        specifier: ^5.1.1
+        version: 5.1.1
       drizzle-valibot:
         specifier: ^0.4.2
         version: 0.4.2(drizzle-orm@0.45.1(@libsql/client@0.17.0(encoding@0.1.13))(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.0)(@types/pg@8.15.6)(pg@8.16.3)(postgres@3.4.7))(valibot@1.2.0(typescript@5.9.3))

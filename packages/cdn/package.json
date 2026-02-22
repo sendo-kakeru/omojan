@@ -23,8 +23,9 @@
 		"valibot": "^1.2.0"
 	},
 	"devDependencies": {
-		"wrangler": "^4.4.0",
 		"@repo/tsup-config": "workspace:*",
-		"@repo/typescript-config": "workspace:*"
+		"@repo/typescript-config": "workspace:*",
+		"@types/node": "^24.10.13",
+		"wrangler": "^4.4.0"
 	}
 }

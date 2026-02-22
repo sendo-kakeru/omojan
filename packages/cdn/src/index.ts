@@ -7,7 +7,7 @@ import { imageRoutes } from "./routes";
 const app = new Hono<{ Bindings: Env & { R2: R2Bucket } }>()
 	.use((c, next) => {
 		const corsMiddleware = cors({
-			allowHeaders: ["Content-Type"],
+			allowHeaders: ["Authorization", "Content-Type"],
 			allowMethods: ["GET", "PUT", "DELETE", "HEAD", "OPTIONS"],
 			exposeHeaders: ["X-Cache"],
 			origin: c.env.WEB_URL,

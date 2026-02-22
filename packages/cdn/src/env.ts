@@ -10,6 +10,8 @@ export type GcpServiceAccountKey = InferOutput<
 >;
 
 export const envSchema = object({
+	COGNITO_CLIENT_ID: string(),
+	COGNITO_USER_POOL_ID: string(),
 	GCP_SERVICE_ACCOUNT_KEY: optional(string()),
 	ORIGIN_URL: pipe(string(), url()),
 	WEB_URL: pipe(string(), url()),
