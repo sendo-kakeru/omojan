@@ -429,8 +429,7 @@ sequenceDiagram
 2. ~~プロフィール編集ページを作成~~ → **実装済み**（`/users/:userId/edit`、自分のみアクセス可、名前のみ編集可能）
 3. プロフィール編集ページに画像アップロードUIを追加（CDN Worker へ PUT → 取得した URL で `PATCH /v1/me`）
 4. API Worker で画像更新時に旧画像を CDN Worker 経由で R2 から削除するロジックを追加
-5. `Avatar` コンポーネントを Image CDN URL に対応させる（`?w=200&h=200` 等のリサイズパラメータ付き）
-6. LINE OIDCの`picture`クレームからの初回画像取り込みフロー
+5. 画像URL構築ユーティリティを作成する（本CDNドメインの場合は `?w=200&h=200` 等のリサイズパラメータを付与、LINE等の外部URLはそのまま返す）
 
 ### Phase 5: CI/CD
 1. GitHub Actions ワークフロー追加（cdn, image-processor）
