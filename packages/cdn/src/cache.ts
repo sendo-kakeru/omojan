@@ -19,9 +19,12 @@ export async function getCached(
 }
 
 /** レスポンスを Cache API に格納する。 */
-export async function setCached(params: {
+export async function setCached({
+	cacheKey,
+	response,
+}: {
 	cacheKey: Request;
 	response: Response;
 }): Promise<void> {
-	await defaultCache.put(params.cacheKey, params.response.clone());
+	await defaultCache.put(cacheKey, response);
 }

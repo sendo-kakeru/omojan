@@ -1,5 +1,6 @@
 import { MAX_IMAGE_FILE_SIZE } from "@repo/shared/constants/image";
 import { vValidator } from "@repo/shared/libs/vValidator";
+import type { HttpRespondReturn } from "@repo/shared/types";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { authMiddleware } from "./auth";
@@ -16,7 +17,7 @@ type PrivateContext = BaseContext & { Variables: { sub: string } };
 const publicRoutes = new Hono<BaseContext>().get(
 	"/*",
 	vValidator("query", imageDeliveryQuerySchema),
-	async (c) => {
+	async (c): Promise<Response> => {
 		const key = c.req.path.replace(/^\/images\//, "");
 		validateKey(key);
 
@@ -50,7 +51,7 @@ const publicRoutes = new Hono<BaseContext>().get(
 
 const privateRoutes = new Hono<PrivateContext>()
 	.use(authMiddleware())
-	.put("/*", async (c) => {
+	.put("/*", async (c): Promise<HttpRespondReturn<{ key: string }>> => {
 		const key = c.req.path.replace(/^\/images\//, "");
 		validateKey(key);
 
@@ -85,7 +86,7 @@ const privateRoutes = new Hono<PrivateContext>()
 			httpMetadata: { contentType },
 		});
 
-		return c.json({ key }, 201);
+		return c.json({ data: { key }, message: "Created" }, 201);
 	});
 
 export const imageRoutes = new Hono<BaseContext>()

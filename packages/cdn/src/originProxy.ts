@@ -5,7 +5,7 @@ import {
 import { pemToDer } from "@repo/shared/libs/pem";
 import { HTTPException } from "hono/http-exception";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
-import { parse } from "valibot";
+import { object, parse, string } from "valibot";
 import { type GcpServiceAccountKey, gcpServiceAccountKeySchema } from "./env";
 import type { ImageDeliveryQuery } from "./schemas";
 
@@ -15,6 +15,7 @@ type TokenCache = {
 };
 
 let tokenCache: TokenCache | null = null;
+let pendingTokenRequest: Promise<string> | null = null;
 
 /** GCP サービスアカウントの秘密鍵で自己署名 JWT を生成する（RS256）。 */
 async function createSignedJwt({
@@ -57,9 +58,12 @@ async function createSignedJwt({
 	return `${signingInput}.${base64urlEncodeBytes(signature)}`;
 }
 
+const oidcTokenResponseSchema = object({ id_token: string() });
+
 /**
  * GCP OIDC トークンを取得する。
  * トークンは1時間有効で、期限5分前に再取得する。
+ * 並行リクエスト時は同一の Promise を共有して重複フェッチを防ぐ。
  */
 async function getOidcToken({
 	audience,
@@ -75,6 +79,26 @@ async function getOidcToken({
 		return tokenCache.token;
 	}
 
+	if (pendingTokenRequest) {
+		return pendingTokenRequest;
+	}
+
+	pendingTokenRequest = fetchOidcToken({ audience, serviceAccount }).finally(
+		() => {
+			pendingTokenRequest = null;
+		},
+	);
+
+	return pendingTokenRequest;
+}
+
+async function fetchOidcToken({
+	audience,
+	serviceAccount,
+}: {
+	serviceAccount: GcpServiceAccountKey;
+	audience: string;
+}): Promise<string> {
 	const jwt = await createSignedJwt({ audience, serviceAccount });
 	const response = await fetch("https://oauth2.googleapis.com/token", {
 		body: new URLSearchParams({
@@ -93,9 +117,9 @@ async function getOidcToken({
 		});
 	}
 
-	const data: { id_token: string } = await response.json();
+	const data = parse(oidcTokenResponseSchema, await response.json());
 	tokenCache = {
-		expiresAt: now + 3600 * 1000,
+		expiresAt: Date.now() + 3600 * 1000,
 		token: data.id_token,
 	};
 	return data.id_token;
@@ -133,7 +157,7 @@ export async function proxyToOrigin({
 	}
 
 	const headers: Record<string, string> = {};
-	const isLocal = originUrl.startsWith("http://localhost");
+	const isLocal = originBase.hostname === "localhost";
 
 	if (!isLocal) {
 		if (!gcpServiceAccountKey) {
@@ -141,10 +165,16 @@ export async function proxyToOrigin({
 				message: "GCPサービスアカウントキーが設定されていません",
 			});
 		}
-		const serviceAccount = parse(
-			gcpServiceAccountKeySchema,
-			JSON.parse(gcpServiceAccountKey),
-		);
+
+		let parsed: unknown;
+		try {
+			parsed = JSON.parse(gcpServiceAccountKey);
+		} catch {
+			throw new HTTPException(500, {
+				message: "GCPサービスアカウントキーのJSONが不正です",
+			});
+		}
+		const serviceAccount = parse(gcpServiceAccountKeySchema, parsed);
 		const token = await getOidcToken({
 			audience: originUrl,
 			serviceAccount,
