@@ -7,7 +7,7 @@ on:
       - synchronize
 
 jobs:
-  ci:
+  typescript:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -23,3 +23,27 @@ jobs:
           pnpm turbo run build --filter @repo/api
       - name: Run CI
         run: pnpm turbo run test:run --concurrency=100%
+
+  rust:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/image-processor
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            packages/image-processor/target
+          key: ${{ runner.os }}-cargo-test-${{ hashFiles('packages/image-processor/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-test-
+
+      - name: Install nasm
+        run: sudo apt-get update && sudo apt-get install -y nasm
+
+      - name: Run tests
+        run: cargo test

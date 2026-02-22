@@ -169,6 +169,7 @@ export function JoinRoomDialog({
 									const id = `${formId}_playerName`;
 									return (
 										<FieldItem
+											className="md:grid-cols-[160px_minmax(0,1fr)]"
 											errorMessage={
 												(!field.state.meta.isValid &&
 													field.state.meta.errors[0]?.message) ||
@@ -197,6 +198,7 @@ export function JoinRoomDialog({
 									const id = `${formId}_password`;
 									return (
 										<FieldItem
+											className="md:grid-cols-[160px_minmax(0,1fr)]"
 											errorMessage={
 												passwordError ||
 												(!field.state.meta.isValid &&

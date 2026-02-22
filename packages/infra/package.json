@@ -1,0 +1,28 @@
+{
+	"devDependencies": {
+		"@pulumi/aws": "^7.20.0",
+		"@pulumi/cloudflare": "^6.13.0",
+		"@pulumi/gcp": "^9.0.0",
+		"@pulumi/pulumi": "^3.223.0",
+		"@repo/typescript-config": "workspace:*",
+		"@types/node": "^24.10.13",
+		"dotenv": "^17.3.1",
+		"typescript": "^5.9.3",
+		"valibot": "^1.2.0"
+	},
+	"license": "UNLICENSED",
+	"main": "index.ts",
+	"name": "@repo/infra",
+	"private": true,
+	"scripts": {
+		"destroy": "pnpm run destroy:dev && pnpm run destroy:stg && pnpm run destroy:prod",
+		"destroy:dev": "RUN_TYPE=DESTROY pulumi up -y -s dev && pulumi destroy -y -s dev",
+		"destroy:prod": "RUN_TYPE=DESTROY pulumi up -y -s prod && pulumi destroy -y -s prod",
+		"destroy:stg": "RUN_TYPE=DESTROY pulumi up -y -s stg && pulumi destroy -y -s stg",
+		"format": "biome check --fix --unsafe .",
+		"lint": "biome check .",
+		"typecheck": "tsc --noEmit",
+		"up": "pulumi up -y -s dev && pulumi up -y -s stg && pulumi up -y -s prod"
+	},
+	"version": "1.0.0"
+}

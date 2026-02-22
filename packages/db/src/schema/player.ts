@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { createSelectSchema } from "drizzle-valibot";
 import {
@@ -76,3 +77,9 @@ export function isPlayerSeat(seat: number): seat is PlayerSeat {
 }
 
 export type Player = InferOutput<typeof playerSchema>;
+
+/** ユーザー名を優先し、匿名/削除ユーザーは playerName にフォールバック */
+export const playerNameExpression =
+	sql<string>`COALESCE(${userTable.name}, ${playerTable.playerName})`.as(
+		"playerName",
+	);
