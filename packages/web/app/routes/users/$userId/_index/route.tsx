@@ -1,8 +1,9 @@
 import type { Api } from "@repo/api";
 import type { PublicUser } from "@repo/db/model";
 import { hc } from "hono/client";
-import { FaUser } from "react-icons/fa";
+import { FaCrown, FaUser } from "react-icons/fa";
 import { FiChevronLeft, FiEdit } from "react-icons/fi";
+import { IoGameController } from "react-icons/io5";
 import { useNavigate } from "react-router";
 import { Button } from "~/components/button/Button";
 import { Footer } from "~/components/Footer";
@@ -56,7 +57,7 @@ function UserProfile({ user }: { user: PublicUser }) {
 	const isMe = me?.userId === user.userId;
 
 	return (
-		<div className="grid">
+		<div className="grid gap-y-24">
 			<div className="flex justify-between">
 				<button
 					aria-label="戻る"
@@ -71,6 +72,7 @@ function UserProfile({ user }: { user: PublicUser }) {
 						as="link"
 						color="gray"
 						leftIcon={<FiEdit />}
+						size="S"
 						to={`/users/${user.userId}/edit`}
 						variant="outline"
 					>
@@ -78,30 +80,38 @@ function UserProfile({ user }: { user: PublicUser }) {
 					</Button>
 				)}
 			</div>
-			<div className="grid place-items-center gap-y-20 py-24">
-				{user.image ? (
-					<img
-						alt={user.name}
-						className="size-96 rounded-full object-cover"
-						src={buildImageUrl({
-							image: user.image,
-							size: PROFILE_IMAGE_DIMENSIONS,
-						})}
-					/>
-				) : (
-					<FaUser className="size-96 rounded-full bg-gray-300 p-16 text-gray-500" />
-				)}
+			<div className="grid place-items-center gap-y-32">
+				<div className="grid place-items-center gap-y-24">
+					{user.image ? (
+						<img
+							alt={user.name}
+							className="size-96 rounded-full object-cover"
+							src={buildImageUrl({
+								image: user.image,
+								size: PROFILE_IMAGE_DIMENSIONS,
+							})}
+						/>
+					) : (
+						<FaUser className="size-96 rounded-full bg-gray-300 p-16 text-gray-500" />
+					)}
 
-				<h1 className="font-bold text-xl">{user.name}</h1>
+					<h1 className="font-bold text-xl">{user.name}</h1>
+				</div>
 
 				<div className="flex gap-x-32">
-					<div className="grid place-items-center gap-y-2">
+					<div className="grid place-items-center gap-y-4">
 						<span className="font-bold text-xl">{user.playCount}</span>
-						<span className="text-neutral-500 text-sm">プレイ</span>
+						<span className="flex items-center gap-x-4 text-neutral-500 text-sm">
+							<IoGameController className="size-16 text-green-500" />
+							プレイ
+						</span>
 					</div>
-					<div className="grid place-items-center gap-y-2">
+					<div className="grid place-items-center gap-y-4">
 						<span className="font-bold text-xl">{user.winCount}</span>
-						<span className="text-neutral-500 text-sm">勝利</span>
+						<span className="flex items-center gap-x-4 text-neutral-500 text-sm">
+							<FaCrown className="size-16 text-yellow-500" />
+							勝利
+						</span>
 					</div>
 				</div>
 			</div>

@@ -4,7 +4,7 @@ import { tv } from "tailwind-variants";
 
 const avatarVariants = tv(
 	{
-		base: "aspect-square shrink-0 overflow-hidden rounded-full object-contain object-center",
+		base: "aspect-square shrink-0 overflow-hidden rounded-full object-cover object-center",
 		variants: {
 			size: {
 				L: "size-40",
