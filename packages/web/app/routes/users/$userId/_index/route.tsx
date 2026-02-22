@@ -1,5 +1,6 @@
 import type { Api } from "@repo/api";
 import type { PublicUser } from "@repo/db/model";
+import { OFFICIAL_X_ID } from "@repo/shared/constants/config";
 import { hc } from "hono/client";
 import { FaCrown, FaUser } from "react-icons/fa";
 import { FiChevronLeft, FiEdit } from "react-icons/fi";
@@ -11,7 +12,11 @@ import { Header } from "~/components/Header";
 import { Spinner } from "~/components/Spinner";
 import { useMe } from "~/context/me/hooks";
 import { buildImageUrl, PROFILE_IMAGE_DIMENSIONS } from "~/libs/image";
+import { buildNoindexMeta } from "~/libs/meta";
 import type { Route } from "./+types/route";
+
+export const meta: Route.MetaFunction = ({ matches }) =>
+	buildNoindexMeta(matches.flatMap((m) => m?.meta ?? []));
 
 export async function loader({
 	params: { userId },
@@ -40,12 +45,30 @@ export async function loader({
 export default function UserPage({
 	loaderData: { user },
 }: Route.ComponentProps) {
+	const { me } = useMe();
+	const isMe = me?.userId === user.userId;
+
 	return (
 		<div className="grid min-h-full grid-rows-[auto_1fr_auto]">
 			<Header />
 			<main className="grid content-start gap-y-24 pb-40">
 				<UserProfile user={user} />
 			</main>
+
+			{isMe && (
+				<p className="text-center text-neutral-400 text-xs">
+					退会をご希望の場合は
+					<a
+						className="underline"
+						href={`https://x.com/${OFFICIAL_X_ID}`}
+						rel="noopener noreferrer"
+						target="_blank"
+					>
+						公式X
+					</a>
+					へDMでご連絡ください
+				</p>
+			)}
 			<Footer />
 		</div>
 	);
