@@ -1,8 +1,14 @@
 import { type Me, meProfileSchema } from "@repo/db/model";
+import {
+	ALLOWED_IMAGE_MIME_TYPES,
+	type ImageMimeType,
+	MIME_TO_EXTENSION,
+} from "@repo/shared/constants/image";
 import { useForm } from "@tanstack/react-form";
-import { useId } from "react";
+import classNames from "classnames";
+import { useId, useRef, useState } from "react";
 import { FaUser } from "react-icons/fa";
-import { FiChevronLeft } from "react-icons/fi";
+import { FiCamera, FiChevronLeft } from "react-icons/fi";
 import { useNavigate } from "react-router";
 import { Button } from "~/components/button/Button";
 import { Footer } from "~/components/Footer";
@@ -12,6 +18,7 @@ import { Header } from "~/components/Header";
 import { Spinner } from "~/components/Spinner";
 import { useToast } from "~/components/Toast";
 import { useMe } from "~/context/me/hooks";
+import { useImageUpload } from "~/hooks/useImageUpload";
 import { useIsLoading } from "~/hooks/useIsLoading";
 import { honoClient } from "~/libs/apiClient.client";
 import { buildImageUrl, PROFILE_IMAGE_DIMENSIONS } from "~/libs/image";
@@ -65,6 +72,9 @@ function EditForm({ me }: { me: Me }) {
 	const { showToast } = useToast();
 	const { isLoading, startLoading, stopLoading } = useIsLoading();
 	const formId = useId();
+	const fileInputRef = useRef<HTMLInputElement>(null);
+	const { isUploading, uploadImage } = useImageUpload();
+	const [isImageLoaded, setIsImageLoaded] = useState(true);
 
 	const form = useForm({
 		defaultValues: {
@@ -103,6 +113,38 @@ function EditForm({ me }: { me: Me }) {
 		},
 	});
 
+	const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		if (!file) return;
+
+		try {
+			const ext = MIME_TO_EXTENSION[file.type as ImageMimeType];
+			if (!ext) {
+				showToast({
+					title: "対応していない画像フォーマットです",
+					type: "error",
+				});
+				return;
+			}
+			const key = `users/${me.userId}/${crypto.randomUUID()}.${ext}`;
+			await uploadImage({ file, key });
+			setIsImageLoaded(false);
+			form.setFieldValue("image", key);
+		} catch (error) {
+			console.error("画像のアップロードに失敗しました:", error);
+			showToast({
+				title:
+					error instanceof Error
+						? error.message
+						: "画像のアップロードに失敗しました",
+				type: "error",
+			});
+		} finally {
+			// 同じファイルを再選択可能にする
+			e.target.value = "";
+		}
+	};
+
 	return (
 		<div className="grid place-items-center">
 			<div className="flex w-full items-center gap-x-8">
@@ -116,23 +158,50 @@ function EditForm({ me }: { me: Me }) {
 				<h1 className="font-bold text-lg">プロフィール編集</h1>
 			</div>
 
-			<div className="grid place-items-center py-24">
-				{me.image ? (
-					<img
-						alt={me.name}
-						className="size-96 rounded-full object-cover"
-						src={buildImageUrl({
-							image: me.image,
-							size: PROFILE_IMAGE_DIMENSIONS,
-						})}
-					/>
-				) : (
-					<FaUser className="size-96 rounded-full bg-gray-300 p-16 text-gray-500" />
+			<form.Subscribe selector={(state) => state.values.image}>
+				{(image) => (
+					<div className="grid place-items-center gap-y-8 py-24">
+						<button
+							className="relative"
+							disabled={isUploading || isLoading}
+							onClick={() => fileInputRef.current?.click()}
+							type="button"
+						>
+							{image ? (
+								<img
+									alt={me.name}
+									className={classNames(
+										"size-96 rounded-full object-cover",
+										!isImageLoaded && "invisible",
+									)}
+									onLoad={() => setIsImageLoaded(true)}
+									src={buildImageUrl({
+										image,
+										size: PROFILE_IMAGE_DIMENSIONS,
+									})}
+								/>
+							) : (
+								<FaUser className="size-96 rounded-full bg-gray-300 p-16 text-gray-500" />
+							)}
+							<div className="absolute inset-0 grid place-items-center rounded-full bg-black/20">
+								{isUploading || !isImageLoaded ? (
+									<Spinner className="size-24 text-white" />
+								) : (
+									<FiCamera className="size-24 text-white" />
+								)}
+							</div>
+						</button>
+						<input
+							accept={ALLOWED_IMAGE_MIME_TYPES.join(",")}
+							className="hidden"
+							onChange={handleFileSelect}
+							ref={fileInputRef}
+							type="file"
+						/>
+						<p className="text-neutral-400 text-xs">タップして画像を変更</p>
+					</div>
 				)}
-				<p className="mt-8 text-neutral-400 text-xs">
-					画像の変更は現在準備中です
-				</p>
-			</div>
+			</form.Subscribe>
 
 			<form
 				className="grid w-full max-w-400 gap-y-24"
@@ -147,7 +216,7 @@ function EditForm({ me }: { me: Me }) {
 						const id = `${formId}_name`;
 						return (
 							<FieldItem
-								className="md:grid-cols-[auto_1fr]"
+								className="grid-cols-[auto_1fr]"
 								errorMessage={
 									!field.state.meta.isValid &&
 									field.state.meta.errors[0]?.message

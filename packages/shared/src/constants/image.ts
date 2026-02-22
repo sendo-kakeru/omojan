@@ -11,3 +11,12 @@ export const ALLOWED_IMAGE_MIME_TYPES = [
 ] as const;
 
 export type ImageMimeType = (typeof ALLOWED_IMAGE_MIME_TYPES)[number];
+
+/** MIME タイプ → ファイル拡張子マッピング */
+export const MIME_TO_EXTENSION: Record<ImageMimeType, string> = {
+	"image/avif": "avif",
+	"image/gif": "gif",
+	"image/jpeg": "jpg",
+	"image/png": "png",
+	"image/webp": "webp",
+} as const;
