@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { Avatar } from "~/components/Avatar";
 import { Badge } from "~/components/Badge";
 import { useCountdown } from "~/hooks/useCountdown";
+import { AVATAR_IMAGE_DIMENSIONS, buildImageUrl } from "~/libs/image";
 import { createCombination } from "../libs/gameUtils";
 import { GamePhaseLayout } from "./GamePhaseLayout";
 import { GamePhaseNav } from "./GamePhaseNav";
@@ -132,7 +133,10 @@ export function GameVote({
 											<Avatar
 												name={player.playerName}
 												size="S"
-												src={player.image ?? undefined}
+												src={buildImageUrl({
+													image: player.image,
+													size: AVATAR_IMAGE_DIMENSIONS.S,
+												})}
 											/>
 											<p className="font-semibold text-neutral-400 text-xs">
 												{player.playerName}

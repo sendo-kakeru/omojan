@@ -14,6 +14,7 @@ import { useToast } from "~/components/Toast";
 import { useMe } from "~/context/me/hooks";
 import { useIsLoading } from "~/hooks/useIsLoading";
 import { honoClient } from "~/libs/apiClient.client";
+import { buildImageUrl, PROFILE_IMAGE_DIMENSIONS } from "~/libs/image";
 import type { Route } from "./+types/route";
 
 export default function UserEditPage({
@@ -120,7 +121,10 @@ function EditForm({ me }: { me: Me }) {
 					<img
 						alt={me.name}
 						className="size-96 rounded-full object-cover"
-						src={me.image}
+						src={buildImageUrl({
+							image: me.image,
+							size: PROFILE_IMAGE_DIMENSIONS,
+						})}
 					/>
 				) : (
 					<FaUser className="size-96 rounded-full bg-gray-300 p-16 text-gray-500" />

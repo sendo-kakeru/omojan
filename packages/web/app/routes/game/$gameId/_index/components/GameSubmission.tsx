@@ -10,6 +10,7 @@ import { Badge } from "~/components/Badge";
 import { Separator } from "~/components/Separator";
 import { Spinner } from "~/components/Spinner";
 import { useCountdown } from "~/hooks/useCountdown";
+import { AVATAR_IMAGE_DIMENSIONS, buildImageUrl } from "~/libs/image";
 import { createCombination } from "../libs/gameUtils";
 import { GamePhaseLayout } from "./GamePhaseLayout";
 import { GamePhaseNav } from "./GamePhaseNav";
@@ -227,7 +228,10 @@ export function GameSubmission({
 										<Avatar
 											name={player.playerName}
 											size="S"
-											src={player.image ?? undefined}
+											src={buildImageUrl({
+												image: player.image,
+												size: AVATAR_IMAGE_DIMENSIONS.S,
+											})}
 										/>
 										<div className="grid flex-1 gap-y-1 md:gap-y-2">
 											<p className="font-semibold text-xs">
