@@ -39,7 +39,7 @@
 				}
 			],
 			"vars": {
-				"ORIGIN_URL": "https://image-processor-stg-xxx.run.app",
+				"ORIGIN_URL": "https://image-processor-stg-158363594746.asia-northeast1.run.app",
 				"WEB_URL": "https://stg.omojan.com"
 			}
 		}
