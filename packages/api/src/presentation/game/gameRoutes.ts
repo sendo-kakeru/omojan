@@ -4,11 +4,12 @@ import {
 	verifyRoomTokenRequestQuerySchema,
 } from "@repo/db/model";
 import { gameIdRequestParamSchema } from "@repo/db/schema";
+import { vValidator } from "@repo/shared/libs/vValidator";
+import type { HttpRespondReturn } from "@repo/shared/types";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { GameService } from "../../application/game/GameService";
-import { vValidator } from "../../libs/vValidator";
-import type { BaseContext, HttpRespondReturn } from "../../types";
+import type { BaseContext } from "../../types";
 
 export const routes = new Hono<
 	BaseContext & { Variables: { gameService: GameService } }

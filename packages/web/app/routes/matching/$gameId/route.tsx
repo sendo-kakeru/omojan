@@ -5,12 +5,16 @@ import { useNavigate } from "react-router";
 import { useToast } from "~/components/Toast";
 import { useIsLoading } from "~/hooks/useIsLoading";
 import { gameTokenLocalStorage } from "~/libs/gameTokenLocalStorage";
+import { buildNoindexMeta } from "~/libs/meta";
 import type { Route } from "./+types/route";
 import { MatchingError } from "./components/MatchingError";
 import { MatchingLoading } from "./components/MatchingLoading";
 import { MatchingPresenter } from "./components/MatchingPresenter";
 import { useMatchingSubscriptionSWR } from "./hooks/useMatchingSubscriptionSWR";
 import { useRoomSWR } from "./hooks/useRoomSWR";
+
+export const meta: Route.MetaFunction = ({ matches }) =>
+	buildNoindexMeta(matches.flatMap((m) => m?.meta ?? []));
 
 export default function Page({ params: { gameId } }: Route.ComponentProps) {
 	const navigate = useNavigate();

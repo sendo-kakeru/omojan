@@ -11,7 +11,7 @@ export function Header() {
 				<img
 					alt="おもじゃんオンライン"
 					height={32}
-					src="/logo.png"
+					src="/icons/omojan.webp"
 					width={32}
 				/>
 			</Link>

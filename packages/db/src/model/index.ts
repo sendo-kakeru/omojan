@@ -4,3 +4,4 @@ export * from "./matching";
 export * from "./me";
 export * from "./pagination";
 export * from "./room";
+export * from "./user";

@@ -1,7 +1,7 @@
 import { verifyRoomTokenRequestQuerySchema } from "@repo/db/model";
 import { gameIdRequestParamSchema } from "@repo/db/schema";
+import { vValidator } from "@repo/shared/libs/vValidator";
 import { Hono } from "hono";
-import { vValidator } from "../../libs/vValidator";
 import type { BaseContext } from "../../types";
 
 export const routes = new Hono<BaseContext>().get(

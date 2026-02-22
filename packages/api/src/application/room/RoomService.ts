@@ -18,6 +18,7 @@ import {
 	isPlayerSeat,
 	type PlayerId,
 	type PlayerSeat,
+	playerNameExpression,
 	playerTable,
 	roundTable,
 	submissionTable,
@@ -40,11 +41,8 @@ import { GameService } from "../game/GameService";
 
 export class RoomService {
 	private readonly encoder = new TextEncoder();
-	private readonly gameService: GameService;
 
-	constructor(private readonly db: DrizzleClient) {
-		this.gameService = new GameService(db);
-	}
+	constructor(private readonly db: DrizzleClient) {}
 
 	/**
 	 * ルームを単体取得する
@@ -255,7 +253,7 @@ export class RoomService {
 				gameId: playerTable.gameId,
 				id: playerTable.id,
 				image: userTable.image,
-				playerName: playerTable.playerName,
+				playerName: playerNameExpression,
 				seat: playerTable.seat,
 			})
 			.from(playerTable)
@@ -328,7 +326,7 @@ export class RoomService {
 				const roundVotes = votes.filter((v) => v.roundId === round.id);
 
 				const { winnerPlayerIds } =
-					this.gameService.calculateWinnersAndVoteCountsFromVotes({
+					GameService.calculateWinnersAndVoteCountsFromVotes({
 						submissions: roundSubmissions,
 						votes: roundVotes,
 					});

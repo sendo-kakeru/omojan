@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { FaCrown } from "react-icons/fa";
 import { Avatar } from "~/components/Avatar";
 import { useCountdown } from "~/hooks/useCountdown";
+import { AVATAR_IMAGE_DIMENSIONS, buildImageUrl } from "~/libs/image";
 import { createCombination } from "../libs/gameUtils";
 import { GamePhaseLayout } from "./GamePhaseLayout";
 import { GamePhaseNav } from "./GamePhaseNav";
@@ -59,7 +60,10 @@ export function GameResult({ data }: { data: GameServerResultMessage }) {
 											<Avatar
 												name={player.playerName}
 												size="S"
-												src={player.image ?? undefined}
+												src={buildImageUrl({
+													image: player.image,
+													size: AVATAR_IMAGE_DIMENSIONS.S,
+												})}
 											/>
 											{isWinner && (
 												<FaCrown className="size-20 text-yellow-500" />

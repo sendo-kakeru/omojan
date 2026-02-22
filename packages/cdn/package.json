@@ -18,11 +18,14 @@
 		"typecheck": "pnpm run cf-typegen && tsc --noEmit"
 	},
 	"dependencies": {
-		"hono": "^4.12.0"
+		"@repo/shared": "workspace:*",
+		"hono": "^4.12.0",
+		"valibot": "^1.2.0"
 	},
 	"devDependencies": {
-		"wrangler": "^4.4.0",
 		"@repo/tsup-config": "workspace:*",
-		"@repo/typescript-config": "workspace:*"
+		"@repo/typescript-config": "workspace:*",
+		"@types/node": "^24.10.13",
+		"wrangler": "^4.4.0"
 	}
 }
