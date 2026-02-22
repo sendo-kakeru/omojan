@@ -1,5 +1,10 @@
 import type { ImageMimeType } from "@repo/shared/constants/image";
 
+/**
+ * マジックバイトから画像の MIME タイプを判定する。
+ * 対応フォーマット: JPEG, PNG, GIF, WebP, AVIF。
+ * 非対応フォーマットの場合は null を返す。
+ */
 export function detectMime(buffer: ArrayBuffer): ImageMimeType | null {
 	const bytes = new Uint8Array(buffer, 0, Math.min(12, buffer.byteLength));
 

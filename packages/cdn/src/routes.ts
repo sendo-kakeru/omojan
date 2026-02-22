@@ -1,0 +1,81 @@
+import { MAX_IMAGE_FILE_SIZE } from "@repo/shared/constants/image";
+import { vValidator } from "@repo/shared/libs/vValidator";
+import { Hono } from "hono";
+import { HTTPException } from "hono/http-exception";
+import { getCached, normalizeCacheKey, setCached } from "./cache";
+import type { Env } from "./env";
+import { validateKey } from "./key";
+import { detectMime } from "./mime";
+import { proxyToOrigin } from "./originProxy";
+import { imageDeliveryQuerySchema } from "./schemas";
+
+export const imageRoutes = new Hono<{
+	Bindings: Env & { R2: R2Bucket };
+}>()
+	.get("/*", vValidator("query", imageDeliveryQuerySchema), async (c) => {
+		const key = c.req.path.replace(/^\/images\//, "");
+		validateKey(key);
+
+		const query = c.req.valid("query");
+		const cacheKey = normalizeCacheKey(new URL(c.req.url));
+
+		const cached = await getCached(cacheKey);
+		if (cached) {
+			const response = new Response(cached.body, cached);
+			response.headers.set("X-Cache", "HIT");
+			return response;
+		}
+
+		const originResponse = await proxyToOrigin({
+			gcpServiceAccountKey: c.env.GCP_SERVICE_ACCOUNT_KEY,
+			key,
+			originUrl: c.env.ORIGIN_URL,
+			query,
+		});
+
+		const response = new Response(originResponse.body, originResponse);
+		response.headers.set("X-Cache", "MISS");
+
+		c.executionCtx.waitUntil(
+			setCached({ cacheKey, response: response.clone() }),
+		);
+
+		return response;
+	})
+	.put("/*", async (c) => {
+		const key = c.req.path.replace(/^\/images\//, "");
+		validateKey(key);
+
+		const contentLength = Number(c.req.header("content-length") ?? 0);
+		if (contentLength > MAX_IMAGE_FILE_SIZE) {
+			throw new HTTPException(413, {
+				message: `ファイルサイズが上限を超えています (最大${MAX_IMAGE_FILE_SIZE}バイト)`,
+			});
+		}
+
+		const body = await c.req.arrayBuffer();
+
+		if (body.byteLength === 0) {
+			throw new HTTPException(400, {
+				message: "リクエストボディが空です",
+			});
+		}
+		if (body.byteLength > MAX_IMAGE_FILE_SIZE) {
+			throw new HTTPException(413, {
+				message: `ファイルサイズが上限を超えています (最大${MAX_IMAGE_FILE_SIZE}バイト)`,
+			});
+		}
+
+		const contentType = detectMime(body);
+		if (!contentType) {
+			throw new HTTPException(400, {
+				message: "対応していない画像フォーマットです",
+			});
+		}
+
+		await c.env.R2.put(key, body, {
+			httpMetadata: { contentType },
+		});
+
+		return c.json({ key }, 201);
+	});

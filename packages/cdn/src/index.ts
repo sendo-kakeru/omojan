@@ -1,9 +1,10 @@
 import { honoErrorHandler } from "@repo/shared/libs/honoErrorHandler";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { imageRoutes } from "./images";
+import type { Env } from "./env";
+import { imageRoutes } from "./routes";
 
-const app = new Hono<{ Bindings: CloudflareBindings }>()
+const app = new Hono<{ Bindings: Env & { R2: R2Bucket } }>()
 	.use((c, next) => {
 		const corsMiddleware = cors({
 			allowHeaders: ["Content-Type"],

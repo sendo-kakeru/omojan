@@ -3,6 +3,10 @@ import { HTTPException } from "hono/http-exception";
 const MAX_KEY_LENGTH = 1024;
 const ALLOWED_KEY_PATTERN = /^[a-zA-Z0-9\-_/.]+$/;
 
+/**
+ * R2キーのバリデーション（パストラバーサル防止）。
+ * 不正なキーの場合は HTTPException(400) をスローする。
+ */
 export function validateKey(key: string): void {
 	if (key === "") {
 		throw new HTTPException(400, { message: "キーが空です" });
