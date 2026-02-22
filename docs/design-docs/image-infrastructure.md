@@ -201,7 +201,7 @@ Rust / Axum で構築する画像加工オリジンサーバー。Google Cloud R
 - ランタイム: `gcr.io/distroless/cc-debian12`（最小攻撃面）
 - 依存キャッシュ付きマルチステージビルド
 
-### 3. インフラ追加 (`packages/infrastructure/`)
+### 3. インフラ追加 (`packages/infra/`)
 
 既存のPulumiプロジェクトに以下を追加:
 
@@ -344,7 +344,7 @@ packages/
 │   ├── Cargo.toml
 │   ├── Dockerfile
 │   └── .dockerignore
-└── infrastructure/         # 既存Pulumiに追加
+└── infra/                  # 既存Pulumiに追加
     └── src/
         ├── r2.ts           # R2バケット（追加）
         └── artifact-registry.ts  # Artifact Registry（追加）

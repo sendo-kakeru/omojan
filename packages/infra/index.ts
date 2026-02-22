@@ -7,13 +7,13 @@ import * as aws from "@pulumi/aws";
 import * as cloudflare from "@pulumi/cloudflare";
 import * as pulumi from "@pulumi/pulumi";
 
-export const infrastructureEnvSchema = object({
+export const infraEnvSchema = object({
 	LINE_CHANNEL_ID: string(),
 	LINE_CHANNEL_SECRET: string(),
 	RUN_TYPE: optional(picklist(["UP", "DESTROY"]), "UP"),
 });
 
-const env = parse(infrastructureEnvSchema, process.env);
+const env = parse(infraEnvSchema, process.env);
 
 // 環境別設定
 const stackSchema = picklist(["dev", "prod", "stg"]);

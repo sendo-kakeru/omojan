@@ -11,7 +11,7 @@ esac
 
 # --- スクリプトの場所を基準に絶対パス解決 ---
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
-# INFRA_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"        # => packages/infrastructure
+# INFRA_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"        # => packages/infra
 API_DIR="$(cd "$SCRIPT_DIR/../../../api" && pwd)"   # => packages/api
 
 case "$ENV" in

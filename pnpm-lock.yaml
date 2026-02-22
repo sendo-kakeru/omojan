@@ -155,7 +155,7 @@ importers:
 
   packages/image-processor: {}
 
-  packages/infrastructure:
+  packages/infra:
     devDependencies:
       '@pulumi/aws':
         specifier: ^7.20.0

@@ -12,7 +12,7 @@
 	},
 	"license": "UNLICENSED",
 	"main": "index.ts",
-	"name": "@repo/infrastructure",
+	"name": "@repo/infra",
 	"private": true,
 	"scripts": {
 		"destroy": "pnpm run destroy:dev && pnpm run destroy:stg && pnpm run destroy:prod",
