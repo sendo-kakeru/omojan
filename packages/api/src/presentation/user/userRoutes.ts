@@ -2,11 +2,12 @@ import {
 	type GetPublicUserResponseBody,
 	userRequestParamSchema,
 } from "@repo/db/model";
+import { vValidator } from "@repo/shared/libs/vValidator";
+import type { HttpRespondReturn } from "@repo/shared/types";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { UserService } from "../../application/user/UserService";
-import { vValidator } from "../../libs/vValidator";
-import type { BaseContext, HttpRespondReturn } from "../../types";
+import type { BaseContext } from "../../types";
 
 export const routes = new Hono<
 	BaseContext & { Variables: { userService: UserService } }
