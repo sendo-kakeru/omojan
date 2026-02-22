@@ -59,6 +59,15 @@ export class MeService {
 		}
 	}
 
+	async getImageKey({ sub }: Pick<User, "sub">): Promise<string | null> {
+		const [user] = await this.db
+			.select({ image: userTable.image })
+			.from(userTable)
+			.where(eq(userTable.sub, sub))
+			.limit(1);
+		return user?.image ?? null;
+	}
+
 	async update(
 		dto: UpdateMeRequestBody & Pick<User, "sub">,
 	): Promise<UpdateMeResponseBody> {

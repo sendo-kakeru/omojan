@@ -5,6 +5,7 @@ import type { DrizzleClient } from "./libs/drizzle";
 
 export type BaseContext = HonoEnv & {
 	Bindings: Env & {
+		CDN_WORKER: Fetcher;
 		GAME_DURABLE_OBJECT: DurableObjectNamespace;
 		MATCHING_DURABLE_OBJECT: DurableObjectNamespace;
 	};
