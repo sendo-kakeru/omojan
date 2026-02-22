@@ -5,6 +5,7 @@ on:
       - staging
     paths:
       - packages/cdn/**
+      - packages/shared/**
       - packages/typescript-config/**
       - .github/workflows/deploy-cdn-stg.yml
 jobs:
@@ -16,6 +17,9 @@ jobs:
 
       - name: Setup pnpm
         uses: ./.github/actions/setup-pnpm
+
+      - name: Build dependencies packages
+        run: pnpm turbo run build --filter @repo/shared
 
       - name: Deploy
         uses: cloudflare/wrangler-action@v3
