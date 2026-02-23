@@ -49,7 +49,7 @@ function SectionHeader({
 			<div className="grid gap-y-12">
 				<XFollowButton username={OFFICIAL_X_ID} />
 				<div className="flex items-center gap-x-8">
-					<h2 className="font-bold">募集中の部屋</h2>
+					<h2 className="font-bold">🎮 募集中の部屋</h2>
 					<span className="text-neutral-500 text-xs sm:text-sm">
 						( {isLoading || count === undefined ? "読み込み中" : `${count}件`} )
 					</span>
