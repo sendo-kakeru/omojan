@@ -2,6 +2,7 @@ import type { Me } from "@repo/db/model";
 import { useState } from "react";
 import { LuLogIn } from "react-icons/lu";
 import { Link } from "react-router";
+import { useSWRConfig } from "swr";
 import { useMe } from "~/context/me/hooks";
 import { cognito } from "~/libs/cognito";
 import { AVATAR_IMAGE_DIMENSIONS, buildImageUrl } from "~/libs/image";
@@ -28,10 +29,12 @@ export function AuthUserMenuButton() {
  * ログイン時
  */
 export function UserMenuButton({ me }: { me: Me }) {
+	const { cache } = useSWRConfig();
 	const { showToast } = useToast();
 
 	const handleSignOut = () => {
 		try {
+			cache.delete("/me");
 			cognito.signOut();
 		} catch (error) {
 			console.error("ログアウトに失敗しました:", error);
