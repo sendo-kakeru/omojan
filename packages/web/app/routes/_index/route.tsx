@@ -80,12 +80,12 @@ export default function Page({ loaderData }: Route.ComponentProps) {
 				<div className="grid gap-y-24">
 					<WaitingRoomSection
 						error={waitingError}
-						handleRefresh={() => {
+						isLoading={waitingLoading}
+						onCreateRoom={() => setIsOpen(true)}
+						onRefresh={() => {
 							waitingMutate();
 							finishedMutate();
 						}}
-						isLoading={waitingLoading}
-						onCreateRoom={() => setIsOpen(true)}
 						rooms={waitingData?.items as WaitingRoom[] | undefined}
 					/>
 

@@ -1,7 +1,30 @@
 import { PROD_SITE_URL, SITE_NAME } from "@repo/shared/constants/config";
+import type { PropsWithChildren } from "react";
 import { Link } from "react-router";
 import { Header } from "~/components/Header";
 import type { Route } from "./+types/route";
+
+const FEATURES = [
+	{
+		description:
+			"アカウント登録なしですぐに遊べます。プレイヤー名を入力するだけでOK。",
+		title: "ログイン不要で即プレイ",
+	},
+	{
+		description:
+			"鍵付き部屋を作れば、パスワードを共有した友達とだけ対戦できます。",
+		title: "友達とプライベート対戦",
+	},
+	{
+		description:
+			"人数が足りなくても、CPUプレイヤーを入れてすぐにゲームを始められます。",
+		title: "1人でもCPUと対戦",
+	},
+	{
+		description: "1ゲーム約5〜10分。空き時間にサクッと楽しめます。",
+		title: "短時間でサクッと遊べる",
+	},
+] as const;
 
 const PAGE_TITLE = `遊び方 | ${SITE_NAME}`;
 const PAGE_DESCRIPTION =
@@ -57,9 +80,12 @@ export default function HowToPlayPage() {
 					</p>
 					<img
 						alt="おもじゃんオンライン"
-						className="rounded-lg"
+						className="w-full rounded-lg"
 						decoding="async"
+						fetchPriority="high"
+						height={1024}
 						src="/ogp.png"
+						width={1536}
 					/>
 				</div>
 
@@ -91,10 +117,12 @@ export default function HowToPlayPage() {
 								</ul>
 								<img
 									alt="部屋参加ダイアログ"
-									className="rounded-lg"
+									className="w-full rounded-lg"
 									decoding="async"
+									height={682}
 									loading="lazy"
 									src="/guide/join.webp"
+									width={1116}
 								/>
 							</Step>
 
@@ -113,10 +141,12 @@ export default function HowToPlayPage() {
 								</ul>
 								<img
 									alt="マッチング待機画面"
-									className="rounded-lg"
+									className="w-full rounded-lg"
 									decoding="async"
+									height={880}
 									loading="lazy"
 									src="/guide/matching.webp"
+									width={1596}
 								/>
 							</Step>
 
@@ -146,10 +176,12 @@ export default function HowToPlayPage() {
 								</ul>
 								<img
 									alt="提出フェーズの画面"
-									className="rounded-lg"
+									className="w-full rounded-lg"
 									decoding="async"
+									height={1722}
 									loading="lazy"
 									src="/guide/submission.webp"
+									width={1646}
 								/>
 							</Step>
 
@@ -167,10 +199,12 @@ export default function HowToPlayPage() {
 								</ul>
 								<img
 									alt="投票フェーズの画面"
-									className="rounded-lg"
+									className="w-full rounded-lg"
 									decoding="async"
+									height={754}
 									loading="lazy"
 									src="/guide/vote.webp"
+									width={1592}
 								/>
 							</Step>
 
@@ -187,10 +221,12 @@ export default function HowToPlayPage() {
 								</ul>
 								<img
 									alt="最終結果画面"
-									className="rounded-lg"
+									className="w-full rounded-lg"
 									decoding="async"
+									height={1689}
 									loading="lazy"
 									src="/guide/result.webp"
+									width={1645}
 								/>
 							</Step>
 						</div>
@@ -200,22 +236,9 @@ export default function HowToPlayPage() {
 					<section className="grid gap-y-12">
 						<h2 className="font-bold text-lg">特徴</h2>
 						<div className="grid gap-y-8 sm:grid-cols-2 sm:gap-16">
-							<FeatureCard
-								description="アカウント登録なしですぐに遊べます。プレイヤー名を入力するだけでOK。"
-								title="ログイン不要で即プレイ"
-							/>
-							<FeatureCard
-								description="鍵付き部屋を作れば、パスワードを共有した友達とだけ対戦できます。"
-								title="友達とプライベート対戦"
-							/>
-							<FeatureCard
-								description="人数が足りなくても、CPUプレイヤーを入れてすぐにゲームを始められます。"
-								title="1人でもCPUと対戦"
-							/>
-							<FeatureCard
-								description="1ゲーム約5〜10分。空き時間にサクッと楽しめます。"
-								title="短時間でサクッと遊べる"
-							/>
+							{FEATURES.map((feature) => (
+								<FeatureCard key={feature.title} {...feature} />
+							))}
 						</div>
 					</section>
 
@@ -238,11 +261,10 @@ function Step({
 	number,
 	title,
 	children,
-}: {
+}: PropsWithChildren<{
 	number: number;
 	title: string;
-	children: React.ReactNode;
-}) {
+}>) {
 	return (
 		<div className="grid gap-y-12">
 			<div className="flex items-center gap-x-8">

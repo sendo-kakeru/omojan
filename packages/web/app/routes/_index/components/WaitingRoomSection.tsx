@@ -12,21 +12,21 @@ export function WaitingRoomSection({
 	error,
 	rooms,
 	onCreateRoom,
-	handleRefresh,
+	onRefresh,
 }: {
 	isLoading: boolean;
 	error?: Error;
 	rooms?: WaitingRoom[];
 	onCreateRoom: () => void;
-	handleRefresh: () => void;
+	onRefresh: () => void;
 }) {
 	return (
 		<section className="grid gap-y-12">
 			<SectionHeader
 				count={rooms?.length}
-				handleRefresh={handleRefresh}
 				isLoading={isLoading}
 				onCreateRoom={onCreateRoom}
+				onRefresh={onRefresh}
 			/>
 			<WaitingRoomList error={error} isLoading={isLoading} rooms={rooms} />
 		</section>
@@ -37,12 +37,12 @@ function SectionHeader({
 	count,
 	isLoading,
 	onCreateRoom,
-	handleRefresh,
+	onRefresh,
 }: {
 	count?: number;
 	isLoading: boolean;
 	onCreateRoom: () => void;
-	handleRefresh: () => void;
+	onRefresh: () => void;
 }) {
 	return (
 		<div className="flex items-end justify-between">
@@ -61,7 +61,7 @@ function SectionHeader({
 					className="ml-auto"
 					color="gray"
 					leftIcon={<RxUpdate />}
-					onClick={handleRefresh}
+					onClick={onRefresh}
 					variant="outline"
 				>
 					更新
