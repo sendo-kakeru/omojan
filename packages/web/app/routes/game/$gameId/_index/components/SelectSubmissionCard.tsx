@@ -1,4 +1,5 @@
 import classNames from "classnames";
+import { useEffect, useRef } from "react";
 
 export type SelectSubmissionCardProps = (
 	| { state: "idle" }
@@ -6,6 +7,13 @@ export type SelectSubmissionCardProps = (
 	| { state: "selected"; word: string; onSubmit: () => Promise<void> }
 	| { state: "placed"; word: string }
 ) & { label: string };
+
+/** 対応デバイスでハプティックフィードバックを発火する */
+function triggerHaptic(): void {
+	if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+		navigator.vibrate([30, 20, 15]);
+	}
+}
 
 export function SelectSubmissionCard({
 	label,
@@ -17,6 +25,15 @@ export function SelectSubmissionCard({
 	const isSelected = state === "selected";
 	const isPlaced = state === "placed";
 	const disabled = isReady ? props.disabled : false;
+	const prevStateRef = useRef(state);
+
+	// "placed" 状態への遷移時にハプティックフィードバックを発火する
+	useEffect(() => {
+		if (state === "placed" && prevStateRef.current !== "placed") {
+			triggerHaptic();
+		}
+		prevStateRef.current = state;
+	}, [state]);
 
 	return (
 		<div
@@ -33,9 +50,19 @@ export function SelectSubmissionCard({
 				{label}
 			</p>
 
+			{/* 配置時のエフェクト（リングバースト + 背景フラッシュ） */}
+			{isPlaced && (
+				<>
+					<div className="pointer-events-none absolute inset-0 grid place-items-center">
+						<div className="absolute size-full animate-place-card-ring rounded-xl border-3 border-green-400" />
+					</div>
+					<div className="pointer-events-none absolute inset-0 animate-place-card-flash rounded-xl bg-green-400/30" />
+				</>
+			)}
+
 			{/* コンテンツエリア */}
 			{isPlaced ? (
-				<div className="animate-place-card text-center font-bold text-neutral-700 text-sm transition-all duration-600 sm:text-base">
+				<div className="animate-place-card text-center font-bold text-neutral-700 text-sm sm:text-base">
 					{props.word}
 				</div>
 			) : isSelected ? (
