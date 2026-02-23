@@ -20,7 +20,7 @@ jobs:
       VITE_COGNITO_CLIENT_ID: ${{ vars.VITE_COGNITO_CLIENT_ID }}
       VITE_COGNITO_DOMAIN: https://auth-stg.omojan.com
       VITE_API_URL: https://api-stg.omojan.com
-      VITE_CDN_URL: cdn-stg.omojan.com
+      VITE_CDN_URL: https://cdn-stg.omojan.com
     steps:
       - uses: actions/checkout@v6
 
