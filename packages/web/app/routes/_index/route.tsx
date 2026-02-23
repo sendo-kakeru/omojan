@@ -69,7 +69,7 @@ export default function Page({ loaderData }: Route.ComponentProps) {
 		<>
 			<Header />
 			<main className="grid gap-y-12 pb-40 sm:mt-24">
-				<h1 className="sr-only">おもじゃんオンライン(OMOJAN)</h1>
+				<h1 className="sr-only">おもじゃんオンライン</h1>
 				<Link
 					className="block rounded-lg bg-yellow-100 px-16 py-12 text-center text-sm transition hover:bg-yellow-200"
 					to="/guide"
