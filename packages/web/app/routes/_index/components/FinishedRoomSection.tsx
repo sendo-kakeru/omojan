@@ -24,7 +24,7 @@ export function FinishedRoomSection({
 function SectionHeader() {
 	return (
 		<div className="flex items-center justify-between">
-			<h2 className="font-bold">最近のゲーム</h2>
+			<h2 className="font-bold">🏆 最近のゲーム</h2>
 			<Button
 				as="link"
 				rightIcon={<FiChevronRight className="size-16" />}

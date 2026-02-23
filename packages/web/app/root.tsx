@@ -21,7 +21,7 @@ import { ToastProvider } from "./components/Toast";
 import { MeProvider } from "./context/me/provider";
 
 const SITE_DESCRIPTION =
-	"おもじゃん(OMOJAN)をオンラインで遊ぼう！言葉を組み合わせて一番面白い人が勝ち。4人対戦ワードゲーム。";
+	"おもじゃんをオンラインで遊ぼう！言葉を組み合わせて一番面白い人が勝ち。4人対戦ワードゲーム。";
 const OGP_IMAGE = `${PROD_SITE_URL}/ogp.png`;
 
 export const meta: Route.MetaFunction = () => [

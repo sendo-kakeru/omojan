@@ -2,6 +2,7 @@ import type { Api } from "@repo/api";
 import type { FinishedRoom, WaitingRoom } from "@repo/db/model";
 import { hc } from "hono/client";
 import { useState } from "react";
+import { Link } from "react-router";
 import { Footer } from "~/components/Footer";
 import { Header } from "~/components/Header";
 import type { Route } from "./+types/route";
@@ -68,16 +69,23 @@ export default function Page({ loaderData }: Route.ComponentProps) {
 		<>
 			<Header />
 			<main className="grid gap-y-12 pb-40 sm:mt-24">
-				<h1 className="sr-only">おもじゃんオンライン(OMOJAN)</h1>
+				<h1 className="sr-only">おもじゃんオンライン</h1>
+				<Link
+					className="block rounded-lg bg-yellow-100 px-16 py-12 text-center text-sm transition hover:bg-yellow-200"
+					to="/guide"
+				>
+					初めての方へ：
+					<span className="font-bold">遊び方を見る</span>
+				</Link>
 				<div className="grid gap-y-24">
 					<WaitingRoomSection
 						error={waitingError}
-						handleRefresh={() => {
+						isLoading={waitingLoading}
+						onCreateRoom={() => setIsOpen(true)}
+						onRefresh={() => {
 							waitingMutate();
 							finishedMutate();
 						}}
-						isLoading={waitingLoading}
-						onCreateRoom={() => setIsOpen(true)}
 						rooms={waitingData?.items as WaitingRoom[] | undefined}
 					/>
 

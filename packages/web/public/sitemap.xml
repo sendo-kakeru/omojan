@@ -4,4 +4,8 @@
     <loc>https://omojan.com/</loc>
     <priority>1.0</priority>
   </url>
+  <url>
+    <loc>https://omojan.com/guide</loc>
+    <priority>0.8</priority>
+  </url>
 </urlset>
