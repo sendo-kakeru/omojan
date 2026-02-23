@@ -34,9 +34,9 @@ const noop = () => {};
 /** 募集中の部屋が複数ある */
 export const WithRooms: Story = () => (
 	<WaitingRoomSection
-		handleRefresh={noop}
 		isLoading={false}
 		onCreateRoom={noop}
+		onRefresh={noop}
 		rooms={[
 			createWaitingRoom({ title: "初心者歓迎！" }),
 			createWaitingRoom({
@@ -67,9 +67,9 @@ export const WithRooms: Story = () => (
 /** 募集中の部屋が1件 */
 export const WithOneRoom: Story = () => (
 	<WaitingRoomSection
-		handleRefresh={noop}
 		isLoading={false}
 		onCreateRoom={noop}
+		onRefresh={noop}
 		rooms={[createWaitingRoom()]}
 	/>
 );
@@ -77,29 +77,25 @@ export const WithOneRoom: Story = () => (
 /** 募集中の部屋が0件 */
 export const Empty: Story = () => (
 	<WaitingRoomSection
-		handleRefresh={noop}
 		isLoading={false}
 		onCreateRoom={noop}
+		onRefresh={noop}
 		rooms={[]}
 	/>
 );
 
 /** ローディング中 */
 export const Loading: Story = () => (
-	<WaitingRoomSection
-		handleRefresh={noop}
-		isLoading={true}
-		onCreateRoom={noop}
-	/>
+	<WaitingRoomSection isLoading={true} onCreateRoom={noop} onRefresh={noop} />
 );
 
 /** エラー */
 export const ErrorState: Story = () => (
 	<WaitingRoomSection
 		error={new globalThis.Error("Failed to fetch")}
-		handleRefresh={noop}
 		isLoading={false}
 		onCreateRoom={noop}
+		onRefresh={noop}
 		rooms={undefined}
 	/>
 );
@@ -107,9 +103,9 @@ export const ErrorState: Story = () => (
 /** 募集中の部屋が多数ある */
 export const ManyRooms: Story = () => (
 	<WaitingRoomSection
-		handleRefresh={noop}
 		isLoading={false}
 		onCreateRoom={noop}
+		onRefresh={noop}
 		rooms={[
 			createWaitingRoom({ title: "部屋1" }),
 			createWaitingRoom({ title: "部屋2" }),

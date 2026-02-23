@@ -12,21 +12,21 @@ export function WaitingRoomSection({
 	error,
 	rooms,
 	onCreateRoom,
-	handleRefresh,
+	onRefresh,
 }: {
 	isLoading: boolean;
 	error?: Error;
 	rooms?: WaitingRoom[];
 	onCreateRoom: () => void;
-	handleRefresh: () => void;
+	onRefresh: () => void;
 }) {
 	return (
 		<section className="grid gap-y-12">
 			<SectionHeader
 				count={rooms?.length}
-				handleRefresh={handleRefresh}
 				isLoading={isLoading}
 				onCreateRoom={onCreateRoom}
+				onRefresh={onRefresh}
 			/>
 			<WaitingRoomList error={error} isLoading={isLoading} rooms={rooms} />
 		</section>
@@ -37,19 +37,19 @@ function SectionHeader({
 	count,
 	isLoading,
 	onCreateRoom,
-	handleRefresh,
+	onRefresh,
 }: {
 	count?: number;
 	isLoading: boolean;
 	onCreateRoom: () => void;
-	handleRefresh: () => void;
+	onRefresh: () => void;
 }) {
 	return (
 		<div className="flex items-end justify-between">
 			<div className="grid gap-y-12">
 				<XFollowButton username={OFFICIAL_X_ID} />
 				<div className="flex items-center gap-x-8">
-					<h2 className="font-bold">募集中の部屋</h2>
+					<h2 className="font-bold">🎮 募集中の部屋</h2>
 					<span className="text-neutral-500 text-xs sm:text-sm">
 						( {isLoading || count === undefined ? "読み込み中" : `${count}件`} )
 					</span>
@@ -61,7 +61,7 @@ function SectionHeader({
 					className="ml-auto"
 					color="gray"
 					leftIcon={<RxUpdate />}
-					onClick={handleRefresh}
+					onClick={onRefresh}
 					variant="outline"
 				>
 					更新
