@@ -12,6 +12,7 @@ import {
 	type PlayerId,
 	type PlayerSeat,
 	playerCardTable,
+	playerNameExpression,
 	playerTable,
 	type RoundId,
 	type RoundNo,
@@ -81,7 +82,7 @@ export class GameService {
 					id: playerTable.id,
 					image: userTable.image,
 					isCpu: playerTable.isCpu,
-					playerName: playerTable.playerName,
+					playerName: playerNameExpression,
 					seat: playerTable.seat,
 				})
 				.from(playerTable)
@@ -432,13 +433,16 @@ export class GameService {
 			.from(voteTable)
 			.where(eq(voteTable.roundId, round.id));
 
-		return this.calculateWinnersAndVoteCountsFromVotes({ submissions, votes });
+		return GameService.calculateWinnersAndVoteCountsFromVotes({
+			submissions,
+			votes,
+		});
 	}
 
 	/**
 	 * 投票結果から勝者と得票数を計算する
 	 */
-	calculateWinnersAndVoteCountsFromVotes({
+	static calculateWinnersAndVoteCountsFromVotes({
 		submissions,
 		votes,
 	}: {
@@ -562,7 +566,7 @@ export class GameService {
 			.select({
 				id: playerTable.id,
 				image: userTable.image,
-				playerName: playerTable.playerName,
+				playerName: playerNameExpression,
 				seat: playerTable.seat,
 				userId: playerTable.userId,
 			})
@@ -631,10 +635,11 @@ export class GameService {
 				(submission) => submission.roundId === round.id,
 			);
 			const roundVotes = votes.filter((vote) => vote.roundId === round.id);
-			const { winnerPlayerIds } = this.calculateWinnersAndVoteCountsFromVotes({
-				submissions: roundSubmissions,
-				votes: roundVotes,
-			});
+			const { winnerPlayerIds } =
+				GameService.calculateWinnersAndVoteCountsFromVotes({
+					submissions: roundSubmissions,
+					votes: roundVotes,
+				});
 			roundWinnersByRoundId.set(round.id, winnerPlayerIds);
 			for (const playerId of winnerPlayerIds) {
 				const currentCount = winCountByPlayer.get(playerId) ?? 0;
@@ -735,7 +740,7 @@ export class GameService {
 				id: playerTable.id,
 				image: userTable.image,
 				isCpu: playerTable.isCpu,
-				playerName: playerTable.playerName,
+				playerName: playerNameExpression,
 				seat: playerTable.seat,
 			})
 			.from(playerTable)

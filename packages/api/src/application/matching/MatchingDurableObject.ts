@@ -10,6 +10,7 @@ import {
 	isGameId,
 	type Player,
 	type PlayerId,
+	playerNameExpression,
 	playerTable,
 	type User,
 	userTable,
@@ -481,7 +482,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 				createdAt: playerTable.createdAt,
 				id: playerTable.id,
 				image: userTable.image,
-				playerName: playerTable.playerName,
+				playerName: playerNameExpression,
 			})
 			.from(playerTable)
 			.leftJoin(userTable, eq(playerTable.userId, userTable.id))

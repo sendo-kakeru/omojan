@@ -1,10 +1,11 @@
 import type { Me } from "@repo/db/model";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { LuLogIn } from "react-icons/lu";
 import { Link } from "react-router";
+import { useSWRConfig } from "swr";
 import { useMe } from "~/context/me/hooks";
 import { cognito } from "~/libs/cognito";
-import { isAppBrowser } from "~/libs/isAppBrowser";
+import { AVATAR_IMAGE_DIMENSIONS, buildImageUrl } from "~/libs/image";
 import { Avatar } from "../Avatar";
 import { Button } from "../button/Button";
 import {
@@ -28,10 +29,12 @@ export function AuthUserMenuButton() {
  * ログイン時
  */
 export function UserMenuButton({ me }: { me: Me }) {
+	const { cache } = useSWRConfig();
 	const { showToast } = useToast();
 
 	const handleSignOut = () => {
 		try {
+			cache.delete("/me");
 			cognito.signOut();
 		} catch (error) {
 			console.error("ログアウトに失敗しました:", error);
@@ -46,16 +49,15 @@ export function UserMenuButton({ me }: { me: Me }) {
 					className="transition-opacity hover:opacity-80"
 					name={me.name}
 					size="M"
-					src={me.image ?? undefined}
+					src={buildImageUrl({
+						image: me.image,
+						size: AVATAR_IMAGE_DIMENSIONS.M,
+					})}
 				/>
 			}
 		>
-			{/* TODO: メニュー内容の実装 */}
 			<DropdownMenuItem asChild>
-				<Link to="/">プロフィール</Link>
-			</DropdownMenuItem>
-			<DropdownMenuItem asChild>
-				<Link to="/">アカウント設定</Link>
+				<Link to={`/users/${me.userId}`}>プロフィール</Link>
 			</DropdownMenuItem>
 			<DropdownMenuSeparator />
 			<DropdownMenuItem asChild>
@@ -72,11 +74,6 @@ export function UserMenuButton({ me }: { me: Me }) {
  */
 function SigninButton() {
 	const [isOpen, setIsOpen] = useState(false);
-	const [isInAppBrowser, setIsInAppBrowser] = useState(false);
-
-	useEffect(() => {
-		setIsInAppBrowser(isAppBrowser());
-	}, []);
 
 	return (
 		<>
@@ -90,11 +87,7 @@ function SigninButton() {
 			>
 				<LuLogIn aria-hidden="true" />
 			</Button>
-			<SigninModal
-				isAppBrowser={isInAppBrowser}
-				isOpen={isOpen}
-				setIsOpen={setIsOpen}
-			/>
+			<SigninModal isOpen={isOpen} setIsOpen={setIsOpen} />
 		</>
 	);
 }

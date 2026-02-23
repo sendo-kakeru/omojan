@@ -1,6 +1,7 @@
 import type { User } from "@repo/db/schema";
 import classNames from "classnames";
 import type { ComponentProps } from "react";
+import { AVATAR_IMAGE_DIMENSIONS, buildImageUrl } from "~/libs/image";
 import { Avatar } from "../Avatar";
 
 export function UserLabel({
@@ -16,7 +17,13 @@ export function UserLabel({
 }) {
 	return (
 		<div className={classNames("flex items-center gap-x-8", className)}>
-			<Avatar src={user.image ?? ""} {...avatarProps} />
+			<Avatar
+				src={buildImageUrl({
+					image: user.image,
+					size: AVATAR_IMAGE_DIMENSIONS[avatarProps?.size ?? "M"],
+				})}
+				{...avatarProps}
+			/>
 			<p
 				className={classNames(
 					"overflow-hidden text-ellipsis whitespace-nowrap text-sm",

@@ -52,3 +52,6 @@ bin
 *.njsproj
 *.sln
 *.sw?
+
+# Rust
+target/
