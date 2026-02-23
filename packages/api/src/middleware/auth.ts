@@ -1,6 +1,9 @@
+import { userTable } from "@repo/db/schema";
 import { CognitoService } from "@repo/shared/libs/cognito";
+import { eq } from "drizzle-orm";
 import type { MiddlewareHandler } from "hono";
 import { HTTPException } from "hono/http-exception";
+import type { DrizzleClient } from "../libs/drizzle";
 import type { HybridRouteContext, PrivateRouteContext } from "../types";
 
 /**
@@ -9,6 +12,24 @@ import type { HybridRouteContext, PrivateRouteContext } from "../types";
  * 同一 isolate 内で再利用する。
  */
 let cognitoService: CognitoService | null = null;
+
+/**
+ * ユーザーが無効化されていないことを確認する。
+ * ユーザーが未登録の場合（新規登録フロー）はスキップする。
+ */
+async function assertUserActive(db: DrizzleClient, sub: string): Promise<void> {
+	const [user] = await db
+		.select({ status: userTable.status })
+		.from(userTable)
+		.where(eq(userTable.sub, sub))
+		.limit(1);
+
+	if (user && user.status !== "active") {
+		throw new HTTPException(403, {
+			message: "このアカウントは無効化されています",
+		});
+	}
+}
 
 /**
  * @returns MiddlewareHandler<HybridRouteContext>
@@ -28,11 +49,13 @@ export function hybridAuthMiddleware(): MiddlewareHandler<HybridRouteContext> {
 
 			if (token) {
 				const tokenPayload = await cognitoService.verifyAccessToken({ token });
+				await assertUserActive(c.var.db, tokenPayload.sub);
 				c.set("sub", tokenPayload.sub);
 			} else {
 				c.set("sub", null);
 			}
 		} catch (error) {
+			if (error instanceof HTTPException) throw error;
 			console.error("Tokenの検証に失敗しました:", error);
 			c.set("sub", null);
 		}
@@ -64,14 +87,13 @@ export function privateAuthMiddleware(): MiddlewareHandler<PrivateRouteContext> 
 			}
 
 			const tokenPayload = await cognitoService.verifyAccessToken({ token });
+			await assertUserActive(c.var.db, tokenPayload.sub);
 			c.set("sub", tokenPayload.sub);
 
 			await next();
 		} catch (error) {
 			console.error("Tokenの検証に失敗しました:", error);
-			if (error instanceof HTTPException) {
-				throw error;
-			}
+			if (error instanceof HTTPException) throw error;
 			throw new HTTPException(401, {
 				message: "無効または期限切れのトークンです",
 			});
