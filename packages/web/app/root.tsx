@@ -18,6 +18,7 @@ import type { PropsWithChildren } from "react";
 import { ErrorPage } from "./components/ErrorPage";
 import { GlobalNavigationProgress } from "./components/GlobalNavigationProgress";
 import { ToastProvider } from "./components/Toast";
+import { TooltipProvider } from "./components/Tooltip";
 import { MeProvider } from "./context/me/provider";
 
 const SITE_DESCRIPTION =
@@ -106,7 +107,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 						width="0"
 					/>
 				</noscript>
-				<ToastProvider>{children}</ToastProvider>
+				<TooltipProvider>
+					<ToastProvider>{children}</ToastProvider>
+				</TooltipProvider>
 				<ScrollRestoration />
 				<Scripts />
 			</body>
