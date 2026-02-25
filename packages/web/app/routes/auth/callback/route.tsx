@@ -1,5 +1,6 @@
+import type { Api } from "@repo/api";
+import { hc } from "hono/client";
 import { Spinner } from "~/components/Spinner";
-import { honoClient } from "~/libs/apiClient.client";
 import { cognito } from "~/libs/cognito";
 import { buildNoindexMeta } from "~/libs/meta";
 import type { Route } from "./+types/route";
@@ -18,9 +19,15 @@ export async function clientLoader({ request }: Route.LoaderArgs) {
 			throw new Error(`OAuth error: ${oauthError}`);
 		}
 
-		const { payload } = await cognito.handleOAuthCallback({
+		const { accessToken, payload } = await cognito.handleOAuthCallback({
 			code,
 			state,
+		});
+
+		// handleOAuthCallbackから返されたトークンを直接使用する
+		// CognitoUserPool経由でのトークン取得はSafari ITPによりlocalStorageが即座に利用できない場合があるため、初回ログイン時に失敗する可能性がある
+		const honoClient = hc<Api>(import.meta.env.VITE_API_URL, {
+			headers: { Authorization: `Bearer ${accessToken}` },
 		});
 
 		const getMeResponse = await honoClient.v1.me.$get();

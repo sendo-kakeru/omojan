@@ -25,6 +25,7 @@ import { useMe } from "~/context/me/hooks";
 import { useIsLoading } from "~/hooks/useIsLoading";
 import { honoClient } from "~/libs/apiClient.client";
 import { gameTokenLocalStorage } from "~/libs/gameTokenLocalStorage";
+import { LoginPrompt } from "~/routes/_index/components/LoginPrompt";
 export function JoinRoomDialog({
 	isOpen,
 	setIsOpen,
@@ -127,7 +128,12 @@ export function JoinRoomDialog({
 	});
 
 	return (
-		<Dialog onOpenChange={setIsOpen} open={isOpen} title={room.title}>
+		<Dialog
+			onOpenAutoFocus={(e) => e.preventDefault()}
+			onOpenChange={setIsOpen}
+			open={isOpen}
+			title={room.title}
+		>
 			<div className="grid gap-y-16">
 				<div className="grid gap-y-4 rounded-lg border border-gray-200 bg-gray-50 p-12">
 					<div className="grid gap-y-4">
@@ -154,6 +160,7 @@ export function JoinRoomDialog({
 						))}
 					</div>
 				</div>
+				{!me && <LoginPrompt guestLabel="またはゲストで参加" />}
 				<form
 					className="grid gap-y-16"
 					onSubmit={(event) => {
@@ -177,7 +184,6 @@ export function JoinRoomDialog({
 											}
 											htmlFor={id}
 											label="プレイヤー名"
-											note="ログインすると入力が不要になります。"
 										>
 											<Input
 												disabled={isLoading}
