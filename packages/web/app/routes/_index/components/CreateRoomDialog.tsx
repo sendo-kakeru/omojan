@@ -16,6 +16,7 @@ import { useMe } from "~/context/me/hooks";
 import { useIsLoading } from "~/hooks/useIsLoading";
 import { honoClient } from "~/libs/apiClient.client";
 import { gameTokenLocalStorage } from "~/libs/gameTokenLocalStorage";
+import { LoginPrompt } from "~/routes/_index/components/LoginPrompt";
 
 export function CreateRoomDialog({
 	isOpen,
@@ -74,7 +75,13 @@ export function CreateRoomDialog({
 		},
 	});
 	return (
-		<Dialog onOpenChange={setIsOpen} open={isOpen} title="部屋を作成">
+		<Dialog
+			onOpenAutoFocus={(e) => e.preventDefault()}
+			onOpenChange={setIsOpen}
+			open={isOpen}
+			title="部屋を作成"
+		>
+			{!me && <LoginPrompt guestLabel="またはゲストで作成" />}
 			<form
 				className="grid gap-y-24"
 				onSubmit={(e) => {
@@ -122,7 +129,6 @@ export function CreateRoomDialog({
 										}
 										htmlFor={id}
 										label="プレイヤー名"
-										note="ログインすると入力が不要になります。"
 									>
 										<Input
 											disabled={isLoading}
