@@ -183,6 +183,9 @@ export function GameFinalResult({
 															<FaCrown className="size-16 text-yellow-500 md:hidden" />
 														)}
 													</div>
+													{player.isWinner && (
+														<FaCrown className="hidden size-16 text-yellow-500 md:block" />
+													)}
 													<div className="flex items-center gap-x-4 md:contents">
 														<p
 															className={classNames(
@@ -210,9 +213,6 @@ export function GameFinalResult({
 															<TooltipContent>Xで共有する</TooltipContent>
 														</Tooltip>
 													</div>
-													{player.isWinner && (
-														<FaCrown className="hidden size-16 text-yellow-500 md:block" />
-													)}
 												</div>
 											);
 										})}
