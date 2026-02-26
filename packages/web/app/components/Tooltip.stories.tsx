@@ -1,21 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Button } from "./button/Button";
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
-} from "./Tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./Tooltip";
 
 const meta: Meta<typeof Tooltip> = {
 	component: Tooltip,
-	decorators: [
-		(Story) => (
-			<TooltipProvider>
-				<Story />
-			</TooltipProvider>
-		),
-	],
 	tags: ["autodocs"],
 	title: "Components/Tooltip",
 } satisfies Meta<typeof Tooltip>;
