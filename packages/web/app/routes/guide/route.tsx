@@ -81,11 +81,10 @@ export default function HowToPlayPage() {
 					<img
 						alt="おもじゃんオンライン"
 						className="w-full rounded-lg"
-						decoding="async"
 						fetchPriority="high"
-						height={1024}
-						src="/ogp.png"
-						width={1536}
+						height={512}
+						src="/guide/kv.webp"
+						width={768}
 					/>
 				</div>
 
@@ -119,10 +118,10 @@ export default function HowToPlayPage() {
 									alt="部屋参加ダイアログ"
 									className="w-full rounded-lg"
 									decoding="async"
-									height={682}
+									height={447}
 									loading="lazy"
 									src="/guide/join.webp"
-									width={1116}
+									width={732}
 								/>
 							</Step>
 
@@ -143,10 +142,10 @@ export default function HowToPlayPage() {
 									alt="マッチング待機画面"
 									className="w-full rounded-lg"
 									decoding="async"
-									height={880}
+									height={404}
 									loading="lazy"
 									src="/guide/matching.webp"
-									width={1596}
+									width={732}
 								/>
 							</Step>
 
@@ -178,10 +177,10 @@ export default function HowToPlayPage() {
 									alt="提出フェーズの画面"
 									className="w-full rounded-lg"
 									decoding="async"
-									height={1722}
+									height={347}
 									loading="lazy"
 									src="/guide/submission.webp"
-									width={1646}
+									width={732}
 								/>
 							</Step>
 
@@ -223,10 +222,10 @@ export default function HowToPlayPage() {
 									alt="最終結果画面"
 									className="w-full rounded-lg"
 									decoding="async"
-									height={1689}
+									height={752}
 									loading="lazy"
 									src="/guide/result.webp"
-									width={1645}
+									width={732}
 								/>
 							</Step>
 						</div>
