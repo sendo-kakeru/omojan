@@ -1,7 +1,8 @@
 import type { GameResultResponseBody } from "@repo/db/model";
-import { OFFICIAL_X_ID } from "@repo/shared/constants/config";
+import { OFFICIAL_X_ID, PROD_SITE_URL } from "@repo/shared/constants/config";
 import classNames from "classnames";
 import { FaCrown } from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
 import { Link } from "react-router";
 import { Avatar } from "~/components/Avatar";
 import { Badge } from "~/components/Badge";
@@ -9,8 +10,29 @@ import { Button } from "~/components/button/Button";
 import { XFollowButton } from "~/components/button/XFollowButton";
 import { Footer } from "~/components/Footer";
 import { Header } from "~/components/Header";
+import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/Tooltip";
 import { useMe } from "~/context/me/hooks";
 import { AVATAR_IMAGE_DIMENSIONS, buildImageUrl } from "~/libs/image";
+
+function buildXShareUrl({
+	submission,
+	theme,
+}: {
+	submission: string;
+	theme: string;
+}): string {
+	const text = [
+		`「${submission}」`,
+		"",
+		`お題「${theme}」で文字を組み合わせて作った造語です🀄`,
+		PROD_SITE_URL,
+		"",
+		"#おもじゃんオンライン #おもじゃん #OMOJAN",
+	].join("\n");
+	const url = new URL("https://x.com/intent/tweet");
+	url.searchParams.set("text", text);
+	return url.toString();
+}
 
 export type GameFinalResultProps = {
 	result: GameResultResponseBody;
@@ -161,14 +183,33 @@ export function GameFinalResult({
 															<FaCrown className="size-16 text-yellow-500 md:hidden" />
 														)}
 													</div>
-													<p
-														className={classNames(
-															"font-bold md:flex-1",
-															player.isWinner && "text-yellow-700",
-														)}
-													>
-														{player.submission}
-													</p>
+													<div className="flex items-center gap-x-4 md:contents">
+														<p
+															className={classNames(
+																"flex-1 font-bold",
+																player.isWinner && "text-yellow-700",
+															)}
+														>
+															{player.submission}
+														</p>
+														<Tooltip>
+															<TooltipTrigger asChild>
+																<a
+																	aria-label="Xで共有する"
+																	className="grid size-16 shrink-0 place-items-center rounded-full text-neutral-400 transition-colors hover:bg-neutral-100 hover:text-neutral-600"
+																	href={buildXShareUrl({
+																		submission: player.submission,
+																		theme: round.theme,
+																	})}
+																	rel="noopener noreferrer"
+																	target="_blank"
+																>
+																	<FaXTwitter className="size-14" />
+																</a>
+															</TooltipTrigger>
+															<TooltipContent>Xで共有する</TooltipContent>
+														</Tooltip>
+													</div>
 													{player.isWinner && (
 														<FaCrown className="hidden size-16 text-yellow-500 md:block" />
 													)}
