@@ -19,6 +19,7 @@ import { and, asc, eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import type { Env } from "../../env";
 import { createDrizzleClient, type DrizzleClient } from "../../libs/drizzle";
+import { DiscordNotificationService } from "../discord/DiscordNotificationService";
 import { RoomService } from "../room/RoomService";
 import { WebSocketService } from "../websocket/WebsocketService";
 
@@ -26,18 +27,25 @@ import { WebSocketService } from "../websocket/WebsocketService";
 const HEARTBEAT_INTERVAL_MS = 5_000 as const;
 /** PONG応答のタイムアウト（ミリ秒）。この期間内に戻って来られれば再開可能 */
 const HEARTBEAT_TIMEOUT_MS = 10_000 as const;
+/** Discord通知を送信するまでの待機時間（ミリ秒） */
+const DISCORD_NOTIFICATION_DELAY_MS = 10_000 as const;
 
 export class MatchingDurableObject extends DurableObject<Env> {
 	private readonly db: DrizzleClient;
+	private readonly discordNotificationService: DiscordNotificationService;
 	private readonly roomService: RoomService;
 	private readonly webSocketService = new WebSocketService();
 	private gameId: GameId | null = null;
 	/** プレイヤーIDと最終PONG受信時刻のマップ */
 	private readonly lastPongAt = new Map<PlayerId, number>();
+	private discordNotified = false;
 
 	constructor(ctx: DurableObjectState, env: Env) {
 		super(ctx, env);
 		this.db = createDrizzleClient(env);
+		this.discordNotificationService = new DiscordNotificationService(
+			env.DISCORD_WEBHOOK_URL,
+		);
 		this.roomService = new RoomService(this.db);
 	}
 
@@ -220,6 +228,9 @@ export class MatchingDurableObject extends DurableObject<Env> {
 			this.cleanup();
 			return;
 		}
+
+		// Discord通知: パブリックルームが一定時間以上待機中の場合に通知
+		await this.sendDiscordNotificationIfNeeded();
 
 		// 全接続にPINGを送信
 		this.webSocketService.sendPingToAll({ ctx: this.ctx });
@@ -509,6 +520,34 @@ export class MatchingDurableObject extends DurableObject<Env> {
 			} satisfies MatchingServerParticipantsMessage,
 			sockets: this.ctx.getWebSockets(),
 		});
+	}
+
+	/**
+	 * 必要に応じてDiscord Webhook通知を送信する。
+	 * パブリックルームが作成から一定時間以上待機中の場合のみ送信する。
+	 */
+	private async sendDiscordNotificationIfNeeded(): Promise<void> {
+		if (!this.gameId || this.discordNotified) return;
+
+		const [game] = await this.db
+			.select({
+				createdAt: gameTable.createdAt,
+				isPrivate: gameTable.isPrivate,
+			})
+			.from(gameTable)
+			.where(eq(gameTable.id, this.gameId));
+
+		if (!game || game.isPrivate) {
+			this.discordNotified = true;
+			return;
+		}
+
+		const elapsedMs = Date.now() - game.createdAt.getTime();
+		if (elapsedMs < DISCORD_NOTIFICATION_DELAY_MS) return;
+
+		this.discordNotified = true;
+
+		await this.discordNotificationService.sendWaitingRoomNotification();
 	}
 
 	/**

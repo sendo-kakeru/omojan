@@ -8,7 +8,7 @@
 		"aws-jwt-verify": "^5.1.1",
 		"drizzle-orm": "^0.45.1",
 		"drizzle-valibot": "^0.4.2",
-		"hono": "^4.12.2",
+		"hono": "^4.12.3",
 		"p-retry": "^7.1.1",
 		"valibot": "^1.2.0"
 	},
@@ -17,11 +17,11 @@
 		"@repo/mock": "workspace:*",
 		"@repo/tsup-config": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
-		"@types/node": "^24.10.13",
+		"@types/node": "^24.10.15",
 		"drizzle-seed": "^0.3.1",
 		"tsx": "^4.20.6",
 		"vitest": "^4.0.18",
-		"wrangler": "^4.67.0"
+		"wrangler": "^4.69.0"
 	},
 	"exports": {
 		".": "./dist/index.d.ts"
