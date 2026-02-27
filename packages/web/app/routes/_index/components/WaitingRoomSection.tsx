@@ -1,9 +1,12 @@
 import type { WaitingRoom } from "@repo/db/model";
-import { OFFICIAL_X_ID } from "@repo/shared/constants/config";
+import {
+	DISCORD_INVITE_URL,
+	OFFICIAL_X_ID,
+} from "@repo/shared/constants/config";
+import { FaDiscord, FaXTwitter } from "react-icons/fa6";
 import { IoGameController } from "react-icons/io5";
 import { RxUpdate } from "react-icons/rx";
 import { Button } from "~/components/button/Button";
-import { XFollowButton } from "~/components/button/XFollowButton";
 import { RoomCard } from "./RoomCard";
 import { RoomCardSkeleton } from "./RoomCardSkeleton";
 
@@ -46,8 +49,30 @@ function SectionHeader({
 }) {
 	return (
 		<div className="flex items-end justify-between">
-			<div className="grid gap-y-12">
-				<XFollowButton username={OFFICIAL_X_ID} />
+			<div className="grid gap-y-40">
+				<div className="grid gap-y-6">
+					<p className="text-neutral-500 text-xs">募集通知はDiscordから！</p>
+					<div className="flex items-center gap-x-8">
+						<a
+							aria-label="公式Discordサーバー"
+							className="rounded-full bg-[#5865F2] p-6 text-white transition-colors hover:bg-[#4752C4]"
+							href={DISCORD_INVITE_URL}
+							rel="noopener noreferrer"
+							target="_blank"
+						>
+							<FaDiscord className="size-20" />
+						</a>
+						<a
+							aria-label="公式X"
+							className="rounded-full bg-black p-6 text-white transition-colors hover:bg-gray-700"
+							href={`https://x.com/${OFFICIAL_X_ID}`}
+							rel="noopener noreferrer"
+							target="_blank"
+						>
+							<FaXTwitter className="size-20" />
+						</a>
+					</div>
+				</div>
 				<div className="flex items-center gap-x-8">
 					<h2 className="font-bold">🎮 募集中の部屋</h2>
 					<span className="text-neutral-500 text-xs sm:text-sm">

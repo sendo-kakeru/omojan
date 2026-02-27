@@ -5,7 +5,7 @@
 		"@pulumi/gcp": "^9.13.0",
 		"@pulumi/pulumi": "^3.223.0",
 		"@repo/typescript-config": "workspace:*",
-		"@types/node": "^24.10.13",
+		"@types/node": "^24.10.15",
 		"dotenv": "^17.3.1",
 		"typescript": "^5.9.3",
 		"valibot": "^1.2.0"
