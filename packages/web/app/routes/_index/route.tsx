@@ -67,7 +67,7 @@ export default function Page({ loaderData }: Route.ComponentProps) {
 	return (
 		<>
 			<Header />
-			<main className="grid gap-y-12 pb-40 sm:mt-24">
+			<main className="grid gap-y-12 pb-40 sm:mt-8">
 				<h1 className="sr-only">おもじゃんオンライン</h1>
 				<div className="grid gap-y-24">
 					<WaitingRoomSection
