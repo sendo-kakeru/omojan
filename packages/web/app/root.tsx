@@ -18,10 +18,11 @@ import type { PropsWithChildren } from "react";
 import { ErrorPage } from "./components/ErrorPage";
 import { GlobalNavigationProgress } from "./components/GlobalNavigationProgress";
 import { ToastProvider } from "./components/Toast";
+import { TooltipProvider } from "./components/Tooltip";
 import { MeProvider } from "./context/me/provider";
 
 const SITE_DESCRIPTION =
-	"おもじゃん(OMOJAN)をオンラインで遊ぼう！言葉を組み合わせて一番面白い人が勝ち。4人対戦ワードゲーム。";
+	"おもじゃんをオンラインで遊ぼう！言葉を組み合わせて一番面白い人が勝ち。4人対戦ワードゲーム。";
 const OGP_IMAGE = `${PROD_SITE_URL}/ogp.png`;
 
 export const meta: Route.MetaFunction = () => [
@@ -93,6 +94,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-N9PLX5GD');`,
 					}}
 				/>
+				<script
+					async
+					crossOrigin="anonymous"
+					src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5477394430005803"
+				/>
 				<Meta />
 				<Links />
 			</head>
@@ -106,7 +112,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 						width="0"
 					/>
 				</noscript>
-				<ToastProvider>{children}</ToastProvider>
+				<TooltipProvider>
+					<ToastProvider>{children}</ToastProvider>
+				</TooltipProvider>
 				<ScrollRestoration />
 				<Scripts />
 			</body>

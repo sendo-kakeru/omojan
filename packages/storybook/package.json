@@ -2,7 +2,7 @@
 	"dependencies": {
 		"react": "^19.2.4",
 		"react-dom": "^19.2.4",
-		"react-router": "^7.13.0"
+		"react-router": "^7.13.1"
 	},
 	"devDependencies": {
 		"@chromatic-com/storybook": "^5.0.1",
@@ -10,11 +10,11 @@
 		"@repo/mock": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
 		"@repo/web": "workspace:*",
-		"@storybook/addon-a11y": "^10.2.10",
-		"@storybook/addon-docs": "^10.2.10",
-		"@storybook/addon-vitest": "^10.2.10",
-		"@storybook/react-vite": "^10.2.10",
-		"@tailwindcss/vite": "^4.2.0",
+		"@storybook/addon-a11y": "^10.2.13",
+		"@storybook/addon-docs": "^10.2.13",
+		"@storybook/addon-vitest": "^10.2.13",
+		"@storybook/react-vite": "^10.2.13",
+		"@tailwindcss/vite": "^4.2.1",
 		"@types/react": "^19.2.14",
 		"@types/react-dom": "^19.2.3",
 		"@vitejs/plugin-react": "^5.1.4",
@@ -23,8 +23,8 @@
 		"@vitest/coverage-v8": "^4.0.18",
 		"globals": "^17.3.0",
 		"playwright": "^1.58.2",
-		"storybook": "^10.2.10",
-		"tailwindcss": "^4.2.0",
+		"storybook": "^10.2.13",
+		"tailwindcss": "^4.2.1",
 		"typescript": "~5.9.3",
 		"vite": "^7.3.1",
 		"vitest": "^4.0.18"

@@ -67,17 +67,17 @@ export default function Page({ loaderData }: Route.ComponentProps) {
 	return (
 		<>
 			<Header />
-			<main className="grid gap-y-12 pb-40 sm:mt-24">
-				<h1 className="sr-only">おもじゃんオンライン(OMOJAN)</h1>
+			<main className="grid gap-y-12 pb-40 sm:mt-8">
+				<h1 className="sr-only">おもじゃんオンライン</h1>
 				<div className="grid gap-y-24">
 					<WaitingRoomSection
 						error={waitingError}
-						handleRefresh={() => {
+						isLoading={waitingLoading}
+						onCreateRoom={() => setIsOpen(true)}
+						onRefresh={() => {
 							waitingMutate();
 							finishedMutate();
 						}}
-						isLoading={waitingLoading}
-						onCreateRoom={() => setIsOpen(true)}
 						rooms={waitingData?.items as WaitingRoom[] | undefined}
 					/>
 

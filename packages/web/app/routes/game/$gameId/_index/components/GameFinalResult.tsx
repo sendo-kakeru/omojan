@@ -1,16 +1,44 @@
 import type { GameResultResponseBody } from "@repo/db/model";
-import { OFFICIAL_X_ID } from "@repo/shared/constants/config";
+import {
+	DISCORD_INVITE_URL,
+	OFFICIAL_X_ID,
+	PROD_SITE_URL,
+	SITE_NAME,
+} from "@repo/shared/constants/config";
 import classNames from "classnames";
 import { FaCrown } from "react-icons/fa";
+import { FaDiscord, FaXTwitter } from "react-icons/fa6";
+import { IoMdShare } from "react-icons/io";
 import { Link } from "react-router";
 import { Avatar } from "~/components/Avatar";
 import { Badge } from "~/components/Badge";
 import { Button } from "~/components/button/Button";
-import { XFollowButton } from "~/components/button/XFollowButton";
 import { Footer } from "~/components/Footer";
 import { Header } from "~/components/Header";
+import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/Tooltip";
 import { useMe } from "~/context/me/hooks";
+import { useShare } from "~/hooks/useShare";
 import { AVATAR_IMAGE_DIMENSIONS, buildImageUrl } from "~/libs/image";
+
+function buildXShareUrl({
+	submission,
+	theme,
+}: {
+	submission: string;
+	theme: string;
+}): string {
+	const text = [
+		`「${submission}」`,
+		"",
+		`お題「${theme}」で文字を組み合わせて作った造語です🀄`,
+		PROD_SITE_URL,
+		"",
+		"#おもじゃんオンライン #おもじゃん #OMOJAN",
+	].join("\n");
+	const url = new URL("https://x.com/intent/tweet");
+	url.searchParams.set("text", text);
+	return url.toString();
+}
 
 export type GameFinalResultProps = {
 	result: GameResultResponseBody;
@@ -20,11 +48,16 @@ export function GameFinalResult({
 	result: { title, winners, rounds },
 }: GameFinalResultProps) {
 	const { me } = useMe();
+	const { share } = useShare({
+		text: "一緒に遊ぼう！",
+		title: SITE_NAME,
+		url: PROD_SITE_URL,
+	});
 
 	return (
 		<>
 			<Header />
-			<main className="grid min-h-full gap-y-24 pb-36">
+			<main className="grid gap-y-24 pb-36">
 				<div className="grid gap-y-4">
 					<section className="grid place-items-center gap-y-12 rounded-2xl border border-yellow-300 bg-yellow-100 p-16 shadow">
 						<h1 className="font-bold text-lg text-neutral-600">{title}</h1>
@@ -81,21 +114,33 @@ export function GameFinalResult({
 					</section>
 				</div>
 
-				<aside className="grid place-items-center gap-y-8 rounded-xl border border-gray-200 bg-white p-16">
-					<div className="grid gap-y-4 text-center">
-						<p className="font-bold text-neutral-700">
-							最新情報は公式Xをチェック
-						</p>
-						<p className="text-neutral-500 text-sm">
-							不具合の報告や追加してほしい単語など
-							<br />
-							お気軽にご連絡ください
-						</p>
-					</div>
-					<XFollowButton
-						options={{ lang: "ja", showScreenName: false, size: "large" }}
-						username={OFFICIAL_X_ID}
-					/>
+				<aside className="flex items-center justify-center gap-x-12">
+					<a
+						className="flex h-28 items-center gap-x-8 rounded-full bg-neutral-800 px-16 font-bold text-white text-xs transition-opacity hover:opacity-80"
+						href={`https://x.com/${OFFICIAL_X_ID}`}
+						rel="noopener noreferrer"
+						target="_blank"
+					>
+						<FaXTwitter className="size-18" />
+						フォロー
+					</a>
+					<a
+						className="flex h-28 items-center gap-x-8 rounded-full bg-[#5865F2] px-16 font-bold text-white text-xs transition-opacity hover:opacity-80"
+						href={DISCORD_INVITE_URL}
+						rel="noopener noreferrer"
+						target="_blank"
+					>
+						<FaDiscord className="size-18" />
+						参加する
+					</a>
+					<button
+						className="flex h-28 items-center gap-x-8 rounded-full bg-cyan-400 px-16 font-bold text-white text-xs transition-opacity hover:opacity-80"
+						onClick={share}
+						type="button"
+					>
+						<IoMdShare className="size-18" />
+						共有する
+					</button>
 				</aside>
 
 				{/* Round History */}
@@ -146,7 +191,7 @@ export function GameFinalResult({
 													)}
 													key={player.id}
 												>
-													<div className="flex items-center gap-x-4 md:gap-x-8">
+													<div className="flex items-center gap-x-4 pr-3 md:gap-x-8 md:pr-0">
 														{player.userId ? (
 															<Link
 																className="flex items-center gap-x-4 md:gap-x-8"
@@ -161,17 +206,36 @@ export function GameFinalResult({
 															<FaCrown className="size-16 text-yellow-500 md:hidden" />
 														)}
 													</div>
-													<p
-														className={classNames(
-															"font-bold md:flex-1",
-															player.isWinner && "text-yellow-700",
-														)}
-													>
-														{player.submission}
-													</p>
 													{player.isWinner && (
 														<FaCrown className="hidden size-16 text-yellow-500 md:block" />
 													)}
+													<div className="flex items-center gap-x-4 md:contents">
+														<p
+															className={classNames(
+																"flex-1 font-bold",
+																player.isWinner && "text-yellow-700",
+															)}
+														>
+															{player.submission}
+														</p>
+														<Tooltip>
+															<TooltipTrigger asChild>
+																<a
+																	aria-label="Xで共有する"
+																	className="grid shrink-0 place-items-center rounded-full bg-black p-4 text-white transition-colors hover:bg-gray-700"
+																	href={buildXShareUrl({
+																		submission: player.submission,
+																		theme: round.theme,
+																	})}
+																	rel="noopener noreferrer"
+																	target="_blank"
+																>
+																	<FaXTwitter className="size-14" />
+																</a>
+															</TooltipTrigger>
+															<TooltipContent>Xで共有する</TooltipContent>
+														</Tooltip>
+													</div>
 												</div>
 											);
 										})}

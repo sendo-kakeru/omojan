@@ -7,6 +7,7 @@ export const envSchema = object({
 	// Cognito認証設定
 	COGNITO_USER_POOL_ID: string(),
 	DATABASE_URL: pipe(string(), url()),
+	DISCORD_WEBHOOK_URL: pipe(string(), url()),
 	ENV: envVarSchema,
 	JWT_SECRET: string(),
 	TURSO_AUTH_TOKEN: string(),

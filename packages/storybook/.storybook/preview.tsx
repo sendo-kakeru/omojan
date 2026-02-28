@@ -2,6 +2,7 @@ import { MOCK_ME } from "@repo/mock/model";
 import type { Decorator, Preview } from "@storybook/react-vite";
 import { BrowserRouter } from "react-router";
 import { ToastProvider } from "../../web/app/components/Toast";
+import { TooltipProvider } from "../../web/app/components/Tooltip";
 import { MeContext } from "../../web/app/context/me/provider";
 import "../style.css";
 
@@ -15,11 +16,13 @@ const decorator: Decorator = (Story, context) => {
 					mutate: async () => {},
 				}}
 			>
-				<ToastProvider>
-					<div className="font-[Inter] text-neutral-800">
-						<Story />
-					</div>
-				</ToastProvider>
+				<TooltipProvider>
+					<ToastProvider>
+						<div className="font-[Inter] text-neutral-800">
+							<Story />
+						</div>
+					</ToastProvider>
+				</TooltipProvider>
 			</MeContext>
 		</BrowserRouter>
 	);

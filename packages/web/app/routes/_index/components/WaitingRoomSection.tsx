@@ -1,9 +1,16 @@
 import type { WaitingRoom } from "@repo/db/model";
-import { OFFICIAL_X_ID } from "@repo/shared/constants/config";
+import {
+	DISCORD_INVITE_URL,
+	OFFICIAL_X_ID,
+	PROD_SITE_URL,
+	SITE_NAME,
+} from "@repo/shared/constants/config";
+import { FaDiscord, FaXTwitter } from "react-icons/fa6";
+import { IoMdShare } from "react-icons/io";
 import { IoGameController } from "react-icons/io5";
 import { RxUpdate } from "react-icons/rx";
 import { Button } from "~/components/button/Button";
-import { XFollowButton } from "~/components/button/XFollowButton";
+import { useShare } from "~/hooks/useShare";
 import { RoomCard } from "./RoomCard";
 import { RoomCardSkeleton } from "./RoomCardSkeleton";
 
@@ -12,21 +19,21 @@ export function WaitingRoomSection({
 	error,
 	rooms,
 	onCreateRoom,
-	handleRefresh,
+	onRefresh,
 }: {
 	isLoading: boolean;
 	error?: Error;
 	rooms?: WaitingRoom[];
 	onCreateRoom: () => void;
-	handleRefresh: () => void;
+	onRefresh: () => void;
 }) {
 	return (
 		<section className="grid gap-y-12">
 			<SectionHeader
 				count={rooms?.length}
-				handleRefresh={handleRefresh}
 				isLoading={isLoading}
 				onCreateRoom={onCreateRoom}
+				onRefresh={onRefresh}
 			/>
 			<WaitingRoomList error={error} isLoading={isLoading} rooms={rooms} />
 		</section>
@@ -37,19 +44,55 @@ function SectionHeader({
 	count,
 	isLoading,
 	onCreateRoom,
-	handleRefresh,
+	onRefresh,
 }: {
 	count?: number;
 	isLoading: boolean;
 	onCreateRoom: () => void;
-	handleRefresh: () => void;
+	onRefresh: () => void;
 }) {
+	const { share } = useShare({
+		text: "一緒に遊ぼう！",
+		title: SITE_NAME,
+		url: PROD_SITE_URL,
+	});
+
 	return (
 		<div className="flex items-end justify-between">
-			<div className="grid gap-y-12">
-				<XFollowButton username={OFFICIAL_X_ID} />
+			<div className="grid gap-y-40">
+				<div className="grid gap-y-6">
+					<p className="text-neutral-500 text-xs">募集通知はDiscordから！</p>
+					<div className="flex items-center gap-x-8">
+						<a
+							aria-label="公式Discordサーバー"
+							className="rounded-full bg-[#5865F2] p-6 text-white transition-colors hover:bg-[#4752C4]"
+							href={DISCORD_INVITE_URL}
+							rel="noopener noreferrer"
+							target="_blank"
+						>
+							<FaDiscord className="size-20" />
+						</a>
+						<a
+							aria-label="公式X"
+							className="rounded-full bg-black p-6 text-white transition-colors hover:bg-gray-700"
+							href={`https://x.com/${OFFICIAL_X_ID}`}
+							rel="noopener noreferrer"
+							target="_blank"
+						>
+							<FaXTwitter className="size-20" />
+						</a>
+						<button
+							aria-label="友達に共有する"
+							className="rounded-full bg-cyan-400 p-6 text-white transition-colors hover:bg-cyan-500"
+							onClick={share}
+							type="button"
+						>
+							<IoMdShare className="size-20" />
+						</button>
+					</div>
+				</div>
 				<div className="flex items-center gap-x-8">
-					<h2 className="font-bold">募集中の部屋</h2>
+					<h2 className="font-bold">🎮 募集中の部屋</h2>
 					<span className="text-neutral-500 text-xs sm:text-sm">
 						( {isLoading || count === undefined ? "読み込み中" : `${count}件`} )
 					</span>
@@ -61,7 +104,7 @@ function SectionHeader({
 					className="ml-auto"
 					color="gray"
 					leftIcon={<RxUpdate />}
-					onClick={handleRefresh}
+					onClick={onRefresh}
 					variant="outline"
 				>
 					更新
