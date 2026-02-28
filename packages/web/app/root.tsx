@@ -94,6 +94,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-N9PLX5GD');`,
 					}}
 				/>
+				<script
+					async
+					crossOrigin="anonymous"
+					src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5477394430005803"
+				/>
 				<Meta />
 				<Links />
 			</head>

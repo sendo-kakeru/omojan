@@ -1,12 +1,14 @@
 import type { MatchingParticipant, Room } from "@repo/db/model";
+import { PROD_SITE_URL, SITE_NAME } from "@repo/shared/constants/config";
 import { FaRegCopy } from "react-icons/fa";
 import { FaCheck, FaRegClock } from "react-icons/fa6";
-import { IoIosLock } from "react-icons/io";
+import { IoIosLock, IoMdShare } from "react-icons/io";
 import { Button } from "~/components/button/Button";
 import { Separator } from "~/components/Separator";
 import { Spinner } from "~/components/Spinner";
 import { UserLabel } from "~/components/user/UserLabel";
 import { useClipboard } from "~/hooks/useClipboard";
+import { useShare } from "~/hooks/useShare";
 
 export function MatchingPresenter({
 	roomMeta,
@@ -26,6 +28,11 @@ export function MatchingPresenter({
 	onStart: () => void;
 }) {
 	const { isCopied, copy } = useClipboard(roomMeta.password ?? "");
+	const { share } = useShare({
+		text: `「${roomMeta.title}」で一緒に遊ぼう！`,
+		title: SITE_NAME,
+		url: PROD_SITE_URL,
+	});
 	return (
 		<main className="relative my-24 grid gap-y-16 rounded-lg border border-gray-200 bg-white p-16">
 			{transitionCount !== null && (
@@ -123,13 +130,22 @@ export function MatchingPresenter({
 			<Separator />
 
 			<section className="grid gap-y-16">
-				<div className="grid items-center gap-y-4 md:grid-cols-[auto_1fr] md:gap-x-16">
+				<div className="flex items-center justify-between gap-x-8">
 					<h2 className="font-bold">参加者</h2>
-					<p className="text-neutral-500 text-sm">
-						4人揃ったらゲームが開始されます。
-						{isHost && "「今すぐ開始」で募集中のプレイヤーをCPUで開始します。"}
-					</p>
+					<button
+						aria-label="友達に共有する"
+						className="flex items-center gap-x-6 rounded-full bg-cyan-400 px-16 py-6 font-medium text-sm text-white transition-colors hover:bg-cyan-500"
+						onClick={share}
+						type="button"
+					>
+						<IoMdShare className="size-18" />
+						友達を誘う
+					</button>
 				</div>
+				<p className="text-neutral-500 text-sm">
+					4人揃ったらゲームが開始されます。
+					{isHost && "「今すぐ開始」で募集中のプレイヤーをCPUで開始します。"}
+				</p>
 				<ul className="grid gap-y-12">
 					{[1, 2, 3, 4].map((seat) => (
 						<li key={seat}>
