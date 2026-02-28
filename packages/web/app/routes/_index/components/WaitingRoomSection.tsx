@@ -2,11 +2,15 @@ import type { WaitingRoom } from "@repo/db/model";
 import {
 	DISCORD_INVITE_URL,
 	OFFICIAL_X_ID,
+	PROD_SITE_URL,
+	SITE_NAME,
 } from "@repo/shared/constants/config";
 import { FaDiscord, FaXTwitter } from "react-icons/fa6";
+import { IoMdShare } from "react-icons/io";
 import { IoGameController } from "react-icons/io5";
 import { RxUpdate } from "react-icons/rx";
 import { Button } from "~/components/button/Button";
+import { useShare } from "~/hooks/useShare";
 import { RoomCard } from "./RoomCard";
 import { RoomCardSkeleton } from "./RoomCardSkeleton";
 
@@ -47,6 +51,12 @@ function SectionHeader({
 	onCreateRoom: () => void;
 	onRefresh: () => void;
 }) {
+	const { share } = useShare({
+		text: "一緒に遊ぼう！",
+		title: SITE_NAME,
+		url: PROD_SITE_URL,
+	});
+
 	return (
 		<div className="flex items-end justify-between">
 			<div className="grid gap-y-40">
@@ -71,6 +81,14 @@ function SectionHeader({
 						>
 							<FaXTwitter className="size-20" />
 						</a>
+						<button
+							aria-label="友達に共有する"
+							className="rounded-full bg-cyan-400 p-6 text-white transition-colors hover:bg-cyan-500"
+							onClick={share}
+							type="button"
+						>
+							<IoMdShare className="size-20" />
+						</button>
 					</div>
 				</div>
 				<div className="flex items-center gap-x-8">

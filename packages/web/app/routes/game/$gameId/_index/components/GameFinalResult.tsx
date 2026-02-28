@@ -3,10 +3,12 @@ import {
 	DISCORD_INVITE_URL,
 	OFFICIAL_X_ID,
 	PROD_SITE_URL,
+	SITE_NAME,
 } from "@repo/shared/constants/config";
 import classNames from "classnames";
 import { FaCrown } from "react-icons/fa";
 import { FaDiscord, FaXTwitter } from "react-icons/fa6";
+import { IoMdShare } from "react-icons/io";
 import { Link } from "react-router";
 import { Avatar } from "~/components/Avatar";
 import { Badge } from "~/components/Badge";
@@ -15,6 +17,7 @@ import { Footer } from "~/components/Footer";
 import { Header } from "~/components/Header";
 import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/Tooltip";
 import { useMe } from "~/context/me/hooks";
+import { useShare } from "~/hooks/useShare";
 import { AVATAR_IMAGE_DIMENSIONS, buildImageUrl } from "~/libs/image";
 
 function buildXShareUrl({
@@ -45,6 +48,11 @@ export function GameFinalResult({
 	result: { title, winners, rounds },
 }: GameFinalResultProps) {
 	const { me } = useMe();
+	const { share } = useShare({
+		text: "一緒に遊ぼう！",
+		title: SITE_NAME,
+		url: PROD_SITE_URL,
+	});
 
 	return (
 		<>
@@ -125,6 +133,14 @@ export function GameFinalResult({
 						<FaDiscord className="size-18" />
 						参加する
 					</a>
+					<button
+						className="flex h-28 items-center gap-x-8 rounded-full bg-cyan-400 px-16 font-bold text-white text-xs transition-opacity hover:opacity-80"
+						onClick={share}
+						type="button"
+					>
+						<IoMdShare className="size-18" />
+						共有する
+					</button>
 				</aside>
 
 				{/* Round History */}
