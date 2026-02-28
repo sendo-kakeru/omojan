@@ -2,6 +2,7 @@ import type { GameResultResponseBody } from "@repo/db/model";
 import type { PlayerId, UserId } from "@repo/db/schema";
 import { MOCK_ME } from "@repo/mock/model";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { GameResultSkeleton } from "~/routes/game/$gameId/result/components/GameResultSkeleton";
 import {
 	gameScreenDecorator,
 	gameScreenParameters,
@@ -471,4 +472,10 @@ export const MeAsLoser: Story = {
 		},
 	},
 	name: "自分が負け",
+};
+
+// スケルトン
+export const Skeleton: StoryObj<typeof GameResultSkeleton> = {
+	name: "スケルトン",
+	render: () => <GameResultSkeleton />,
 };

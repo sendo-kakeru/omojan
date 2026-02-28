@@ -1,8 +1,8 @@
 import type { GameId } from "@repo/db/schema";
-import { Spinner } from "~/components/Spinner";
 import { buildNoindexMeta } from "~/libs/meta";
 import { GameFinalResult } from "~/routes/game/$gameId/_index/components/GameFinalResult";
 import type { Route } from "./+types/route";
+import { GameResultSkeleton } from "./components/GameResultSkeleton";
 import { useGameResultSWR } from "./hooks/useGameResultSWR";
 
 export const meta: Route.MetaFunction = ({ matches }) =>
@@ -13,13 +13,7 @@ export default function Page({ params: { gameId } }: Route.ComponentProps) {
 	const result = data?.data;
 
 	if (isLoading) {
-		// TODO: 必要であればスケルトン
-		return (
-			<div className="grid place-items-center gap-y-4 py-16 text-neutral-500">
-				<Spinner className="size-32" />
-				<p className="text-center">ゲーム結果を取得中...</p>
-			</div>
-		);
+		return <GameResultSkeleton />;
 	}
 
 	if (error) {
