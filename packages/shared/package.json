@@ -2,7 +2,7 @@
 	"dependencies": {
 		"aws-jwt-verify": "^5.1.1",
 		"drizzle-valibot": "^0.4.2",
-		"hono": "^4.12.3",
+		"hono": "^4.12.4",
 		"valibot": "^1.2.0"
 	},
 	"devDependencies": {
