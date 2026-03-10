@@ -116,7 +116,7 @@ export function GameFinalResult({
 
 				<aside className="flex items-center justify-center gap-x-12">
 					<a
-						className="flex h-28 items-center gap-x-8 rounded-full bg-neutral-800 px-16 font-bold text-white text-xs transition-opacity hover:opacity-80"
+						className="flex h-28 items-center gap-x-8 rounded-full bg-neutral-800 pr-16 pl-12 font-bold text-white text-xs transition-opacity hover:opacity-80"
 						href={`https://x.com/${OFFICIAL_X_ID}`}
 						rel="noopener noreferrer"
 						target="_blank"
@@ -125,21 +125,21 @@ export function GameFinalResult({
 						フォロー
 					</a>
 					<a
-						className="flex h-28 items-center gap-x-8 rounded-full bg-[#5865F2] px-16 font-bold text-white text-xs transition-opacity hover:opacity-80"
+						className="flex h-28 items-center gap-x-8 rounded-full bg-[#5865F2] pr-16 pl-12 font-bold text-white text-xs transition-opacity hover:opacity-80"
 						href={DISCORD_INVITE_URL}
 						rel="noopener noreferrer"
 						target="_blank"
 					>
 						<FaDiscord className="size-18" />
-						参加する
+						参加
 					</a>
 					<button
-						className="flex h-28 items-center gap-x-8 rounded-full bg-cyan-400 px-16 font-bold text-white text-xs transition-opacity hover:opacity-80"
+						className="flex h-28 items-center gap-x-8 rounded-full bg-cyan-400 pr-16 pl-12 font-bold text-white text-xs transition-opacity hover:opacity-80"
 						onClick={share}
 						type="button"
 					>
 						<IoMdShare className="size-18" />
-						共有する
+						共有
 					</button>
 				</aside>
 
