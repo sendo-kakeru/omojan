@@ -10,6 +10,11 @@
 		"node": "24.13.0"
 	},
 	"name": "omojan",
+	"pnpm": {
+		"overrides": {
+			"@types/node": "^24.11.1"
+		}
+	},
 	"packageManager": "pnpm@10.22.0",
 	"private": true,
 	"scripts": {
