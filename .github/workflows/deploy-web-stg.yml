@@ -21,6 +21,7 @@ jobs:
       VITE_COGNITO_DOMAIN: https://auth-stg.omojan.com
       VITE_API_URL: https://api-stg.omojan.com
       VITE_CDN_URL: https://cdn-stg.omojan.com
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
     steps:
       - uses: actions/checkout@v6
 
