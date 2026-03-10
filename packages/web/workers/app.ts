@@ -1,3 +1,4 @@
+import { wrapRequestHandler } from "@sentry/cloudflare";
 import { createRequestHandler } from "react-router";
 import { maintenanceHtml } from "./maintenance";
 
@@ -14,13 +15,8 @@ type WebEnv = Omit<Env, "MAINTENANCE_MODE"> & {
 	MAINTENANCE_MODE: string;
 };
 
-const requestHandler = createRequestHandler(
-	() => import("virtual:react-router/server-build"),
-	import.meta.env.MODE,
-);
-
 export default {
-	async fetch(request, env: WebEnv, ctx) {
+	async fetch(request, env: WebEnv, executionContext: ExecutionContext) {
 		// メンテナンスモードチェック（Cloudflare Dashboardで "true" に変更可能）
 		if (env.MAINTENANCE_MODE === "true") {
 			return new Response(maintenanceHtml(), {
@@ -32,8 +28,25 @@ export default {
 			});
 		}
 
-		return requestHandler(request, {
-			cloudflare: { ctx, env: env as Env },
-		});
+		const requestHandler = createRequestHandler(
+			() => import("virtual:react-router/server-build"),
+			import.meta.env.MODE,
+		);
+
+		return wrapRequestHandler(
+			{
+				context: executionContext,
+				options: {
+					dsn: "https://0059254ef5a4ea86918e8a1721f51288@o4511000575541248.ingest.us.sentry.io/4511000584192000",
+					sendDefaultPii: true,
+				},
+				request: request,
+			},
+			() => {
+				return requestHandler(request, {
+					cloudflare: { ctx: executionContext, env: env as Env },
+				});
+			},
+		);
 	},
 } satisfies ExportedHandler<WebEnv>;
