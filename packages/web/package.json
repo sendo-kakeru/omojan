@@ -9,7 +9,7 @@
 		"@react-router/serve": "^7.13.1",
 		"@repo/shared": "workspace:*",
 		"@sentry/cloudflare": "^10.43.0",
-		"@sentry/react-router": "^10.42.0",
+		"@sentry/react-router": "^10.43.0",
 		"@tanstack/react-form": "^1.28.5",
 		"amazon-cognito-identity-js": "^6.3.16",
 		"classnames": "^2.5.1",
