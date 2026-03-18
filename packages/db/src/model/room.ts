@@ -29,6 +29,7 @@ import {
 	playerNameSchema,
 	playerSchema,
 	playerTable,
+	userIdSchema,
 	userSchema,
 } from "../schema";
 import {
@@ -64,6 +65,8 @@ export const getRoomListRequestQuerySchema = object({
 	...paginationRequestQuerySchema.entries,
 	/** 部屋のステータス（default: "waiting"） */
 	status: optional(roomStatusSchema),
+	/** 参加したユーザーのID */
+	userId: optional(userIdSchema),
 });
 export type GetRoomListRequestQuery = InferOutput<
 	typeof getRoomListRequestQuerySchema

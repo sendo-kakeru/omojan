@@ -11,17 +11,20 @@ export function useRoomListSWR({
 	status = "waiting",
 	page,
 	limit,
+	userId,
 	fallbackData,
 }: GetRoomListRequestQuery & { fallbackData?: RoomListData } = {}) {
 	const query: GetRoomListRequestQuery = { status };
 
 	if (page) query.page = page;
 	if (limit) query.limit = limit;
+	if (userId) query.userId = userId;
 
 	const key = `/rooms?${new URLSearchParams({
 		limit: query.limit?.toString() ?? "",
 		page: query.page?.toString() ?? "",
 		status: query.status ?? "",
+		userId: query.userId ?? "",
 	}).toString()}`;
 
 	const result = useSWR(key, () => fetchRoomList(query), { fallbackData });

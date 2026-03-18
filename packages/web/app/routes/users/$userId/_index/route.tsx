@@ -1,5 +1,5 @@
 import type { Api } from "@repo/api";
-import type { PublicUser } from "@repo/db/model";
+import type { FinishedRoom, PublicUser } from "@repo/db/model";
 import { OFFICIAL_X_ID } from "@repo/shared/constants/config";
 import { hc } from "hono/client";
 import { FaCrown, FaUser } from "react-icons/fa";
@@ -13,7 +13,10 @@ import { Spinner } from "~/components/Spinner";
 import { useMe } from "~/context/me/hooks";
 import { buildImageUrl, PROFILE_IMAGE_DIMENSIONS } from "~/libs/image";
 import { buildNoindexMeta } from "~/libs/meta";
+import { useRoomListSWR } from "~/routes/_index/hooks/useRoomListSWR";
 import type { Route } from "./+types/route";
+import { UserGameSection } from "./components/UserGameSection";
+import { USER_GAMES_LIMIT } from "./constants";
 
 export const meta: Route.MetaFunction = ({ matches }) =>
 	buildNoindexMeta(matches.flatMap((m) => m?.meta ?? []));
@@ -47,12 +50,28 @@ export default function UserPage({
 }: Route.ComponentProps) {
 	const { me } = useMe();
 	const isMe = me?.userId === user.userId;
+	const {
+		data: gamesData,
+		error: gamesError,
+		isLoading: gamesLoading,
+	} = useRoomListSWR({
+		limit: USER_GAMES_LIMIT,
+		status: "finished",
+		userId: user.userId,
+	});
 
 	return (
 		<div className="grid min-h-full grid-rows-[auto_1fr_auto]">
 			<Header />
 			<main className="grid content-start gap-y-24 pb-40">
 				<UserProfile user={user} />
+				<UserGameSection
+					error={gamesError}
+					isLoading={gamesLoading}
+					rooms={gamesData?.items as FinishedRoom[] | undefined}
+					total={gamesData?.meta?.total}
+					userId={user.userId}
+				/>
 			</main>
 
 			{isMe && (
