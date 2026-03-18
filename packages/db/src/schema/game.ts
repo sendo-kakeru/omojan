@@ -1,4 +1,4 @@
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { createSelectSchema } from "drizzle-valibot";
 import {
 	brand,
@@ -19,19 +19,26 @@ export function isGameId(id: unknown): id is GameId {
 	return result.success;
 }
 
-export const gameTable = sqliteTable("game", {
-	...tableBaseColumns,
-	id: idBaseColumn.$type<GameId>(),
-	isPrivate: integer("is_private", { mode: "boolean" })
-		.notNull()
-		.default(false),
-	password: text("password"),
-	status: text("status", { enum: ["waiting", "active", "finished"] })
-		.notNull()
-		.default("waiting"),
-	timeLimit: integer("time_limit").notNull(),
-	title: text("title").notNull(),
-});
+export const gameTable = sqliteTable(
+	"game",
+	{
+		...tableBaseColumns,
+		id: idBaseColumn.$type<GameId>(),
+		isPrivate: integer("is_private", { mode: "boolean" })
+			.notNull()
+			.default(false),
+		password: text("password"),
+		status: text("status", { enum: ["waiting", "active", "finished"] })
+			.notNull()
+			.default("waiting"),
+		timeLimit: integer("time_limit").notNull(),
+		title: text("title").notNull(),
+	},
+	(table) => [
+		index("game_status_idx").on(table.status),
+		index("game_status_updated_at_idx").on(table.status, table.updatedAt),
+	],
+);
 
 export const gameSchema = createSelectSchema(gameTable, {
 	id: gameIdSchema,

@@ -20,9 +20,11 @@ import {
 	type PlayerSeat,
 	playerNameExpression,
 	playerTable,
+	type RoundId,
 	roundTable,
 	submissionTable,
 	type User,
+	type UserId,
 	userTable,
 	voteTable,
 } from "@repo/db/schema";
@@ -93,31 +95,43 @@ export class RoomService {
 	async findManyWaiting({
 		page = 1,
 		limit = 20,
+		userId,
 	}: {
 		page?: number;
 		limit?: number;
+		userId?: UserId;
 	}): Promise<GetRoomListWaitingResponseBody> {
-		// 総件数取得
-		const [countResult] = await this.db
-			.select({ count: count() })
-			.from(gameTable)
-			.where(eq(gameTable.status, "waiting"));
-		const total = countResult?.count ?? 0;
+		const whereCondition = userId
+			? and(
+					eq(gameTable.status, "waiting"),
+					inArray(
+						gameTable.id,
+						this.db
+							.select({ gameId: playerTable.gameId })
+							.from(playerTable)
+							.where(eq(playerTable.userId, userId)),
+					),
+				)
+			: eq(gameTable.status, "waiting");
 
-		// game取得（ページネーション付き）
-		const games = await this.db
-			.select({
-				createdAt: gameTable.createdAt,
-				id: gameTable.id,
-				isPrivate: gameTable.isPrivate,
-				timeLimit: gameTable.timeLimit,
-				title: gameTable.title,
-			})
-			.from(gameTable)
-			.where(eq(gameTable.status, "waiting"))
-			.orderBy(desc(gameTable.createdAt))
-			.limit(limit)
-			.offset((page - 1) * limit);
+		// 総件数とゲーム一覧を1往復で取得
+		const [countResults, games] = await this.db.batch([
+			this.db.select({ count: count() }).from(gameTable).where(whereCondition),
+			this.db
+				.select({
+					createdAt: gameTable.createdAt,
+					id: gameTable.id,
+					isPrivate: gameTable.isPrivate,
+					timeLimit: gameTable.timeLimit,
+					title: gameTable.title,
+				})
+				.from(gameTable)
+				.where(whereCondition)
+				.orderBy(desc(gameTable.createdAt))
+				.limit(limit)
+				.offset((page - 1) * limit),
+		]);
+		const total = countResults[0]?.count ?? 0;
 
 		if (games.length === 0) {
 			return {
@@ -168,31 +182,43 @@ export class RoomService {
 	async findManyFinished({
 		page = 1,
 		limit = 20,
+		userId,
 	}: {
 		page?: number;
 		limit?: number;
+		userId?: UserId;
 	}): Promise<GetRoomListFinishedResponseBody> {
-		// 総件数取得
-		const [countResult] = await this.db
-			.select({ count: count() })
-			.from(gameTable)
-			.where(eq(gameTable.status, "finished"));
-		const total = countResult?.count ?? 0;
+		const whereCondition = userId
+			? and(
+					eq(gameTable.status, "finished"),
+					inArray(
+						gameTable.id,
+						this.db
+							.select({ gameId: playerTable.gameId })
+							.from(playerTable)
+							.where(eq(playerTable.userId, userId)),
+					),
+				)
+			: eq(gameTable.status, "finished");
 
-		// game取得（ページネーション付き）
-		const games = await this.db
-			.select({
-				finishedAt: gameTable.updatedAt,
-				id: gameTable.id,
-				isPrivate: gameTable.isPrivate,
-				timeLimit: gameTable.timeLimit,
-				title: gameTable.title,
-			})
-			.from(gameTable)
-			.where(eq(gameTable.status, "finished"))
-			.orderBy(desc(gameTable.updatedAt))
-			.limit(limit)
-			.offset((page - 1) * limit);
+		// 総件数とゲーム一覧を1往復で取得
+		const [countResults, games] = await this.db.batch([
+			this.db.select({ count: count() }).from(gameTable).where(whereCondition),
+			this.db
+				.select({
+					finishedAt: gameTable.updatedAt,
+					id: gameTable.id,
+					isPrivate: gameTable.isPrivate,
+					timeLimit: gameTable.timeLimit,
+					title: gameTable.title,
+				})
+				.from(gameTable)
+				.where(whereCondition)
+				.orderBy(desc(gameTable.updatedAt))
+				.limit(limit)
+				.offset((page - 1) * limit),
+		]);
+		const total = countResults[0]?.count ?? 0;
 
 		if (games.length === 0) {
 			return {
@@ -310,20 +336,38 @@ export class RoomService {
 						.where(inArray(voteTable.roundId, roundIds))
 				: [];
 
+		// 事前にMapでインデックス化
+		const roundsByGameId = new Map<GameId, typeof rounds>();
+		for (const round of rounds) {
+			const arr = roundsByGameId.get(round.gameId) ?? [];
+			arr.push(round);
+			roundsByGameId.set(round.gameId, arr);
+		}
+
+		const submissionsByRoundId = new Map<RoundId, typeof submissions>();
+		for (const sub of submissions) {
+			const arr = submissionsByRoundId.get(sub.roundId) ?? [];
+			arr.push(sub);
+			submissionsByRoundId.set(sub.roundId, arr);
+		}
+
+		const votesByRoundId = new Map<RoundId, typeof votes>();
+		for (const vote of votes) {
+			const arr = votesByRoundId.get(vote.roundId) ?? [];
+			arr.push(vote);
+			votesByRoundId.set(vote.roundId, arr);
+		}
+
 		// gameIdごとの勝者IDセットを計算
 		const winnerIdsByGameId = new Map<GameId, Set<PlayerId>>();
 
 		for (const gameId of gameIds) {
-			const gameRounds = rounds.filter((r) => r.gameId === gameId);
-
-			// 各プレイヤーのラウンド勝利数を計算
+			const gameRounds = roundsByGameId.get(gameId) ?? [];
 			const winCountByPlayer = new Map<PlayerId, number>();
 
 			for (const round of gameRounds) {
-				const roundSubmissions = submissions.filter(
-					(s) => s.roundId === round.id,
-				);
-				const roundVotes = votes.filter((v) => v.roundId === round.id);
+				const roundSubmissions = submissionsByRoundId.get(round.id) ?? [];
+				const roundVotes = votesByRoundId.get(round.id) ?? [];
 
 				const { winnerPlayerIds } =
 					GameService.calculateWinnersAndVoteCountsFromVotes({
