@@ -1,6 +1,6 @@
 {
 	"dependencies": {
-		"@libsql/client": "^0.17.0",
+		"@libsql/client": "^0.17.2",
 		"@noble/hashes": "^2.0.1",
 		"@oslojs/encoding": "^1.1.0",
 		"@repo/db": "workspace:*",
