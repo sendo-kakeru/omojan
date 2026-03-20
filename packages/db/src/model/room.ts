@@ -36,6 +36,7 @@ import {
 	paginatedResponseSchema,
 	paginationRequestQuerySchema,
 } from "./pagination";
+
 export type { BrandSymbol };
 
 /** 部屋一覧で使用するステータス */

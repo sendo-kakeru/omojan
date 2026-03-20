@@ -237,11 +237,11 @@ function Pagination({
 
 export {
 	Pagination,
-	PaginationRoot,
 	PaginationContent,
 	PaginationEllipsis,
 	PaginationItem,
 	PaginationLink,
 	PaginationNext,
 	PaginationPrevious,
+	PaginationRoot,
 };
