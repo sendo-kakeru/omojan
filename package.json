@@ -3,7 +3,7 @@
 		"@biomejs/biome": "^2.4.6",
 		"lefthook": "^2.1.4",
 		"tsup": "^8.5.1",
-		"turbo": "^2.8.16",
+		"turbo": "^2.8.20",
 		"typescript": "5.9.3"
 	},
 	"engines": {
