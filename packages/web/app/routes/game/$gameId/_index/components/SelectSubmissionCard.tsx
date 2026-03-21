@@ -53,8 +53,8 @@ export function SelectSubmissionCard({
 			{/* 配置時のエフェクト（リングバースト + 背景フラッシュ） */}
 			{isPlaced && (
 				<>
-					<div className="pointer-events-none absolute inset-0 grid place-items-center">
-						<div className="absolute size-full animate-place-card-ring rounded-xl border-3 border-green-400" />
+					<div className="pointer-events-none absolute inset-0 overflow-hidden rounded-xl">
+						<div className="absolute inset-0 animate-place-card-ring rounded-xl border-3 border-green-400" />
 					</div>
 					<div className="pointer-events-none absolute inset-0 animate-place-card-flash rounded-xl bg-green-400/30" />
 				</>
