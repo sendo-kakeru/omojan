@@ -147,6 +147,7 @@ export function GameSubmission({
 				setPendingPosition(position);
 			},
 			state: "ready",
+			word: selectedCard?.word,
 		};
 	};
 
@@ -157,6 +158,12 @@ export function GameSubmission({
 		setSelectedCardId(cardId);
 		setPendingPosition(null);
 	};
+
+	// 操作フェーズの判定
+	const isActivePhase = isMyTurn && !isConfirmed;
+	const isCardSelectionPhase = isActivePhase && !selectedCard;
+	const isPlacementPhase = isActivePhase && !!selectedCard && !pendingPosition;
+	const isConfirmPhase = isActivePhase && !!selectedCard && !!pendingPosition;
 
 	return (
 		<>
@@ -193,8 +200,8 @@ export function GameSubmission({
 					/>
 				}
 			>
-				{/* 自分の番でオーバーレイ（手札・配置エリア以外を暗く） */}
-				{isMyTurn && !isConfirmed && (
+				{/* 自分の番でオーバーレイ（操作対象以外を暗く） */}
+				{isActivePhase && (
 					<div className="pointer-events-none fixed inset-0 z-20 bg-black/50" />
 				)}
 
@@ -256,57 +263,43 @@ export function GameSubmission({
 						})}
 					</section>
 
-					{/* 配置エリア - 牌選択後にz-indexを上げてオーバーレイの上に表示 */}
+					{/* 配置エリア - 配置選択フェーズ or 確認フェーズでz-indexを上げる */}
 					<section
 						className={classNames(
 							"relative mt-8 grid place-items-center rounded-t-2xl border border-gray-300 border-b-0 bg-white p-16",
-							isMyTurn && !isConfirmed && selectedCard && "z-30",
+							(isPlacementPhase || isConfirmPhase) && "z-30",
 						)}
 					>
-						{/* 配置選択時のガイダンスメッセージ */}
-						{isMyTurn && !isConfirmed && selectedCard && !pendingPosition && (
-							<div className="absolute -top-24 left-1/2 z-10 -translate-x-1/2 animate-bounce">
-								<p className="whitespace-nowrap rounded-full bg-green-500 px-16 py-4 font-bold text-sm text-white shadow-lg">
-									↓ 配置場所をタップ ↓
-								</p>
-							</div>
-						)}
 						<div className="grid w-full max-w-480 place-items-center gap-y-16 sm:gap-y-24">
 							<SelectSubmissionCard
 								{...buildSelectSubmissionCardProps("prefix")}
 							/>
-							{/* テーマカード - 自分の番では常にオーバーレイの上に表示 */}
-							<p
+							{/* テーマカード - お題感を強調した装飾的デザイン */}
+							<div
 								className={classNames(
-									"grid min-h-56 xs:min-h-64 w-full place-items-center rounded-md border border-yellow-300 bg-yellow-50 p-8 px-12 font-bold text-sm shadow sm:text-base",
-									isMyTurn && !isConfirmed && "relative z-30",
+									"relative grid min-h-56 xs:min-h-64 w-full place-items-center rounded-md border-2 border-yellow-400 border-dashed bg-yellow-50 p-8 px-12 shadow",
+									isActivePhase && "z-30",
 								)}
 							>
-								{game.theme}
-							</p>
+								<span className="absolute -top-10 left-1/2 -translate-x-1/2 rounded-full bg-yellow-400 px-10 py-2 font-bold text-xs text-yellow-900">
+									お題
+								</span>
+								<p className="font-bold text-sm sm:text-base">{game.theme}</p>
+							</div>
 							<SelectSubmissionCard
 								{...buildSelectSubmissionCardProps("suffix")}
 							/>
 						</div>
 					</section>
 
-					{/* 手札エリア - 自分の番ではz-indexを上げてオーバーレイの上に表示 */}
-					<div
-						className={classNames(isMyTurn && !isConfirmed && "relative z-30")}
-					>
-						{/* 牌選択時のガイダンスメッセージ */}
-						{isMyTurn && !isConfirmed && !selectedCard && (
-							<div className="absolute -top-32 left-1/2 z-10 -translate-x-1/2 animate-bounce">
-								<p className="whitespace-nowrap rounded-full bg-green-500 px-16 py-4 font-bold text-sm text-white shadow-lg">
-									↓ 手札を選んでください ↓
-								</p>
-							</div>
-						)}
+					{/* 手札エリア - 自分の番では常にz-indexを上げる（カード再選択を可能に） */}
+					<div className={classNames(isActivePhase && "relative z-30")}>
 						<PlayerCardDisplay
 							cards={mePlayer.playerCards}
 							isConfirmed={isConfirmed}
 							onCardClick={isMyTurn ? handleCardClick : undefined}
 							selectedCardId={selectedCardId}
+							showPulse={isCardSelectionPhase}
 						/>
 					</div>
 				</main>

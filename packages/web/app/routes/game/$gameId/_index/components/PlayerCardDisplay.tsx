@@ -15,6 +15,7 @@ export function PlayerCardDisplay({
 	selectedCardId,
 	isConfirmed = false,
 	overlayMessage,
+	showPulse = false,
 }: {
 	/** プレイヤーの手札 */
 	cards: GamePlayerCard[];
@@ -28,6 +29,8 @@ export function PlayerCardDisplay({
 	isConfirmed?: boolean;
 	/** オーバーレイ上に表示するメッセージ */
 	overlayMessage?: string;
+	/** 未選択カードにパルスアニメーションを表示するか */
+	showPulse?: boolean;
 }) {
 	const isInteractive = !!onCardClick && !disabled;
 
@@ -48,7 +51,9 @@ export function PlayerCardDisplay({
 											? "border-green-500 bg-green-100 opacity-50"
 											: isSelected
 												? "border-green-400 bg-green-50 shadow-sm"
-												: "border-gray-200 bg-gray-100 hover:bg-green-50",
+												: showPulse
+													? "animate-pulse-card border-gray-200 bg-gray-100 hover:bg-green-50"
+													: "border-gray-200 bg-gray-100 hover:bg-green-50",
 								)}
 								disabled={card.used || isConfirmed}
 								key={card.id}
