@@ -1,12 +1,12 @@
 import classNames from "classnames";
 import { useEffect, useRef } from "react";
 
-export type SelectSubmissionCardProps = (
+export type SelectSubmissionCardProps = { label: string } & (
 	| { state: "idle" }
-	| { state: "ready"; onSelect: () => void; disabled?: boolean }
+	| { state: "ready"; onSelect: () => void; disabled?: boolean; word?: string }
 	| { state: "selected"; word: string; onSubmit: () => Promise<void> }
 	| { state: "placed"; word: string }
-) & { label: string };
+);
 
 /** 対応デバイスでハプティックフィードバックを発火する */
 function triggerHaptic(): void {
@@ -25,6 +25,7 @@ export function SelectSubmissionCard({
 	const isSelected = state === "selected";
 	const isPlaced = state === "placed";
 	const disabled = isReady ? props.disabled : false;
+	const showPulse = isReady && !disabled;
 	const prevStateRef = useRef(state);
 
 	// "placed" 状態への遷移時にハプティックフィードバックを発火する
@@ -40,8 +41,12 @@ export function SelectSubmissionCard({
 			className={classNames(
 				"relative grid min-h-60 xs:min-h-64 w-full place-items-center rounded-xl border px-8 pt-10 pb-4 xs:pb-8 transition-all duration-300",
 				isIdle && "border-gray-300 border-dashed bg-gray-50/10",
-				isReady && "border-green-400 border-dashed bg-green-50/10",
-				isSelected && "border-green-500 border-solid bg-green-50/50 shadow-md",
+				isReady &&
+					!disabled &&
+					"animate-pulse-slot border-green-400 border-dashed bg-green-50/10",
+				isReady && disabled && "border-gray-300 border-dashed bg-gray-50/10",
+				isSelected &&
+					"animate-pulse-slot border-green-500 border-solid bg-green-50/50",
 				isPlaced && "border-green-400 border-solid bg-green-50/20",
 			)}
 		>
@@ -81,8 +86,8 @@ export function SelectSubmissionCard({
 			) : (
 				<button
 					className={classNames(
-						"absolute inset-0 rounded-xl text-neutral-400 text-sm transition-all duration-200 sm:text-base",
-						isReady && !disabled
+						"absolute inset-0 grid place-items-center rounded-xl text-sm transition-all duration-200 sm:text-base",
+						showPulse
 							? "cursor-pointer bg-green-50/50 hover:bg-green-100"
 							: "cursor-default bg-gray-50/50",
 					)}
@@ -90,11 +95,13 @@ export function SelectSubmissionCard({
 					onClick={isReady ? props.onSelect : undefined}
 					type="button"
 				>
-					{isIdle
-						? "選択待ち..."
-						: disabled
-							? "手札を選んでください"
-							: "タップしてここに置く"}
+					{showPulse ? (
+						<span className="font-bold text-neutral-300 text-sm sm:text-base">
+							{(isReady && props.word) || label}
+						</span>
+					) : isIdle ? (
+						<span className="text-neutral-400">選択待ち...</span>
+					) : null}
 				</button>
 			)}
 		</div>
