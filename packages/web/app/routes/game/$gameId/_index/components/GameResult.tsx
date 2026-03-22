@@ -31,7 +31,7 @@ export function GameResult({ data }: { data: GameServerResultMessage }) {
 		>
 			<main className="grid grid-rows-[1fr_auto]">
 				{/* プレイヤー結果エリア */}
-				<section className="relative my-auto grid h-fit content-center rounded-lg">
+				<section className="relative my-auto grid h-fit content-center gap-y-4 rounded-lg">
 					{/* 結果表示ラベル */}
 					<p className="mb-12 text-center font-semibold text-neutral-600">
 						ラウンド {game.roundNo} 結果
