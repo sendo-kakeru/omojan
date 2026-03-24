@@ -116,7 +116,7 @@ export function GameVote({
 													? "z-10 scale-[1.02] border-2 border-green-500 bg-green-50 shadow-md"
 													: confirmedPlayerId
 														? "border border-gray-200 bg-white"
-														: "animate-pulse-card border border-gray-200 bg-white",
+														: "animate-pulse-card border border-gray-200 bg-white hover:scale-[1.02]",
 									)}
 									disabled={isSelf || !!confirmedPlayerId}
 									onClick={() => handlePlayerClick(player.id)}
