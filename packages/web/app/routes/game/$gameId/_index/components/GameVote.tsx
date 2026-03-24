@@ -4,7 +4,7 @@ import type {
 } from "@repo/db/model";
 import type { PlayerId } from "@repo/db/schema";
 import classNames from "classnames";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { Avatar } from "~/components/Avatar";
 import { Badge } from "~/components/Badge";
 import { useCountdown } from "~/hooks/useCountdown";
@@ -31,9 +31,7 @@ export function GameVote({
 	const [confirmedPlayerId, setConfirmedPlayerId] = useState<PlayerId | null>(
 		null,
 	);
-	// 送信中フラグ（重複送信防止）
-	// Note: useIsLoadingは1秒の遅延があるため、即時リセットが必要な重複送信防止には不適切
-	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [isPending, startTransition] = useTransition();
 
 	const { count, progress, start: startCountdown } = useCountdown();
 
@@ -48,19 +46,21 @@ export function GameVote({
 		return null;
 	};
 
-	const handlePlayerClick = async (playerId: PlayerId) => {
+	const handlePlayerClick = (playerId: PlayerId): void => {
 		if (playerId === mePlayer.id) return;
-		if (confirmedPlayerId || isSubmitting) return;
+		if (confirmedPlayerId || isPending) return;
 
 		// 既に選択中の場合は投票を確定
 		if (selectedPlayerId === playerId) {
-			setIsSubmitting(true);
 			setConfirmedPlayerId(playerId);
-			try {
-				await sendVote(playerId);
-			} finally {
-				setIsSubmitting(false);
-			}
+			startTransition(async () => {
+				try {
+					await sendVote(playerId);
+				} catch (error) {
+					console.error("投票の送信に失敗しました:", error);
+					setConfirmedPlayerId(null);
+				}
+			});
 			return;
 		}
 
@@ -107,7 +107,7 @@ export function GameVote({
 							<div className="relative w-full" key={player.id}>
 								<button
 									className={classNames(
-										"flex w-full items-center gap-x-12 rounded-lg px-12 py-8 transition-all duration-200 md:py-12",
+										"flex w-full items-center gap-x-12 rounded-2xl px-12 py-8 transition-all duration-200 md:py-12",
 										isSelf
 											? "cursor-not-allowed border-2 border-transparent bg-gray-200 opacity-90"
 											: isConfirmed
@@ -116,7 +116,7 @@ export function GameVote({
 													? "z-10 scale-[1.02] border-2 border-green-500 bg-green-50 shadow-md"
 													: confirmedPlayerId
 														? "border border-gray-200 bg-white"
-														: "animate-pulse-card border border-gray-200 bg-white",
+														: "animate-pulse-card border border-gray-200 bg-white hover:scale-[1.02]",
 									)}
 									disabled={isSelf || !!confirmedPlayerId}
 									onClick={() => handlePlayerClick(player.id)}

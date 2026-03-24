@@ -2,7 +2,12 @@
 import { createRoomRequestBodySchema } from "@repo/db/model";
 import { LOCALSTORAGE_OPERATION_FAILED_MESSAGE } from "@repo/shared/error";
 import { useForm } from "@tanstack/react-form";
-import { type Dispatch, type SetStateAction, useId } from "react";
+import {
+	type Dispatch,
+	type SetStateAction,
+	useId,
+	useTransition,
+} from "react";
 import { useNavigate } from "react-router";
 import { Button } from "~/components/button/Button";
 import { Dialog } from "~/components/Dialog";
@@ -13,7 +18,6 @@ import { Select } from "~/components/form/Select";
 import { Spinner } from "~/components/Spinner";
 import { useToast } from "~/components/Toast";
 import { useMe } from "~/context/me/hooks";
-import { useIsLoading } from "~/hooks/useIsLoading";
 import { honoClient } from "~/libs/apiClient.client";
 import { gameTokenLocalStorage } from "~/libs/gameTokenLocalStorage";
 import { LoginPrompt } from "~/routes/_index/components/LoginPrompt";
@@ -29,7 +33,7 @@ export function CreateRoomDialog({
 	const formId = useId();
 	const navigate = useNavigate();
 	const { showToast } = useToast();
-	const { isLoading, startLoading, stopLoading } = useIsLoading();
+	const [isPending, startTransition] = useTransition();
 
 	const form = useForm({
 		defaultValues: {
@@ -38,37 +42,36 @@ export function CreateRoomDialog({
 			timeLimit: 30,
 			title: "誰でも歓迎",
 		},
-		onSubmit: async ({ value }) => {
+		onSubmit: ({ value }) => {
 			// NOTE: 必要ならSWRフック化し、mutateで送信。作成後は自動でページ遷移するため今の所不要
-			startLoading();
-			try {
-				const response = await honoClient.v1.rooms.$post({
-					json: value,
-				});
-				const { data, message } = await response.json();
+			startTransition(async () => {
+				try {
+					const response = await honoClient.v1.rooms.$post({
+						json: value,
+					});
+					const { data, message } = await response.json();
 
-				if (!data) {
-					throw new Error(message);
+					if (!data) {
+						throw new Error(message);
+					}
+
+					gameTokenLocalStorage.set(data.token, {
+						onError() {
+							alert(LOCALSTORAGE_OPERATION_FAILED_MESSAGE);
+							void navigate("/");
+						},
+					});
+					void navigate(`/matching/${data.gameId}`);
+
+					setIsOpen(false);
+				} catch (error) {
+					console.error("部屋の作成に失敗しました:", error);
+					showToast({
+						title: "部屋の作成に失敗しました。",
+						type: "error",
+					});
 				}
-
-				gameTokenLocalStorage.set(data.token, {
-					onError() {
-						alert(LOCALSTORAGE_OPERATION_FAILED_MESSAGE);
-						void navigate("/");
-					},
-				});
-				void navigate(`/matching/${data.gameId}`);
-
-				setIsOpen(false);
-			} catch (error) {
-				console.error("部屋の作成に失敗しました:", error);
-				showToast({
-					title: "部屋の作成に失敗しました。",
-					type: "error",
-				});
-			} finally {
-				stopLoading();
-			}
+			});
 		},
 		validators: {
 			onSubmit: createRoomRequestBodySchema,
@@ -105,7 +108,7 @@ export function CreateRoomDialog({
 									label="部屋名"
 								>
 									<Input
-										disabled={isLoading}
+										disabled={isPending}
 										id={id}
 										onBlur={field.handleBlur}
 										onChange={(e) => field.handleChange(e.target.value)}
@@ -131,7 +134,7 @@ export function CreateRoomDialog({
 										label="プレイヤー名"
 									>
 										<Input
-											disabled={isLoading}
+											disabled={isPending}
 											id={id}
 											onBlur={field.handleBlur}
 											onChange={(e) => field.handleChange(e.target.value)}
@@ -157,7 +160,7 @@ export function CreateRoomDialog({
 									label="制限時間"
 								>
 									<Select
-										disabled={isLoading}
+										disabled={isPending}
 										id={id}
 										onBlur={field.handleBlur}
 										onChange={(e) => field.handleChange(Number(e.target.value))}
@@ -226,13 +229,13 @@ export function CreateRoomDialog({
 						{(state) => (
 							<Button
 								as="button"
-								disabled={!state.canSubmit || isLoading}
+								disabled={!state.canSubmit || isPending}
 								leftIcon={
-									isLoading ? <Spinner className="size-16" /> : undefined
+									isPending ? <Spinner className="size-16" /> : undefined
 								}
 								type="submit"
 							>
-								{isLoading ? "作成しています" : "作成する"}
+								{isPending ? "作成しています" : "作成する"}
 							</Button>
 						)}
 					</form.Subscribe>

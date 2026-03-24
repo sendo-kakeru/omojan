@@ -17,7 +17,12 @@ import { useToast } from "../Toast";
 import { SigninModal } from "./SigninModal";
 
 export function AuthUserMenuButton() {
-	const { me } = useMe();
+	const { me, isLoading } = useMe();
+
+	if (isLoading) {
+		return <div className="size-32 animate-pulse rounded-full bg-gray-200" />;
+	}
+
 	if (me) {
 		return <UserMenuButton me={me} />;
 	}

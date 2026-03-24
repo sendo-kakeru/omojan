@@ -37,13 +37,6 @@
 		}
 	}
 
-	/* SelectSubmissionCard animations */
-	--animate-place-card: place-card 500ms cubic-bezier(0.22, 1.5, 0.36, 1);
-	--animate-place-card-ring: place-card-ring 600ms ease-out forwards;
-	--animate-place-card-flash: place-card-flash 400ms ease-out forwards;
-	--animate-button-pop: button-pop 400ms cubic-bezier(0.34, 1.56, 0.64, 1)
-		forwards;
-
 	/* パルスアニメーション */
 	--animate-pulse-slot: pulse-slot 1.5s ease-in-out infinite;
 	--animate-pulse-card: pulse-card 1.5s ease-in-out infinite;

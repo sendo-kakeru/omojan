@@ -49,7 +49,7 @@ export function GameResult({ data }: { data: GameServerResultMessage }) {
 							<div className="relative w-full" key={player.id}>
 								<div
 									className={classNames(
-										"flex w-full items-center gap-x-12 rounded-lg px-12 py-8 md:py-12",
+										"flex w-full items-center gap-x-12 rounded-2xl px-12 py-8 md:py-12",
 										isWinner
 											? "border-2 border-yellow-400 bg-yellow-50"
 											: "border border-gray-200 bg-white",
