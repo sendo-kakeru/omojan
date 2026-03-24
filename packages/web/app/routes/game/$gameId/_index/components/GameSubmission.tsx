@@ -4,7 +4,7 @@ import type {
 } from "@repo/db/model";
 import type { PlayerCard, PlayerCardId, PlayerId } from "@repo/db/schema";
 import classNames from "classnames";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { Avatar } from "~/components/Avatar";
 import { Badge } from "~/components/Badge";
 import { Separator } from "~/components/Separator";
@@ -47,9 +47,7 @@ export function GameSubmission({
 		(card) => card.id === selectedCardId,
 	);
 	const isConfirmed = confirmedSubmission !== null;
-	// 送信中フラグ（重複送信防止）
-	// Note: useIsLoadingは1秒の遅延があるため、即時リセットが必要な重複送信防止には不適切
-	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [isPending, startTransition] = useTransition();
 
 	// カウントダウンタイマー
 	const { count, progress, start: startCountdown } = useCountdown();
@@ -117,25 +115,27 @@ export function GameSubmission({
 		setPendingPosition(null);
 	};
 
-	const handleComboSelect = async (position: Position): Promise<void> => {
-		if (!selectedCard || isConfirmed || isSubmitting) return;
+	const handleComboSelect = (position: Position): void => {
+		if (!selectedCard || isConfirmed || isPending) return;
 		// 同じ選択肢を2度タップで確定
 		if (pendingPosition === position) {
-			setIsSubmitting(true);
 			setConfirmedSubmission({
 				position,
 				text: selectedCard.word,
 			});
 			setPendingPosition(null);
 			vibrate();
-			try {
-				await sendSubmission({
-					position,
-					text: selectedCard.word,
-				});
-			} finally {
-				setIsSubmitting(false);
-			}
+			startTransition(async () => {
+				try {
+					await sendSubmission({
+						position,
+						text: selectedCard.word,
+					});
+				} catch (error) {
+					console.error("提出の送信に失敗しました:", error);
+					setConfirmedSubmission(null);
+				}
+			});
 			return;
 		}
 		setPendingPosition(position);
