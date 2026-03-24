@@ -21,7 +21,7 @@ const FEATURES = [
 		title: "1人でもCPUと対戦",
 	},
 	{
-		description: "1ゲーム約5〜10分。空き時間にサクッと楽しめます。",
+		description: "1ゲーム約2〜10分。空き時間にサクッと楽しめます。",
 		title: "短時間でサクッと遊べる",
 	},
 ] as const;
@@ -152,7 +152,7 @@ export default function HowToPlayPage() {
 							{/* STEP 3 */}
 							<Step number={3} title="テーマに言葉をくっつけて造語！">
 								<p>
-									ラウンドが始まると、みんなに共通のテーマ牌（お題）が出されます。手持ち牌から1枚選んで、テーマの「前」か「後ろ」にくっつけて造語を作りましょう。
+									ラウンドが始まると、みんなに共通のテーマ牌（お題）が出されます。手持ち牌から1枚選ぶと、2つの組み合わせが表示されるので、好きな方を選んで造語を作りましょう。
 								</p>
 								<div className="rounded-lg bg-yellow-100 p-16">
 									<p className="mb-4 font-bold text-xs text-yellow-700">
