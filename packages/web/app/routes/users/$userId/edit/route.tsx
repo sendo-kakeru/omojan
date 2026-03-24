@@ -6,7 +6,7 @@ import {
 } from "@repo/shared/constants/image";
 import { useForm } from "@tanstack/react-form";
 import classNames from "classnames";
-import { useId, useRef, useState } from "react";
+import { useId, useRef, useState, useTransition } from "react";
 import { FaUser } from "react-icons/fa";
 import { FiCamera, FiChevronLeft } from "react-icons/fi";
 import { useNavigate } from "react-router";
@@ -19,7 +19,6 @@ import { Spinner } from "~/components/Spinner";
 import { useToast } from "~/components/Toast";
 import { useMe } from "~/context/me/hooks";
 import { useImageUpload } from "~/hooks/useImageUpload";
-import { useIsLoading } from "~/hooks/useIsLoading";
 import { honoClient } from "~/libs/apiClient.client";
 import { buildImageUrl, PROFILE_IMAGE_DIMENSIONS } from "~/libs/image";
 import { buildNoindexMeta } from "~/libs/meta";
@@ -74,7 +73,7 @@ function EditForm({ me }: { me: Me }) {
 	const { mutate } = useMe();
 	const navigate = useNavigate();
 	const { showToast } = useToast();
-	const { isLoading, startLoading, stopLoading } = useIsLoading();
+	const [isPending, startTransition] = useTransition();
 	const formId = useId();
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const { isUploading, uploadImage } = useImageUpload();
@@ -85,32 +84,31 @@ function EditForm({ me }: { me: Me }) {
 			image: me.image,
 			name: me.name,
 		},
-		onSubmit: async ({ value }) => {
-			startLoading();
-			try {
-				const response = await honoClient.v1.me.$patch({
-					json: value,
-				});
-				const { data, message } = await response.json();
+		onSubmit: ({ value }) => {
+			startTransition(async () => {
+				try {
+					const response = await honoClient.v1.me.$patch({
+						json: value,
+					});
+					const { data, message } = await response.json();
 
-				if (!data) {
-					throw new Error(message);
+					if (!data) {
+						throw new Error(message);
+					}
+
+					await mutate({ data, message }, false);
+					showToast({ title: "プロフィールを更新しました", type: "success" });
+					void navigate(`/users/${me.userId}`, {
+						replace: true,
+					});
+				} catch (error) {
+					console.error("プロフィールの更新に失敗しました:", error);
+					showToast({
+						title: "プロフィールの更新に失敗しました",
+						type: "error",
+					});
 				}
-
-				await mutate({ data, message }, false);
-				showToast({ title: "プロフィールを更新しました", type: "success" });
-				void navigate(`/users/${me.userId}`, {
-					replace: true,
-				});
-			} catch (error) {
-				console.error("プロフィールの更新に失敗しました:", error);
-				showToast({
-					title: "プロフィールの更新に失敗しました",
-					type: "error",
-				});
-			} finally {
-				stopLoading();
-			}
+			});
 		},
 		validators: {
 			onSubmit: meProfileSchema,
@@ -167,7 +165,7 @@ function EditForm({ me }: { me: Me }) {
 					<div className="grid place-items-center gap-y-8 py-24">
 						<button
 							className="relative"
-							disabled={isUploading || isLoading}
+							disabled={isUploading || isPending}
 							onClick={() => fileInputRef.current?.click()}
 							type="button"
 						>
@@ -229,7 +227,7 @@ function EditForm({ me }: { me: Me }) {
 								label="名前"
 							>
 								<Input
-									disabled={isLoading}
+									disabled={isPending}
 									id={id}
 									onBlur={field.handleBlur}
 									onChange={(e) => field.handleChange(e.target.value)}
@@ -250,11 +248,11 @@ function EditForm({ me }: { me: Me }) {
 						<Button
 							as="button"
 							className="mx-auto w-240"
-							disabled={!state.canSubmit || isLoading}
-							leftIcon={isLoading ? <Spinner className="size-16" /> : undefined}
+							disabled={!state.canSubmit || isPending}
+							leftIcon={isPending ? <Spinner className="size-16" /> : undefined}
 							type="submit"
 						>
-							{isLoading ? "更新中…" : "更新"}
+							{isPending ? "更新中…" : "更新"}
 						</Button>
 					)}
 				</form.Subscribe>

@@ -4,7 +4,13 @@ import type { JoinRoomRequestBody, Room } from "@repo/db/model";
 import { joinRoomRequestBodySchema, roomPasswordSchema } from "@repo/db/model";
 import { LOCALSTORAGE_OPERATION_FAILED_MESSAGE } from "@repo/shared/error";
 import { useForm } from "@tanstack/react-form";
-import { type Dispatch, type SetStateAction, useId, useState } from "react";
+import {
+	type Dispatch,
+	type SetStateAction,
+	useId,
+	useState,
+	useTransition,
+} from "react";
 import { FaRegClock } from "react-icons/fa6";
 import { FiUsers } from "react-icons/fi";
 import { useNavigate } from "react-router";
@@ -22,7 +28,6 @@ import { Spinner } from "~/components/Spinner";
 import { useToast } from "~/components/Toast";
 import { UserLabel } from "~/components/user/UserLabel";
 import { useMe } from "~/context/me/hooks";
-import { useIsLoading } from "~/hooks/useIsLoading";
 import { honoClient } from "~/libs/apiClient.client";
 import { gameTokenLocalStorage } from "~/libs/gameTokenLocalStorage";
 import { LoginPrompt } from "~/routes/_index/components/LoginPrompt";
@@ -39,7 +44,7 @@ export function JoinRoomDialog({
 	const navigate = useNavigate();
 	const formId = useId();
 	const { showToast } = useToast();
-	const { isLoading, startLoading, stopLoading } = useIsLoading();
+	const [isPending, startTransition] = useTransition();
 	const [passwordError, setPasswordError] = useState<string | undefined>();
 
 	const defaultValues: JoinRoomRequestBody = (() => {
@@ -61,66 +66,63 @@ export function JoinRoomDialog({
 
 	const form = useForm({
 		defaultValues,
-		onSubmit: async ({ value }) => {
-			startLoading();
-
+		onSubmit: ({ value }) => {
 			// 鍵部屋はパスワード検証
 			if (room.isPrivate) {
 				const result = safeParse(roomPasswordSchema, value.password);
 				if (!result.success) {
 					setPasswordError(result.issues[0].message);
-					stopLoading();
 					return;
 				}
 			}
 
-			try {
-				const response = await honoClient.v1.rooms[":gameId"].join.$post({
-					json: value,
-					param: { gameId: room.gameId },
-				});
-				const { data, message } = await response.json();
+			startTransition(async () => {
+				try {
+					const response = await honoClient.v1.rooms[":gameId"].join.$post({
+						json: value,
+						param: { gameId: room.gameId },
+					});
+					const { data, message } = await response.json();
 
-				// 400番台ならレスポンスメッセージを表示
-				if (!data) {
-					if (response.status >= 400 && response.status < 500) {
-						showToast({
-							title: message,
-							type: "error",
-						});
+					// 400番台ならレスポンスメッセージを表示
+					if (!data) {
+						if (response.status >= 400 && response.status < 500) {
+							showToast({
+								title: message,
+								type: "error",
+							});
+							return;
+						}
+						throw new Error(message);
+					}
+
+					// 保持しているトークンのプレイヤーが存在する場合（過去に参加済み）そのままマッチング画面へ（基本発生し得ない）
+					if (data.state === "HELD_TOKEN_PLAYER_JOINED") {
+						setIsOpen(false);
+						void navigate(`/matching/${room.gameId}`);
 						return;
 					}
-					throw new Error(message);
-				}
 
-				// 保持しているトークンのプレイヤーが存在する場合（過去に参加済み）そのままマッチング画面へ（基本発生し得ない）
-				if (data.state === "HELD_TOKEN_PLAYER_JOINED") {
+					try {
+						gameTokenLocalStorage.set(data.token);
+					} catch {
+						showToast({
+							title: LOCALSTORAGE_OPERATION_FAILED_MESSAGE,
+							type: "error",
+						});
+					}
+
+					setPasswordError(undefined);
 					setIsOpen(false);
 					void navigate(`/matching/${room.gameId}`);
-					return;
-				}
-
-				try {
-					gameTokenLocalStorage.set(data.token);
-				} catch {
+				} catch (error) {
+					console.error("部屋への参加に失敗しました:", error);
 					showToast({
-						title: LOCALSTORAGE_OPERATION_FAILED_MESSAGE,
+						title: "部屋への参加に失敗しました。",
 						type: "error",
 					});
 				}
-
-				setPasswordError(undefined);
-				setIsOpen(false);
-				void navigate(`/matching/${room.gameId}`);
-			} catch (error) {
-				console.error("部屋への参加に失敗しました:", error);
-				showToast({
-					title: "部屋への参加に失敗しました。",
-					type: "error",
-				});
-			} finally {
-				stopLoading();
-			}
+			});
 		},
 		validators: {
 			onSubmit: joinRoomRequestBodySchema,
@@ -186,7 +188,7 @@ export function JoinRoomDialog({
 											label="プレイヤー名"
 										>
 											<Input
-												disabled={isLoading}
+												disabled={isPending}
 												id={id}
 												onBlur={field.handleBlur}
 												onChange={(e) => field.handleChange(e.target.value)}
@@ -216,7 +218,7 @@ export function JoinRoomDialog({
 										>
 											<InputOTP
 												autoComplete="off"
-												disabled={isLoading}
+												disabled={isPending}
 												id={id}
 												inputMode="text"
 												maxLength={6}
@@ -258,13 +260,13 @@ export function JoinRoomDialog({
 							{(state) => (
 								<Button
 									as="button"
-									disabled={!state.canSubmit || isLoading}
+									disabled={!state.canSubmit || isPending}
 									leftIcon={
-										isLoading ? <Spinner className="size-16" /> : undefined
+										isPending ? <Spinner className="size-16" /> : undefined
 									}
 									type="submit"
 								>
-									{isLoading ? "参加しています" : "参加する"}
+									{isPending ? "参加しています" : "参加する"}
 								</Button>
 							)}
 						</form.Subscribe>
