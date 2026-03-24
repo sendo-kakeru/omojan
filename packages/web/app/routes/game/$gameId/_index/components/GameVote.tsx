@@ -107,7 +107,7 @@ export function GameVote({
 							<div className="relative w-full" key={player.id}>
 								<button
 									className={classNames(
-										"flex w-full items-center gap-x-12 rounded-lg px-12 py-8 transition-all duration-200 md:py-12",
+										"flex w-full items-center gap-x-12 rounded-2xl px-12 py-8 transition-all duration-200 md:py-12",
 										isSelf
 											? "cursor-not-allowed border-2 border-transparent bg-gray-200 opacity-90"
 											: isConfirmed

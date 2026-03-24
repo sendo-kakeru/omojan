@@ -12,3 +12,8 @@ export function createCombination({
 	if (!text || !position) return null;
 	return position === "prefix" ? `${text}${theme}` : `${theme}${text}`;
 }
+
+/** 対応デバイスでハプティックフィードバックを発火する */
+export function vibrate(): void {
+	navigator.vibrate?.([30, 20, 15]);
+}
