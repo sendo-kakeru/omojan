@@ -78,7 +78,12 @@ export function useGameSubscriptionSWR({
 			};
 
 			const handleClose = (event: CloseEvent): void => {
-				if (event.code !== 1000 && event.code !== 4204 && event.code !== 4410) {
+				if (
+					event.code !== 1000 &&
+					event.code !== 4001 &&
+					event.code !== 4204 &&
+					event.code !== 4410
+				) {
 					console.error("接続が閉じられました。", event);
 					next(
 						new Error("接続が切断されました。時間をおいて再接続してください。"),
