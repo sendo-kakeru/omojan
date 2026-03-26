@@ -1,6 +1,6 @@
 import { LOCALSTORAGE_OPERATION_FAILED_MESSAGE } from "@repo/shared/error";
 import { DetailedError } from "hono/client";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { useToast } from "~/components/Toast";
 import { gameTokenLocalStorage } from "~/libs/gameTokenLocalStorage";
@@ -31,14 +31,6 @@ export default function Page({ params: { gameId } }: Route.ComponentProps) {
 	});
 	const [isExiting, setIsExiting] = useState(false);
 	const [isStarting, setIsStarting] = useState(false);
-
-	useEffect(() => {
-		return () => {
-			if (exitTimeoutRef.current) {
-				clearTimeout(exitTimeoutRef.current);
-			}
-		};
-	}, []);
 
 	const {
 		data: participants,
