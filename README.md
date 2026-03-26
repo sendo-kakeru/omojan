@@ -29,6 +29,15 @@
 - `docs/*`: ドキュメント更新用ブランチ
 - `revert/*`: コミット取り消し用ブランチ
 
+## リリースフロー
+
+- STG反映
+  - ブランチ: `develop` → `staging`
+  - PRタイトル: `Deploy to staging`
+- 本番反映
+  - ブランチ: `develop` → `main`
+  - PRタイトル: `Release to production`
+
 ## コミットメッセージ規約
 
 ### フォーマット
