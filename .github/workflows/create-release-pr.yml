@@ -1,0 +1,42 @@
+name: Create Release PR
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  create:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Generate PR body
+        run: |
+          {
+            echo "## リリース内容"
+            echo ""
+            git log origin/main..origin/develop --merges --pretty=format:"%s" | while IFS= read -r message; do
+              pr_num=$(echo "$message" | grep -oE '#[0-9]+' | head -1 | tr -d '#')
+              if [ -n "$pr_num" ]; then
+                pr_title=$(gh pr view "$pr_num" --json title -q '.title' 2>/dev/null || echo "")
+                if [ -n "$pr_title" ]; then
+                  echo "- [#${pr_num} ${pr_title}](https://github.com/${GITHUB_REPOSITORY}/pull/${pr_num})"
+                fi
+              fi
+            done
+          } > pr_body.txt
+
+      - name: Create PR
+        run: |
+          gh pr create \
+            --title "Release to production" \
+            --body-file pr_body.txt \
+            --base main \
+            --head develop

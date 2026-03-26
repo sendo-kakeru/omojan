@@ -31,12 +31,13 @@
 
 ## リリースフロー
 
-- STG反映
-  - ブランチ: `develop` → `staging`
-  - PRタイトル: `Deploy to staging`
-- 本番反映
-  - ブランチ: `develop` → `main`
-  - PRタイトル: `Release to production`
+- STG反映（`develop` → `staging`）
+  1. GitHub Actions「Create Staging PR」を手動実行
+  2. PRの内容を確認しマージ
+- 本番反映（`develop` → `main`）
+  1. GitHub Actions「Create Release PR」を手動実行
+  2. PRの内容を確認しマージ
+  3. マージ時にリリースタグが自動作成される（`0.0.0-YYYY.MM.DD.HH.mm`）
 
 ## コミットメッセージ規約
 
