@@ -16,12 +16,13 @@
 		"db:migrate:stg": {},
 		"db:push:local": {},
 		"db:reset:local": {},
-		"destroy": {},
 		"dev": {
 			"cache": false,
 			"persistent": true
 		},
 		"format": {},
+		"infra:destroy": {},
+		"infra:up": {},
 		"lint": {},
 		"storybook": {
 			"with": ["storybook:styles"]
@@ -32,9 +33,9 @@
 		},
 		"studio": {},
 		"test": {},
+		"test:e2e": {},
 		"test:run": {},
-		"typecheck": {},
-		"up": {}
+		"typecheck": {}
 	},
 	"ui": "stream"
 }

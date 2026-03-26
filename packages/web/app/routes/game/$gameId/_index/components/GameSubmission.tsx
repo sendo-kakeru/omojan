@@ -4,21 +4,19 @@ import type {
 } from "@repo/db/model";
 import type { PlayerCard, PlayerCardId, PlayerId } from "@repo/db/schema";
 import classNames from "classnames";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { Avatar } from "~/components/Avatar";
 import { Badge } from "~/components/Badge";
 import { Separator } from "~/components/Separator";
 import { Spinner } from "~/components/Spinner";
 import { useCountdown } from "~/hooks/useCountdown";
 import { AVATAR_IMAGE_DIMENSIONS, buildImageUrl } from "~/libs/image";
-import { createCombination } from "../libs/gameUtils";
+import { createCombination, vibrate } from "../libs/gameUtils";
 import { GamePhaseLayout } from "./GamePhaseLayout";
 import { GamePhaseNav } from "./GamePhaseNav";
 import { PlayerCardDisplay } from "./PlayerCardDisplay";
-import {
-	SelectSubmissionCard,
-	type SelectSubmissionCardProps,
-} from "./SelectSubmissionCard";
+import { SubmissionCard } from "./SubmissionCard";
+import { ThemeCard } from "./ThemeCard";
 
 type Position = "prefix" | "suffix";
 
@@ -49,9 +47,7 @@ export function GameSubmission({
 		(card) => card.id === selectedCardId,
 	);
 	const isConfirmed = confirmedSubmission !== null;
-	// 送信中フラグ（重複送信防止）
-	// Note: useIsLoadingは1秒の遅延があるため、即時リセットが必要な重複送信防止には不適切
-	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [isPending, startTransition] = useTransition();
 
 	// カウントダウンタイマー
 	const { count, progress, start: startCountdown } = useCountdown();
@@ -86,76 +82,63 @@ export function GameSubmission({
 		});
 	};
 
-	// SelectSubmissionCardのpropsを生成
-	const buildSelectSubmissionCardProps = (
-		position: Position,
-	): SelectSubmissionCardProps => {
-		const label = position === "prefix" ? "前" : "後";
+	// 操作フェーズの判定
+	const isActivePhase = isMyTurn && !isConfirmed;
 
-		// 自分のターンで確定済み
-		if (isMyTurn && confirmedSubmission?.position === position) {
-			return {
-				label,
-				state: "placed",
-				word: confirmedSubmission.text,
-			};
+	// 確定済みの提出情報（自分 or 他プレイヤー）
+	const resolvedSubmission = (() => {
+		if (isConfirmed && isMyTurn) {
+			const text = createCombination({
+				position: confirmedSubmission.position,
+				text: confirmedSubmission.text,
+				theme: game.theme,
+			});
+			if (!text) return;
+			return { position: confirmedSubmission.position, text };
 		}
-		// 自分のターンで選択中（タップで提出）
-		if (isMyTurn && selectedCard && pendingPosition === position) {
-			return {
-				label,
-				onSubmit: async () => {
-					if (!selectedCard || !pendingPosition || isSubmitting) return;
-					setIsSubmitting(true);
-					setConfirmedSubmission({
-						position: pendingPosition,
-						text: selectedCard.word,
-					});
-					setPendingPosition(null);
-					try {
-						// サーバーに提出を送信
-						await sendSubmission({
-							position: pendingPosition,
-							text: selectedCard.word,
-						});
-					} finally {
-						setIsSubmitting(false);
-					}
-				},
-				state: "selected",
-				word: selectedCard.word,
-			};
+		if (!isMyTurn && game.submitted) {
+			const text = createCombination({
+				position: game.submitted.position,
+				text: game.submitted.text,
+				theme: game.theme,
+			});
+			if (!text) return;
+			return { position: game.submitted.position, text };
 		}
-		// 他プレイヤーのターンで提出済み（提出結果表示）
-		if (!isMyTurn && game.submitted && game.submitted.position === position) {
-			return {
-				label,
-				state: "placed",
-				word: game.submitted.text,
-			};
-		}
-		// 自分の番ではない、または確定済み
-		if (!isMyTurn || isConfirmed) {
-			return { label, state: "idle" };
-		}
-		// 選択待ち
-		return {
-			disabled: !selectedCard,
-			label,
-			onSelect: () => {
-				if (!selectedCard || isConfirmed) return;
-				setPendingPosition(position);
-			},
-			state: "ready",
-		};
-	};
+	})();
 
-	const handleCardClick = (cardId: PlayerCardId) => {
+	const handleCardClick = (cardId: PlayerCardId): void => {
 		if (isConfirmed) return;
 		const card = mePlayer.playerCards.find((c) => c.id === cardId);
 		if (card?.used) return;
 		setSelectedCardId(cardId);
 		setPendingPosition(null);
+	};
+
+	const handleComboSelect = (position: Position): void => {
+		if (!selectedCard || isConfirmed || isPending) return;
+		// 同じ選択肢を2度タップで確定
+		if (pendingPosition === position) {
+			setConfirmedSubmission({
+				position,
+				text: selectedCard.word,
+			});
+			setPendingPosition(null);
+			vibrate();
+			startTransition(async () => {
+				try {
+					await sendSubmission({
+						position,
+						text: selectedCard.word,
+					});
+				} catch (error) {
+					console.error("提出の送信に失敗しました:", error);
+					setConfirmedSubmission(null);
+				}
+			});
+			return;
+		}
+		setPendingPosition(position);
 	};
 
 	return (
@@ -193,8 +176,8 @@ export function GameSubmission({
 					/>
 				}
 			>
-				{/* 自分の番でオーバーレイ（手札・配置エリア以外を暗く） */}
-				{isMyTurn && !isConfirmed && (
+				{/* 自分の番でオーバーレイ（操作対象以外を暗く） */}
+				{isActivePhase && (
 					<div className="pointer-events-none fixed inset-0 z-20 bg-black/50" />
 				)}
 
@@ -256,57 +239,44 @@ export function GameSubmission({
 						})}
 					</section>
 
-					{/* 配置エリア - 牌選択後にz-indexを上げてオーバーレイの上に表示 */}
+					{/* 中央エリア - お題カード + 組み合わせ選択 */}
 					<section
 						className={classNames(
 							"relative mt-8 grid place-items-center rounded-t-2xl border border-gray-300 border-b-0 bg-white p-16",
-							isMyTurn && !isConfirmed && selectedCard && "z-30",
+							isActivePhase && "z-30",
 						)}
 					>
-						{/* 配置選択時のガイダンスメッセージ */}
-						{isMyTurn && !isConfirmed && selectedCard && !pendingPosition && (
-							<div className="absolute -top-24 left-1/2 z-10 -translate-x-1/2 animate-bounce">
-								<p className="whitespace-nowrap rounded-full bg-green-500 px-16 py-4 font-bold text-sm text-white shadow-lg">
-									↓ 配置場所をタップ ↓
-								</p>
-							</div>
-						)}
 						<div className="grid w-full max-w-480 place-items-center gap-y-16 sm:gap-y-24">
-							<SelectSubmissionCard
-								{...buildSelectSubmissionCardProps("prefix")}
-							/>
-							{/* テーマカード - 自分の番では常にオーバーレイの上に表示 */}
-							<p
-								className={classNames(
-									"grid min-h-56 xs:min-h-64 w-full place-items-center rounded-md border border-yellow-300 bg-yellow-50 p-8 px-12 font-bold text-sm shadow sm:text-base",
-									isMyTurn && !isConfirmed && "relative z-30",
-								)}
-							>
-								{game.theme}
-							</p>
-							<SelectSubmissionCard
-								{...buildSelectSubmissionCardProps("suffix")}
-							/>
+							{resolvedSubmission ? (
+								<SubmissionCard
+									position={resolvedSubmission.position}
+									state="confirmed"
+									text={resolvedSubmission.text}
+								/>
+							) : (
+								<ThemeCard theme={game.theme} />
+							)}
+
+							{isActivePhase && !!selectedCard && (
+								<SubmissionCard
+									onSelect={handleComboSelect}
+									position={pendingPosition}
+									state="selecting"
+									theme={game.theme}
+									word={selectedCard.word}
+								/>
+							)}
 						</div>
 					</section>
 
-					{/* 手札エリア - 自分の番ではz-indexを上げてオーバーレイの上に表示 */}
-					<div
-						className={classNames(isMyTurn && !isConfirmed && "relative z-30")}
-					>
-						{/* 牌選択時のガイダンスメッセージ */}
-						{isMyTurn && !isConfirmed && !selectedCard && (
-							<div className="absolute -top-32 left-1/2 z-10 -translate-x-1/2 animate-bounce">
-								<p className="whitespace-nowrap rounded-full bg-green-500 px-16 py-4 font-bold text-sm text-white shadow-lg">
-									↓ 手札を選んでください ↓
-								</p>
-							</div>
-						)}
+					{/* 手札エリア - 自分の番では常にz-indexを上げる（カード再選択を可能に） */}
+					<div className={classNames(isActivePhase && "relative z-30")}>
 						<PlayerCardDisplay
 							cards={mePlayer.playerCards}
 							isConfirmed={isConfirmed}
 							onCardClick={isMyTurn ? handleCardClick : undefined}
 							selectedCardId={selectedCardId}
+							showPulse={isActivePhase && !selectedCard}
 						/>
 					</div>
 				</main>

@@ -1,9 +1,8 @@
 import { LOCALSTORAGE_OPERATION_FAILED_MESSAGE } from "@repo/shared/error";
 import { DetailedError } from "hono/client";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { useToast } from "~/components/Toast";
-import { useIsLoading } from "~/hooks/useIsLoading";
 import { gameTokenLocalStorage } from "~/libs/gameTokenLocalStorage";
 import { buildNoindexMeta } from "~/libs/meta";
 import type { Route } from "./+types/route";
@@ -30,16 +29,9 @@ export default function Page({ params: { gameId } }: Route.ComponentProps) {
 		header: { "x-game-token": gameToken ?? "" },
 		param: { gameId },
 	});
-	const {
-		isLoading: isExiting,
-		startLoading: startExiting,
-		stopLoading: stopExiting,
-	} = useIsLoading();
-	const {
-		isLoading: isStarting,
-		startLoading: startStarting,
-		stopLoading: stopStarting,
-	} = useIsLoading();
+	const [isExiting, setIsExiting] = useState(false);
+	const [isStarting, setIsStarting] = useState(false);
+
 	const {
 		data: participants,
 		error: matchingError,
@@ -57,7 +49,7 @@ export default function Page({ params: { gameId } }: Route.ComponentProps) {
 				exitTimeoutRef.current = null;
 			}
 
-			stopExiting();
+			setIsExiting(false);
 
 			if (event.code === 1000) {
 				// NOTE: ゲーム開始時（正常終了）はゲームページへ遷移
@@ -75,27 +67,26 @@ export default function Page({ params: { gameId } }: Route.ComponentProps) {
 	const handleStart = () => {
 		if (!isHost) return;
 
-		startStarting();
+		setIsStarting(true);
 		try {
 			sendStart();
 		} catch (error) {
+			setIsStarting(false);
 			console.error("WebSocketが接続されていません。", error);
 			showToast({
 				title: "接続が切断されています。ページを再読み込みしてください。",
 				type: "error",
 			});
 			void navigate("/", { replace: true });
-		} finally {
-			stopStarting();
 		}
 	};
 
 	const handleExit = () => {
-		startExiting();
+		setIsExiting(true);
 
 		// 5秒後にタイムアウト処理
 		exitTimeoutRef.current = window.setTimeout(() => {
-			stopExiting();
+			setIsExiting(false);
 			showToast({
 				title: "退出処理がタイムアウトしました。再度お試しください。",
 				type: "error",
@@ -110,7 +101,7 @@ export default function Page({ params: { gameId } }: Route.ComponentProps) {
 				clearTimeout(exitTimeoutRef.current);
 				exitTimeoutRef.current = null;
 			}
-			stopExiting();
+			setIsExiting(false);
 			void navigate("/", { replace: true });
 			return;
 		}

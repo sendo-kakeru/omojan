@@ -44,7 +44,11 @@ export const routes = new Hono<
 
 			try {
 				if (status === "finished") {
-					const result = await roomService.findManyFinished({ limit, page });
+					const result = await roomService.findManyFinished({
+						limit,
+						page,
+						userId: query.userId,
+					});
 					return c.json(
 						{
 							data: result,
@@ -54,7 +58,11 @@ export const routes = new Hono<
 					);
 				}
 
-				const result = await roomService.findManyWaiting({ limit, page });
+				const result = await roomService.findManyWaiting({
+					limit,
+					page,
+					userId: query.userId,
+				});
 				return c.json(
 					{
 						data: result,

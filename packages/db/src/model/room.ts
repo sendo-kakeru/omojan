@@ -29,12 +29,14 @@ import {
 	playerNameSchema,
 	playerSchema,
 	playerTable,
+	userIdSchema,
 	userSchema,
 } from "../schema";
 import {
 	paginatedResponseSchema,
 	paginationRequestQuerySchema,
 } from "./pagination";
+
 export type { BrandSymbol };
 
 /** 部屋一覧で使用するステータス */
@@ -64,6 +66,8 @@ export const getRoomListRequestQuerySchema = object({
 	...paginationRequestQuerySchema.entries,
 	/** 部屋のステータス（default: "waiting"） */
 	status: optional(roomStatusSchema),
+	/** 参加したユーザーのID */
+	userId: optional(userIdSchema),
 });
 export type GetRoomListRequestQuery = InferOutput<
 	typeof getRoomListRequestQuerySchema
