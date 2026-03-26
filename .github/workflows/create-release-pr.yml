@@ -19,15 +19,17 @@ jobs:
 
       - name: Generate PR body
         run: |
+          # PR情報を一括取得してローカルでフィルタリング
+          pr_list=$(gh pr list --state merged --limit 200 --json number,title)
           {
-            echo "## リリース内容"
+            echo "## 変更内容"
             echo ""
             git log origin/main..origin/develop --merges --pretty=format:"%s" | while IFS= read -r message; do
               pr_num=$(echo "$message" | grep -oE '#[0-9]+' | head -1 | tr -d '#')
               if [ -n "$pr_num" ]; then
-                pr_title=$(gh pr view "$pr_num" --json title -q '.title' 2>/dev/null || echo "")
+                pr_title=$(echo "$pr_list" | jq -r ".[] | select(.number == ${pr_num}) | .title")
                 if [ -n "$pr_title" ]; then
-                  echo "- [#${pr_num} ${pr_title}](https://github.com/${GITHUB_REPOSITORY}/pull/${pr_num})"
+                  printf -- '- [#%s %s](https://github.com/%s/pull/%s)\n' "$pr_num" "$pr_title" "$GITHUB_REPOSITORY" "$pr_num"
                 fi
               fi
             done
