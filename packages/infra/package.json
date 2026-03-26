@@ -15,14 +15,14 @@
 	"name": "@repo/infra",
 	"private": true,
 	"scripts": {
-		"destroy": "pnpm run destroy:dev && pnpm run destroy:stg && pnpm run destroy:prod",
-		"destroy:dev": "RUN_TYPE=DESTROY pulumi up -y -s dev && pulumi destroy -y -s dev",
-		"destroy:prod": "RUN_TYPE=DESTROY pulumi up -y -s prod && pulumi destroy -y -s prod",
-		"destroy:stg": "RUN_TYPE=DESTROY pulumi up -y -s stg && pulumi destroy -y -s stg",
+		"infra:destroy": "pnpm run infra:destroy:dev && pnpm run infra:destroy:stg && pnpm run infra:destroy:prod",
+		"infra:destroy:dev": "RUN_TYPE=DESTROY pulumi up -y -s dev && pulumi infra:destroy -y -s dev",
+		"infra:destroy:prod": "RUN_TYPE=DESTROY pulumi up -y -s prod && pulumi infra:destroy -y -s prod",
+		"infra:destroy:stg": "RUN_TYPE=DESTROY pulumi up -y -s stg && pulumi infra:destroy -y -s stg",
 		"format": "biome check --fix --unsafe .",
 		"lint": "biome check .",
 		"typecheck": "tsc --noEmit",
-		"up": "pulumi up -y -s dev && pulumi up -y -s stg && pulumi up -y -s prod"
+		"infra:up": "pulumi up -y -s dev && pulumi up -y -s stg && pulumi up -y -s prod"
 	},
 	"version": "1.0.0"
 }
