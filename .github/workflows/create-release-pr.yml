@@ -22,7 +22,7 @@ jobs:
           {
             echo "## 変更内容"
             echo ""
-            git log origin/main..origin/develop --merges --pretty=format:"%s" | while IFS= read -r message; do
+            git log origin/main..origin/develop --merges --pretty=format:"%s" | while IFS= read -r message || [ -n "$message" ]; do
               pr_num=$(echo "$message" | grep -oE '#[0-9]+' | head -1 | tr -d '#')
               if [ -n "$pr_num" ]; then
                 pr_title=$(gh pr view "$pr_num" --json title -q '.title' 2>/dev/null || echo "")
