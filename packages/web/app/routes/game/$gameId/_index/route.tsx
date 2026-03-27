@@ -6,7 +6,10 @@ import { buildNoindexMeta } from "~/libs/meta";
 import type { Route } from "./+types/route";
 import { GameError } from "./components/GameError";
 import { GamePresenter } from "./components/GamePresenter";
+import { ReactionBar } from "./components/ReactionBar";
+import { ReactionOverlay } from "./components/ReactionOverlay";
 import { useGameSubscriptionSWR } from "./hooks/useGameSubscriptionSWR";
+import { useReactions } from "./hooks/useReactions";
 
 export const meta: Route.MetaFunction = ({ matches }) =>
 	buildNoindexMeta(matches.flatMap((m) => m?.meta ?? []));
@@ -20,10 +23,13 @@ export default function Page({ params: { gameId } }: Route.ComponentProps) {
 		},
 	});
 
-	const { data, error, sendSubmission, sendVote, wsRef } =
+	const { addReaction, reactions } = useReactions();
+
+	const { data, error, sendReaction, sendSubmission, sendVote, wsRef } =
 		useGameSubscriptionSWR({
 			gameId,
 			gameToken,
+			onReaction: addReaction,
 		});
 
 	if (error) {
@@ -43,11 +49,20 @@ export default function Page({ params: { gameId } }: Route.ComponentProps) {
 		);
 	}
 
+	const isMySubmittingTurn =
+		data.type === "TURN_START" && data.currentPlayerId === data.mePlayer.id;
+
+	const showReactionBar = data.type !== "END" && !isMySubmittingTurn;
+
 	return (
-		<GamePresenter
-			data={data}
-			sendSubmission={sendSubmission}
-			sendVote={sendVote}
-		/>
+		<>
+			<ReactionOverlay reactions={reactions} />
+			<GamePresenter
+				data={data}
+				sendSubmission={sendSubmission}
+				sendVote={sendVote}
+			/>
+			<ReactionBar sendReaction={sendReaction} visible={showReactionBar} />
+		</>
 	);
 }
