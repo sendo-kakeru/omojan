@@ -10,7 +10,8 @@ jobs:
   create:
     runs-on: ubuntu-latest
     env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # GITHUB_TOKENで作成されたPRはCIがトリガーされないためPATを使用
+      GITHUB_TOKEN: ${{ secrets.PAT }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
