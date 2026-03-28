@@ -185,7 +185,6 @@ export type GameClientVoteMessage = InferOutput<
 // リアクション
 export const REACTION_EMOJIS = [
 	"😂",
-	"🫣",
 	"🫠",
 	"🎯",
 	"👏",
