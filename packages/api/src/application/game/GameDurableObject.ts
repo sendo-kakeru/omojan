@@ -214,44 +214,46 @@ export class GameDurableObject extends DurableObject<Env> {
 	 * WebSocketメッセージ受信時のハンドラ
 	 */
 	async webSocketMessage(ws: WebSocket, message: string): Promise<void> {
-		await this.restoreState();
+		await this.ctx.blockConcurrencyWhile(async () => {
+			await this.restoreState();
 
-		// 送信元のプレイヤーIDを特定
-		const senderId = this.getPlayerIdBySocket(ws);
-		if (!senderId) {
-			ws.close(1003, "送信元のプレイヤーが特定できませんでした。");
-			return;
-		}
+			// 送信元のプレイヤーIDを特定
+			const senderId = this.getPlayerIdBySocket(ws);
+			if (!senderId) {
+				ws.close(1003, "送信元のプレイヤーが特定できませんでした。");
+				return;
+			}
 
-		const parsedMessage = this.webSocketService.parseClientMessage({
-			message,
-			schema: gameClientMessageSchema,
-			ws,
+			const parsedMessage = this.webSocketService.parseClientMessage({
+				message,
+				schema: gameClientMessageSchema,
+				ws,
+			});
+			if (!parsedMessage) return;
+
+			switch (parsedMessage.type) {
+				case "SUBMIT":
+					await this.handleSubmission({
+						playerId: senderId,
+						submission: parsedMessage.submission,
+					});
+					break;
+				case "VOTE":
+					await this.handleVote({
+						playerId: senderId,
+						votePlayerId: parsedMessage.votePlayerId,
+					});
+					break;
+				case "REACTION":
+					this.handleReaction({
+						emoji: parsedMessage.emoji,
+						playerId: senderId,
+					});
+					return; // リアクションはゲーム状態に影響しないため永続化不要
+			}
+
+			await this.persistState();
 		});
-		if (!parsedMessage) return;
-
-		switch (parsedMessage.type) {
-			case "SUBMIT":
-				await this.handleSubmission({
-					playerId: senderId,
-					submission: parsedMessage.submission,
-				});
-				break;
-			case "VOTE":
-				await this.handleVote({
-					playerId: senderId,
-					votePlayerId: parsedMessage.votePlayerId,
-				});
-				break;
-			case "REACTION":
-				this.handleReaction({
-					emoji: parsedMessage.emoji,
-					playerId: senderId,
-				});
-				return; // リアクションはゲーム状態に影響しないため永続化不要
-		}
-
-		await this.persistState();
 	}
 
 	async alarm(): Promise<void> {
