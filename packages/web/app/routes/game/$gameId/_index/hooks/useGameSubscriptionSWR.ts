@@ -1,9 +1,13 @@
 import {
+	type GameClientReactionMessage,
 	type GameClientSubmissionMessage,
 	type GameClientVoteMessage,
 	type GameServerMessage,
+	type GameServerReactionMessage,
 	gameServerMessageSchema,
+	type ReactionEmoji,
 } from "@repo/db/model";
+import type { PlayerId } from "@repo/db/schema";
 import pRetry from "p-retry";
 import { useRef } from "react";
 import { useNavigate } from "react-router";
@@ -24,9 +28,11 @@ function getUrl({ gameId }: { gameId: string }): URL | undefined {
 export function useGameSubscriptionSWR({
 	gameId,
 	gameToken,
+	onReaction,
 }: {
 	gameId: string;
 	gameToken: string | null;
+	onReaction: (reaction: GameServerReactionMessage) => void;
 }) {
 	const wsRef = useRef<WebSocket | null>(null);
 	const navigate = useNavigate();
@@ -59,6 +65,13 @@ export function useGameSubscriptionSWR({
 						gameServerMessageSchema,
 						JSON.parse(event.data),
 					);
+
+					// リアクションはゲーム状態と分離して処理
+					if (message.type === "REACTION") {
+						onReaction(message);
+						return;
+					}
+
 					next(null, message);
 				} catch (error) {
 					console.error("メッセージの形式が正しくありません:", error, event);
@@ -142,9 +155,7 @@ export function useGameSubscriptionSWR({
 		}
 	};
 
-	const sendVote = async (
-		votePlayerId: GameClientVoteMessage["votePlayerId"],
-	): Promise<void> => {
+	const sendVote = async (votePlayerId: PlayerId): Promise<void> => {
 		try {
 			await pRetry(
 				() => {
@@ -170,8 +181,26 @@ export function useGameSubscriptionSWR({
 		}
 	};
 
+	const sendReaction = async (emoji: ReactionEmoji): Promise<void> => {
+		try {
+			if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
+				return;
+			}
+			wsRef.current.send(
+				JSON.stringify({
+					emoji,
+					type: "REACTION",
+				} satisfies GameClientReactionMessage),
+			);
+		} catch (error) {
+			// リアクションはゲーム進行に影響しないため、エラーは無視
+			console.error("リアクションの送信に失敗しました。", error);
+		}
+	};
+
 	return {
 		...subscription,
+		sendReaction,
 		sendSubmission,
 		sendVote,
 		wsRef,

@@ -37,6 +37,28 @@
 		}
 	}
 
+	/* リアクションフロートアップアニメーション */
+	--animate-reaction-float: reaction-float 3s linear forwards;
+
+	@keyframes reaction-float {
+		0% {
+			opacity: 0;
+			transform: translateY(0) scale(0.5);
+		}
+		10% {
+			opacity: 1;
+			transform: translateY(-5vh) scale(1);
+		}
+		80% {
+			opacity: 1;
+			transform: translateY(-60vh) scale(1);
+		}
+		100% {
+			opacity: 0;
+			transform: translateY(-75vh) scale(0.8);
+		}
+	}
+
 	/* パルスアニメーション */
 	--animate-pulse-slot: pulse-slot 1.5s ease-in-out infinite;
 	--animate-pulse-card: pulse-card 1.5s ease-in-out infinite;
