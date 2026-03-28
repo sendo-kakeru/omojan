@@ -3,6 +3,7 @@ import {
 	type GamePlayerCard,
 	type GamePlayerItem,
 	type GameServerGameEndMessage,
+	type GameServerReactionMessage,
 	type GameServerResultMessage,
 	type GameServerRoundStartMessage,
 	type GameServerTurnEndMessage,
@@ -10,6 +11,7 @@ import {
 	type GameServerVoteMessage,
 	type GameState,
 	gameClientMessageSchema,
+	type ReactionEmoji,
 } from "@repo/db/model";
 import {
 	type Game,
@@ -35,6 +37,9 @@ import { GameService } from "./GameService";
 
 /** ctx.storageに永続化するゲーム状態のキー */
 const STORAGE_KEY = "GAME_STATE" as const;
+
+/** リアクションの連打判定間隔(ms) */
+const REACTION_RATE_LIMIT_MS = 300 as const;
 
 /** ゲーム進行のタイミング定数 (ミリ秒) */
 const TIMING = {
@@ -79,6 +84,11 @@ export class GameDurableObject extends DurableObject<Env> {
 	private themes: Map<RoundNo, RoundTheme["text"]> = new Map();
 	private timeLimit = 30;
 	private players: PlayerState[] = [];
+	/**
+	 *　プレイヤーごとのリアクション最終送信時刻
+	 *　連打対策
+	 */
+	private reactionLastSentAt: Map<PlayerId, number> = new Map();
 
 	constructor(ctx: DurableObjectState, env: Env) {
 		super(ctx, env);
@@ -233,6 +243,12 @@ export class GameDurableObject extends DurableObject<Env> {
 					votePlayerId: parsedMessage.votePlayerId,
 				});
 				break;
+			case "REACTION":
+				this.handleReaction({
+					emoji: parsedMessage.emoji,
+					playerId: senderId,
+				});
+				return; // リアクションはゲーム状態に影響しないため永続化不要
 		}
 
 		await this.persistState();
@@ -921,6 +937,43 @@ export class GameDurableObject extends DurableObject<Env> {
 			// 結果フェーズへ移行
 			await this.proceedToResult();
 		}
+	}
+
+	/**
+	 * リアクション処理
+	 * ゲーム状態に影響を与えず、全プレイヤーにブロードキャストする
+	 */
+	private handleReaction({
+		emoji,
+		playerId,
+	}: {
+		emoji: ReactionEmoji;
+		playerId: PlayerId;
+	}): void {
+		// リアクション有効フェーズの確認
+		if (this.state === "WAITING" || this.state === "INITIALIZING") {
+			return;
+		}
+
+		// 連打防止判定
+		const now = Date.now();
+		const lastSentAt = this.reactionLastSentAt.get(playerId) ?? 0;
+		if (now - lastSentAt < REACTION_RATE_LIMIT_MS) {
+			return;
+		}
+		this.reactionLastSentAt.set(playerId, now);
+
+		const player = this.players.find((p) => p.id === playerId);
+		if (!player) return;
+
+		this.webSocketService.broadcastJson({
+			payload: {
+				emoji,
+				playerName: player.playerName,
+				type: "REACTION",
+			} satisfies GameServerReactionMessage,
+			sockets: this.ctx.getWebSockets(),
+		});
 	}
 
 	/**
