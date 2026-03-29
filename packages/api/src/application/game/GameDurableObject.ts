@@ -214,10 +214,11 @@ export class GameDurableObject extends DurableObject<Env> {
 	 * WebSocketメッセージ受信時のハンドラ
 	 */
 	async webSocketMessage(ws: WebSocket, message: string): Promise<void> {
-		await this.restoreState();
-
 		// 送信元のプレイヤーIDを特定
-		const senderId = this.getPlayerIdBySocket(ws);
+		const senderId = this.webSocketService.getPlayerIdBySocket({
+			ctx: this.ctx,
+			ws,
+		});
 		if (!senderId) {
 			ws.close(1003, "送信元のプレイヤーが特定できませんでした。");
 			return;
@@ -230,28 +231,33 @@ export class GameDurableObject extends DurableObject<Env> {
 		});
 		if (!parsedMessage) return;
 
-		switch (parsedMessage.type) {
-			case "SUBMIT":
-				await this.handleSubmission({
-					playerId: senderId,
-					submission: parsedMessage.submission,
-				});
-				break;
-			case "VOTE":
-				await this.handleVote({
-					playerId: senderId,
-					votePlayerId: parsedMessage.votePlayerId,
-				});
-				break;
-			case "REACTION":
-				this.handleReaction({
-					emoji: parsedMessage.emoji,
-					playerId: senderId,
-				});
-				return; // リアクションはゲーム状態に影響しないため永続化不要
+		// リアクション: 排他制御なしで処理（ゲーム状態に影響しない）
+		if (parsedMessage.type === "REACTION") {
+			this.handleReaction({ emoji: parsedMessage.emoji, playerId: senderId });
+			return;
 		}
 
-		await this.persistState();
+		// SUBMIT/VOTE: 排他制御を取得してゲーム状態を安全に更新
+		await this.ctx.blockConcurrencyWhile(async () => {
+			await this.restoreState();
+
+			switch (parsedMessage.type) {
+				case "SUBMIT":
+					await this.handleSubmission({
+						playerId: senderId,
+						submission: parsedMessage.submission,
+					});
+					break;
+				case "VOTE":
+					await this.handleVote({
+						playerId: senderId,
+						votePlayerId: parsedMessage.votePlayerId,
+					});
+					break;
+			}
+
+			await this.persistState();
+		});
 	}
 
 	async alarm(): Promise<void> {
@@ -1292,24 +1298,6 @@ export class GameDurableObject extends DurableObject<Env> {
 				error,
 			);
 		}
-	}
-
-	/**
-	 * WebSocketからプレイヤーIDを特定する
-	 * acceptWebSocket時に設定したタグを使用して特定する
-	 */
-	private getPlayerIdBySocket(ws: WebSocket): PlayerId | null {
-		const playerId = this.webSocketService.getPlayerIdBySocket({
-			ctx: this.ctx,
-			ws,
-		});
-
-		if (!playerId) return null;
-
-		if (this.players.some((player) => player.id === playerId)) {
-			return playerId;
-		}
-		return null;
 	}
 
 	/**
