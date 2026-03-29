@@ -2,7 +2,8 @@
 	"compilerOptions": {
 		"lib": ["ESNext", "DOM"],
 		"outDir": "./dist",
-		"rootDir": "./src"
+		"rootDir": "./src",
+		"types": ["node"]
 	},
 	"exclude": ["dist", "vitest.config.ts", "**/*.test.ts", "**/*.test.tsx"],
 	"extends": "@repo/typescript-config/base.json"
