@@ -7,6 +7,7 @@ import {
 	number,
 	object,
 	pick,
+	picklist,
 	string,
 	union,
 	null as valibotNull,
@@ -181,10 +182,42 @@ export type GameClientVoteMessage = InferOutput<
 	typeof gameClientVoteMessageSchema
 >;
 
+// リアクション
+export const REACTION_EMOJIS = [
+	"😂",
+	"🫠",
+	"🎯",
+	"👏",
+	"✨",
+	"🔥",
+	"‼️",
+] as const;
+
+export const reactionEmojiSchema = picklist(REACTION_EMOJIS);
+export type ReactionEmoji = InferOutput<typeof reactionEmojiSchema>;
+
+export const gameClientReactionMessageSchema = object({
+	emoji: reactionEmojiSchema,
+	type: literal("REACTION"),
+});
+export type GameClientReactionMessage = InferOutput<
+	typeof gameClientReactionMessageSchema
+>;
+
+export const gameServerReactionMessageSchema = object({
+	emoji: reactionEmojiSchema,
+	playerName: playerSchema.entries.playerName,
+	type: literal("REACTION"),
+});
+export type GameServerReactionMessage = InferOutput<
+	typeof gameServerReactionMessageSchema
+>;
+
 // クライアントメッセージ（統合）
 export const gameClientMessageSchema = variant("type", [
 	gameClientSubmissionMessageSchema,
 	gameClientVoteMessageSchema,
+	gameClientReactionMessageSchema,
 ]);
 export type GameClientMessage = InferOutput<typeof gameClientMessageSchema>;
 
@@ -221,6 +254,7 @@ export const gameServerMessageSchema = variant("type", [
 	gameServerVoteMessageSchema,
 	gameServerResultMessageSchema,
 	gameServerGameEndMessageSchema,
+	gameServerReactionMessageSchema,
 ]);
 export type GameServerMessage = InferOutput<typeof gameServerMessageSchema>;
 
