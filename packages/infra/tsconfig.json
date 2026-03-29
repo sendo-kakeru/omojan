@@ -6,7 +6,8 @@
 		"noImplicitReturns": true,
 		"outDir": "bin",
 		"pretty": true,
-		"sourceMap": true
+		"sourceMap": true,
+		"types": ["node"]
 	},
 	"extends": "@repo/typescript-config/base.json",
 	"files": ["index.ts"]
