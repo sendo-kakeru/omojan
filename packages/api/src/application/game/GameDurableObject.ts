@@ -233,7 +233,10 @@ export class GameDurableObject extends DurableObject<Env> {
 
 		// リアクション: 排他制御なしで処理（ゲーム状態に影響しない）
 		if (parsedMessage.type === "REACTION") {
-			this.handleReaction({ emoji: parsedMessage.emoji, playerId: senderId });
+			await this.handleReaction({
+				emoji: parsedMessage.emoji,
+				playerId: senderId,
+			});
 			return;
 		}
 
@@ -949,18 +952,13 @@ export class GameDurableObject extends DurableObject<Env> {
 	 * リアクション処理
 	 * ゲーム状態に影響を与えず、全プレイヤーにブロードキャストする
 	 */
-	private handleReaction({
+	private async handleReaction({
 		emoji,
 		playerId,
 	}: {
 		emoji: ReactionEmoji;
 		playerId: PlayerId;
-	}): void {
-		// リアクション有効フェーズの確認
-		if (this.state === "WAITING" || this.state === "INITIALIZING") {
-			return;
-		}
-
+	}): Promise<void> {
 		// 連打防止判定
 		const now = Date.now();
 		const lastSentAt = this.reactionLastSentAt.get(playerId) ?? 0;
@@ -969,17 +967,33 @@ export class GameDurableObject extends DurableObject<Env> {
 		}
 		this.reactionLastSentAt.set(playerId, now);
 
-		const player = this.players.find((p) => p.id === playerId);
-		if (!player) return;
+		const playerName = await this.resolvePlayerName({ playerId });
+		if (!playerName) return;
 
 		this.webSocketService.broadcastJson({
 			payload: {
 				emoji,
-				playerName: player.playerName,
+				playerName,
 				type: "REACTION",
 			} satisfies GameServerReactionMessage,
 			sockets: this.ctx.getWebSockets(),
 		});
+	}
+
+	/**
+	 * プレイヤー名を取得
+	 */
+	private async resolvePlayerName({
+		playerId,
+	}: {
+		playerId: PlayerId;
+	}): Promise<string | undefined> {
+		if (this.players.length > 0) {
+			return this.players.find((p) => p.id === playerId)?.playerName;
+		}
+		const persisted =
+			await this.ctx.storage.get<PersistedGameState>(STORAGE_KEY);
+		return persisted?.players.find((p) => p.id === playerId)?.playerName;
 	}
 
 	/**
