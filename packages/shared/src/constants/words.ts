@@ -2218,4 +2218,5 @@ export const WORDS = [
 	{ enabled: true, text: "ウォーズ" },
 	{ enabled: true, text: "チャンピオン" },
 	{ enabled: true, text: "かよ！" },
+	{ enabled: true, text: "を支える技術" },
 ] as const satisfies { text: string; enabled: boolean }[];
