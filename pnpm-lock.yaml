@@ -161,8 +161,8 @@ importers:
   packages/infra:
     devDependencies:
       '@pulumi/aws':
-        specifier: ^7.23.0
-        version: 7.23.0(typescript@6.0.2)
+        specifier: ^7.24.0
+        version: 7.24.0(typescript@6.0.2)
       '@pulumi/cloudflare':
         specifier: ^6.14.0
         version: 6.14.0(typescript@6.0.2)
@@ -2359,8 +2359,8 @@ packages:
   '@protobufjs/utf8@1.1.0':
     resolution: {integrity: sha512-Vvn3zZrhQZkkBE8LSuW3em98c0FwgO4nxzv6OdSxPKJIEKY2bGbHn+mhGIPerzI4twdxaP8/0+06HBpwf345Lw==}
 
-  '@pulumi/aws@7.23.0':
-    resolution: {integrity: sha512-tRyG4cwTQQ+88gb2TwejLWXW4TvuC72zlrNpCm2BBTnBp6YaZRT23xLFTYK8GN37fjzglmoVE9DF4yYMPvt17g==}
+  '@pulumi/aws@7.24.0':
+    resolution: {integrity: sha512-Y+zV+uU3Mr+5kUaqsFbF0/lf9yc8TU1Kx1cgcqMbyUQTRBRyfpXb6lR3sBwC88z1DX/WFMrBCD+1bbwnS2fBbw==}
 
   '@pulumi/cloudflare@6.14.0':
     resolution: {integrity: sha512-YKH9x7UsNg5iI92g9hVL893MzF8VS4W7nANFvr1TN99mQczPKNi0Z1abTBxyZ4DcB/JWi5zq+va7rJuKkuVr6Q==}
@@ -5622,10 +5622,6 @@ packages:
     resolution: {integrity: sha512-enIvLvRAFZYXJzkCYG5RKmPfrFArdLv+R+lbQ53BmIMLIry74bjKzX6iHAm8WYamJkhSSEabrWN5D97XnKObjQ==}
     engines: {node: 20 || >=22}
 
-  minimatch@10.2.4:
-    resolution: {integrity: sha512-oRjTw/97aTBN0RHbYCdtF1MQfvusSIBQM0IZEgzl6426+8jSC0nF1a/GmnVLpfB9yyr6g6FTqWqiZVbxrtaCIg==}
-    engines: {node: 18 || 20 || >=22}
-
   minimatch@10.2.5:
     resolution: {integrity: sha512-MULkVLfKGYDFYejP07QOurDLLQpcjk7Fw+7jXS2R2czRQzR56yHRveU5NDJEOviH+hETZKSkIk5c+T23GjFUMg==}
     engines: {node: 18 || 20 || >=22}
@@ -8635,7 +8631,7 @@ snapshots:
 
   '@protobufjs/utf8@1.1.0': {}
 
-  '@pulumi/aws@7.23.0(typescript@6.0.2)':
+  '@pulumi/aws@7.24.0(typescript@6.0.2)':
     dependencies:
       '@pulumi/pulumi': 3.229.0(typescript@6.0.2)
       mime: 2.6.0
@@ -11899,10 +11895,6 @@ snapshots:
   minimatch@10.1.1:
     dependencies:
       '@isaacs/brace-expansion': 5.0.0
-
-  minimatch@10.2.4:
-    dependencies:
-      brace-expansion: 5.0.5
 
   minimatch@10.2.5:
     dependencies:
