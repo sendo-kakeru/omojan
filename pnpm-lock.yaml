@@ -135,8 +135,8 @@ importers:
         specifier: 24.12.0
         version: 24.12.0
       dotenv:
-        specifier: ^17.3.1
-        version: 17.3.1
+        specifier: ^17.4.0
+        version: 17.4.0
       drizzle-kit:
         specifier: ^0.31.10
         version: 0.31.10
@@ -179,8 +179,8 @@ importers:
         specifier: 24.12.0
         version: 24.12.0
       dotenv:
-        specifier: ^17.3.1
-        version: 17.3.1
+        specifier: ^17.4.0
+        version: 17.4.0
       typescript:
         specifier: ^6.0.2
         version: 6.0.2
@@ -447,8 +447,8 @@ importers:
         specifier: ^19.2.3
         version: 19.2.3(@types/react@19.2.14)
       dotenv:
-        specifier: ^17.3.1
-        version: 17.3.1
+        specifier: ^17.4.0
+        version: 17.4.0
       drizzle-orm:
         specifier: ^0.45.2
         version: 0.45.2(@libsql/client@0.17.2(encoding@0.1.13))(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6)(pg@8.16.3)(postgres@3.4.7)
@@ -4703,8 +4703,8 @@ packages:
     resolution: {integrity: sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow==}
     engines: {node: '>=12'}
 
-  dotenv@17.3.1:
-    resolution: {integrity: sha512-IO8C/dzEb6O3F9/twg6ZLXz164a2fhTnEWb95H23Dm4OuN+92NmEAlTrupP9VW6Jm3sO26tQlqyvyi4CsnY9GA==}
+  dotenv@17.4.0:
+    resolution: {integrity: sha512-kCKF62fwtzwYm0IGBNjRUjtJgMfGapII+FslMHIjMR5KTnwEmBmWLDRSnc3XSNP8bNy34tekgQyDT0hr7pERRQ==}
     engines: {node: '>=12'}
 
   drizzle-kit@0.31.10:
@@ -11007,7 +11007,7 @@ snapshots:
 
   dotenv@16.6.1: {}
 
-  dotenv@17.3.1: {}
+  dotenv@17.4.0: {}
 
   drizzle-kit@0.31.10:
     dependencies:
