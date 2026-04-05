@@ -2156,7 +2156,6 @@ export const WORDS = [
 	{ enabled: true, text: "無罪" },
 	{ enabled: true, text: "有罪" },
 	{ enabled: true, text: "極刑" },
-	{ enabled: true, text: "恩赦" },
 	{ enabled: true, text: "特赦" },
 	{ enabled: true, text: "大赦" },
 	{ enabled: true, text: "脱獄" },
@@ -2218,4 +2217,6 @@ export const WORDS = [
 	{ enabled: true, text: "ウォーズ" },
 	{ enabled: true, text: "チャンピオン" },
 	{ enabled: true, text: "かよ！" },
+	{ enabled: true, text: "工法" },
+	{ enabled: true, text: "を支える技術" },
 ] as const satisfies { text: string; enabled: boolean }[];
