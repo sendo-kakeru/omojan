@@ -52,7 +52,7 @@
 		"typescript": "^6.0.2",
 		"vite": "^8.0.8",
 		"vite-tsconfig-paths": "^6.1.1",
-		"wrangler": "^4.80.0"
+		"wrangler": "^4.81.1"
 	},
 	"exports": {
 		"./build.css": "./dist/index.css",
