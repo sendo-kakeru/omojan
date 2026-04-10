@@ -13,7 +13,16 @@
 	"pnpm": {
 		"overrides": {
 			"@types/node": "24.12.2"
-		}
+		},
+		"ignoredBuiltDependencies": [
+			"@parcel/watcher",
+			"@sentry/cli",
+			"esbuild",
+			"lefthook",
+			"protobufjs",
+			"sharp",
+			"workerd"
+		]
 	},
 	"packageManager": "pnpm@10.22.0",
 	"private": true,
