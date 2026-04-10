@@ -29,8 +29,7 @@ export const meta: Route.MetaFunction = () => [
 	{ title: SITE_NAME },
 	{ content: SITE_DESCRIPTION, name: "description" },
 	{
-		content:
-			"おもじゃん, OMOJAN, ワードゲーム, オンラインゲーム, おもじゃん荘, 言葉遊び",
+		content: "おもじゃん, OMOJAN, ワードゲーム, オンラインゲーム, 言葉遊び",
 		name: "keywords",
 	},
 	// Canonical

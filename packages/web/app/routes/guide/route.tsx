@@ -52,7 +52,7 @@ export const meta: Route.MetaFunction = ({ matches }) => {
 		{ content: PAGE_DESCRIPTION, name: "description" },
 		{
 			content:
-				"おもじゃん, 遊び方, ルール, OMOJAN, ワードゲーム, オンラインゲーム, おもじゃん荘, 言葉遊び",
+				"おもじゃん, 遊び方, ルール, OMOJAN, ワードゲーム, オンラインゲーム, 言葉遊び",
 			name: "keywords",
 		},
 		{
