@@ -12,7 +12,7 @@
 	"name": "omojan",
 	"pnpm": {
 		"overrides": {
-			"@types/node": "24.12.0"
+			"@types/node": "24.12.2"
 		}
 	},
 	"packageManager": "pnpm@10.22.0",
