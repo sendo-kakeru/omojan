@@ -347,8 +347,8 @@ importers:
         specifier: workspace:*
         version: link:../shared
       '@sentry/cloudflare':
-        specifier: ^10.47.0
-        version: 10.47.0
+        specifier: ^10.48.0
+        version: 10.48.0
       '@sentry/react-router':
         specifier: ^10.47.0
         version: 10.47.0(@react-router/node@7.14.0(react-router@7.14.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(typescript@6.0.2))(encoding@0.1.13)(react-router@7.14.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(rollup@4.60.1)
@@ -3714,8 +3714,8 @@ packages:
     engines: {node: '>= 10'}
     hasBin: true
 
-  '@sentry/cloudflare@10.47.0':
-    resolution: {integrity: sha512-R5noxsP8M/L0TKoaOr2UYNgDitruGxknJJ4kcxHyjA3cpvvqUnDiMG8+E4SDosVFCWizHv+uVKIrPjXx03ruLg==}
+  '@sentry/cloudflare@10.48.0':
+    resolution: {integrity: sha512-i02Ps4/cJjFpbcHLMhNEFXTeVqLB9XpB3+/OFQ9aMFV3yDcxlvHwe0oo7WZf41iroArvpysotLG8Y8NBOU9omA==}
     engines: {node: '>=18'}
     peerDependencies:
       '@cloudflare/workers-types': ^4.x
@@ -3725,6 +3725,10 @@ packages:
 
   '@sentry/core@10.47.0':
     resolution: {integrity: sha512-nsYRAx3EWezDut+Zl+UwwP07thh9uY7CfSAi2whTdcJl5hu1nSp2z8bba7Vq/MGbNLnazkd3A+GITBEML924JA==}
+    engines: {node: '>=18'}
+
+  '@sentry/core@10.48.0':
+    resolution: {integrity: sha512-h8F+fXVwYC9ro5ZaO8V+v3vqc0awlXHGblEAuVxSGgh4IV/oFX+QVzXeDTTrFOFS6v/Vn5vAyu240eJrJAS6/g==}
     engines: {node: '>=18'}
 
   '@sentry/node-core@10.47.0':
@@ -9917,12 +9921,14 @@ snapshots:
       - encoding
       - supports-color
 
-  '@sentry/cloudflare@10.47.0':
+  '@sentry/cloudflare@10.48.0':
     dependencies:
       '@opentelemetry/api': 1.9.1
-      '@sentry/core': 10.47.0
+      '@sentry/core': 10.48.0
 
   '@sentry/core@10.47.0': {}
+
+  '@sentry/core@10.48.0': {}
 
   '@sentry/node-core@10.47.0(@opentelemetry/api@1.9.1)(@opentelemetry/context-async-hooks@2.6.1(@opentelemetry/api@1.9.1))(@opentelemetry/core@2.6.1(@opentelemetry/api@1.9.1))(@opentelemetry/instrumentation@0.214.0(@opentelemetry/api@1.9.1))(@opentelemetry/resources@2.6.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.6.1(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.40.0)':
     dependencies:
