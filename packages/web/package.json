@@ -13,7 +13,7 @@
 		"@tanstack/react-form": "^1.28.6",
 		"amazon-cognito-identity-js": "^6.3.16",
 		"classnames": "^2.5.1",
-		"hono": "^4.12.12",
+		"hono": "^4.12.14",
 		"input-otp": "^1.4.2",
 		"isbot": "^5.1.37",
 		"jwt-decode": "^4.0.0",
