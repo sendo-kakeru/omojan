@@ -7,7 +7,7 @@ export function Header() {
 	return (
 		<header className="flex items-start justify-between bg-transparent p-16">
 			<Link
-				className="hover:translate-0.5 flex size-32 rounded-md shadow transition hover:shadow-none"
+				className="hover:translate-0.5 flex size-32 overflow-hidden rounded-md shadow transition hover:shadow-none"
 				to="/"
 			>
 				<img
