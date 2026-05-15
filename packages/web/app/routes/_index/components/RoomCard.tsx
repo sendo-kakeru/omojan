@@ -1,3 +1,4 @@
+import { uuid58Encode } from "@nakanoaas/uuid58";
 import type { FinishedRoom, WaitingRoom } from "@repo/db/model";
 import classNames from "classnames";
 import { useState } from "react";
@@ -119,7 +120,7 @@ export function RoomCard({
 				<Link
 					aria-label={`${room.title}の結果を見る`}
 					className={cardClassName}
-					to={`/game/${room.gameId}/result`}
+					to={`/game/${uuid58Encode(room.gameId)}/result`}
 				>
 					{content}
 				</Link>

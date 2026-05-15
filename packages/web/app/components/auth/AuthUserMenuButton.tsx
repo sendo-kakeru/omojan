@@ -1,3 +1,4 @@
+import { uuid58Encode } from "@nakanoaas/uuid58";
 import type { Me } from "@repo/db/model";
 import { useState } from "react";
 import { LuLogIn } from "react-icons/lu";
@@ -62,7 +63,7 @@ export function UserMenuButton({ me }: { me: Me }) {
 			}
 		>
 			<DropdownMenuItem asChild>
-				<Link to={`/users/${me.userId}`}>プロフィール</Link>
+				<Link to={`/users/${uuid58Encode(me.userId)}`}>プロフィール</Link>
 			</DropdownMenuItem>
 			<DropdownMenuSeparator />
 			<DropdownMenuItem asChild>
