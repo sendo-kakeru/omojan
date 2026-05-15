@@ -167,8 +167,8 @@ importers:
         specifier: ^6.15.0
         version: 6.15.0(typescript@6.0.3)
       '@pulumi/gcp':
-        specifier: ^9.21.0
-        version: 9.21.0(typescript@6.0.3)
+        specifier: ^9.23.0
+        version: 9.23.0(typescript@6.0.3)
       '@pulumi/pulumi':
         specifier: ^3.230.0
         version: 3.230.0(typescript@6.0.3)
@@ -2549,8 +2549,8 @@ packages:
   '@pulumi/cloudflare@6.15.0':
     resolution: {integrity: sha512-I2C1UA//YbkuGUV5O9skIMUu94StNSE4hiAU57GFtyL7WEqAMJLvV8Vpcu1192rI1/ZwFIJeR4MbAZfiYlPFqA==}
 
-  '@pulumi/gcp@9.21.0':
-    resolution: {integrity: sha512-fjRNW0PdQ16wl44BpgjOlIUfZXyBZCs8IyHxhEMhA+mxT6Tgx+0zwvXwrlBmrWcTczhHcTkTTmhf4tgCvD5weA==}
+  '@pulumi/gcp@9.23.0':
+    resolution: {integrity: sha512-4ASG24GmMKzz4FTA7mv4tC2yuHDPuM4UPB1NBi/8aQrwwdoGF39FGbHWYCtOVfAYyiDkQguV9s0a3aHszphdWA==}
 
   '@pulumi/pulumi@3.230.0':
     resolution: {integrity: sha512-wWHP65RKj2zz8R8N4sImPie4bQM/walrCOeNUl46TkdHOOihFdg6cMO2l1IPufh/EBBLtiUBrzpP0wi8OWqhsQ==}
@@ -4413,8 +4413,8 @@ packages:
   '@types/pg@8.15.6':
     resolution: {integrity: sha512-NoaMtzhxOrubeL/7UZuNTrejB4MPAJ0RpxZqXQf2qXuVlTPuG6Y8p4u9dKRaue4yjmC7ZhzVO2/Yyyn25znrPQ==}
 
-  '@types/qs@6.15.0':
-    resolution: {integrity: sha512-JawvT8iBVWpzTrz3EGw9BTQFg3BQNmwERdKE22vlTxawwtbyUSlMppvZYKLZzB5zgACXdXxbD3m1bXaMqP/9ow==}
+  '@types/qs@6.15.1':
+    resolution: {integrity: sha512-GZHUBZR9hckSUhrxmp1nG6NwdpM9fCunJwyThLW1X3AyHgd9IlHb6VANpQQqDr2o/qQp6McZ3y/IA2rVzKzSbw==}
 
   '@types/range-parser@1.2.7':
     resolution: {integrity: sha512-hKormJbkJqzQGhziax5PItDUTMAM9uE2XXQmM37dyd4hVM+5aVl7oVxMVUiVQn2oCQFN/LKCZdvSM0pFRqbSmQ==}
@@ -6499,6 +6499,11 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
+  semver@7.8.0:
+    resolution: {integrity: sha512-AcM7dV/5ul4EekoQ29Agm5vri8JNqRyj39o0qpX6vDF2GZrtutZl5RwgD1XnZjiTAfncsJhMI48QQH3sN87YNA==}
+    engines: {node: '>=10'}
+    hasBin: true
+
   send@0.19.2:
     resolution: {integrity: sha512-VMbMxbDeehAxpOtWJXlcUS5E8iXh6QmN+BkRX1GARS3wRaXEEgzCcB10gTQazO42tpNIya8xIyNx8fll1OFPrg==}
     engines: {node: '>= 0.8.0'}
@@ -8358,7 +8363,7 @@ snapshots:
       npm-pick-manifest: 10.0.0
       proc-log: 5.0.0
       promise-retry: 2.0.1
-      semver: 7.7.4
+      semver: 7.8.0
       which: 5.0.0
 
   '@npmcli/git@7.0.2':
@@ -8369,7 +8374,7 @@ snapshots:
       lru-cache: 11.2.7
       npm-pick-manifest: 11.0.3
       proc-log: 6.1.0
-      semver: 7.7.4
+      semver: 7.8.0
       which: 6.0.1
 
   '@npmcli/installed-package-contents@4.0.0':
@@ -8405,7 +8410,7 @@ snapshots:
       hosted-git-info: 8.1.0
       json-parse-even-better-errors: 4.0.0
       proc-log: 5.0.0
-      semver: 7.7.4
+      semver: 7.8.0
       validate-npm-package-license: 3.0.4
 
   '@npmcli/package-json@7.0.5':
@@ -8953,7 +8958,7 @@ snapshots:
       - ts-node
       - typescript
 
-  '@pulumi/gcp@9.21.0(typescript@6.0.3)':
+  '@pulumi/gcp@9.23.0(typescript@6.0.3)':
     dependencies:
       '@npmcli/package-json': 6.2.0
       '@pulumi/pulumi': 3.230.0(typescript@6.0.3)
@@ -10705,7 +10710,7 @@ snapshots:
   '@types/express-serve-static-core@4.19.8':
     dependencies:
       '@types/node': 24.12.2
-      '@types/qs': 6.15.0
+      '@types/qs': 6.15.1
       '@types/range-parser': 1.2.7
       '@types/send': 1.2.1
 
@@ -10713,7 +10718,7 @@ snapshots:
     dependencies:
       '@types/body-parser': 1.19.6
       '@types/express-serve-static-core': 4.19.8
-      '@types/qs': 6.15.0
+      '@types/qs': 6.15.1
       '@types/serve-static': 1.15.10
 
   '@types/google-protobuf@3.15.12': {}
@@ -10748,7 +10753,7 @@ snapshots:
       pg-protocol: 1.13.0
       pg-types: 2.2.0
 
-  '@types/qs@6.15.0': {}
+  '@types/qs@6.15.1': {}
 
   '@types/range-parser@1.2.7': {}
 
@@ -12147,7 +12152,7 @@ snapshots:
 
   make-dir@4.0.0:
     dependencies:
-      semver: 7.7.4
+      semver: 7.8.0
 
   make-fetch-happen@15.0.5:
     dependencies:
@@ -12313,7 +12318,7 @@ snapshots:
       make-fetch-happen: 15.0.5
       nopt: 9.0.0
       proc-log: 6.1.0
-      semver: 7.7.4
+      semver: 7.8.0
       tar: 7.5.13
       tinyglobby: 0.2.16
       which: 6.0.1
@@ -12340,7 +12345,7 @@ snapshots:
 
   npm-install-checks@7.1.2:
     dependencies:
-      semver: 7.7.4
+      semver: 7.8.0
 
   npm-install-checks@8.0.0:
     dependencies:
@@ -12354,7 +12359,7 @@ snapshots:
     dependencies:
       hosted-git-info: 8.1.0
       proc-log: 5.0.0
-      semver: 7.7.4
+      semver: 7.8.0
       validate-npm-package-name: 6.0.2
 
   npm-package-arg@13.0.2:
@@ -12374,7 +12379,7 @@ snapshots:
       npm-install-checks: 7.1.2
       npm-normalize-package-bin: 4.0.0
       npm-package-arg: 12.0.2
-      semver: 7.7.4
+      semver: 7.8.0
 
   npm-pick-manifest@11.0.3:
     dependencies:
@@ -12999,6 +13004,8 @@ snapshots:
   semver@6.3.1: {}
 
   semver@7.7.4: {}
+
+  semver@7.8.0: {}
 
   send@0.19.2:
     dependencies:
