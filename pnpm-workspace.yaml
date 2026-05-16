@@ -2,3 +2,13 @@ packages:
   - "packages/*"
 strictDepBuilds: true
 minimumReleaseAge: 4320
+overrides:
+  "@types/node": "24.12.4"
+allowBuilds:
+  "@parcel/watcher": false
+  "@sentry/cli": false
+  esbuild: false
+  lefthook: false
+  protobufjs: false
+  sharp: false
+  workerd: false

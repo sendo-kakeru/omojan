@@ -10,20 +10,6 @@
 		"node": "24.15.0"
 	},
 	"name": "omojan",
-	"pnpm": {
-		"overrides": {
-			"@types/node": "24.12.4"
-		},
-		"ignoredBuiltDependencies": [
-			"@parcel/watcher",
-			"@sentry/cli",
-			"esbuild",
-			"lefthook",
-			"protobufjs",
-			"sharp",
-			"workerd"
-		]
-	},
 	"packageManager": "pnpm@10.22.0",
 	"private": true,
 	"scripts": {
