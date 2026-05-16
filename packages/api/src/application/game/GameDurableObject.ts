@@ -749,6 +749,8 @@ export class GameDurableObject extends DurableObject<Env> {
 				}) satisfies GameServerVoteMessage,
 		});
 
+		await this.ctx.storage.setAlarm(Date.now() + TIMING.VOTE_TIMEOUT_MS);
+
 		// CPUプレイヤーの自動投票
 		// 失敗した場合は投票タイムアウト（handleVoteTimeout）で再試行される
 		for (const player of this.players) {
@@ -763,9 +765,6 @@ export class GameDurableObject extends DurableObject<Env> {
 				}
 			}
 		}
-
-		// 投票タイムアウトアラームを設定（15秒）
-		await this.ctx.storage.setAlarm(Date.now() + TIMING.VOTE_TIMEOUT_MS);
 	}
 
 	/**
@@ -1427,11 +1426,20 @@ export class GameDurableObject extends DurableObject<Env> {
 
 		if (!randomTarget) return;
 
-		await this.gameService.saveVote({
-			gameId: this.gameId,
-			playerId,
-			roundNo: this.roundNo,
-			votePlayerId: randomTarget.id,
-		});
+		await pRetry(
+			async () => {
+				if (!this.gameId) return;
+
+				await this.gameService.saveVote({
+					gameId: this.gameId,
+					playerId,
+					roundNo: this.roundNo,
+					votePlayerId: randomTarget.id,
+				});
+			},
+			{
+				retries: 3,
+			},
+		);
 	}
 }
