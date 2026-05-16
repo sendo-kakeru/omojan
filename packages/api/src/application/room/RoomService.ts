@@ -163,6 +163,7 @@ export class RoomService {
 						image: player.image,
 						playerName: player.playerName,
 						seat: player.seat,
+						userId: player.userId,
 					})),
 				timeLimit: game.timeLimit,
 				title: game.title,
@@ -256,6 +257,7 @@ export class RoomService {
 							isWinner: winnerIds.has(player.id),
 							playerName: player.playerName,
 							seat: player.seat,
+							userId: player.userId,
 						})),
 					timeLimit: game.timeLimit,
 					title: game.title,
@@ -281,6 +283,7 @@ export class RoomService {
 				image: userTable.image,
 				playerName: playerNameExpression,
 				seat: playerTable.seat,
+				userId: playerTable.userId,
 			})
 			.from(playerTable)
 			.leftJoin(userTable, eq(playerTable.userId, userTable.id))
