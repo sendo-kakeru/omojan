@@ -11,7 +11,7 @@
 			"Bash(pnpm i)",
 			"Bash(pnpm typecheck)",
 			"Bash(pnpm lint)",
-			"Bash(pnpm ci)",
+			"Bash(pnpm run ci)",
 			"Bash(pnpm dev)",
 			"Bash(pnpm dev:*)",
 			"Bash(pnpm i)",

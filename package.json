@@ -10,21 +10,7 @@
 		"node": "24.15.0"
 	},
 	"name": "omojan",
-	"pnpm": {
-		"overrides": {
-			"@types/node": "24.12.4"
-		},
-		"ignoredBuiltDependencies": [
-			"@parcel/watcher",
-			"@sentry/cli",
-			"esbuild",
-			"lefthook",
-			"protobufjs",
-			"sharp",
-			"workerd"
-		]
-	},
-	"packageManager": "pnpm@10.22.0",
+	"packageManager": "pnpm@11.1.2",
 	"private": true,
 	"scripts": {
 		"ci": "biome ci && turbo run typecheck test:run && cd packages/web && pnpm run test:e2e"
