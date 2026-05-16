@@ -52,6 +52,7 @@ const roomPlayerSchema = object({
 	...pick(playerSchema, ["playerName", "seat"]).entries,
 	id: playerIdSchema,
 	image: nullable(userSchema.entries.image),
+	userId: nullable(playerSchema.entries.userId),
 });
 
 export const roomSchema = object({

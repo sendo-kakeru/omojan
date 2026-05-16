@@ -1,4 +1,5 @@
 import type { WaitingRoom } from "@repo/db/model";
+import type { UserId } from "@repo/db/schema";
 import type { Meta, StoryFn } from "@storybook/react-vite";
 import { WaitingRoomSection } from "./WaitingRoomSection";
 
@@ -11,6 +12,8 @@ const meta: Meta<typeof WaitingRoomSection> = {
 export default meta;
 type Story = StoryFn<typeof WaitingRoomSection>;
 
+const DUMMY_USER_ID = "00000000-0000-0000-0000-000000000001" as UserId;
+
 const createWaitingRoom = (overrides?: Partial<WaitingRoom>): WaitingRoom => ({
 	createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
 	gameId:
@@ -22,6 +25,7 @@ const createWaitingRoom = (overrides?: Partial<WaitingRoom>): WaitingRoom => ({
 			image: null,
 			playerName: "ホスト",
 			seat: 1,
+			userId: DUMMY_USER_ID,
 		},
 	],
 	timeLimit: 60,
@@ -46,12 +50,14 @@ export const WithRooms: Story = () => (
 						image: null,
 						playerName: "ホスト",
 						seat: 1,
+						userId: DUMMY_USER_ID,
 					},
 					{
 						id: "player-2" as WaitingRoom["players"][0]["id"],
 						image: null,
 						playerName: "参加者A",
 						seat: 2,
+						userId: null,
 					},
 				],
 				title: "ガチ勢集合",

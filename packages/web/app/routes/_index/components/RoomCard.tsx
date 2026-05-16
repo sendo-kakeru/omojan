@@ -27,17 +27,42 @@ export function RoomCard({
 	  }) {
 	const [isOpen, setIsOpen] = useState(false);
 	const isWaiting = status === "waiting";
-	const cardClassName = classNames(
-		"grid w-full rounded-lg border border-gray-300 bg-white p-12 shadow-sm transition-colors",
-		"hover:bg-gray-50",
-		className,
+
+	const cardActionClassName = classNames(
+		"pointer-events-auto text-left outline-none before:absolute before:inset-0 before:rounded-lg before:content-['']",
+		"focus-visible:before:ring-2 focus-visible:before:ring-blue-500 focus-visible:before:ring-inset",
 	);
 
-	const content = (
-		<>
-			<div className="grid gap-y-4">
+	return (
+		<article
+			className={classNames(
+				"relative grid w-full rounded-lg border border-gray-300 bg-white p-12 shadow-sm transition-colors",
+				"hover:bg-gray-50",
+				className,
+			)}
+		>
+			<div className="pointer-events-none grid gap-y-4">
 				<div className="flex min-h-34 items-center justify-between gap-x-6">
-					<h3 className="font-semibold">{room.title}</h3>
+					<h3 className="font-semibold">
+						{isWaiting ? (
+							<button
+								aria-label={`${room.title}に参加`}
+								className={cardActionClassName}
+								onClick={() => setIsOpen(true)}
+								type="button"
+							>
+								{room.title}
+							</button>
+						) : (
+							<Link
+								aria-label={`${room.title}の結果を見る`}
+								className={cardActionClassName}
+								to={`/game/${uuid58Encode(room.gameId)}/result`}
+							>
+								{room.title}
+							</Link>
+						)}
+					</h3>
 					{room.isPrivate && (
 						<div className="rounded-full border border-gray-300 bg-gray-100 p-4">
 							<IoIosLock
@@ -62,20 +87,16 @@ export function RoomCard({
 					)}
 				</div>
 			</div>
-			<div className="mt-12 flex flex-wrap gap-x-8">
+			<ul className="pointer-events-none mt-12 flex flex-wrap gap-x-8">
 				{room.players.map((player) => {
 					const isWinner =
 						!isWaiting && "isWinner" in player && player.isWinner;
-
-					return (
-						<div
-							className={classNames(
-								"flex items-center gap-x-4 py-4 pr-12 pl-8",
-								isWinner &&
-									"rounded-full border-2 border-yellow-400 bg-yellow-50",
-							)}
-							key={player.id}
-						>
+					const itemClassName = classNames(
+						"flex items-center gap-x-4 py-4 pr-12 pl-8",
+						isWinner && "rounded-full border-2 border-yellow-400 bg-yellow-50",
+					);
+					const playerContent = (
+						<>
 							{isWinner && <FaCrown className="size-16 text-yellow-500" />}
 							<UserLabel
 								avatarProps={{ size: "S" }}
@@ -85,10 +106,28 @@ export function RoomCard({
 									name: player.playerName,
 								}}
 							/>
-						</div>
+						</>
+					);
+					return (
+						<li key={player.id}>
+							{player.userId ? (
+								<Link
+									aria-label={`${player.playerName}のプロフィールを見る`}
+									className={classNames(
+										itemClassName,
+										"pointer-events-auto relative z-1 rounded-full transition-colors hover:bg-gray-100",
+									)}
+									to={`/users/${uuid58Encode(player.userId)}`}
+								>
+									{playerContent}
+								</Link>
+							) : (
+								<div className={itemClassName}>{playerContent}</div>
+							)}
+						</li>
 					);
 				})}
-			</div>
+			</ul>
 			<time
 				className="mt-6 w-full text-right text-neutral-400 text-xs"
 				dateTime={formatDateHyphen(
@@ -99,31 +138,8 @@ export function RoomCard({
 					? formatRelativeTime(room.createdAt)
 					: formatRelativeTime(room.finishedAt)}
 			</time>
-		</>
-	);
-
-	return (
-		<article>
-			{isWaiting ? (
-				<>
-					<button
-						aria-label={`${room.title}に参加`}
-						className={cardClassName}
-						onClick={() => setIsOpen(true)}
-						type="button"
-					>
-						{content}
-					</button>
-					<JoinRoomDialog isOpen={isOpen} room={room} setIsOpen={setIsOpen} />
-				</>
-			) : (
-				<Link
-					aria-label={`${room.title}の結果を見る`}
-					className={cardClassName}
-					to={`/game/${uuid58Encode(room.gameId)}/result`}
-				>
-					{content}
-				</Link>
+			{isWaiting && (
+				<JoinRoomDialog isOpen={isOpen} room={room} setIsOpen={setIsOpen} />
 			)}
 		</article>
 	);
