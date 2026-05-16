@@ -12,7 +12,7 @@
 	"name": "omojan",
 	"pnpm": {
 		"overrides": {
-			"@types/node": "24.12.2"
+			"@types/node": "24.12.4"
 		},
 		"ignoredBuiltDependencies": [
 			"@parcel/watcher",
