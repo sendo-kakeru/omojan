@@ -1415,7 +1415,8 @@ export class GameDurableObject extends DurableObject<Env> {
 	}: {
 		playerId: PlayerId;
 	}): Promise<void> {
-		if (!this.gameId) return;
+		const gameId = this.gameId;
+		if (!gameId) return;
 
 		// 自分以外のプレイヤーからランダムに選択
 		const otherPlayers = this.players.filter(
@@ -1428,10 +1429,8 @@ export class GameDurableObject extends DurableObject<Env> {
 
 		await pRetry(
 			async () => {
-				if (!this.gameId) return;
-
 				await this.gameService.saveVote({
-					gameId: this.gameId,
+					gameId,
 					playerId,
 					roundNo: this.roundNo,
 					votePlayerId: randomTarget.id,
