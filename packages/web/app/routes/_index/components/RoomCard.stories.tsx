@@ -1,4 +1,5 @@
 import type { FinishedRoom, WaitingRoom } from "@repo/db/model";
+import type { UserId } from "@repo/db/schema";
 import type { Meta, StoryFn } from "@storybook/react-vite";
 import { RoomCard } from "./RoomCard";
 import { RoomCardSkeleton } from "./RoomCardSkeleton";
@@ -19,6 +20,8 @@ const meta: Meta = {
 export default meta;
 type Story = StoryFn<typeof RoomCard>;
 
+const DUMMY_USER_ID = "00000000-0000-0000-0000-000000000001" as UserId;
+
 const createWaitingRoom = (overrides?: Partial<WaitingRoom>): WaitingRoom => ({
 	createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30分前
 	gameId: "game-123" as WaitingRoom["gameId"],
@@ -29,6 +32,7 @@ const createWaitingRoom = (overrides?: Partial<WaitingRoom>): WaitingRoom => ({
 			image: null,
 			playerName: "ホスト",
 			seat: 1,
+			userId: DUMMY_USER_ID,
 		},
 	],
 	timeLimit: 60,
@@ -49,6 +53,7 @@ const createFinishedRoom = (
 			isWinner: true,
 			playerName: "プレイヤー1",
 			seat: 1,
+			userId: DUMMY_USER_ID,
 		},
 		{
 			id: "player-2" as FinishedRoom["players"][0]["id"],
@@ -56,6 +61,7 @@ const createFinishedRoom = (
 			isWinner: false,
 			playerName: "プレイヤー2",
 			seat: 2,
+			userId: null,
 		},
 		{
 			id: "player-3" as FinishedRoom["players"][0]["id"],
@@ -63,6 +69,7 @@ const createFinishedRoom = (
 			isWinner: false,
 			playerName: "プレイヤー3",
 			seat: 3,
+			userId: null,
 		},
 		{
 			id: "player-4" as FinishedRoom["players"][0]["id"],
@@ -70,6 +77,7 @@ const createFinishedRoom = (
 			isWinner: false,
 			playerName: "プレイヤー4",
 			seat: 4,
+			userId: null,
 		},
 	],
 	timeLimit: 60,
@@ -97,12 +105,14 @@ export const WaitingTwoPlayers: Story = () => (
 					image: null,
 					playerName: "ホスト",
 					seat: 1,
+					userId: DUMMY_USER_ID,
 				},
 				{
 					id: "player-2" as WaitingRoom["players"][0]["id"],
 					image: null,
 					playerName: "参加者A",
 					seat: 2,
+					userId: null,
 				},
 			],
 		})}
@@ -120,24 +130,28 @@ export const WaitingFullRoom: Story = () => (
 					image: null,
 					playerName: "ホスト",
 					seat: 1,
+					userId: DUMMY_USER_ID,
 				},
 				{
 					id: "player-2" as WaitingRoom["players"][0]["id"],
 					image: null,
 					playerName: "参加者A",
 					seat: 2,
+					userId: null,
 				},
 				{
 					id: "player-3" as WaitingRoom["players"][0]["id"],
 					image: null,
 					playerName: "参加者B",
 					seat: 3,
+					userId: null,
 				},
 				{
 					id: "player-4" as WaitingRoom["players"][0]["id"],
 					image: null,
 					playerName: "参加者C",
 					seat: 4,
+					userId: null,
 				},
 			],
 			title: "満員の部屋",
@@ -167,6 +181,7 @@ export const FinishedMultipleWinners: Story = () => (
 					isWinner: true,
 					playerName: "優勝者A",
 					seat: 1,
+					userId: DUMMY_USER_ID,
 				},
 				{
 					id: "player-2" as FinishedRoom["players"][0]["id"],
@@ -174,6 +189,7 @@ export const FinishedMultipleWinners: Story = () => (
 					isWinner: true,
 					playerName: "優勝者B",
 					seat: 2,
+					userId: null,
 				},
 				{
 					id: "player-3" as FinishedRoom["players"][0]["id"],
@@ -181,6 +197,7 @@ export const FinishedMultipleWinners: Story = () => (
 					isWinner: false,
 					playerName: "参加者C",
 					seat: 3,
+					userId: null,
 				},
 				{
 					id: "player-4" as FinishedRoom["players"][0]["id"],
@@ -188,6 +205,7 @@ export const FinishedMultipleWinners: Story = () => (
 					isWinner: false,
 					playerName: "参加者D",
 					seat: 4,
+					userId: null,
 				},
 			],
 			title: "同点優勝の部屋",
@@ -207,6 +225,7 @@ export const FinishedNoWinners: Story = () => (
 					isWinner: false,
 					playerName: "プレイヤー1",
 					seat: 1,
+					userId: DUMMY_USER_ID,
 				},
 				{
 					id: "player-2" as FinishedRoom["players"][0]["id"],
@@ -214,6 +233,7 @@ export const FinishedNoWinners: Story = () => (
 					isWinner: false,
 					playerName: "プレイヤー2",
 					seat: 2,
+					userId: null,
 				},
 			],
 			title: "引き分けの部屋",
@@ -242,12 +262,14 @@ export const LongPlayerNames: Story = () => (
 					image: null,
 					playerName: "とても長いプレイヤー名のユーザー",
 					seat: 1,
+					userId: DUMMY_USER_ID,
 				},
 				{
 					id: "player-2" as WaitingRoom["players"][0]["id"],
 					image: null,
 					playerName: "別の長い名前のプレイヤー",
 					seat: 2,
+					userId: null,
 				},
 			],
 		})}

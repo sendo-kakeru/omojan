@@ -1,5 +1,6 @@
 "use client";
 
+import { uuid58Encode } from "@nakanoaas/uuid58";
 import type { JoinRoomRequestBody, Room } from "@repo/db/model";
 import { joinRoomRequestBodySchema, roomPasswordSchema } from "@repo/db/model";
 import { LOCALSTORAGE_OPERATION_FAILED_MESSAGE } from "@repo/shared/error";
@@ -99,7 +100,7 @@ export function JoinRoomDialog({
 					// 保持しているトークンのプレイヤーが存在する場合（過去に参加済み）そのままマッチング画面へ（基本発生し得ない）
 					if (data.state === "HELD_TOKEN_PLAYER_JOINED") {
 						setIsOpen(false);
-						void navigate(`/matching/${room.gameId}`);
+						void navigate(`/matching/${uuid58Encode(room.gameId)}`);
 						return;
 					}
 
@@ -114,7 +115,7 @@ export function JoinRoomDialog({
 
 					setPasswordError(undefined);
 					setIsOpen(false);
-					void navigate(`/matching/${room.gameId}`);
+					void navigate(`/matching/${uuid58Encode(room.gameId)}`);
 				} catch (error) {
 					console.error("部屋への参加に失敗しました:", error);
 					showToast({

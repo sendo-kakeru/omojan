@@ -1,4 +1,6 @@
+import { uuid58Encode } from "@nakanoaas/uuid58";
 import { type Me, meProfileSchema } from "@repo/db/model";
+import type { UserId } from "@repo/db/schema";
 import {
 	ALLOWED_IMAGE_MIME_TYPES,
 	type ImageMimeType,
@@ -22,14 +24,16 @@ import { useImageUpload } from "~/hooks/useImageUpload";
 import { honoClient } from "~/libs/apiClient.client";
 import { buildImageUrl, PROFILE_IMAGE_DIMENSIONS } from "~/libs/image";
 import { buildNoindexMeta } from "~/libs/meta";
+import { decodeUuid58Param } from "~/libs/uuid58";
 import type { Route } from "./+types/route";
 
 export const meta: Route.MetaFunction = ({ matches }) =>
 	buildNoindexMeta(matches.flatMap((m) => m?.meta ?? []));
 
 export default function UserEditPage({
-	params: { userId },
+	params: { userId: encodedUserId },
 }: Route.ComponentProps) {
+	const userId = decodeUuid58Param<UserId>(encodedUserId);
 	const { me, isLoading } = useMe();
 
 	if (isLoading) {
@@ -98,7 +102,7 @@ function EditForm({ me }: { me: Me }) {
 
 					await mutate({ data, message }, false);
 					showToast({ title: "プロフィールを更新しました", type: "success" });
-					void navigate(`/users/${me.userId}`, {
+					void navigate(`/users/${uuid58Encode(me.userId)}`, {
 						replace: true,
 					});
 				} catch (error) {

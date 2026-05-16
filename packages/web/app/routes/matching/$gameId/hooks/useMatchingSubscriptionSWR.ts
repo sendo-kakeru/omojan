@@ -1,9 +1,11 @@
+import { uuid58Encode } from "@nakanoaas/uuid58";
 import {
 	type HeartbeatPongMessage,
 	type MatchingClientMessage,
 	type MatchingParticipant,
 	matchingServerMessageSchema,
 } from "@repo/db/model";
+import type { GameId } from "@repo/db/schema";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import useSWRSubscription, {
@@ -11,7 +13,7 @@ import useSWRSubscription, {
 } from "swr/subscription";
 import { parse } from "valibot";
 
-function getUrl({ gameId }: { gameId: string }): URL | undefined {
+function getUrl({ gameId }: { gameId: GameId }): URL | undefined {
 	try {
 		return new URL(`/v1/matchings/${gameId}`, import.meta.env.VITE_API_URL);
 	} catch (error) {
@@ -25,7 +27,7 @@ export function useMatchingSubscriptionSWR({
 	gameToken,
 	onClose,
 }: {
-	gameId: string;
+	gameId: GameId;
 	gameToken: string | null;
 	onClose: (event: CloseEvent) => void;
 }) {
@@ -138,7 +140,7 @@ export function useMatchingSubscriptionSWR({
 		if (transitionCount === null) return;
 
 		if (transitionCount <= 0) {
-			void navigate(`/game/${gameId}`, { replace: true });
+			void navigate(`/game/${uuid58Encode(gameId)}`, { replace: true });
 			wsRef.current?.close(1000, "マッチングが完了しました。");
 			return;
 		}

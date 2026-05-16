@@ -6,13 +6,17 @@ import { Link, useSearchParams } from "react-router";
 import { Button } from "~/components/button/Button";
 import { Header } from "~/components/Header";
 import { Pagination } from "~/components/Pagination";
+import { decodeUuid58Param } from "~/libs/uuid58";
 import { useRoomListSWR } from "~/routes/_index/hooks/useRoomListSWR";
 import { UserGameList } from "~/routes/users/$userId/_index/components/UserGameSection";
 import type { Route } from "./+types/route";
 
 const PER_PAGE = 20;
 
-export default function Page({ params: { userId } }: Route.ComponentProps) {
+export default function Page({
+	params: { userId: encodedUserId },
+}: Route.ComponentProps) {
+	const userId = decodeUuid58Param<UserId>(encodedUserId);
 	const [searchParams] = useSearchParams();
 	const page = Number(searchParams.get("page")) || 1;
 
@@ -20,13 +24,13 @@ export default function Page({ params: { userId } }: Route.ComponentProps) {
 		limit: PER_PAGE,
 		page,
 		status: "finished",
-		userId: userId as UserId,
+		userId,
 	});
 
 	const rooms = data?.items as FinishedRoom[] | undefined;
 	const meta = data?.meta;
 
-	const getPageUrl = (pageNum: number) => {
+	const getPageUrl = (pageNum: number): string => {
 		const params = new URLSearchParams();
 		params.set("page", pageNum.toString());
 		return `?${params.toString()}`;
@@ -41,7 +45,7 @@ export default function Page({ params: { userId } }: Route.ComponentProps) {
 						<Link
 							aria-label="ユーザーページへ戻る"
 							className="flex items-center gap-x-4 text-neutral-500 hover:text-neutral-700"
-							to={`/users/${userId}`}
+							to={`/users/${encodedUserId}`}
 						>
 							<FiChevronLeft className="size-20" />
 						</Link>

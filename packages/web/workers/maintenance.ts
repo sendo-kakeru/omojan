@@ -47,6 +47,7 @@ export const maintenanceHtml = () => `<!DOCTYPE html>
       width: 120px;
       height: auto;
       margin-bottom: 32px;
+      border-radius: 6px;
     }
     .message {
       margin-bottom: 24px;

@@ -23,13 +23,13 @@ export function GamePresenter({
 	) => Promise<void>;
 }) {
 	const navigate = useNavigate();
-	const { gameId } = useParams();
+	const { gameId: encodedGameId } = useParams();
 
 	useEffect(() => {
 		if (data.type === "END") {
-			void navigate(`/game/${gameId}/result`, { replace: true });
+			void navigate(`/game/${encodedGameId}/result`, { replace: true });
 		}
-	}, [data.type, gameId, navigate]);
+	}, [data.type, encodedGameId, navigate]);
 
 	if (
 		data.type === "ROUND_START" ||

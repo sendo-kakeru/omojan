@@ -23,6 +23,7 @@ export function InPageError({
 					{showLogo && (
 						<img
 							alt="おもじゃんオンライン"
+							className="rounded-md"
 							height={72}
 							src="/icons/omojan.webp"
 							width={72}
