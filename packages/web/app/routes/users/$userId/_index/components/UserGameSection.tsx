@@ -1,3 +1,4 @@
+import { uuid58Encode } from "@nakanoaas/uuid58";
 import type { FinishedRoom } from "@repo/db/model";
 import type { UserId } from "@repo/db/schema";
 import { FiChevronRight } from "react-icons/fi";
@@ -27,7 +28,7 @@ export function UserGameSection({
 					<Button
 						as="link"
 						rightIcon={<FiChevronRight className="size-16" />}
-						to={`/users/${userId}/games`}
+						to={`/users/${uuid58Encode(userId)}/games`}
 						variant="outline"
 					>
 						もっと見る

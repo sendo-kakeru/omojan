@@ -1,3 +1,4 @@
+import type { GameId } from "@repo/db/schema";
 import { LOCALSTORAGE_OPERATION_FAILED_MESSAGE } from "@repo/shared/error";
 import { DetailedError } from "hono/client";
 import { useRef, useState } from "react";
@@ -5,6 +6,7 @@ import { useNavigate } from "react-router";
 import { useToast } from "~/components/Toast";
 import { gameTokenLocalStorage } from "~/libs/gameTokenLocalStorage";
 import { buildNoindexMeta } from "~/libs/meta";
+import { decodeUuid58Param } from "~/libs/uuid58";
 import type { Route } from "./+types/route";
 import { MatchingError } from "./components/MatchingError";
 import { MatchingLoading } from "./components/MatchingLoading";
@@ -15,7 +17,10 @@ import { useRoomSWR } from "./hooks/useRoomSWR";
 export const meta: Route.MetaFunction = ({ matches }) =>
 	buildNoindexMeta(matches.flatMap((m) => m?.meta ?? []));
 
-export default function Page({ params: { gameId } }: Route.ComponentProps) {
+export default function Page({
+	params: { gameId: encodedGameId },
+}: Route.ComponentProps) {
+	const gameId = decodeUuid58Param<GameId>(encodedGameId);
 	const navigate = useNavigate();
 	const exitTimeoutRef = useRef<number | null>(null);
 	const { showToast } = useToast();
@@ -53,7 +58,7 @@ export default function Page({ params: { gameId } }: Route.ComponentProps) {
 
 			if (event.code === 1000) {
 				// NOTE: ゲーム開始時（正常終了）はゲームページへ遷移
-				void navigate(`/game/${gameId}`, { replace: true });
+				void navigate(`/game/${encodedGameId}`, { replace: true });
 				return;
 			}
 

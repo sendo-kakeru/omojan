@@ -1,5 +1,7 @@
+import { uuid58Encode } from "@nakanoaas/uuid58";
 import type { Api } from "@repo/api";
 import type { FinishedRoom, PublicUser } from "@repo/db/model";
+import type { UserId } from "@repo/db/schema";
 import { OFFICIAL_X_ID } from "@repo/shared/constants/config";
 import { hc } from "hono/client";
 import { FaCrown, FaUser } from "react-icons/fa";
@@ -13,6 +15,7 @@ import { Spinner } from "~/components/Spinner";
 import { useMe } from "~/context/me/hooks";
 import { buildImageUrl, PROFILE_IMAGE_DIMENSIONS } from "~/libs/image";
 import { buildNoindexMeta } from "~/libs/meta";
+import { decodeUuid58Param } from "~/libs/uuid58";
 import { useRoomListSWR } from "~/routes/_index/hooks/useRoomListSWR";
 import type { Route } from "./+types/route";
 import { UserGameSection } from "./components/UserGameSection";
@@ -27,7 +30,7 @@ export async function loader({
 }: Route.LoaderArgs) {
 	const client = hc<Api>(context.cloudflare.env.VITE_API_URL);
 	const response = await client.v1.users[":userId"].$get({
-		param: { userId },
+		param: { userId: decodeUuid58Param<UserId>(userId) },
 	});
 
 	if (!response.ok) {
@@ -115,7 +118,7 @@ function UserProfile({ user }: { user: PublicUser }) {
 						color="gray"
 						leftIcon={<FiEdit />}
 						size="S"
-						to={`/users/${user.userId}/edit`}
+						to={`/users/${uuid58Encode(user.userId)}/edit`}
 						variant="outline"
 					>
 						プロフィールを編集

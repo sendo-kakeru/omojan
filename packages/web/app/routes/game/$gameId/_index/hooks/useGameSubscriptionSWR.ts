@@ -7,7 +7,7 @@ import {
 	gameServerMessageSchema,
 	type ReactionEmoji,
 } from "@repo/db/model";
-import type { PlayerId } from "@repo/db/schema";
+import type { GameId, PlayerId } from "@repo/db/schema";
 import pRetry from "p-retry";
 import { useRef } from "react";
 import { useNavigate } from "react-router";
@@ -16,7 +16,7 @@ import useSWRSubscription, {
 } from "swr/subscription";
 import { parse } from "valibot";
 
-function getUrl({ gameId }: { gameId: string }): URL | undefined {
+function getUrl({ gameId }: { gameId: GameId }): URL | undefined {
 	try {
 		return new URL(`/v1/games/${gameId}`, import.meta.env.VITE_API_URL);
 	} catch (error) {
@@ -30,7 +30,7 @@ export function useGameSubscriptionSWR({
 	gameToken,
 	onReaction,
 }: {
-	gameId: string;
+	gameId: GameId;
 	gameToken: string | null;
 	onReaction: (reaction: GameServerReactionMessage) => void;
 }) {
