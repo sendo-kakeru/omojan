@@ -1,3 +1,4 @@
+import { uuid58Encode } from "@nakanoaas/uuid58";
 import type { GameResultResponseBody } from "@repo/db/model";
 import {
 	DISCORD_INVITE_URL,
@@ -100,7 +101,7 @@ export function GameFinalResult({
 									<Link
 										className="grid place-items-center"
 										key={winner.id}
-										to={`/users/${winner.userId}`}
+										to={`/users/${uuid58Encode(winner.userId)}`}
 									>
 										{winnerContent}
 									</Link>
@@ -195,7 +196,7 @@ export function GameFinalResult({
 														{player.userId ? (
 															<Link
 																className="flex items-center gap-x-4 md:gap-x-8"
-																to={`/users/${player.userId}`}
+																to={`/users/${uuid58Encode(player.userId)}`}
 															>
 																{playerInfo}
 															</Link>

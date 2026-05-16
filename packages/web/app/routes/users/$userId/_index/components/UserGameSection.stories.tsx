@@ -28,6 +28,7 @@ const createFinishedRoom = (
 			isWinner: true,
 			playerName: "プレイヤー1",
 			seat: 1,
+			userId: DUMMY_USER_ID,
 		},
 		{
 			id: "player-2" as FinishedRoom["players"][0]["id"],
@@ -35,6 +36,7 @@ const createFinishedRoom = (
 			isWinner: false,
 			playerName: "プレイヤー2",
 			seat: 2,
+			userId: null,
 		},
 		{
 			id: "player-3" as FinishedRoom["players"][0]["id"],
@@ -42,6 +44,7 @@ const createFinishedRoom = (
 			isWinner: false,
 			playerName: "プレイヤー3",
 			seat: 3,
+			userId: null,
 		},
 		{
 			id: "player-4" as FinishedRoom["players"][0]["id"],
@@ -49,6 +52,7 @@ const createFinishedRoom = (
 			isWinner: false,
 			playerName: "プレイヤー4",
 			seat: 4,
+			userId: null,
 		},
 	],
 	timeLimit: 60,

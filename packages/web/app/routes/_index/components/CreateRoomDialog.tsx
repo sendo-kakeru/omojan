@@ -1,4 +1,5 @@
 "use client";
+import { uuid58Encode } from "@nakanoaas/uuid58";
 import { createRoomRequestBodySchema } from "@repo/db/model";
 import { LOCALSTORAGE_OPERATION_FAILED_MESSAGE } from "@repo/shared/error";
 import { useForm } from "@tanstack/react-form";
@@ -61,7 +62,7 @@ export function CreateRoomDialog({
 							void navigate("/");
 						},
 					});
-					void navigate(`/matching/${data.gameId}`);
+					void navigate(`/matching/${uuid58Encode(data.gameId)}`);
 
 					setIsOpen(false);
 				} catch (error) {

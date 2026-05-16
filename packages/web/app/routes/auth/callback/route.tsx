@@ -64,7 +64,7 @@ function AuthenticatingView() {
 		<div className="flex min-h-svh flex-col items-center justify-center gap-y-24">
 			<img
 				alt="おもじゃんオンライン"
-				className="size-80 animate-bounce"
+				className="size-80 animate-bounce rounded-md"
 				src="/icons/omojan.webp"
 			/>
 			<div className="flex items-center gap-x-8">

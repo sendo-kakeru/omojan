@@ -1,8 +1,10 @@
+import type { GameId } from "@repo/db/schema";
 import { LOCALSTORAGE_OPERATION_FAILED_MESSAGE } from "@repo/shared/error";
 import { useNavigate } from "react-router";
 import { Spinner } from "~/components/Spinner";
 import { gameTokenLocalStorage } from "~/libs/gameTokenLocalStorage";
 import { buildNoindexMeta } from "~/libs/meta";
+import { decodeUuid58Param } from "~/libs/uuid58";
 import type { Route } from "./+types/route";
 import { GameError } from "./components/GameError";
 import { GamePresenter } from "./components/GamePresenter";
@@ -14,7 +16,10 @@ import { useReactions } from "./hooks/useReactions";
 export const meta: Route.MetaFunction = ({ matches }) =>
 	buildNoindexMeta(matches.flatMap((m) => m?.meta ?? []));
 
-export default function Page({ params: { gameId } }: Route.ComponentProps) {
+export default function Page({
+	params: { gameId: encodedGameId },
+}: Route.ComponentProps) {
+	const gameId = decodeUuid58Param<GameId>(encodedGameId);
 	const navigate = useNavigate();
 	const gameToken = gameTokenLocalStorage.get({
 		onError() {
