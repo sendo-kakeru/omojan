@@ -8,8 +8,41 @@ on:
       - staging
   workflow_dispatch:
 
+env:
+  E2E_BASE_DB_NAME: "omojan-main-e2e"
+
 jobs:
+  migrate-e2e-base-db:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: e2e
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: ./.github/actions/setup-pnpm
+
+      - name: Install Turso CLI
+        run: |
+          curl -sSfL https://get.tur.so/install.sh | bash
+          echo "$HOME/.turso" >> $GITHUB_PATH
+
+      - name: Build DB package
+        run: pnpm turbo run build --filter @repo/db
+
+      - name: E2E Base Database Migration
+        working-directory: packages/db
+        env:
+          TURSO_API_TOKEN: ${{ secrets.TURSO_API_TOKEN }}
+        run: |
+          DATABASE_URL=$(turso db show "${E2E_BASE_DB_NAME}" --url)
+          TURSO_AUTH_TOKEN=$(turso db tokens create "${E2E_BASE_DB_NAME}" --expiration 1d)
+          export DATABASE_URL
+          export TURSO_AUTH_TOKEN
+          ENV=e2e pnpm drizzle-kit migrate
+
   test:
+    needs: migrate-e2e-base-db
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: e2e
@@ -20,7 +53,6 @@ jobs:
       VITE_COGNITO_USER_POOL_ID: ${{ vars.VITE_COGNITO_USER_POOL_ID }}
       COGNITO_CLIENT_ID: ${{ vars.VITE_COGNITO_CLIENT_ID }}
       COGNITO_USER_POOL_ID: ${{ vars.VITE_COGNITO_USER_POOL_ID }}
-      E2E_BASE_DB_NAME: "omojan-main-e2e"
       ENV: e2e
       JWT_SECRET: e2e-secret
       WEB_URL: http://localhost:5173
@@ -35,30 +67,19 @@ jobs:
           curl -sSfL https://get.tur.so/install.sh | bash
           echo "$HOME/.turso" >> $GITHUB_PATH
 
-      - name: Build dependencies packages
-        run: |
-          pnpm turbo run build --filter @repo/db
-          pnpm turbo run build --filter @repo/mock
-          pnpm turbo run build --filter @repo/shared
-          pnpm turbo run build --filter @repo/api
-
-      - name: E2E Base Database Migration
-        working-directory: packages/db
-        env:
-          TURSO_API_TOKEN: ${{ secrets.TURSO_API_TOKEN }}
-        run: |
-          DATABASE_URL=$(turso db show "${E2E_BASE_DB_NAME}" --url)
-          TURSO_AUTH_TOKEN=$(turso db tokens create "${E2E_BASE_DB_NAME}" --expiration 1d)
-          export DATABASE_URL
-          export TURSO_AUTH_TOKEN
-          ENV=e2e pnpm drizzle-kit migrate
-
       - name: Setup E2E Database
         id: setup-db
         uses: ./.github/actions/setup-e2e-db
         with:
           turso-api-token: ${{ secrets.TURSO_API_TOKEN }}
           source-db: ${{ env.E2E_BASE_DB_NAME }}
+
+      - name: Build dependencies packages
+        run: |
+          pnpm turbo run build --filter @repo/db
+          pnpm turbo run build --filter @repo/mock
+          pnpm turbo run build --filter @repo/shared
+          pnpm turbo run build --filter @repo/api
 
       - name: Create .dev.vars.e2e for API
         working-directory: packages/api
