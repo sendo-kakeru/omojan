@@ -50,7 +50,7 @@ runs:
         echo "Database URL: ${DB_URL}"
 
         # DBトークンを作成
-        DB_TOKEN=$(turso db tokens create "${DB_NAME}")
+        DB_TOKEN=$(turso db tokens create "${DB_NAME}" --expiration 1d)
 
         # 出力を設定
         echo "database-name=${DB_NAME}" >> $GITHUB_OUTPUT
