@@ -20,6 +20,7 @@ jobs:
       VITE_COGNITO_USER_POOL_ID: ${{ vars.VITE_COGNITO_USER_POOL_ID }}
       COGNITO_CLIENT_ID: ${{ vars.VITE_COGNITO_CLIENT_ID }}
       COGNITO_USER_POOL_ID: ${{ vars.VITE_COGNITO_USER_POOL_ID }}
+      E2E_BASE_DB_NAME: "omojan-main-e2e"
       ENV: e2e
       JWT_SECRET: e2e-secret
       WEB_URL: http://localhost:5173
@@ -29,11 +30,10 @@ jobs:
       - name: Setup pnpm
         uses: ./.github/actions/setup-pnpm
 
-      - name: Setup E2E Database
-        id: setup-db
-        uses: ./.github/actions/setup-e2e-db
-        with:
-          turso-api-token: ${{ secrets.TURSO_API_TOKEN }}
+      - name: Install Turso CLI
+        run: |
+          curl -sSfL https://get.tur.so/install.sh | bash
+          echo "$HOME/.turso" >> $GITHUB_PATH
 
       - name: Build dependencies packages
         run: |
@@ -42,12 +42,23 @@ jobs:
           pnpm turbo run build --filter @repo/shared
           pnpm turbo run build --filter @repo/api
 
-      - name: Run Migration
+      - name: E2E Base Database Migration
         working-directory: packages/db
         env:
-          DATABASE_URL: ${{ steps.setup-db.outputs.database-url }}
-          TURSO_AUTH_TOKEN: ${{ steps.setup-db.outputs.database-token }}
-        run: ENV=e2e pnpm drizzle-kit migrate
+          TURSO_API_TOKEN: ${{ secrets.TURSO_API_TOKEN }}
+        run: |
+          DATABASE_URL=$(turso db show "${E2E_BASE_DB_NAME}" --url)
+          TURSO_AUTH_TOKEN=$(turso db tokens create "${E2E_BASE_DB_NAME}" --expiration 1d)
+          export DATABASE_URL
+          export TURSO_AUTH_TOKEN
+          ENV=e2e pnpm drizzle-kit migrate
+
+      - name: Setup E2E Database
+        id: setup-db
+        uses: ./.github/actions/setup-e2e-db
+        with:
+          turso-api-token: ${{ secrets.TURSO_API_TOKEN }}
+          source-db: ${{ env.E2E_BASE_DB_NAME }}
 
       - name: Create .dev.vars.e2e for API
         working-directory: packages/api
