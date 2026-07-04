@@ -11,6 +11,10 @@ on:
 env:
   E2E_BASE_DB_NAME: "omojan-main-e2e"
 
+concurrency:
+  group: ci-e2e-${{ github.repository }}
+  cancel-in-progress: false
+
 jobs:
   migrate-e2e-base-db:
     runs-on: ubuntu-latest
