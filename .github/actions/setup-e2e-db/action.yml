@@ -1,6 +1,6 @@
 name: Setup E2E Database
 
-description: E2E実行ごとにTurso DBを作成し、Migrationを実行
+description: E2E実行ごとにTurso DBを作成
 
 inputs:
   turso-api-token:
@@ -8,8 +8,7 @@ inputs:
     required: true
   source-db:
     description: 複製元のデータベース名
-    required: false
-    default: "omojan-main-e2e"
+    required: true
   group:
     description: データベースグループ
     required: false
@@ -29,14 +28,6 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Install Turso CLI
-      shell: bash
-      run: curl -sSfL https://get.tur.so/install.sh | bash
-
-    - name: Add Turso to PATH
-      shell: bash
-      run: echo "$HOME/.turso" >> $GITHUB_PATH
-
     - name: Create E2E Database
       id: create-db
       shell: bash
@@ -59,7 +50,7 @@ runs:
         echo "Database URL: ${DB_URL}"
 
         # DBトークンを作成
-        DB_TOKEN=$(turso db tokens create "${DB_NAME}")
+        DB_TOKEN=$(turso db tokens create "${DB_NAME}" --expiration 1d)
 
         # 出力を設定
         echo "database-name=${DB_NAME}" >> $GITHUB_OUTPUT
