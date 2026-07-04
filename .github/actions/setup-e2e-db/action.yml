@@ -1,6 +1,6 @@
 name: Setup E2E Database
 
-description: PR毎にTurso DBを作成し、Migrationを実行
+description: E2E実行ごとにTurso DBを作成し、Migrationを実行
 
 inputs:
   turso-api-token:
@@ -43,19 +43,10 @@ runs:
       env:
         TURSO_API_TOKEN: ${{ inputs.turso-api-token }}
       run: |
-        # PR番号とコミットSHAからユニークなDB名を生成
-        PR_NUMBER="${{ github.event.pull_request.number }}"
-        SHORT_SHA="${{ github.event.pull_request.head.sha }}"
-        SHORT_SHA="${SHORT_SHA:0:7}"
-        DB_NAME="omojan-e2e-pr${PR_NUMBER}-${SHORT_SHA}"
+        # GitHub Actionsの実行IDからユニークなDB名を生成
+        DB_NAME="omojan-e2e-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
 
         echo "Creating database: ${DB_NAME}"
-
-        # 既存のDBがあれば削除（同じPR+SHAの再実行の場合）
-        if turso db show "${DB_NAME}" >/dev/null 2>&1; then
-          echo "Database ${DB_NAME} already exists, destroying..."
-          turso db destroy "${DB_NAME}" --yes
-        fi
 
         # 新しいDBを作成（source-dbをベースに）
         turso db create "${DB_NAME}" \
