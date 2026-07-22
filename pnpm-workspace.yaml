@@ -1,7 +1,6 @@
 packages:
   - "packages/*"
 strictDepBuilds: true
-minimumReleaseAge: 4320
 overrides:
   "@types/node": "24.12.4"
 allowBuilds:
