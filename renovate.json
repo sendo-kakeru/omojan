@@ -38,5 +38,7 @@
 			"groupName": "vitest",
 			"matchPackageNames": ["vitest", "@vitest/*"]
 		}
-	]
+	],
+	"prConcurrentLimit": 30,
+	"prHourlyLimit": 0
 }
