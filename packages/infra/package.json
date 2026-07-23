@@ -8,7 +8,7 @@
 		"@types/node": "24.13.3",
 		"dotenv": "17.4.2",
 		"typescript": "6.0.3",
-		"valibot": "1.4.0"
+		"valibot": "1.4.2"
 	},
 	"license": "UNLICENSED",
 	"main": "index.ts",
