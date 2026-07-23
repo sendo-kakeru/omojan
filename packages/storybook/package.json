@@ -20,15 +20,15 @@
 		"@types/react-dom": "19.2.3",
 		"@vitejs/plugin-react": "6.0.4",
 		"@vitest/browser": "4.1.6",
-		"@vitest/browser-playwright": "4.1.6",
-		"@vitest/coverage-v8": "4.1.6",
+		"@vitest/browser-playwright": "4.1.10",
+		"@vitest/coverage-v8": "4.1.10",
 		"globals": "17.6.0",
 		"playwright": "1.61.1",
 		"storybook": "10.3.6",
 		"tailwindcss": "4.3.0",
 		"typescript": "~6.0.3",
 		"vite": "8.0.10",
-		"vitest": "4.1.6"
+		"vitest": "4.1.10"
 	},
 	"license": "UNLICENSED",
 	"name": "@repo/storybook",
