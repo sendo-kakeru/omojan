@@ -371,8 +371,8 @@ importers:
         specifier: 1.4.2
         version: 1.4.2(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       isbot:
-        specifier: 5.1.40
-        version: 5.1.40
+        specifier: 5.2.1
+        version: 5.2.1
       jwt-decode:
         specifier: 4.0.0
         version: 4.0.0
@@ -4651,8 +4651,8 @@ packages:
   isarray@1.0.0:
     resolution: {integrity: sha512-VLghIWNM6ELQzo7zwmcg0NmTVyWKYjvIeM83yjp0wRDTmUnrM678fQbcKBo6n2CJEF0szoG//ytg+TKla89ALQ==}
 
-  isbot@5.1.40:
-    resolution: {integrity: sha512-yNeeynhhtIVRBk12tBV4eHNxwB42HzR4Q3Ea7vCOiJhImGaAIdIMrbJtacQlBizGLjUPw+akkFI5Dn9T70XoVQ==}
+  isbot@5.2.1:
+    resolution: {integrity: sha512-dJ+LpKyClQZ7NG+j3OensC/mAZkGpukE9YUrgPYvAZj2doVL0edfDgywTUh5CXa0o+nW9a1V9e5+CJTX8+SxRw==}
     engines: {node: '>=18'}
 
   isexe@2.0.0:
@@ -8467,7 +8467,7 @@ snapshots:
       dedent: 1.7.2
       es-module-lexer: 1.7.0
       exit-hook: 2.2.1
-      isbot: 5.1.40
+      isbot: 5.2.1
       jsesc: 3.0.2
       lodash: 4.18.1
       p-map: 7.0.4
@@ -10266,7 +10266,7 @@ snapshots:
 
   isarray@1.0.0: {}
 
-  isbot@5.1.40: {}
+  isbot@5.2.1: {}
 
   isexe@2.0.0: {}
 

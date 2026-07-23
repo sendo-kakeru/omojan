@@ -16,7 +16,7 @@
 		"classnames": "2.5.1",
 		"hono": "4.12.18",
 		"input-otp": "1.4.2",
-		"isbot": "5.1.40",
+		"isbot": "5.2.1",
 		"jwt-decode": "4.0.0",
 		"p-retry": "8.0.0",
 		"radix-ui": "1.4.3",
