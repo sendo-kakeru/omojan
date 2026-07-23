@@ -4,7 +4,7 @@
 		"@repo/tsup-config": "workspace:*",
 		"@repo/db": "workspace:*",
 		"@repo/shared": "workspace:*",
-		"@faker-js/faker": "10.4.0"
+		"@faker-js/faker": "10.5.0"
 	},
 	"exports": {
 		"./*": {
