@@ -1,14 +1,14 @@
 {
 	"dependencies": {
-		"aws-jwt-verify": "^5.1.1",
-		"drizzle-valibot": "^0.4.2",
-		"hono": "^4.12.18",
-		"valibot": "^1.4.0"
+		"aws-jwt-verify": "5.1.1",
+		"drizzle-valibot": "0.4.2",
+		"hono": "4.12.18",
+		"valibot": "1.4.0"
 	},
 	"devDependencies": {
 		"@repo/tsup-config": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
-		"@types/node": "^24.12.4"
+		"@types/node": "24.12.4"
 	},
 	"exports": {
 		"./*": {
