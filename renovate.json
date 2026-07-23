@@ -1,9 +1,17 @@
 {
 	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
 	"enabledManagers": ["npm", "github-actions", "cargo"],
-	"extends": ["config:recommended", "helpers:disableTypesNodeMajor"],
+	"extends": [
+		"config:recommended",
+		"helpers:disableTypesNodeMajor",
+		"customManagers:biomeVersions"
+	],
 	"osvVulnerabilityAlerts": true,
 	"packageRules": [
+		{
+			"groupName": "node types",
+			"matchPackageNames": ["@types/node"]
+		},
 		{
 			"groupName": "react",
 			"matchPackageNames": [
