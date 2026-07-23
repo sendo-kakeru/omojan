@@ -52,7 +52,7 @@ importers:
         version: 0.45.2(@libsql/client@0.17.3)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6)
       drizzle-valibot:
         specifier: 0.4.2
-        version: 0.4.2(drizzle-orm@0.45.2(@libsql/client@0.17.3)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6))(valibot@1.4.0(typescript@6.0.3))
+        version: 0.4.2(drizzle-orm@0.45.2(@libsql/client@0.17.3)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6))(valibot@1.4.2(typescript@6.0.3))
       hono:
         specifier: 4.12.18
         version: 4.12.18
@@ -60,8 +60,8 @@ importers:
         specifier: 8.0.0
         version: 8.0.0
       valibot:
-        specifier: 1.4.0
-        version: 1.4.0(typescript@6.0.3)
+        specifier: 1.4.2
+        version: 1.4.2(typescript@6.0.3)
     devDependencies:
       '@faker-js/faker':
         specifier: 10.5.0
@@ -100,8 +100,8 @@ importers:
         specifier: 4.12.18
         version: 4.12.18
       valibot:
-        specifier: 1.4.0
-        version: 1.4.0(typescript@6.0.3)
+        specifier: 1.4.2
+        version: 1.4.2(typescript@6.0.3)
     devDependencies:
       '@repo/tsup-config':
         specifier: workspace:*
@@ -148,13 +148,13 @@ importers:
         version: 0.3.1(drizzle-orm@0.45.2(@libsql/client@0.17.3)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6))
       drizzle-valibot:
         specifier: 0.4.2
-        version: 0.4.2(drizzle-orm@0.45.2(@libsql/client@0.17.3)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6))(valibot@1.4.0(typescript@6.0.3))
+        version: 0.4.2(drizzle-orm@0.45.2(@libsql/client@0.17.3)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6))(valibot@1.4.2(typescript@6.0.3))
       tsx:
         specifier: 4.20.6
         version: 4.20.6
       valibot:
-        specifier: 1.4.0
-        version: 1.4.0(typescript@6.0.3)
+        specifier: 1.4.2
+        version: 1.4.2(typescript@6.0.3)
 
   packages/image-processor: {}
 
@@ -185,8 +185,8 @@ importers:
         specifier: 6.0.3
         version: 6.0.3
       valibot:
-        specifier: 1.4.0
-        version: 1.4.0(typescript@6.0.3)
+        specifier: 1.4.2
+        version: 1.4.2(typescript@6.0.3)
 
   packages/mock:
     devDependencies:
@@ -213,13 +213,13 @@ importers:
         version: 5.1.1
       drizzle-valibot:
         specifier: 0.4.2
-        version: 0.4.2(drizzle-orm@0.45.2(@libsql/client@0.17.3)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6))(valibot@1.4.0(typescript@6.0.3))
+        version: 0.4.2(drizzle-orm@0.45.2(@libsql/client@0.17.3)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6))(valibot@1.4.2(typescript@6.0.3))
       hono:
         specifier: 4.12.18
         version: 4.12.18
       valibot:
-        specifier: 1.4.0
-        version: 1.4.0(typescript@6.0.3)
+        specifier: 1.4.2
+        version: 1.4.2(typescript@6.0.3)
     devDependencies:
       '@repo/tsup-config':
         specifier: workspace:*
@@ -404,11 +404,11 @@ importers:
         specifier: 3.2.2
         version: 3.2.2(tailwind-merge@3.6.0)(tailwindcss@4.3.0)
       valibot:
-        specifier: 1.4.0
-        version: 1.4.0(typescript@6.0.3)
+        specifier: 1.4.2
+        version: 1.4.2(typescript@6.0.3)
       vite-plugin-valibot-env:
         specifier: 1.0.2
-        version: 1.0.2(valibot@1.4.0(typescript@6.0.3))(vite@8.0.10(@types/node@24.13.3)(esbuild@0.27.7)(jiti@2.7.0)(tsx@4.21.0))
+        version: 1.0.2(valibot@1.4.2(typescript@6.0.3))(vite@8.0.10(@types/node@24.13.3)(esbuild@0.27.7)(jiti@2.7.0)(tsx@4.21.0))
     devDependencies:
       '@playwright/test':
         specifier: 1.61.1
@@ -6193,8 +6193,8 @@ packages:
     resolution: {integrity: sha512-4kPkK3/XTQW9Hbm4CaqfICn+kY9LJtDVEOfgsRRra/+n2Ofg4NqzRFceAkxvQ/Ud/6BpHOPzj8cirqM7TzTN5Q==}
     hasBin: true
 
-  valibot@1.4.0:
-    resolution: {integrity: sha512-iC/x7fVcSyOwlm/VSt7RlHnzNGLGvR9GnxdifUeWoCJo0q4ZZvrVkIHC6faTlkxG47I2Y4UrFquPuVHCrOnrLg==}
+  valibot@1.4.2:
+    resolution: {integrity: sha512-gjdCvJ6d3RyHAneqxMYMW9QMCwYMb3jpOO0IyHZV1bnRHFBHrX3VkIILt5XYR0WhwHiH7Mty8ovuPZ/O3gamrg==}
     peerDependencies:
       typescript: '>=5'
     peerDependenciesMeta:
@@ -8923,7 +8923,7 @@ snapshots:
       react-router: 7.14.2(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       semver: 7.8.5
       tinyglobby: 0.2.17
-      valibot: 1.4.0(typescript@6.0.3)
+      valibot: 1.4.2(typescript@6.0.3)
       vite: 8.0.10(@types/node@24.13.3)(esbuild@0.27.7)(jiti@2.7.0)(tsx@4.21.0)
       vite-node: 3.2.4(@types/node@24.13.3)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.21.0)
     optionalDependencies:
@@ -10254,10 +10254,10 @@ snapshots:
     optionalDependencies:
       drizzle-orm: 0.45.2(@libsql/client@0.17.3)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6)
 
-  drizzle-valibot@0.4.2(drizzle-orm@0.45.2(@libsql/client@0.17.3)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6))(valibot@1.4.0(typescript@6.0.3)):
+  drizzle-valibot@0.4.2(drizzle-orm@0.45.2(@libsql/client@0.17.3)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6))(valibot@1.4.2(typescript@6.0.3)):
     dependencies:
       drizzle-orm: 0.45.2(@libsql/client@0.17.3)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6)
-      valibot: 1.4.0(typescript@6.0.3)
+      valibot: 1.4.2(typescript@6.0.3)
 
   dunder-proto@1.0.1:
     dependencies:
@@ -12131,7 +12131,7 @@ snapshots:
 
   uuidv7@1.2.1: {}
 
-  valibot@1.4.0(typescript@6.0.3):
+  valibot@1.4.2(typescript@6.0.3):
     optionalDependencies:
       typescript: 6.0.3
 
@@ -12167,10 +12167,10 @@ snapshots:
       - tsx
       - yaml
 
-  vite-plugin-valibot-env@1.0.2(valibot@1.4.0(typescript@6.0.3))(vite@8.0.10(@types/node@24.13.3)(esbuild@0.27.7)(jiti@2.7.0)(tsx@4.21.0)):
+  vite-plugin-valibot-env@1.0.2(valibot@1.4.2(typescript@6.0.3))(vite@8.0.10(@types/node@24.13.3)(esbuild@0.27.7)(jiti@2.7.0)(tsx@4.21.0)):
     dependencies:
       is-unicode-supported: 2.1.0
-      valibot: 1.4.0(typescript@6.0.3)
+      valibot: 1.4.2(typescript@6.0.3)
       vite: 8.0.10(@types/node@24.13.3)(esbuild@0.27.7)(jiti@2.7.0)(tsx@4.21.0)
 
   vite-tsconfig-paths@6.1.1(typescript@6.0.3)(vite@8.0.10(@types/node@24.13.3)(esbuild@0.27.7)(jiti@2.7.0)(tsx@4.21.0)):
