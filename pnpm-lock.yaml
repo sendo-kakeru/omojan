@@ -45,8 +45,8 @@ importers:
         specifier: workspace:*
         version: link:../shared
       aws-jwt-verify:
-        specifier: 5.1.1
-        version: 5.1.1
+        specifier: 5.2.1
+        version: 5.2.1
       drizzle-orm:
         specifier: 0.45.2
         version: 0.45.2(@libsql/client@0.17.3)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6)
@@ -209,8 +209,8 @@ importers:
   packages/shared:
     dependencies:
       aws-jwt-verify:
-        specifier: 5.1.1
-        version: 5.1.1
+        specifier: 5.2.1
+        version: 5.2.1
       drizzle-valibot:
         specifier: 0.4.2
         version: 0.4.2(drizzle-orm@0.45.2(@libsql/client@0.17.3)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6))(valibot@1.4.2(typescript@7.0.2))
@@ -3998,8 +3998,8 @@ packages:
     resolution: {integrity: sha512-LElXdjswlqjWrPpJFg1Fx4wpkOCxj1TDHlSV4PlaRxHGWko024xICaa97ZkMfs6DRKlCguiAI+rbXv5GWwXIkg==}
     hasBin: true
 
-  aws-jwt-verify@5.1.1:
-    resolution: {integrity: sha512-j6whGdGJmQ27agk4ijY8RPv6itb8JLb7SCJ86fEnneTcSBrpxuwL8kLq6y5WVH95aIknyAloEqAsaOLS1J8ITQ==}
+  aws-jwt-verify@5.2.1:
+    resolution: {integrity: sha512-J+buA4M+qvQDk58WXFBLkDodkEX3DDL1ac5XFQPW3opxAsaLXYu5hYnlSHsaBRDBUXBAn695kE/cw/mdyJKwJg==}
     engines: {node: '>=18.0.0'}
 
   axe-core@4.11.4:
@@ -9773,7 +9773,7 @@ snapshots:
 
   astring@1.9.0: {}
 
-  aws-jwt-verify@5.1.1: {}
+  aws-jwt-verify@5.2.1: {}
 
   axe-core@4.11.4: {}
 
