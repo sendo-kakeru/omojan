@@ -6,6 +6,8 @@
 		"helpers:disableTypesNodeMajor",
 		"customManagers:biomeVersions"
 	],
+	"internalChecksFilter": "strict",
+	"minimumReleaseAge": "3 days",
 	"osvVulnerabilityAlerts": true,
 	"packageRules": [
 		{
