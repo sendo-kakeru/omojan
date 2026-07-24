@@ -28,7 +28,8 @@
 				"react-router",
 				"@types/react-router",
 				"@react-router/*"
-			]
+			],
+			"separateMajorMinor": false
 		},
 		{
 			"groupName": "storybook",
