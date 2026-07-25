@@ -12,3 +12,6 @@ allowBuilds:
   protobufjs: false
   sharp: false
   workerd: false
+minimumReleaseAgeExclude:
+  # Renovate security update: @vitest/browser@4.1.10
+  - "@vitest/browser@4.1.10"
