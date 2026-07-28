@@ -1,6 +1,12 @@
 {
 	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
-	"enabledManagers": ["npm", "github-actions", "cargo", "custom.jsonata"],
+	"enabledManagers": [
+		"npm",
+		"github-actions",
+		"cargo",
+		"dockerfile",
+		"custom.jsonata"
+	],
 	"extends": [
 		"config:recommended",
 		"helpers:disableTypesNodeMajor",
