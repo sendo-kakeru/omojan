@@ -1,0 +1,55 @@
+{
+	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
+	"enabledManagers": ["npm", "github-actions", "cargo", "custom.jsonata"],
+	"extends": [
+		"config:recommended",
+		"helpers:disableTypesNodeMajor",
+		"customManagers:biomeVersions"
+	],
+	"internalChecksFilter": "strict",
+	"minimumReleaseAge": "3 days",
+	"osvVulnerabilityAlerts": true,
+	"packageRules": [
+		{
+			"groupName": "node types",
+			"matchPackageNames": ["@types/node"]
+		},
+		{
+			"groupName": "react",
+			"matchPackageNames": [
+				"react",
+				"react-dom",
+				"@types/react",
+				"@types/react-dom",
+				"@types/react-is"
+			]
+		},
+		{
+			"groupName": "react router",
+			"matchPackageNames": [
+				"react-router",
+				"@types/react-router",
+				"@react-router/*"
+			],
+			"separateMajorMinor": false
+		},
+		{
+			"groupName": "storybook",
+			"matchPackageNames": ["storybook", "@storybook/*"]
+		},
+		{
+			"groupName": "radix ui",
+			"matchPackageNames": ["radix-ui", "@radix-ui/*"]
+		},
+		{
+			"groupName": "tailwindcss",
+			"matchPackageNames": ["tailwindcss", "@tailwindcss/*"]
+		},
+		{
+			"groupName": "vitest",
+			"matchPackageNames": ["vitest", "@vitest/*"]
+		}
+	],
+	"prConcurrentLimit": 30,
+	"prHourlyLimit": 0
+}

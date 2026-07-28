@@ -3,7 +3,7 @@ packages:
 strictDepBuilds: true
 minimumReleaseAge: 4320
 overrides:
-  "@types/node": "24.12.4"
+  "@types/node": "24.13.3"
 allowBuilds:
   "@parcel/watcher": false
   "@sentry/cli": false
