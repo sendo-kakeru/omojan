@@ -1,14 +1,13 @@
 import { uuid58Encode } from "@nakanoaas/uuid58";
 import type { GameResultResponseBody } from "@repo/db/model";
 import {
-	DISCORD_INVITE_URL,
 	OFFICIAL_X_ID,
 	PROD_SITE_URL,
 	SITE_NAME,
 } from "@repo/shared/constants/config";
 import classNames from "classnames";
 import { FaCrown } from "react-icons/fa";
-import { FaDiscord, FaXTwitter } from "react-icons/fa6";
+import { FaXTwitter } from "react-icons/fa6";
 import { IoMdShare } from "react-icons/io";
 import { Link } from "react-router";
 import { Avatar } from "~/components/Avatar";
@@ -124,15 +123,6 @@ export function GameFinalResult({
 					>
 						<FaXTwitter className="size-18" />
 						フォロー
-					</a>
-					<a
-						className="flex h-28 items-center gap-x-8 rounded-full bg-[#5865F2] pr-16 pl-12 font-bold text-white text-xs transition-opacity hover:opacity-80"
-						href={DISCORD_INVITE_URL}
-						rel="noopener noreferrer"
-						target="_blank"
-					>
-						<FaDiscord className="size-18" />
-						参加
 					</a>
 					<button
 						className="flex h-28 items-center gap-x-8 rounded-full bg-cyan-400 pr-16 pl-12 font-bold text-white text-xs transition-opacity hover:opacity-80"
