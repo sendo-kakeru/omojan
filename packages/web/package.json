@@ -1,6 +1,6 @@
 {
 	"dependencies": {
-		"@cloudflare/vite-plugin": "1.47.0",
+		"@cloudflare/vite-plugin": "1.48.0",
 		"@nakanoaas/uuid58": "1.2.1",
 		"@radix-ui/react-dialog": "1.1.23",
 		"@radix-ui/react-dropdown-menu": "2.1.24",
@@ -9,8 +9,8 @@
 		"@react-router/node": "8.3.0",
 		"@react-router/serve": "8.3.0",
 		"@repo/shared": "workspace:*",
-		"@sentry/cloudflare": "10.68.0",
-		"@sentry/react-router": "10.68.0",
+		"@sentry/cloudflare": "10.69.0",
+		"@sentry/react-router": "10.69.0",
 		"@tanstack/react-form": "1.33.2",
 		"amazon-cognito-identity-js": "6.3.20",
 		"classnames": "2.5.1",
@@ -38,7 +38,7 @@
 		"@repo/db": "workspace:*",
 		"@repo/mock": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
-		"@storybook/react-vite": "10.5.4",
+		"@storybook/react-vite": "10.5.5",
 		"@tailwindcss/cli": "4.3.3",
 		"@tailwindcss/vite": "4.3.3",
 		"@types/node": "24.13.3",
@@ -53,7 +53,7 @@
 		"typescript": "7.0.2",
 		"vite": "8.1.5",
 		"vite-tsconfig-paths": "6.1.1",
-		"wrangler": "4.114.0"
+		"wrangler": "4.115.0"
 	},
 	"exports": {
 		"./build.css": "./dist/index.css",
