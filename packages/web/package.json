@@ -38,7 +38,7 @@
 		"@repo/db": "workspace:*",
 		"@repo/mock": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
-		"@storybook/react-vite": "10.5.5",
+		"@storybook/react-vite": "10.5.6",
 		"@tailwindcss/cli": "4.3.3",
 		"@tailwindcss/vite": "4.3.3",
 		"@types/node": "24.13.3",
