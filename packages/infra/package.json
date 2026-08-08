@@ -1,6 +1,6 @@
 {
 	"devDependencies": {
-		"@pulumi/aws": "7.39.0",
+		"@pulumi/aws": "7.40.0",
 		"@pulumi/cloudflare": "6.18.0",
 		"@pulumi/gcp": "9.32.1",
 		"@pulumi/pulumi": "3.255.0",
