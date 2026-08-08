@@ -3,7 +3,7 @@
 		"@pulumi/aws": "7.40.0",
 		"@pulumi/cloudflare": "6.18.0",
 		"@pulumi/gcp": "9.33.0",
-		"@pulumi/pulumi": "3.255.0",
+		"@pulumi/pulumi": "3.256.0",
 		"@repo/typescript-config": "workspace:*",
 		"@types/node": "24.13.3",
 		"dotenv": "17.4.2",
