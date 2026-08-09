@@ -4,6 +4,7 @@ import { hc } from "hono/client";
 import { useState } from "react";
 import { Footer } from "~/components/Footer";
 import { Header } from "~/components/Header";
+import { cloudflareContext } from "~/libs/cloudflareContext";
 import type { Route } from "./+types/route";
 import { CreateRoomDialog } from "./components/CreateRoomDialog";
 import { FinishedRoomSection } from "./components/FinishedRoomSection";
@@ -13,7 +14,8 @@ import { useRoomListSWR } from "./hooks/useRoomListSWR";
 const FINISHED_ROOMS_LIMIT = 5;
 
 export async function loader({ context }: Route.LoaderArgs) {
-	const client = hc<Api>(context.cloudflare.env.VITE_API_URL);
+	const { env } = context.get(cloudflareContext);
+	const client = hc<Api>(env.VITE_API_URL);
 
 	const [waitingRooms, finishedRooms] = await Promise.all([
 		(async () => {
