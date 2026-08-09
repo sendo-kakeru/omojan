@@ -1,11 +1,10 @@
 import type { WaitingRoom } from "@repo/db/model";
 import {
-	DISCORD_INVITE_URL,
 	OFFICIAL_X_ID,
 	PROD_SITE_URL,
 	SITE_NAME,
 } from "@repo/shared/constants/config";
-import { FaDiscord, FaXTwitter } from "react-icons/fa6";
+import { FaXTwitter } from "react-icons/fa6";
 import { IoMdShare } from "react-icons/io";
 import { IoGameController } from "react-icons/io5";
 import { RxUpdate } from "react-icons/rx";
@@ -61,17 +60,7 @@ function SectionHeader({
 		<div className="flex items-end justify-between">
 			<div className="grid gap-y-40">
 				<div className="grid gap-y-6">
-					<p className="text-neutral-500 text-xs">募集通知はDiscordから！</p>
 					<div className="flex items-center gap-x-8">
-						<a
-							aria-label="公式Discordサーバー"
-							className="rounded-full bg-[#5865F2] p-6 text-white transition-colors hover:bg-[#4752C4]"
-							href={DISCORD_INVITE_URL}
-							rel="noopener noreferrer"
-							target="_blank"
-						>
-							<FaDiscord className="size-20" />
-						</a>
 						<a
 							aria-label="公式X"
 							className="rounded-full bg-black p-6 text-white transition-colors hover:bg-gray-700"
