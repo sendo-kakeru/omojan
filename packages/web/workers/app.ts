@@ -7,6 +7,11 @@ type WebEnv = Omit<Env, "MAINTENANCE_MODE"> & {
 	MAINTENANCE_MODE: string;
 };
 
+const requestHandler = createRequestHandler(
+	() => import("virtual:react-router/server-build"),
+	import.meta.env.MODE,
+);
+
 export default {
 	async fetch(request, env: WebEnv, executionContext: ExecutionContext) {
 		// メンテナンスモードチェック（Cloudflare Dashboardで "true" に変更可能）
@@ -19,11 +24,6 @@ export default {
 				status: 503,
 			});
 		}
-
-		const requestHandler = createRequestHandler(
-			() => import("virtual:react-router/server-build"),
-			import.meta.env.MODE,
-		);
 
 		return wrapRequestHandler(
 			{
