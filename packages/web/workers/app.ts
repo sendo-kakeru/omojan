@@ -1,19 +1,16 @@
 import { wrapRequestHandler } from "@sentry/cloudflare";
-import { createRequestHandler } from "react-router";
+import { createRequestHandler, RouterContextProvider } from "react-router";
+import { cloudflareContext } from "../app/libs/cloudflareContext";
 import { maintenanceHtml } from "./maintenance";
-
-declare module "react-router" {
-	export interface AppLoadContext {
-		cloudflare: {
-			env: Env;
-			ctx: ExecutionContext;
-		};
-	}
-}
 
 type WebEnv = Omit<Env, "MAINTENANCE_MODE"> & {
 	MAINTENANCE_MODE: string;
 };
+
+const requestHandler = createRequestHandler(
+	() => import("virtual:react-router/server-build"),
+	import.meta.env.MODE,
+);
 
 export default {
 	async fetch(request, env: WebEnv, executionContext: ExecutionContext) {
@@ -28,11 +25,6 @@ export default {
 			});
 		}
 
-		const requestHandler = createRequestHandler(
-			() => import("virtual:react-router/server-build"),
-			import.meta.env.MODE,
-		);
-
 		return wrapRequestHandler(
 			{
 				context: executionContext,
@@ -43,9 +35,13 @@ export default {
 				request: request,
 			},
 			() => {
-				return requestHandler(request, {
-					cloudflare: { ctx: executionContext, env: env as Env },
+				const routerContext = new RouterContextProvider();
+				routerContext.set(cloudflareContext, {
+					ctx: executionContext,
+					env: env as Env,
 				});
+
+				return requestHandler(request, routerContext);
 			},
 		);
 	},

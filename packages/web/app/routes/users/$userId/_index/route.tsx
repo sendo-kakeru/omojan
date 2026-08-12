@@ -13,6 +13,7 @@ import { Footer } from "~/components/Footer";
 import { Header } from "~/components/Header";
 import { Spinner } from "~/components/Spinner";
 import { useMe } from "~/context/me/hooks";
+import { cloudflareContext } from "~/libs/cloudflareContext";
 import { buildImageUrl, PROFILE_IMAGE_DIMENSIONS } from "~/libs/image";
 import { buildNoindexMeta } from "~/libs/meta";
 import { decodeUuid58Param } from "~/libs/uuid58";
@@ -28,7 +29,8 @@ export async function loader({
 	params: { userId },
 	context,
 }: Route.LoaderArgs) {
-	const client = hc<Api>(context.cloudflare.env.VITE_API_URL);
+	const { env } = context.get(cloudflareContext);
+	const client = hc<Api>(env.VITE_API_URL);
 	const response = await client.v1.users[":userId"].$get({
 		param: { userId: decodeUuid58Param<UserId>(userId) },
 	});
