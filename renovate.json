@@ -54,6 +54,10 @@
 		{
 			"groupName": "vitest",
 			"matchPackageNames": ["vitest", "@vitest/*"]
+		},
+		{
+			"groupName": "cloudflare",
+			"matchPackageNames": ["wrangler", "@cloudflare/*"]
 		}
 	],
 	"prConcurrentLimit": 30,
