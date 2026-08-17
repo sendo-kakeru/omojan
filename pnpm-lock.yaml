@@ -64,8 +64,8 @@ importers:
         version: 1.4.2(typescript@7.0.2)
     devDependencies:
       '@faker-js/faker':
-        specifier: 10.5.0
-        version: 10.5.0
+        specifier: 10.6.0
+        version: 10.6.0
       '@repo/mock':
         specifier: workspace:*
         version: link:../mock
@@ -191,8 +191,8 @@ importers:
   packages/mock:
     devDependencies:
       '@faker-js/faker':
-        specifier: 10.5.0
-        version: 10.5.0
+        specifier: 10.6.0
+        version: 10.6.0
       '@repo/db':
         specifier: workspace:*
         version: link:../db
@@ -247,8 +247,8 @@ importers:
         specifier: 5.3.0
         version: 5.3.0(storybook@10.5.8(@types/react@19.2.18)(prettier@3.8.3)(react@19.2.8))
       '@faker-js/faker':
-        specifier: 10.5.0
-        version: 10.5.0
+        specifier: 10.6.0
+        version: 10.6.0
       '@repo/mock':
         specifier: workspace:*
         version: link:../mock
@@ -1404,8 +1404,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@faker-js/faker@10.5.0':
-    resolution: {integrity: sha512-bsxD8WLS5lIj7aaoCx1YJkktqYj5vlBUE6HWzu2Q51ksrGJ0H737ECCKlFU7Yf8Br45z9t99frBp/J7kzbMPAg==}
+  '@faker-js/faker@10.6.0':
+    resolution: {integrity: sha512-3RQHgEtvL1Frl/d1cSreo7qhJ3Gk1OdNUai/CtZ8G+wYeRQnJih3s9xJ9/kgYekPQRdwgh0HXRPqMlzWGwivIQ==}
     engines: {node: ^20.19.0 || ^22.13.0 || ^23.5.0 || >=24.0.0, npm: '>=10'}
 
   '@floating-ui/core@1.7.3':
@@ -7347,7 +7347,7 @@ snapshots:
   '@esbuild/win32-x64@0.28.1':
     optional: true
 
-  '@faker-js/faker@10.5.0': {}
+  '@faker-js/faker@10.6.0': {}
 
   '@floating-ui/core@1.7.3':
     dependencies:
