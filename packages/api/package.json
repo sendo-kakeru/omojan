@@ -8,12 +8,12 @@
 		"aws-jwt-verify": "5.2.1",
 		"drizzle-orm": "0.45.2",
 		"drizzle-valibot": "0.4.2",
-		"hono": "4.13.1",
+		"hono": "4.13.2",
 		"p-retry": "8.0.0",
 		"valibot": "1.4.2"
 	},
 	"devDependencies": {
-		"@faker-js/faker": "10.5.0",
+		"@faker-js/faker": "10.6.0",
 		"@repo/mock": "workspace:*",
 		"@repo/tsup-config": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
@@ -21,7 +21,7 @@
 		"drizzle-seed": "0.3.1",
 		"tsx": "4.23.12",
 		"vitest": "4.1.10",
-		"wrangler": "4.122.0"
+		"wrangler": "4.123.0"
 	},
 	"exports": {
 		".": "./dist/index.d.ts"
