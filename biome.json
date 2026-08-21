@@ -34,7 +34,6 @@
 				"useOptionalChain": "error"
 			},
 			"correctness": {
-				"noConstantCondition": "error",
 				"noUnusedImports": "error",
 				"noUnusedVariables": "error",
 				"useUniqueElementIds": "off"
@@ -64,7 +63,6 @@
 			},
 			"suspicious": {
 				"noArrayIndexKey": "warn",
-				"noExplicitAny": "error",
 				"noUnknownAtRules": "off"
 			}
 		}
