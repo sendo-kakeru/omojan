@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.5.8/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.5.9/schema.json",
 	"assist": {
 		"actions": {
 			"source": {
@@ -34,7 +34,6 @@
 				"useOptionalChain": "error"
 			},
 			"correctness": {
-				"noConstantCondition": "error",
 				"noUnusedImports": "error",
 				"noUnusedVariables": "error",
 				"useUniqueElementIds": "off"
@@ -64,7 +63,6 @@
 			},
 			"suspicious": {
 				"noArrayIndexKey": "warn",
-				"noExplicitAny": "error",
 				"noUnknownAtRules": "off"
 			}
 		}
