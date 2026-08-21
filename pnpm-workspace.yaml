@@ -4,10 +4,9 @@ minimumReleaseAge: 4320
 overrides:
   "@types/node": "24.13.3"
 allowBuilds:
-  "@parcel/watcher": false
-  "@sentry/cli": false
-  esbuild: false
-  lefthook: false
-  protobufjs: false
-  sharp: false
-  workerd: false
+  "@parcel/watcher": true
+  "@sentry/cli": true
+  esbuild: true
+  lefthook: true
+  protobufjs: true
+  workerd: true
