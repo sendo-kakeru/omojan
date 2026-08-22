@@ -2,6 +2,7 @@
 	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
 	"enabledManagers": [
 		"npm",
+		"mise",
 		"github-actions",
 		"cargo",
 		"dockerfile",
@@ -58,7 +59,9 @@
 		{
 			"groupName": "cloudflare",
 			"matchPackageNames": ["wrangler", "@cloudflare/*"]
-		}
+		},
+		{ "groupName": "node", "matchDepNames": ["node"] },
+		{ "groupName": "pnpm", "matchDepNames": ["pnpm"] }
 	],
 	"prConcurrentLimit": 30,
 	"prHourlyLimit": 0
