@@ -40,8 +40,6 @@
 		"dev:tsup": "tsup --watch",
 		"dev:wrangler": "wrangler dev",
 		"dev:e2e": "wrangler dev --env e2e",
-		"format": "biome check --fix --unsafe .",
-		"lint": "biome check .",
 		"test": "tsx ./src/__tests__/vitest-with-db.ts",
 		"test:run": "tsx ./src/__tests__/vitest-with-db.ts run",
 		"typecheck": "pnpm run cf-typegen && tsc --noEmit"
