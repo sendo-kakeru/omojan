@@ -20,10 +20,8 @@
 			"cache": false,
 			"persistent": true
 		},
-		"format": {},
 		"infra:destroy": {},
 		"infra:up": {},
-		"lint": {},
 		"storybook": {
 			"with": ["storybook:styles"]
 		},

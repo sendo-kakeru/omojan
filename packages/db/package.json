@@ -34,8 +34,6 @@
 		"dev": "pnpm run \"/^dev:/\"",
 		"dev:tsc": "tsc --watch",
 		"dev:tsup": "tsup --watch",
-		"format": "biome check --fix --unsafe .",
-		"lint": "biome check .",
 		"db:gen": "drizzle-kit generate",
 		"db:migrate:prod": "ENV=production drizzle-kit migrate",
 		"db:migrate:stg": "ENV=staging drizzle-kit migrate",

@@ -13,8 +13,6 @@
 		"dev:tsc": "tsc --watch",
 		"dev:tsup": "tsup --watch",
 		"dev:wrangler": "wrangler dev",
-		"format": "biome check --fix --unsafe .",
-		"lint": "biome check .",
 		"typecheck": "pnpm run cf-typegen && tsc --noEmit"
 	},
 	"dependencies": {

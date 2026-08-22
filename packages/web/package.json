@@ -67,8 +67,6 @@
 		"cf-typegen": "wrangler types",
 		"deploy": "pnpm run build && wrangler deploy",
 		"dev": "react-router dev",
-		"format": "biome check --fix --unsafe .",
-		"lint": "biome check .",
 		"preview": "pnpm run build && vite preview",
 		"start": "react-router-serve ./build/server/index.js",
 		"storybook:styles": "tailwindcss -i ./app/app.css -o ./dist/index.css --watch",

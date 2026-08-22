@@ -19,8 +19,6 @@
 		"infra:destroy:dev": "RUN_TYPE=DESTROY pulumi up -y -s dev && pulumi destroy -y -s dev",
 		"infra:destroy:prod": "RUN_TYPE=DESTROY pulumi up -y -s prod && pulumi destroy -y -s prod",
 		"infra:destroy:stg": "RUN_TYPE=DESTROY pulumi up -y -s stg && pulumi destroy -y -s stg",
-		"format": "biome check --fix --unsafe .",
-		"lint": "biome check .",
 		"typecheck": "tsc --noEmit",
 		"infra:up": "pulumi up -y -s dev && pulumi up -y -s stg && pulumi up -y -s prod"
 	},
