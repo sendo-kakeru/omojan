@@ -13,8 +13,29 @@
 	"packageManager": "pnpm@11.22.0",
 	"private": true,
 	"scripts": {
-		"ci": "biome ci && turbo run typecheck test:run && cd packages/web && pnpm run test:e2e",
+		"build": "turbo run build",
+		"cf-typegen": "turbo run cf-typegen",
+		"db:changed": "turbo run db:changed",
+		"db:drop:local": "turbo run db:drop:local",
+		"db:dump": "turbo run db:dump",
+		"db:gen": "turbo run db:gen",
+		"db:migrate:local": "turbo run db:migrate:local",
+		"db:migrate:prod": "turbo run db:migrate:prod",
+		"db:migrate:stg": "turbo run db:migrate:stg",
+		"db:push:local": "turbo run db:push:local",
+		"db:reset:local": "turbo run db:reset:local",
+		"dev": "turbo run dev",
 		"lint": "biome check .",
-		"format": "biome check --fix --unsafe ."
+		"format": "biome check --fix --unsafe .",
+		"infra:destroy": "turbo run infra:destroy",
+		"infra:up": "turbo run infra:up",
+		"storybook": "turbo run storybook",
+		"storybook:styles": "turbo run storybook:styles",
+		"studio": "turbo run studio",
+		"test": "turbo run test",
+		"test:run": "turbo run test:run",
+		"test:e2e": "turbo run test:e2e",
+		"typecheck": "turbo run typecheck",
+		"ci": "biome ci && turbo run typecheck test:run && cd packages/web && pnpm run test:e2e"
 	}
 }
