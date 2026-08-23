@@ -1,6 +1,6 @@
 {
 	"dependencies": {
-		"@cloudflare/vite-plugin": "1.53.0",
+		"@cloudflare/vite-plugin": "1.53.1",
 		"@nakanoaas/uuid58": "1.2.1",
 		"@radix-ui/react-dialog": "1.1.23",
 		"@radix-ui/react-dropdown-menu": "2.1.24",
@@ -53,7 +53,7 @@
 		"typescript": "7.0.2",
 		"vite": "8.2.1",
 		"vite-tsconfig-paths": "6.1.1",
-		"wrangler": "4.124.0"
+		"wrangler": "4.125.0"
 	},
 	"exports": {
 		"./build.css": "./dist/index.css",
