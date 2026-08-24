@@ -1,6 +1,16 @@
 pre-commit:
   parallel: true
   jobs:
+
     - run: npx @biomejs/biome check --fix --no-errors-on-unmatched --files-ignore-unknown=true --colors=off {staged_files}
       glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}"
       stage_fixed: true
+
+    - name: rustfmt
+      run: cargo fmt --all
+      glob: "**/*.rs"
+      stage_fixed: true
+
+    - name: clippy
+      run: cargo clippy --workspace --all-targets -- -D warnings
+      glob: "**/*.rs"
