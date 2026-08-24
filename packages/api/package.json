@@ -21,7 +21,7 @@
 		"drizzle-seed": "0.3.1",
 		"tsx": "4.23.12",
 		"vitest": "4.1.11",
-		"wrangler": "4.124.0"
+		"wrangler": "4.125.0"
 	},
 	"exports": {
 		".": "./dist/index.d.ts"
@@ -40,8 +40,6 @@
 		"dev:tsup": "tsup --watch",
 		"dev:wrangler": "wrangler dev",
 		"dev:e2e": "wrangler dev --env e2e",
-		"format": "biome check --fix --unsafe .",
-		"lint": "biome check .",
 		"test": "tsx ./src/__tests__/vitest-with-db.ts",
 		"test:run": "tsx ./src/__tests__/vitest-with-db.ts run",
 		"typecheck": "pnpm run cf-typegen && tsc --noEmit"

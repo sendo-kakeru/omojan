@@ -21,7 +21,7 @@
 ## スキーマ変更フロー
 
 1. `packages/db/src/schema/` 配下のスキーマファイルを編集
-2. `pnpm turbo run db:changed --filter @repo/db` を実行
+2. `pnpm run db:changed --filter @repo/db` を実行
    - マイグレーションファイル生成（`db:gen`）
    - ローカル・E2E DBへの適用（`db:migrate:local`, `db:migrate:e2e`）
    - ローカルDBダンプ（`db:dump`）
