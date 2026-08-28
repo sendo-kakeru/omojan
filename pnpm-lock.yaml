@@ -164,8 +164,8 @@ importers:
         specifier: 7.43.0
         version: 7.43.0(supports-color@10.2.2)(typescript@7.0.2)
       '@pulumi/cloudflare':
-        specifier: 6.19.0
-        version: 6.19.0(supports-color@10.2.2)(typescript@7.0.2)
+        specifier: 6.20.0
+        version: 6.20.0(supports-color@10.2.2)(typescript@7.0.2)
       '@pulumi/gcp':
         specifier: 9.35.1
         version: 9.35.1(supports-color@10.2.2)(typescript@7.0.2)
@@ -2284,8 +2284,8 @@ packages:
   '@pulumi/aws@7.43.0':
     resolution: {integrity: sha512-UCZCrOBn1xVu5CSfd9I3FNZCPkdEcXaB6XNacTj0wVB9iPj8Ma6dLnbfLsUT2ceGsmSMrhwOMvnacOrrhG722A==}
 
-  '@pulumi/cloudflare@6.19.0':
-    resolution: {integrity: sha512-AP76ceRwCIws362nm7UpfvDvzI4zPaGThli0i3qsKqjektk1qNapyflA9g0LvpI2e6VEWAdTbkIK7WSucg00Sg==}
+  '@pulumi/cloudflare@6.20.0':
+    resolution: {integrity: sha512-VcLlDp3INdSzFUMHXi3nLJte/YoktFHX4hk0DokWygpMm6DGzZq7tfIoUvSP3HAWC9cEI7+59UnBBpNaVNNpgQ==}
 
   '@pulumi/gcp@9.35.1':
     resolution: {integrity: sha512-i4l6DR2/War/R1t4RcXg9NRA94xT+E2gGcmWDdZSSJjiuCgUy+ZfTxsWdYwcssXTk9obw8jrH3dEl4NcUVD87w==}
@@ -8048,7 +8048,7 @@ snapshots:
       - ts-node
       - typescript
 
-  '@pulumi/cloudflare@6.19.0(supports-color@10.2.2)(typescript@7.0.2)':
+  '@pulumi/cloudflare@6.20.0(supports-color@10.2.2)(typescript@7.0.2)':
     dependencies:
       '@pulumi/pulumi': 3.259.0(supports-color@10.2.2)(typescript@7.0.2)
     transitivePeerDependencies:
