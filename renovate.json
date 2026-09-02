@@ -2,6 +2,7 @@
 	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
 	"enabledManagers": [
 		"npm",
+		"mise",
 		"github-actions",
 		"cargo",
 		"dockerfile",
@@ -54,8 +55,16 @@
 		{
 			"groupName": "vitest",
 			"matchPackageNames": ["vitest", "@vitest/*"]
-		}
+		},
+		{
+			"groupName": "cloudflare",
+			"matchPackageNames": ["wrangler", "@cloudflare/*"]
+		},
+		{ "groupName": "node", "matchDepNames": ["node"] },
+		{ "groupName": "pnpm", "matchDepNames": ["pnpm"] }
 	],
 	"prConcurrentLimit": 30,
-	"prHourlyLimit": 0
+	"prHourlyLimit": 0,
+	"schedule": ["* * * * 5"],
+	"timezone": "Asia/Tokyo"
 }

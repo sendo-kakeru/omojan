@@ -4,7 +4,7 @@
 		"@repo/tsup-config": "workspace:*",
 		"@repo/db": "workspace:*",
 		"@repo/shared": "workspace:*",
-		"@faker-js/faker": "10.5.0"
+		"@faker-js/faker": "10.6.0"
 	},
 	"exports": {
 		"./*": {
@@ -23,8 +23,6 @@
 		"build": "pnpm run build:tsup && pnpm run build:tsc",
 		"build:tsup": "tsup --clean",
 		"build:tsc": "tsc",
-		"lint": "biome check .",
-		"format": "biome check --fix --unsafe .",
 		"typecheck": "tsc --noEmit"
 	},
 	"type": "module",

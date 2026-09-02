@@ -16,7 +16,7 @@ export function UserLabel({
 	className?: string;
 }) {
 	return (
-		<div className={classNames("flex items-center gap-x-8", className)}>
+		<div className={classNames("flex min-w-0 items-center gap-x-8", className)}>
 			<Avatar
 				src={buildImageUrl({
 					image: user.image,

@@ -9,7 +9,7 @@
 		"drizzle-orm": "0.45.2",
 		"drizzle-valibot": "0.4.2",
 		"drizzle-seed": "0.3.1",
-		"tsx": "4.23.8",
+		"tsx": "4.23.12",
 		"valibot": "1.4.2"
 	},
 	"exports": {
@@ -34,8 +34,6 @@
 		"dev": "pnpm run \"/^dev:/\"",
 		"dev:tsc": "tsc --watch",
 		"dev:tsup": "tsup --watch",
-		"format": "biome check --fix --unsafe .",
-		"lint": "biome check .",
 		"db:gen": "drizzle-kit generate",
 		"db:migrate:prod": "ENV=production drizzle-kit migrate",
 		"db:migrate:stg": "ENV=staging drizzle-kit migrate",

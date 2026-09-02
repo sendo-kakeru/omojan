@@ -87,7 +87,7 @@ export function RoomCard({
 					)}
 				</div>
 			</div>
-			<ul className="pointer-events-none mt-12 flex flex-wrap gap-x-8">
+			<ul className="pointer-events-none mt-12 flex min-w-0 flex-wrap gap-x-8">
 				{room.players.map((player) => {
 					const isWinner =
 						!isWaiting && "isWinner" in player && player.isWinner;
@@ -109,7 +109,7 @@ export function RoomCard({
 						</>
 					);
 					return (
-						<li key={player.id}>
+						<li className="min-w-0" key={player.id}>
 							{player.userId ? (
 								<Link
 									aria-label={`${player.playerName}のプロフィールを見る`}
