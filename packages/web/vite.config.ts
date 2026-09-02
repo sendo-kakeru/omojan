@@ -39,7 +39,11 @@ export default defineConfig((config) => ({
 		// NOTE: 起動時に全クライアントモジュールを変換させ、依存の事前バンドルを完了させる。
 		// これを省くとリクエスト到達時に依存が新規発見されて再最適化が走り、その間に読み込まれたページは 504 (Outdated Optimize Dep) でクライアント JS を取得できずハイドレーションされない（E2E が dev サーバー上で動くため実害が出る）。
 		warmup: {
-			clientFiles: ["./app/**/*.ts", "./app/**/*.tsx"],
+			clientFiles: [
+				"./app/**/*.ts",
+				"./app/**/*.tsx",
+				"!./app/**/*.stories.tsx",
+			],
 		},
 	},
 }));
