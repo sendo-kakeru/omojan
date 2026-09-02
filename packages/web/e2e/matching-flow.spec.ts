@@ -1,4 +1,4 @@
-import { expect, type Page, test } from "@playwright/test";
+import { expect, type Locator, type Page, test } from "@playwright/test";
 
 function uniqueSuffix() {
 	return `${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`;
@@ -10,6 +10,26 @@ function extractGameIdFromUrl(url: string): string | undefined {
 		throw new Error("gameIdの取得に失敗しました");
 	}
 	return match[1];
+}
+
+/**
+ * ダイアログが開くまでトリガーのクリックを再試行する。
+ */
+async function clickUntilVisible({
+	trigger,
+	target,
+	timeout = 30_000,
+}: {
+	trigger: Locator;
+	target: Locator;
+	timeout?: number;
+}) {
+	await expect(async () => {
+		if (!(await target.isVisible())) {
+			await trigger.click({ timeout: 5_000 });
+		}
+		await expect(target).toBeVisible({ timeout: 2_000 });
+	}).toPass({ timeout });
 }
 
 async function createRoom({
@@ -25,8 +45,10 @@ async function createRoom({
 	await expect(
 		page.getByRole("heading", { name: "募集中の部屋" }),
 	).toBeVisible();
-	await page.getByRole("button", { name: "部屋作成" }).click();
-	await expect(page.getByLabel("部屋名")).toBeVisible({ timeout: 15_000 });
+	await clickUntilVisible({
+		target: page.getByLabel("部屋名"),
+		trigger: page.getByRole("button", { name: "部屋作成" }),
+	});
 	await page.getByLabel("部屋名").fill(roomTitle);
 	await page.getByLabel("プレイヤー名").fill(playerName);
 	await page.getByRole("button", { name: "作成する" }).click();
@@ -55,13 +77,15 @@ async function joinRoom({
 	).toBeVisible();
 	const joinButton = page.getByRole("button", { name: `${roomTitle}に参加` });
 	await expect(joinButton).toBeVisible();
-	await joinButton.click();
+
+	const joinConfirmedButton = page.getByRole("button", { name: "参加する" });
+	await clickUntilVisible({ target: joinConfirmedButton, trigger: joinButton });
 
 	const nameField = page.getByLabel("プレイヤー名");
 	if (await nameField.isVisible()) {
 		await nameField.fill(playerName);
 	}
-	await page.getByRole("button", { name: "参加する" }).click();
+	await joinConfirmedButton.click({ timeout: 15_000 });
 
 	// 4人目の参加時はゲーム画面に直接遷移する可能性がある
 	await page.waitForURL(/\/(matching|game)\//);
