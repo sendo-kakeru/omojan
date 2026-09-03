@@ -18,7 +18,7 @@ const decorator: Decorator = (Story, context) => {
 			>
 				<TooltipProvider>
 					<ToastProvider>
-						<div className="font-[Inter] text-neutral-800">
+						<div className="bg-tatami font-sans text-neutral-800">
 							<Story />
 						</div>
 					</ToastProvider>
@@ -31,7 +31,7 @@ const decorator: Decorator = (Story, context) => {
 const preview: Preview = {
 	decorators: [decorator],
 	initialGlobals: {
-		backgrounds: { value: "Gray" },
+		backgrounds: { value: "tatami" },
 	},
 	parameters: {
 		a11y: {
@@ -45,6 +45,7 @@ const preview: Preview = {
 				dark: { name: "Dark", value: "#333" },
 				gray: { name: "Gray", value: "#eee" },
 				light: { name: "Light", value: "#F7F9F2" },
+				tatami: { name: "Tatami", value: "#f9f5e4" },
 			},
 		},
 		controls: {

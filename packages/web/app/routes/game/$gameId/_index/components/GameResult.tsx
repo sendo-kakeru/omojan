@@ -3,6 +3,7 @@ import classNames from "classnames";
 import { useEffect } from "react";
 import { FaCrown } from "react-icons/fa";
 import { Avatar } from "~/components/Avatar";
+import { tileClassName } from "~/components/Tile";
 import { useCountdown } from "~/hooks/useCountdown";
 import { AVATAR_IMAGE_DIMENSIONS, buildImageUrl } from "~/libs/image";
 import { createCombination } from "../libs/gameUtils";
@@ -33,8 +34,8 @@ export function GameResult({ data }: { data: GameServerResultMessage }) {
 				{/* プレイヤー結果エリア */}
 				<section className="relative my-auto grid h-fit content-center gap-y-4 rounded-lg">
 					{/* 結果表示ラベル */}
-					<p className="mb-12 text-center font-semibold text-neutral-600">
-						ラウンド {game.roundNo} 結果
+					<p className="mb-12 text-center font-bold text-moss">
+						ラウンド {game.roundNo} の結果
 					</p>
 					{game.players.map((player) => {
 						const isWinner = game.winnerPlayerIds.includes(player.id);
@@ -48,12 +49,14 @@ export function GameResult({ data }: { data: GameServerResultMessage }) {
 						return (
 							<div className="relative w-full" key={player.id}>
 								<div
-									className={classNames(
-										"flex w-full items-center gap-x-12 rounded-2xl px-12 py-8 md:py-12",
-										isWinner
-											? "border-2 border-yellow-400 bg-yellow-50"
-											: "border border-gray-200 bg-white",
-									)}
+									className={tileClassName({
+										className: classNames(
+											"flex w-full animate-place-tile items-center gap-x-12 px-12 py-8 motion-reduce:animate-none md:py-12",
+											isWinner &&
+												"animate-glow bg-gold/20 motion-reduce:animate-none",
+										),
+										stand: isWinner ? "gold" : "ivory",
+									})}
 								>
 									<div className="grid flex-1 gap-y-2">
 										<div className="flex items-center gap-x-8">
@@ -66,22 +69,31 @@ export function GameResult({ data }: { data: GameServerResultMessage }) {
 												})}
 											/>
 											{isWinner && (
-												<FaCrown className="size-20 text-yellow-500" />
+												<FaCrown className="size-20 text-gold-deep" />
 											)}
-											<p className="font-semibold text-neutral-400 text-xs">
+											<p className="font-bold text-neutral-500 text-xs">
 												{player.playerName}
 												{isSelf && (
-													<span className="text-neutral-400">（自分）</span>
+													<span className="font-normal text-neutral-400">
+														（自分）
+													</span>
 												)}
 											</p>
 										</div>
-										<p className="font-bold text-base md:text-lg">
+										<p className="font-bold text-base text-carved text-moss md:text-lg">
 											{combination}
 										</p>
 									</div>
 									{/* 固定幅でバッジの位置を安定させる */}
 									<div className="grid w-64 place-items-center">
-										<p className="whitespace-nowrap rounded-full border-2 border-green-200 bg-green-100 px-12 py-2 font-medium text-green-700 text-sm">
+										<p
+											className={classNames(
+												"whitespace-nowrap rounded-full border-2 px-12 py-2 font-bold text-sm",
+												isWinner
+													? "border-gold-deep bg-gold text-moss"
+													: "border-moss/30 bg-moss/10 text-moss",
+											)}
+										>
 											{player.voteCount}票
 										</p>
 									</div>

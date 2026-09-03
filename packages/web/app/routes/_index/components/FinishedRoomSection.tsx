@@ -1,6 +1,7 @@
 import type { FinishedRoom } from "@repo/db/model";
 import { FiChevronRight } from "react-icons/fi";
 import { Button } from "~/components/button/Button";
+import { SectionHeading } from "~/components/SectionHeading";
 import { RoomCard } from "./RoomCard";
 import { RoomCardSkeleton } from "./RoomCardSkeleton";
 
@@ -15,25 +16,26 @@ export function FinishedRoomSection({
 }) {
 	return (
 		<section className="grid gap-y-12">
-			<SectionHeader />
+			<SectionHeading
+				action={
+					<Button
+						as="link"
+						className="shrink-0"
+						color="gray"
+						rightIcon={<FiChevronRight className="size-16" />}
+						size="S"
+						to="/room/finished"
+						variant="outline"
+					>
+						もっと見る
+					</Button>
+				}
+				mark="果"
+			>
+				最近のゲーム
+			</SectionHeading>
 			<FinishedRoomList error={error} isLoading={isLoading} rooms={rooms} />
 		</section>
-	);
-}
-
-function SectionHeader() {
-	return (
-		<div className="flex items-center justify-between">
-			<h2 className="font-bold">🏆 最近のゲーム</h2>
-			<Button
-				as="link"
-				rightIcon={<FiChevronRight className="size-16" />}
-				to="/room/finished"
-				variant="outline"
-			>
-				もっと見る
-			</Button>
-		</div>
 	);
 }
 
@@ -48,7 +50,7 @@ function FinishedRoomList({
 }) {
 	if (isLoading) {
 		return (
-			<div className="grid gap-y-8">
+			<div className="grid gap-y-12">
 				{Array.from({ length: 5 }).map((_, index) => (
 					<RoomCardSkeleton
 						// biome-ignore lint/suspicious/noArrayIndexKey: ローディングのため問題ない
@@ -62,7 +64,7 @@ function FinishedRoomList({
 
 	if (error) {
 		return (
-			<p className="py-16 text-center text-red-400">
+			<p className="py-16 text-center text-brand-deep text-sm">
 				ゲーム履歴の取得に失敗しました
 			</p>
 		);
@@ -70,16 +72,22 @@ function FinishedRoomList({
 
 	if (!rooms || rooms.length === 0) {
 		return (
-			<p className="py-16 text-center text-neutral-500">
-				ゲームが行われていません
+			<p className="py-16 text-center text-neutral-500 text-sm">
+				まだゲームが行われていません
 			</p>
 		);
 	}
 
 	return (
-		<div className="grid gap-y-8">
-			{rooms.map((room) => (
-				<RoomCard key={room.gameId} room={room} status="finished" />
+		<div className="grid gap-y-12">
+			{rooms.map((room, index) => (
+				<div
+					className="animate-rise motion-reduce:animate-none"
+					key={room.gameId}
+					style={{ animationDelay: `${Math.min(index, 6) * 60}ms` }}
+				>
+					<RoomCard room={room} status="finished" />
+				</div>
 			))}
 		</div>
 	);

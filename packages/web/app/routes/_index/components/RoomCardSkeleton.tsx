@@ -1,5 +1,12 @@
 import type { ComponentProps } from "react";
+import { tileClassName } from "~/components/Tile";
 
+/**
+ * 部屋カードのスケルトン
+ *
+ * 実カードと同じ牌の外形・4席のグリッドを保ち、
+ * 読み込み完了時にレイアウトが動かないようにする
+ */
 export function RoomCardSkeleton({
 	srText,
 	...props
@@ -8,29 +15,29 @@ export function RoomCardSkeleton({
 }) {
 	return (
 		<div
-			className="grid animate-pulse rounded-lg bg-neutral-100 p-12 shadow-sm"
+			className={tileClassName({
+				className: "grid animate-pulse gap-y-8 p-12",
+			})}
 			{...props}
 		>
 			{srText && <span className="sr-only">{srText}</span>}
-			<div className="grid gap-y-4">
-				<div className="flex min-h-34 items-center gap-x-6">
-					<div className="h-24 w-160 animate-pulse rounded-full bg-neutral-200" />
-				</div>
-				<div className="flex gap-x-24">
-					<div className="h-20 w-123 animate-pulse rounded-full bg-neutral-200" />
-					<div className="h-20 w-101 animate-pulse rounded-full bg-neutral-200" />
-				</div>
+			<div className="flex min-h-28 items-start">
+				<div className="h-20 w-160 rounded-full bg-ivory-edge" />
 			</div>
-			<div className="mt-12 flex flex-wrap gap-x-8">
-				<div className="flex items-center gap-x-4 py-4 pr-12 pl-8">
-					<div className="flex items-center gap-x-8">
-						<div className="size-24 rounded-full bg-neutral-200" />
-						<div className="h-16 w-80 rounded-full bg-neutral-200" />
+			<div className="flex gap-x-12">
+				<div className="h-14 w-56 rounded-full bg-ivory-edge" />
+				<div className="h-14 w-48 rounded-full bg-ivory-edge" />
+			</div>
+			<div className="grid grid-cols-4 gap-6">
+				{[1, 2, 3, 4].map((seat) => (
+					<div
+						className="grid place-items-center gap-y-2 rounded-md border border-ivory-edge px-4 py-6"
+						key={seat}
+					>
+						<div className="size-24 rounded-full bg-ivory-edge" />
+						<div className="h-10 w-32 rounded-full bg-ivory-edge" />
 					</div>
-				</div>
-			</div>
-			<div className="flex justify-end">
-				<div className="mt-6 h-16 w-56 rounded-full bg-neutral-200" />
+				))}
 			</div>
 		</div>
 	);

@@ -21,10 +21,12 @@ export default meta;
 type Story = StoryFn<typeof RoomCard>;
 
 const DUMMY_USER_ID = "00000000-0000-0000-0000-000000000001" as UserId;
+// uuid58Encode が正しいUUIDを要求するため、モックもUUID形式にする
+const DUMMY_GAME_ID = "00000000-0000-4000-8000-000000000001";
 
 const createWaitingRoom = (overrides?: Partial<WaitingRoom>): WaitingRoom => ({
 	createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30分前
-	gameId: "game-123" as WaitingRoom["gameId"],
+	gameId: DUMMY_GAME_ID as WaitingRoom["gameId"],
 	isPrivate: false,
 	players: [
 		{
@@ -44,7 +46,7 @@ const createFinishedRoom = (
 	overrides?: Partial<FinishedRoom>,
 ): FinishedRoom => ({
 	finishedAt: new Date(2024, 0, 15).toISOString(), // 2024/01/15
-	gameId: "game-123" as FinishedRoom["gameId"],
+	gameId: DUMMY_GAME_ID as FinishedRoom["gameId"],
 	isPrivate: false,
 	players: [
 		{

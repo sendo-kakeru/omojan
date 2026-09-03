@@ -6,6 +6,7 @@ import { IoIosLock, IoMdShare } from "react-icons/io";
 import { Button } from "~/components/button/Button";
 import { Separator } from "~/components/Separator";
 import { Spinner } from "~/components/Spinner";
+import { tileClassName } from "~/components/Tile";
 import { UserLabel } from "~/components/user/UserLabel";
 import { useClipboard } from "~/hooks/useClipboard";
 import { useShare } from "~/hooks/useShare";
@@ -34,15 +35,23 @@ export function MatchingPresenter({
 		url: PROD_SITE_URL,
 	});
 	return (
-		<main className="relative my-24 grid gap-y-16 rounded-lg border border-gray-200 bg-white p-16">
+		<main
+			className={tileClassName({
+				className: "relative my-24 grid gap-y-16 p-16",
+				stand: "gold",
+			})}
+		>
 			{transitionCount !== null && (
-				<div className="absolute inset-0 z-10 grid place-items-center bg-gray-200/70 backdrop-blur-sm">
-					<div className="grid gap-y-16 text-center text-neutral-700">
+				<div className="absolute inset-0 z-10 grid place-items-center rounded-lg bg-shade/60 backdrop-blur-sm">
+					<div className="grid gap-y-16 text-center text-white">
 						<Spinner className="mx-auto size-32" />
-						<p className="font-semibold">
+						<p className="font-bold">
 							参加者が集まりました。
 							<br />
-							{transitionCount}秒後にゲーム画面へ移動します。
+							<span className="font-display text-2xl text-gold">
+								{transitionCount}
+							</span>
+							秒後にゲーム画面へ移動します。
 						</p>
 					</div>
 				</div>
@@ -51,12 +60,12 @@ export function MatchingPresenter({
 			<section className="grid gap-y-16 py-16">
 				<div className="grid gap-y-8">
 					<div className="flex justify-between">
-						<h1 className="font-bold text-xl">{roomMeta.title}</h1>
+						<h1 className="font-bold text-moss text-xl">{roomMeta.title}</h1>
 						{roomMeta.isPrivate && (
-							<div className="rounded-full border border-gray-300 bg-gray-100 p-4">
+							<div className="rounded-full border border-gold bg-gold/20 p-4">
 								<IoIosLock
 									aria-label="プライベート部屋"
-									className="size-24 text-green-400"
+									className="size-24 text-gold-deep"
 									role="img"
 								/>
 							</div>
@@ -68,13 +77,19 @@ export function MatchingPresenter({
 					</div>
 				</div>
 				{roomMeta.isPrivate && (
-					<div className="mx-auto grid w-full max-w-400 gap-y-12 rounded-lg border border-green-300 bg-green-50 p-8 md:p-16">
+					<div className="mx-auto grid w-full max-w-400 gap-y-12 rounded-lg border-2 border-gold border-dashed bg-gold/10 p-8 md:p-16">
 						<div className="flex items-center justify-between gap-x-8 px-8">
 							<div className="flex items-center gap-x-16">
 								<p className="break-keep font-semibold text-sm md:text-base">
 									パスワード
 								</p>
-								<p className="w-fit rounded-lg border border-green-300 bg-white p-8 px-24 font-mono text-xl">
+								<p
+									className={tileClassName({
+										className:
+											"w-fit p-8 px-24 font-display text-lg text-moss tracking-widest",
+										stand: "gold",
+									})}
+								>
 									{roomMeta.password}
 								</p>
 							</div>
@@ -85,11 +100,7 @@ export function MatchingPresenter({
 								onClick={copy}
 								variant="outline"
 							>
-								{isCopied ? (
-									<FaCheck className="text-green-400" />
-								) : (
-									<FaRegCopy />
-								)}
+								{isCopied ? <FaCheck className="text-moss" /> : <FaRegCopy />}
 							</Button>
 						</div>
 						<p className="w-fit text-neutral-500 text-sm">
@@ -111,6 +122,7 @@ export function MatchingPresenter({
 						<Button
 							as="button"
 							className="w-full max-w-280"
+							color="brand"
 							disabled={
 								isStarting ||
 								participants.length >= 4 ||
@@ -131,10 +143,10 @@ export function MatchingPresenter({
 
 			<section className="grid gap-y-16">
 				<div className="flex items-center justify-between gap-x-8">
-					<h2 className="font-bold">参加者</h2>
+					<h2 className="font-bold text-moss">参加者</h2>
 					<button
 						aria-label="友達に共有する"
-						className="flex items-center gap-x-6 rounded-full bg-cyan-400 px-16 py-6 font-medium text-sm text-white transition-colors hover:bg-cyan-500"
+						className="flex items-center gap-x-6 rounded-full bg-brand-deep px-16 py-6 font-bold text-sm text-white transition-colors hover:bg-brand-darker"
 						onClick={share}
 						type="button"
 					>
@@ -146,10 +158,13 @@ export function MatchingPresenter({
 					4人揃ったらゲームが開始されます。
 					{isHost && "「今すぐ開始」で募集中のプレイヤーをCPUで開始します。"}
 				</p>
-				<ul className="grid gap-y-12">
+				<ul className="grid gap-y-8">
 					{[1, 2, 3, 4].map((seat) => (
 						<li key={seat}>
-							<MatchingParticipantLabel participant={participants[seat - 1]} />
+							<MatchingParticipantLabel
+								participant={participants[seat - 1]}
+								seat={seat}
+							/>
 						</li>
 					))}
 				</ul>
@@ -158,27 +173,45 @@ export function MatchingPresenter({
 	);
 }
 
+/** 席。着席済みは牌、空席は点線の枠で「あと何人か」を一目で分かるようにする */
 function MatchingParticipantLabel({
 	participant,
+	seat,
 }: {
 	participant?: MatchingParticipant;
+	seat: number;
 }) {
+	const seatNumber = (
+		<span className="grid size-24 shrink-0 place-items-center rounded-full bg-mat font-display text-[10px] text-neutral-500">
+			{seat}
+		</span>
+	);
+
 	if (participant) {
 		return (
-			<UserLabel
-				user={{
-					image: participant.image ?? undefined,
-					name: participant.playerName,
-				}}
-			/>
+			<div
+				className={tileClassName({
+					className: "flex animate-rise items-center gap-x-12 px-12 py-8",
+				})}
+			>
+				{seatNumber}
+				<UserLabel
+					textProps={{ className: "font-bold text-moss" }}
+					user={{
+						image: participant.image ?? undefined,
+						name: participant.playerName,
+					}}
+				/>
+			</div>
 		);
 	}
 
 	return (
-		<div className="flex items-center gap-x-8">
-			<div className="size-32 rounded-full border border-gray-300 border-dashed" />
+		<div className="flex items-center gap-x-12 rounded-lg border-2 border-ivory-deep border-dashed px-12 py-8">
+			{seatNumber}
+			<div className="size-32 shrink-0 rounded-full border border-ivory-deep border-dashed" />
 			<p className="overflow-hidden text-ellipsis whitespace-nowrap text-neutral-400 text-sm">
-				募集中
+				募集中...
 			</p>
 		</div>
 	);

@@ -8,6 +8,8 @@ import { cloudflareContext } from "~/libs/cloudflareContext";
 import type { Route } from "./+types/route";
 import { CreateRoomDialog } from "./components/CreateRoomDialog";
 import { FinishedRoomSection } from "./components/FinishedRoomSection";
+import { HomeHero } from "./components/HomeHero";
+import { SocialLinks } from "./components/SocialLinks";
 import { WaitingRoomSection } from "./components/WaitingRoomSection";
 import { useRoomListSWR } from "./hooks/useRoomListSWR";
 
@@ -69,26 +71,27 @@ export default function Page({ loaderData }: Route.ComponentProps) {
 	return (
 		<>
 			<Header />
-			<main className="grid gap-y-12 pb-40 sm:mt-8">
-				<h1 className="sr-only">おもじゃんオンライン</h1>
-				<div className="grid gap-y-24">
-					<WaitingRoomSection
-						error={waitingError}
-						isLoading={waitingLoading}
-						onCreateRoom={() => setIsOpen(true)}
-						onRefresh={() => {
-							waitingMutate();
-							finishedMutate();
-						}}
-						rooms={waitingData?.items as WaitingRoom[] | undefined}
-					/>
+			<main className="grid gap-y-32 pb-40">
+				<HomeHero onCreateRoom={() => setIsOpen(true)} />
 
-					<FinishedRoomSection
-						error={finishedError}
-						isLoading={finishedLoading}
-						rooms={finishedData?.items as FinishedRoom[] | undefined}
-					/>
-				</div>
+				<WaitingRoomSection
+					error={waitingError}
+					isLoading={waitingLoading}
+					onCreateRoom={() => setIsOpen(true)}
+					onRefresh={() => {
+						waitingMutate();
+						finishedMutate();
+					}}
+					rooms={waitingData?.items as WaitingRoom[] | undefined}
+				/>
+
+				<FinishedRoomSection
+					error={finishedError}
+					isLoading={finishedLoading}
+					rooms={finishedData?.items as FinishedRoom[] | undefined}
+				/>
+
+				<SocialLinks />
 			</main>
 			<Footer />
 			<CreateRoomDialog isOpen={isOpen} setIsOpen={setIsOpen} />

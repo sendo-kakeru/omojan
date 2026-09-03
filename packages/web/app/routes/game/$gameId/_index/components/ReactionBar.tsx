@@ -1,6 +1,7 @@
 import { REACTION_EMOJIS, type ReactionEmoji } from "@repo/db/model";
 import classNames from "classnames";
 import { useRef, useState } from "react";
+import { tileClassName } from "~/components/Tile";
 
 /** リアクション送信間隔の制限 (ミリ秒) */
 const RATE_LIMIT_MS = 300;
@@ -32,7 +33,7 @@ export function ReactionBar({
 			{/* 絵文字パネル（左方向に展開） */}
 			<div
 				className={classNames(
-					"flex origin-right gap-x-4 rounded-full bg-white/90 px-8 shadow-lg backdrop-blur-sm transition-all duration-200 ease-out",
+					"flex origin-right gap-x-4 rounded-full border border-ivory-edge bg-ivory/95 px-8 shadow-tile backdrop-blur-sm transition-all duration-200 ease-out",
 					open
 						? "scale-x-100 opacity-100"
 						: "pointer-events-none scale-x-0 opacity-0",
@@ -52,7 +53,12 @@ export function ReactionBar({
 
 			{/* トグルボタン */}
 			<button
-				className="flex size-36 shrink-0 items-center justify-center rounded-full bg-white/90 text-xl shadow-lg backdrop-blur-sm transition-transform active:scale-95"
+				className={tileClassName({
+					className:
+						"flex size-40 shrink-0 items-center justify-center rounded-full text-xl backdrop-blur-sm",
+					interactive: true,
+					stand: "gold",
+				})}
 				onClick={() => setOpen((prev) => !prev)}
 				type="button"
 			>

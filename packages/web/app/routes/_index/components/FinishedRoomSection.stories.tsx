@@ -14,12 +14,18 @@ type Story = StoryFn<typeof FinishedRoomSection>;
 
 const DUMMY_USER_ID = "00000000-0000-0000-0000-000000000001" as UserId;
 
+// uuid58Encode が正しいUUIDを要求するため、モックもUUID形式にする
+let gameIdSeed = 0;
+const nextGameId = () => {
+	gameIdSeed += 1;
+	return `00000000-0000-4000-8000-${String(gameIdSeed).padStart(12, "0")}`;
+};
+
 const createFinishedRoom = (
 	overrides?: Partial<FinishedRoom>,
 ): FinishedRoom => ({
 	finishedAt: new Date(2024, 0, 15).toISOString(),
-	gameId:
-		`game-${Math.random().toString(36).slice(2)}` as FinishedRoom["gameId"],
+	gameId: nextGameId() as FinishedRoom["gameId"],
 	isPrivate: false,
 	players: [
 		{

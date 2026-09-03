@@ -43,12 +43,10 @@ export default function Page({
 
 	if (!WebSocket || wsRef.current?.readyState !== WebSocket.OPEN || !data) {
 		return (
-			<main className="grid place-items-center gap-y-20 py-24 text-neutral-500">
-				<Spinner className="size-32" />
-				<p className="animate-bounce text-center">
-					{data?.type === "END"
-						? "結果に進みます..."
-						: "ゲームを開始しています…"}
+			<main className="grid min-h-svh place-items-center gap-y-20 py-24">
+				<Spinner className="size-32 text-moss" />
+				<p className="animate-bounce text-center font-bold text-moss motion-reduce:animate-none">
+					{data?.type === "END" ? "結果に進みます..." : "卓を用意しています…"}
 				</p>
 			</main>
 		);

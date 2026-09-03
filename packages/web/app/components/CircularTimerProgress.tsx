@@ -18,17 +18,24 @@ export function CircularTimerProgress({
 	const isUrgent = count <= 5;
 
 	return (
-		<div className={classNames("relative size-32 md:size-40", className)}>
+		<div
+			className={classNames(
+				"relative size-32 md:size-40",
+				// 残り5秒でタイマー自体を少し大きく見せて緊迫感を出す
+				isUrgent && "scale-110 transition-transform",
+				className,
+			)}
+		>
 			<svg
 				className={classNames(
-					"size-full rounded-full bg-white",
-					isUrgent ? "text-red-500" : "text-green-500",
+					"size-full rounded-full bg-ivory shadow-tile",
+					isUrgent ? "text-brand" : "text-moss",
 				)}
 				viewBox="0 0 32 32"
 			>
 				<title className="sr-only">Timer</title>
 				<circle
-					className="text-neutral-200"
+					className="text-ivory-edge"
 					cx="16"
 					cy="16"
 					fill="none"
@@ -39,7 +46,7 @@ export function CircularTimerProgress({
 				<circle
 					className={classNames(
 						"transition-[stroke-dashoffset] duration-1000 ease-linear",
-						isUrgent ? "text-red-500" : "text-green-500",
+						isUrgent ? "text-brand" : "text-moss",
 					)}
 					cx="16"
 					cy="16"
@@ -55,8 +62,10 @@ export function CircularTimerProgress({
 			</svg>
 			<p
 				className={classNames(
-					"absolute inset-0 flex items-center justify-center font-semibold text-sm md:text-lg",
-					isUrgent ? "text-red-600" : "text-neutral-900",
+					"absolute inset-0 flex items-center justify-center font-display text-sm md:text-lg",
+					isUrgent
+						? "animate-pulse text-brand-deep motion-reduce:animate-none"
+						: "text-moss",
 				)}
 			>
 				{count}

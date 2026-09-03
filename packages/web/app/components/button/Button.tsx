@@ -6,7 +6,7 @@ import { tv } from "tailwind-variants";
 
 type ShareProps = {
 	className?: string;
-	color?: "primary" | "danger" | "black" | "gray";
+	color?: "primary" | "danger" | "black" | "gray" | "brand";
 	variant?: "fill" | "outline";
 	rightIcon?: ReactNode;
 	leftIcon?: ReactNode;
@@ -104,13 +104,23 @@ const buttonVariants = tv(
 
 			// fill
 			{
-				class: "bg-green-400 text-white hover:bg-green-500",
+				class: "bg-moss text-white hover:bg-moss-dark",
 				color: "primary",
 				disabled: false,
 				variant: "fill",
 			},
+			// ブランドの朱。上端に明るい朱のリム、下辺に厚みを置いて立体的に見せる
 			{
-				class: "bg-red-500 text-white hover:bg-red-600",
+				class: classNames(
+					"bg-brand-deep text-white shadow-[inset_0_1px_0_var(--color-brand),0_4px_0_var(--color-brand-darker)]",
+					"hover:bg-brand-darker active:translate-y-2 active:shadow-[inset_0_1px_0_var(--color-brand),0_2px_0_var(--color-brand-darker)]",
+				),
+				color: "brand",
+				disabled: false,
+				variant: "fill",
+			},
+			{
+				class: "bg-danger text-white hover:bg-danger/85",
 				color: "danger",
 				disabled: false,
 				variant: "fill",
@@ -130,14 +140,20 @@ const buttonVariants = tv(
 
 			// outline
 			{
-				class:
-					"border-1 border-green-400 bg-white text-green-400 hover:bg-green-100",
+				class: "border-1 border-moss bg-ivory text-moss hover:bg-moss/10",
 				color: "primary",
 				disabled: false,
 				variant: "outline",
 			},
 			{
-				class: "border-1 border-red-500 bg-white text-red-500 hover:bg-red-100",
+				class:
+					"border-1 border-brand bg-ivory text-brand-deep hover:bg-brand-soft",
+				color: "brand",
+				disabled: false,
+				variant: "outline",
+			},
+			{
+				class: "border-1 border-danger bg-ivory text-danger hover:bg-danger/10",
 				color: "danger",
 				disabled: false,
 				variant: "outline",
@@ -151,7 +167,7 @@ const buttonVariants = tv(
 			},
 			{
 				class:
-					"border-1 border-gray-300 bg-white text-neutral-500 hover:bg-gray-200",
+					"border-1 border-ivory-deep bg-ivory text-neutral-500 hover:bg-mat",
 				color: "gray",
 				disabled: false,
 				variant: "outline",
@@ -160,6 +176,7 @@ const buttonVariants = tv(
 		variants: {
 			color: {
 				black: "",
+				brand: "",
 				danger: "",
 				gray: "",
 				primary: "",

@@ -9,6 +9,7 @@ import { Avatar } from "~/components/Avatar";
 import { Badge } from "~/components/Badge";
 import { Separator } from "~/components/Separator";
 import { Spinner } from "~/components/Spinner";
+import { tileClassName } from "~/components/Tile";
 import { useCountdown } from "~/hooks/useCountdown";
 import { AVATAR_IMAGE_DIMENSIONS, buildImageUrl } from "~/libs/image";
 import { createCombination, vibrate } from "../libs/gameUtils";
@@ -144,24 +145,32 @@ export function GameSubmission({
 	return (
 		<>
 			{isStarting && (
-				<div className="fixed inset-0 z-80 flex items-center justify-center bg-black/40">
-					<div className="grid w-full max-w-xs place-items-center gap-y-24 rounded-2xl bg-white px-24 py-32 shadow-xl">
-						<div className="grid place-items-center gap-y-8">
-							<p className="font-mono text-neutral-500 text-sm">Round</p>
-							<p className="font-bold text-4xl text-neutral-800">
+				<div className="fixed inset-0 z-80 flex items-center justify-center bg-shade/55">
+					<div
+						className={tileClassName({
+							className:
+								"grid w-full max-w-xs animate-place-tile place-items-center gap-y-24 px-24 py-32 motion-reduce:animate-none",
+							stand: "gold",
+						})}
+					>
+						<div className="grid place-items-center gap-y-4">
+							<p className="font-display text-[10px] text-moss/70 tracking-widest">
+								ROUND
+							</p>
+							<p className="font-display text-5xl text-moss">
 								{game.roundNo}
-								<span className="text-neutral-400"> / 4</span>
+								<span className="text-2xl text-neutral-400"> / 4</span>
 							</p>
 						</div>
 						<div className="grid w-full place-items-center gap-y-8">
-							<p className="text-neutral-500 text-sm">お題</p>
-							<p className="w-full rounded-lg border border-yellow-300 bg-yellow-50 px-16 py-12 text-center font-bold text-lg text-neutral-800">
+							<p className="font-bold text-neutral-500 text-xs">お題</p>
+							<p className="w-full rounded-lg border-2 border-gold bg-gold/15 px-16 py-12 text-center font-bold text-lg text-moss">
 								{game.theme}
 							</p>
 						</div>
-						<div className="flex items-center gap-x-8 text-neutral-500">
+						<div className="flex items-center gap-x-8 text-moss">
 							<Spinner className="size-20" />
-							<p className="text-sm">まもなく開始...</p>
+							<p className="font-bold text-sm">まもなく開始...</p>
 						</div>
 					</div>
 				</div>
@@ -178,15 +187,15 @@ export function GameSubmission({
 			>
 				{/* 自分の番でオーバーレイ（操作対象以外を暗く） */}
 				{isActivePhase && (
-					<div className="pointer-events-none fixed inset-0 z-20 bg-black/50" />
+					<div className="pointer-events-none fixed inset-0 z-20 bg-shade/55" />
 				)}
 
 				{/* 他プレイヤーの提出待機中メッセージ */}
 				{!isMyTurn && !isStarting && (
 					<div className="pointer-events-none fixed bottom-120 left-1/2 z-20 -translate-x-1/2">
-						<div className="flex items-center gap-x-8 rounded-full bg-neutral-900/60 px-24 py-12 shadow-2xl">
+						<div className="flex items-center gap-x-8 rounded-full bg-moss/90 px-24 py-12 shadow-2xl">
 							<Spinner className="size-24 text-white" />
-							<p className="whitespace-nowrap text-white">
+							<p className="whitespace-nowrap font-bold text-sm text-white">
 								他のプレイヤーが選択中...
 							</p>
 						</div>
@@ -194,7 +203,7 @@ export function GameSubmission({
 				)}
 
 				<main className="relative grid grid-rows-[auto_1fr_auto]">
-					<section className="relative grid rounded-lg border border-gray-200 bg-white">
+					<section className="relative grid rounded-lg border border-ivory-edge bg-ivory/85">
 						{game.players.map((player, index) => {
 							const isSelf = player.id === mePlayer.id;
 							const isCurrentPlayer = player.id === currentPlayerId;
@@ -204,8 +213,9 @@ export function GameSubmission({
 								<div className="w-full" key={player.id}>
 									<div
 										className={classNames(
-											"flex items-center gap-x-8 rounded-lg border-green-400 px-8 py-4 transition-colors md:px-12",
-											isCurrentPlayer && "border bg-green-50",
+											"flex items-center gap-x-8 rounded-lg px-8 py-4 transition-colors md:px-12",
+											isCurrentPlayer &&
+												"border-2 border-moss bg-moss/10 shadow-[inset_4px_0_0_var(--color-gold)]",
 										)}
 									>
 										<Avatar
@@ -220,7 +230,7 @@ export function GameSubmission({
 											<p className="font-semibold text-xs">
 												{player.playerName}
 												{isSelf && (
-													<span className="font-normal text-neutral-300">
+													<span className="font-normal text-neutral-400">
 														（自分）
 													</span>
 												)}
@@ -242,7 +252,7 @@ export function GameSubmission({
 					{/* 中央エリア - お題カード + 組み合わせ選択 */}
 					<section
 						className={classNames(
-							"relative mt-8 grid place-items-center rounded-t-2xl border border-gray-300 border-b-0 bg-white p-16",
+							"relative mt-8 grid place-items-center rounded-t-2xl border border-ivory-edge border-b-0 bg-ivory/90 p-16",
 							isActivePhase && "z-30",
 						)}
 					>

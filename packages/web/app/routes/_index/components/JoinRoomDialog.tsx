@@ -261,6 +261,7 @@ export function JoinRoomDialog({
 							{(state) => (
 								<Button
 									as="button"
+									color="brand"
 									disabled={!state.canSubmit || isPending}
 									leftIcon={
 										isPending ? <Spinner className="size-16" /> : undefined

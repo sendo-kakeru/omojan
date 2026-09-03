@@ -9,11 +9,13 @@ const badgeVariants = tv(
 		},
 		variants: {
 			color: {
-				black: "border-gray-900 bg-gray-900 text-white",
+				black: "border-moss bg-moss text-white",
+				brand: "border-brand/40 bg-brand-soft text-brand-deep",
 				danger: "border-red-200 bg-red-100 text-red-700",
-				gray: "border-gray-200 bg-gray-100 text-neutral-700",
-				primary: "border-green-200 bg-green-100 text-green-700",
-				warning: "border-yellow-300 bg-yellow-100 text-yellow-700",
+				gold: "border-gold bg-gold/25 text-moss",
+				gray: "border-ivory-edge bg-mat text-neutral-600",
+				primary: "border-moss/30 bg-moss/10 text-moss",
+				warning: "border-gold bg-gold/25 text-moss",
 			},
 		},
 	},
@@ -27,7 +29,14 @@ export function Badge({
 	...props
 }: React.ComponentProps<"span"> &
 	PropsWithChildren<{
-		color?: "primary" | "danger" | "black" | "gray" | "warning";
+		color?:
+			| "primary"
+			| "danger"
+			| "black"
+			| "gray"
+			| "warning"
+			| "brand"
+			| "gold";
 	}>) {
 	return (
 		<span className={badgeVariants({ className, color })} {...props}>

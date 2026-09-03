@@ -7,6 +7,7 @@ import classNames from "classnames";
 import { useEffect, useState, useTransition } from "react";
 import { Avatar } from "~/components/Avatar";
 import { Badge } from "~/components/Badge";
+import { tileClassName } from "~/components/Tile";
 import { useCountdown } from "~/hooks/useCountdown";
 import { AVATAR_IMAGE_DIMENSIONS, buildImageUrl } from "~/libs/image";
 import { createCombination } from "../libs/gameUtils";
@@ -82,7 +83,7 @@ export function GameVote({
 		>
 			{/* プレイヤーカード以外を暗くするオーバーレイ */}
 			{!confirmedPlayerId && (
-				<div className="pointer-events-none fixed inset-0 z-20 bg-black/50" />
+				<div className="pointer-events-none fixed inset-0 z-20 bg-shade/55" />
 			)}
 
 			<main className="grid grid-rows-[1fr_auto]">
@@ -106,18 +107,24 @@ export function GameVote({
 						return (
 							<div className="relative w-full" key={player.id}>
 								<button
-									className={classNames(
-										"flex w-full items-center gap-x-12 rounded-2xl px-12 py-8 transition-all duration-200 md:py-12",
-										isSelf
-											? "cursor-not-allowed border-2 border-transparent bg-gray-200 opacity-90"
-											: isConfirmed
-												? "border-2 border-green-500 bg-green-100"
-												: isSelected
-													? "z-10 scale-[1.02] border-2 border-green-500 bg-green-50 shadow-md"
-													: confirmedPlayerId
-														? "border border-gray-200 bg-white"
-														: "animate-pulse-card border border-gray-200 bg-white hover:scale-[1.02]",
-									)}
+									className={tileClassName({
+										className: classNames(
+											"flex w-full items-center gap-x-12 px-12 py-8 transition-all duration-200 md:py-12",
+											isSelf && "cursor-not-allowed opacity-60",
+											isConfirmed && "border-moss bg-moss/10",
+											isSelected && !isConfirmed && "z-10 -translate-y-4",
+											!isSelf &&
+												!confirmedPlayerId &&
+												!isSelected &&
+												"animate-pulse-card motion-reduce:animate-none",
+										),
+										interactive: !isSelf && !confirmedPlayerId,
+										stand: (() => {
+											if (isSelf) return "ivory";
+											if (isConfirmed || isSelected) return "moss";
+											return "gold";
+										})(),
+									})}
 									disabled={isSelf || !!confirmedPlayerId}
 									onClick={() => handlePlayerClick(player.id)}
 									type="button"
@@ -132,17 +139,19 @@ export function GameVote({
 													size: AVATAR_IMAGE_DIMENSIONS.S,
 												})}
 											/>
-											<p className="font-semibold text-neutral-400 text-xs">
+											<p className="font-bold text-neutral-500 text-xs">
 												{player.playerName}
 												{isSelf && (
-													<span className="text-neutral-400">（自分）</span>
+													<span className="font-normal text-neutral-400">
+														（自分）
+													</span>
 												)}
 											</p>
 										</div>
 										<p
 											className={classNames(
-												"font-bold text-base md:text-lg",
-												isSelf && "text-neutral-400",
+												"font-bold text-base text-carved md:text-lg",
+												isSelf ? "text-neutral-400" : "text-moss",
 											)}
 										>
 											{combination}
@@ -151,7 +160,7 @@ export function GameVote({
 									{/* 固定幅でバッジの位置を安定させる */}
 									<div className="grid w-64 place-items-center">
 										{isConfirmed ? (
-											<span className="whitespace-nowrap rounded-full bg-green-600 px-8 py-2 text-white text-xs">
+											<span className="whitespace-nowrap rounded-full bg-moss px-8 py-2 font-bold text-white text-xs">
 												投票済み
 											</span>
 										) : (

@@ -1,17 +1,24 @@
 import { Link } from "react-router";
 import { AuthUserMenuButton } from "./auth/AuthUserMenuButton";
 import { BeginnerMarkIcon } from "./icons/BeginnerMarkIcon";
+import { tileClassName } from "./Tile";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./Tooltip";
 
 export function Header() {
 	return (
 		<header className="flex items-start justify-between bg-transparent p-16">
+			{/* ロゴも牌として見せ、アプリ全体の視覚言語を揃える */}
 			<Link
-				className="hover:translate-0.5 flex size-32 overflow-hidden rounded-md shadow transition hover:shadow-none"
+				className={tileClassName({
+					className: "grid size-40 place-items-center p-4",
+					interactive: true,
+					stand: "gold",
+				})}
 				to="/"
 			>
 				<img
 					alt="おもじゃんオンライン"
+					className="size-full rounded-[3px]"
 					height={32}
 					src="/icons/omojan.webp"
 					width={32}

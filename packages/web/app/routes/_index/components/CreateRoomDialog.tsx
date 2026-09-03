@@ -230,6 +230,7 @@ export function CreateRoomDialog({
 						{(state) => (
 							<Button
 								as="button"
+								color="brand"
 								disabled={!state.canSubmit || isPending}
 								leftIcon={
 									isPending ? <Spinner className="size-16" /> : undefined

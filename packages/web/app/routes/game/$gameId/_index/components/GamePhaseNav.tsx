@@ -1,6 +1,7 @@
 import classNames from "classnames";
 import type { ReactNode } from "react";
 import { CircularTimerProgress } from "~/components/CircularTimerProgress";
+import { tileClassName } from "~/components/Tile";
 
 /**
  * ゲームフェーズ共通のナビゲーションバー
@@ -36,10 +37,10 @@ export function GamePhaseNav({
 			{message ? (
 				<p
 					className={classNames(
-						"relative z-40 flex h-full flex-1 items-center rounded-lg border px-8 py-2 text-sm",
+						"relative z-40 flex h-full flex-1 items-center rounded-full border px-12 py-4 font-bold text-xs",
 						messageVariant === "active"
-							? "border-green-300 bg-white text-green-600"
-							: "border-gray-300 bg-gray-50 text-neutral-500",
+							? "border-moss bg-ivory text-moss"
+							: "border-ivory-edge bg-mat/70 text-neutral-500",
 					)}
 				>
 					{message}
@@ -69,11 +70,19 @@ export function RoundIndicator({
 	totalRounds?: number;
 }) {
 	return (
-		<div className="grid w-fit place-items-center rounded-lg border border-gray-200 bg-white px-8 py-2 font-mono text-neutral-600">
-			<span className="text-xs">Round</span>
-			<div className="flex items-center">
-				<span className="text-base">{roundNo}</span>/
-				<span className="text-base">{totalRounds}</span>
+		<div
+			className={tileClassName({
+				className: "grid w-fit shrink-0 place-items-center px-12 py-2",
+				stand: "gold",
+			})}
+		>
+			{/* NOTE: ラテン文字と数字だけなので font-display でも読み込みは軽い */}
+			<span className="font-display text-[9px] text-moss/70 tracking-widest">
+				ROUND
+			</span>
+			<div className="flex items-baseline font-display text-moss">
+				<span className="text-base leading-none">{roundNo}</span>
+				<span className="text-[10px] text-neutral-400">/{totalRounds}</span>
 			</div>
 		</div>
 	);

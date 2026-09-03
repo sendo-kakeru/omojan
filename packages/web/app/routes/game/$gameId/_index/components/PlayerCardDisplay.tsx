@@ -1,12 +1,15 @@
 import type { GamePlayerCard } from "@repo/db/model";
 import type { PlayerCardId } from "@repo/db/schema";
 import classNames from "classnames";
+import { tileClassName } from "~/components/Tile";
 
 /**
  * プレイヤーの手札を表示するコンポーネント
  *
  * 画面下部に固定表示され、使用済み/未使用のスタイル分けと
- * オプションでオーバーレイ表示を行う
+ * オプションでオーバーレイ表示を行う。
+ *
+ * 手札は麻雀牌として表現し、選ぶと持ち上がり、確定すると沈む
  */
 export function PlayerCardDisplay({
 	cards,
@@ -35,26 +38,36 @@ export function PlayerCardDisplay({
 	const isInteractive = !!onCardClick && !disabled;
 
 	return (
-		<section className="relative right-1/2 left-1/2 -mx-[50vw] w-screen border-t-2 border-t-gray-300 bg-white py-8 xs:pt-16 sm:py-24">
+		// 卓の手前の縁。上辺に山吹のレールを引いて手札置き場だと分かるようにする
+		<section className="relative right-1/2 left-1/2 -mx-[50vw] w-screen border-t-4 border-t-gold-deep bg-gradient-to-b from-ivory to-mat py-12 sm:py-24">
 			<div className="mx-auto flex max-w-800 flex-wrap gap-8 px-16">
 				{cards.map((card) => {
 					const isSelected = selectedCardId === card.id;
+					const cardClassName = tileClassName({
+						className: classNames(
+							"px-10 py-6 text-center font-bold text-sm xs:text-base sm:text-lg",
+							card.used
+								? "cursor-not-allowed text-neutral-400 opacity-60"
+								: "text-neutral-800",
+							isSelected && !isConfirmed && "-translate-y-4",
+							isSelected && isConfirmed && "opacity-70",
+							!isSelected &&
+								!card.used &&
+								showPulse &&
+								"animate-pulse-card motion-reduce:animate-none",
+						),
+						interactive: isInteractive && !card.used && !isConfirmed,
+						stand: (() => {
+							if (card.used) return "ivory";
+							if (isSelected) return "moss";
+							return "gold";
+						})(),
+					});
 
 					if (isInteractive) {
 						return (
 							<button
-								className={classNames(
-									"flex rounded-md border px-8 py-4 text-center font-bold text-neutral-800 text-sm xs:text-base transition sm:text-lg",
-									card.used
-										? "cursor-not-allowed border-gray-300 bg-gray-200 opacity-50"
-										: isSelected && isConfirmed
-											? "border-green-500 bg-green-100 opacity-50"
-											: isSelected
-												? "border-green-400 bg-green-50 shadow-sm"
-												: showPulse
-													? "animate-pulse-card border-gray-200 bg-gray-100 hover:bg-green-50"
-													: "border-gray-200 bg-gray-100 hover:bg-green-50",
-								)}
+								className={cardClassName}
 								disabled={card.used || isConfirmed}
 								key={card.id}
 								onClick={() => onCardClick(card.id)}
@@ -66,24 +79,16 @@ export function PlayerCardDisplay({
 					}
 
 					return (
-						<div
-							className={classNames(
-								"flex rounded-md border px-8 py-4 text-center font-bold text-sm xs:text-base sm:text-lg",
-								card.used
-									? "border-gray-300 bg-gray-200 text-neutral-400"
-									: "border-gray-200 bg-gray-100 text-neutral-800",
-							)}
-							key={card.id}
-						>
+						<div className={cardClassName} key={card.id}>
 							{card.word}
 						</div>
 					);
 				})}
 			</div>
 			{disabled && (
-				<div className="absolute inset-0 z-50 grid place-items-center bg-black/50">
+				<div className="absolute inset-0 z-50 grid place-items-center bg-moss/70">
 					{overlayMessage && (
-						<p className="text-center font-medium text-sm text-white">
+						<p className="text-center font-bold text-sm text-white">
 							{overlayMessage}
 						</p>
 					)}
