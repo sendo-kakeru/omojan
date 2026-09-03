@@ -170,8 +170,8 @@ importers:
         specifier: 9.35.1
         version: 9.35.1(supports-color@10.2.2)(typescript@7.0.2)
       '@pulumi/pulumi':
-        specifier: 3.259.0
-        version: 3.259.0(supports-color@10.2.2)(typescript@7.0.2)
+        specifier: 3.260.0
+        version: 3.260.0(supports-color@10.2.2)(typescript@7.0.2)
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
@@ -2290,8 +2290,8 @@ packages:
   '@pulumi/gcp@9.35.1':
     resolution: {integrity: sha512-i4l6DR2/War/R1t4RcXg9NRA94xT+E2gGcmWDdZSSJjiuCgUy+ZfTxsWdYwcssXTk9obw8jrH3dEl4NcUVD87w==}
 
-  '@pulumi/pulumi@3.259.0':
-    resolution: {integrity: sha512-DRc1bDHWTofZGkKcs/bx98LujCZJNoKRkOdeEhQZNz7wPUX/obhuzmWJezew2FUCEAy1xXHtQj1CTcANHoLn3A==}
+  '@pulumi/pulumi@3.260.0':
+    resolution: {integrity: sha512-lLDISSiEToYj1/bT3dmzju9gyLrP7EcVHKo3IZ6pQY2uMfApyAeabOapDFJlrWvQedtpqIKBR7y5nNm6M91gJg==}
     engines: {node: '>=22'}
     peerDependencies:
       ts-node: '>= 7.0.1 < 12'
@@ -8041,7 +8041,7 @@ snapshots:
 
   '@pulumi/aws@7.43.0(supports-color@10.2.2)(typescript@7.0.2)':
     dependencies:
-      '@pulumi/pulumi': 3.259.0(supports-color@10.2.2)(typescript@7.0.2)
+      '@pulumi/pulumi': 3.260.0(supports-color@10.2.2)(typescript@7.0.2)
       mime: 2.6.0
     transitivePeerDependencies:
       - supports-color
@@ -8050,7 +8050,7 @@ snapshots:
 
   '@pulumi/cloudflare@6.20.0(supports-color@10.2.2)(typescript@7.0.2)':
     dependencies:
-      '@pulumi/pulumi': 3.259.0(supports-color@10.2.2)(typescript@7.0.2)
+      '@pulumi/pulumi': 3.260.0(supports-color@10.2.2)(typescript@7.0.2)
     transitivePeerDependencies:
       - supports-color
       - ts-node
@@ -8058,14 +8058,14 @@ snapshots:
 
   '@pulumi/gcp@9.35.1(supports-color@10.2.2)(typescript@7.0.2)':
     dependencies:
-      '@pulumi/pulumi': 3.259.0(supports-color@10.2.2)(typescript@7.0.2)
+      '@pulumi/pulumi': 3.260.0(supports-color@10.2.2)(typescript@7.0.2)
       '@types/express': 4.17.25
     transitivePeerDependencies:
       - supports-color
       - ts-node
       - typescript
 
-  '@pulumi/pulumi@3.259.0(supports-color@10.2.2)(typescript@7.0.2)':
+  '@pulumi/pulumi@3.260.0(supports-color@10.2.2)(typescript@7.0.2)':
     dependencies:
       '@grpc/grpc-js': 1.14.3
       '@logdna/tail-file': 2.2.0
