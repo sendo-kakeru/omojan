@@ -6,9 +6,11 @@ import { Footer } from "~/components/Footer";
 import { Header } from "~/components/Header";
 import { cloudflareContext } from "~/libs/cloudflareContext";
 import type { Route } from "./+types/route";
+import { ActiveRoomBadge } from "./components/ActiveRoomBadge";
 import { CreateRoomDialog } from "./components/CreateRoomDialog";
 import { FinishedRoomSection } from "./components/FinishedRoomSection";
 import { WaitingRoomSection } from "./components/WaitingRoomSection";
+import { useRoomCountSWR } from "./hooks/useRoomCountSWR";
 import { useRoomListSWR } from "./hooks/useRoomListSWR";
 
 const FINISHED_ROOMS_LIMIT = 5;
@@ -17,10 +19,16 @@ export async function loader({ context }: Route.LoaderArgs) {
 	const { env } = context.get(cloudflareContext);
 	const client = hc<Api>(env.VITE_API_URL);
 
-	const [waitingRooms, finishedRooms] = await Promise.all([
+	const [waitingRooms, activeRoomCount, finishedRooms] = await Promise.all([
 		(async () => {
 			const response = await client.v1.rooms.$get({
 				query: { limit: 100, status: "waiting" },
+			});
+			return response.ok ? response.json() : null;
+		})(),
+		(async () => {
+			const response = await client.v1.rooms.count.$get({
+				query: { status: "active" },
 			});
 			return response.ok ? response.json() : null;
 		})(),
@@ -33,6 +41,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 	]);
 
 	return {
+		activeRoomCount,
 		finishedRooms,
 		waitingRooms,
 	};
@@ -54,6 +63,15 @@ export default function Page({ loaderData }: Route.ComponentProps) {
 		status: "waiting",
 	});
 
+	const {
+		data: activeCountData,
+		isLoading: activeCountLoading,
+		mutate: activeCountMutate,
+	} = useRoomCountSWR({
+		fallbackData: loaderData.activeRoomCount ?? undefined,
+		status: "active",
+	});
+
 	// 終了した部屋は5件取得
 	const {
 		data: finishedData,
@@ -69,8 +87,12 @@ export default function Page({ loaderData }: Route.ComponentProps) {
 	return (
 		<>
 			<Header />
-			<main className="grid gap-y-12 pb-40 sm:mt-8">
+			<main className="grid gap-y-12 pt-16 pb-40">
 				<h1 className="sr-only">おもじゃんオンライン</h1>
+				<ActiveRoomBadge
+					count={activeCountData?.count ?? 0}
+					isLoading={activeCountLoading}
+				/>
 				<div className="grid gap-y-24">
 					<WaitingRoomSection
 						error={waitingError}
@@ -78,6 +100,7 @@ export default function Page({ loaderData }: Route.ComponentProps) {
 						onCreateRoom={() => setIsOpen(true)}
 						onRefresh={() => {
 							waitingMutate();
+							activeCountMutate();
 							finishedMutate();
 						}}
 						rooms={waitingData?.items as WaitingRoom[] | undefined}

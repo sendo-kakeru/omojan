@@ -1,10 +1,12 @@
 import {
 	type CreateRoomResponseBody,
 	createRoomRequestBodySchema,
+	type GetRoomCountResponseBody,
 	type GetRoomListFinishedResponseBody,
 	type GetRoomListWaitingResponseBody,
 	type GetRoomResponseBody,
 	gameTokenHeaderSchema,
+	getRoomCountRequestQuerySchema,
 	getRoomListRequestQuerySchema,
 	type JoinRoomResponseBody,
 	joinRoomRequestBodySchema,
@@ -102,6 +104,34 @@ export const routes = new Hono<
 				if (error instanceof HTTPException) throw error;
 
 				throw new HTTPException(500, { message: "Roomの作成に失敗しました" });
+			}
+		},
+	)
+	// 件数取得
+	.get(
+		"/count",
+		vValidator("query", getRoomCountRequestQuerySchema),
+		async (c): Promise<HttpRespondReturn<GetRoomCountResponseBody>> => {
+			const { roomService } = c.var;
+			const query = c.req.valid("query");
+			const status = query.status ?? "active";
+
+			try {
+				const count = await roomService.countByStatus({ status });
+				return c.json(
+					{
+						data: { count },
+						message: "OK",
+					},
+					200,
+				);
+			} catch (error) {
+				console.error("Room件数の取得に失敗しました:", error);
+				if (error instanceof HTTPException) throw error;
+
+				throw new HTTPException(500, {
+					message: "Room件数の取得に失敗しました",
+				});
 			}
 		},
 	)
