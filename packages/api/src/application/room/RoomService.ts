@@ -10,6 +10,7 @@ import type {
 	GetRoomResponseBody,
 	JoinRoomRequestBody,
 	JoinRoomResponseBody,
+	RoomCountStatus,
 } from "@repo/db/model";
 import {
 	type Game,
@@ -175,6 +176,22 @@ export class RoomService {
 				totalPages: Math.ceil(total / limit),
 			},
 		};
+	}
+
+	/**
+	 * ルーム件数を取得する
+	 */
+	async countByStatus({
+		status,
+	}: {
+		status: RoomCountStatus;
+	}): Promise<number> {
+		const [result] = await this.db
+			.select({ count: count() })
+			.from(gameTable)
+			.where(eq(gameTable.status, status));
+
+		return result?.count ?? 0;
 	}
 
 	/**
