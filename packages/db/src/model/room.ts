@@ -43,6 +43,10 @@ export type { BrandSymbol };
 export const roomStatusSchema = picklist(["waiting", "finished"]);
 export type RoomStatus = InferOutput<typeof roomStatusSchema>;
 
+/** 部屋件数取得で使用するステータス */
+export const roomCountStatusSchema = picklist(["active"]);
+export type RoomCountStatus = InferOutput<typeof roomCountStatusSchema>;
+
 export const roomPasswordSchema = pipe(
 	string("パスワードを入力してください"),
 	length(6, "パスワードは6文字で入力してください"),
@@ -72,6 +76,22 @@ export const getRoomListRequestQuerySchema = object({
 });
 export type GetRoomListRequestQuery = InferOutput<
 	typeof getRoomListRequestQuerySchema
+>;
+
+// count
+export const getRoomCountRequestQuerySchema = object({
+	/** 部屋のステータス（default: "active"） */
+	status: optional(roomCountStatusSchema),
+});
+export type GetRoomCountRequestQuery = InferOutput<
+	typeof getRoomCountRequestQuerySchema
+>;
+
+export const getRoomCountResponseBodySchema = object({
+	count: number(),
+});
+export type GetRoomCountResponseBody = InferOutput<
+	typeof getRoomCountResponseBodySchema
 >;
 
 /** 募集中の部屋 */

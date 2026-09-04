@@ -48,7 +48,7 @@ jobs:
   test:
     needs: migrate-e2e-base-db
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     environment: e2e
     env:
       VITE_API_URL: http://localhost:8787

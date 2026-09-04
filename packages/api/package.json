@@ -1,14 +1,14 @@
 {
 	"dependencies": {
 		"@libsql/client": "0.17.4",
-		"@noble/hashes": "2.3.0",
+		"@noble/hashes": "2.4.0",
 		"@oslojs/encoding": "1.1.0",
 		"@repo/db": "workspace:*",
 		"@repo/shared": "workspace:*",
 		"aws-jwt-verify": "5.2.1",
 		"drizzle-orm": "0.45.2",
 		"drizzle-valibot": "0.4.2",
-		"hono": "4.13.4",
+		"hono": "4.13.5",
 		"p-retry": "8.0.0",
 		"valibot": "1.4.2"
 	},
@@ -19,9 +19,9 @@
 		"@repo/typescript-config": "workspace:*",
 		"@types/node": "24.13.3",
 		"drizzle-seed": "0.3.1",
-		"tsx": "4.23.12",
+		"tsx": "4.23.13",
 		"vitest": "4.1.11",
-		"wrangler": "4.125.0"
+		"wrangler": "4.127.1"
 	},
 	"exports": {
 		".": "./dist/index.d.ts"
