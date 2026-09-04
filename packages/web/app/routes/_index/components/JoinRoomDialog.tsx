@@ -169,7 +169,7 @@ export function JoinRoomDialog({
 					onSubmit={(event) => {
 						event.preventDefault();
 						event.stopPropagation();
-						form.handleSubmit();
+						void form.handleSubmit();
 					}}
 				>
 					<div className="grid gap-y-12">

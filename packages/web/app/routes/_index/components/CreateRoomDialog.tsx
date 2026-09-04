@@ -91,7 +91,7 @@ export function CreateRoomDialog({
 				onSubmit={(e) => {
 					e.preventDefault();
 					e.stopPropagation();
-					form.handleSubmit();
+					void form.handleSubmit();
 				}}
 			>
 				<div className="grid gap-y-12">

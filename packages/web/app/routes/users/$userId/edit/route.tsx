@@ -214,7 +214,7 @@ function EditForm({ me }: { me: Me }) {
 				onSubmit={(e) => {
 					e.preventDefault();
 					e.stopPropagation();
-					form.handleSubmit();
+					void form.handleSubmit();
 				}}
 			>
 				<form.Field name="name">
