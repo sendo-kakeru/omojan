@@ -1,0 +1,62 @@
+{
+	// Biome を各言語のフォーマッタとして使用
+	// (トップレベルの formatter に指定すると Biome 非対応の言語まで壊れるため、言語ごとに指定する)
+	"languages": {
+		"JavaScript": {
+			"formatter": { "language_server": { "name": "biome" } },
+			"code_actions_on_format": {
+				"source.fixAll.biome": true
+			}
+		},
+		"JSON": {
+			"formatter": { "language_server": { "name": "biome" } },
+			"code_actions_on_format": {
+				"source.fixAll.biome": true
+			}
+		},
+		"JSONC": {
+			"formatter": { "language_server": { "name": "biome" } },
+			"code_actions_on_format": {
+				"source.fixAll.biome": true
+			}
+		},
+		"JSX": {
+			"formatter": { "language_server": { "name": "biome" } },
+			"code_actions_on_format": {
+				"source.fixAll.biome": true
+			}
+		},
+		"TSX": {
+			"formatter": { "language_server": { "name": "biome" } },
+			"code_actions_on_format": {
+				"source.fixAll.biome": true
+			}
+		},
+		"TypeScript": {
+			"formatter": { "language_server": { "name": "biome" } },
+			"code_actions_on_format": {
+				"source.fixAll.biome": true
+			}
+		}
+	},
+	"format_on_save": "on",
+	"lsp": {
+		// tsserver.tsdk.path 相当。ワークスペースの TypeScript を使わせる
+		"vtsls": {
+			"initialization_options": {
+				"typescript": {
+					"tsdk": "node_modules/typescript/lib"
+				},
+				"vtsls": {
+					"autoUseWorkspaceTsdk": true
+				}
+			}
+		},
+		// rust-analyzer.linkedProjects 相当
+		"rust-analyzer": {
+			"initialization_options": {
+				"linkedProjects": ["packages/image-processor/Cargo.toml"]
+			}
+		}
+	}
+}
