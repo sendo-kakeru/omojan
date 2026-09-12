@@ -127,7 +127,7 @@ export function ToastItem({
 				<Button
 					as="button"
 					className="ml-auto shrink-0"
-					color="gray"
+					color="cream"
 					isIconOnly
 					onClick={() => onClose(id)}
 					size="S"

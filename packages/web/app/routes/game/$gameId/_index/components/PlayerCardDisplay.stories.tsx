@@ -1,11 +1,11 @@
 import type { PlayerCardId } from "@repo/db/schema";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
-import {
-	gameScreenDecorator,
-	gameScreenParameters,
-} from "~/storybook/decorators";
+import { gameScreenParameters } from "~/storybook/decorators";
 import { PlayerCardDisplay } from "./PlayerCardDisplay";
+import { ReactionBar } from "./ReactionBar";
+
+const noopReaction = async () => {};
 
 const createPlayerCardId = (id: string): PlayerCardId =>
 	`card_${id}` as PlayerCardId;
@@ -32,7 +32,13 @@ const mockCardsWithUsed = [
 
 const meta: Meta<typeof PlayerCardDisplay> = {
 	component: PlayerCardDisplay,
-	decorators: [gameScreenDecorator],
+	decorators: [
+		(Story) => (
+			<div className="grid min-h-svh place-items-center bg-table px-16 font-sans text-neutral-800">
+				<Story />
+			</div>
+		),
+	],
 	parameters: gameScreenParameters,
 	tags: ["autodocs"],
 	title: "Game/PlayerCardDisplay",
@@ -107,6 +113,15 @@ export const Confirmed: Story = {
 		selectedCardId: createPlayerCardId("3"),
 	},
 	name: "確定済み状態",
+};
+
+// リアクションパネル付き
+export const WithReactionBar: Story = {
+	args: {
+		cards: mockCards,
+		reactionBar: <ReactionBar sendReaction={noopReaction} visible={true} />,
+	},
+	name: "リアクションパネル付き",
 };
 
 // 長い単語

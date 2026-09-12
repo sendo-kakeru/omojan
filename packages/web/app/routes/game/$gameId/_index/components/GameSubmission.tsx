@@ -4,12 +4,15 @@ import type {
 } from "@repo/db/model";
 import type { PlayerCard, PlayerCardId, PlayerId } from "@repo/db/schema";
 import classNames from "classnames";
+import type { ReactNode } from "react";
 import { useEffect, useState, useTransition } from "react";
 import { Avatar } from "~/components/Avatar";
 import { Badge } from "~/components/Badge";
 import { Separator } from "~/components/Separator";
 import { Spinner } from "~/components/Spinner";
+import { Tile } from "~/components/Tile";
 import { useCountdown } from "~/hooks/useCountdown";
+import { getDisplayName } from "~/libs/displayName";
 import { AVATAR_IMAGE_DIMENSIONS, buildImageUrl } from "~/libs/image";
 import { createCombination, vibrate } from "../libs/gameUtils";
 import { GamePhaseLayout } from "./GamePhaseLayout";
@@ -22,9 +25,11 @@ type Position = "prefix" | "suffix";
 
 export function GameSubmission({
 	data,
+	reactionBar,
 	sendSubmission,
 }: {
 	data: GameServerSubmissionMessage;
+	reactionBar?: ReactNode;
 	sendSubmission: (
 		message: GameClientSubmissionMessage["submission"],
 	) => Promise<void>;
@@ -43,6 +48,9 @@ export function GameSubmission({
 		position: Position;
 		text: PlayerCard["text"];
 	} | null>(null);
+	// 自分の番になった瞬間だけ、画面中央に一瞬バナーを表示する
+	const [showMyTurnBanner, setShowMyTurnBanner] = useState(false);
+
 	const selectedCard = mePlayer.playerCards.find(
 		(card) => card.id === selectedCardId,
 	);
@@ -61,6 +69,13 @@ export function GameSubmission({
 			startCountdown(game.timeLimit);
 		}
 	}, [data.type, game.timeLimit, startCountdown]);
+
+	useEffect(() => {
+		if (data.type !== "TURN_START" || !isMyTurn) return;
+		setShowMyTurnBanner(true);
+		const timer = setTimeout(() => setShowMyTurnBanner(false), 1600);
+		return () => clearTimeout(timer);
+	}, [data.type, isMyTurn]);
 
 	// プレイヤーの組み合わせ文字列を取得
 	const getPlayerCombination = (playerId: PlayerId): string | null => {
@@ -107,6 +122,17 @@ export function GameSubmission({
 		}
 	})();
 
+	// ナビバーに表示する自分の番かどうかのメッセージ
+	const getStatusText = (): string | undefined => {
+		if (isStarting) return undefined;
+		if (isMyTurn) {
+			return isConfirmed
+				? "提出完了！他のプレイヤーを待っています"
+				: "あなたの番です";
+		}
+		return "他のプレイヤーの番です";
+	};
+
 	const handleCardClick = (cardId: PlayerCardId): void => {
 		if (isConfirmed) return;
 		const card = mePlayer.playerCards.find((c) => c.id === cardId);
@@ -144,33 +170,38 @@ export function GameSubmission({
 	return (
 		<>
 			{isStarting && (
-				<div className="fixed inset-0 z-80 flex items-center justify-center bg-black/40">
-					<div className="grid w-full max-w-xs place-items-center gap-y-24 rounded-2xl bg-white px-24 py-32 shadow-xl">
-						<div className="grid place-items-center gap-y-8">
-							<p className="font-mono text-neutral-500 text-sm">Round</p>
-							<p className="font-bold text-4xl text-neutral-800">
+				<div className="fixed inset-0 z-80 flex items-center justify-center bg-olive-900/55">
+					<Tile
+						className="grid w-full max-w-xs animate-place-tile place-items-center gap-y-24 px-24 py-32 motion-reduce:animate-none"
+						thickness="amber"
+					>
+						<div className="grid place-items-center gap-y-4">
+							<p className="font-display text-[10px] text-lime-800/70 tracking-widest">
+								ROUND
+							</p>
+							<p className="font-display text-5xl text-lime-800">
 								{game.roundNo}
-								<span className="text-neutral-400"> / 4</span>
+								<span className="text-2xl text-neutral-400"> / 4</span>
 							</p>
 						</div>
 						<div className="grid w-full place-items-center gap-y-8">
-							<p className="text-neutral-500 text-sm">お題</p>
-							<p className="w-full rounded-lg border border-yellow-300 bg-yellow-50 px-16 py-12 text-center font-bold text-lg text-neutral-800">
+							<p className="font-bold text-neutral-500 text-xs">お題</p>
+							<p className="wrap-break-word w-full rounded-lg border-2 border-amber-300 bg-amber-300/15 px-16 py-12 text-center font-bold text-lime-800 text-xl xs:text-2xl">
 								{game.theme}
 							</p>
 						</div>
-						<div className="flex items-center gap-x-8 text-neutral-500">
+						<div className="flex items-center gap-x-8 text-lime-800">
 							<Spinner className="size-20" />
-							<p className="text-sm">まもなく開始...</p>
+							<p className="font-bold text-sm">まもなく開始...</p>
 						</div>
-					</div>
+					</Tile>
 				</div>
 			)}
 			<GamePhaseLayout
 				nav={
 					<GamePhaseNav
-						messageVariant={isMyTurn ? "active" : "inactive"}
 						roundNo={game.roundNo}
+						statusText={getStatusText()}
 						timerCount={count}
 						timerProgress={progress}
 					/>
@@ -178,15 +209,24 @@ export function GameSubmission({
 			>
 				{/* 自分の番でオーバーレイ（操作対象以外を暗く） */}
 				{isActivePhase && (
-					<div className="pointer-events-none fixed inset-0 z-20 bg-black/50" />
+					<div className="pointer-events-none fixed inset-0 z-20 bg-olive-900/55" />
+				)}
+
+				{/* 自分の番になった瞬間だけ、画面中央に一瞬表示する合図 */}
+				{showMyTurnBanner && (
+					<div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center">
+						<p className="animate-turn-banner px-16 text-center font-display text-4xl text-cream-50 drop-shadow-[0_4px_24px_var(--color-orange-600)] motion-reduce:animate-none">
+							あなたの番です
+						</p>
+					</div>
 				)}
 
 				{/* 他プレイヤーの提出待機中メッセージ */}
 				{!isMyTurn && !isStarting && (
 					<div className="pointer-events-none fixed bottom-120 left-1/2 z-20 -translate-x-1/2">
-						<div className="flex items-center gap-x-8 rounded-full bg-neutral-900/60 px-24 py-12 shadow-2xl">
+						<div className="flex items-center gap-x-8 rounded-full bg-lime-800/90 px-24 py-12 shadow-2xl">
 							<Spinner className="size-24 text-white" />
-							<p className="whitespace-nowrap text-white">
+							<p className="whitespace-nowrap font-bold text-sm text-white">
 								他のプレイヤーが選択中...
 							</p>
 						</div>
@@ -194,7 +234,7 @@ export function GameSubmission({
 				)}
 
 				<main className="relative grid grid-rows-[auto_1fr_auto]">
-					<section className="relative grid rounded-lg border border-gray-200 bg-white">
+					<section className="relative grid rounded-lg border border-cream-200 bg-cream-50/85">
 						{game.players.map((player, index) => {
 							const isSelf = player.id === mePlayer.id;
 							const isCurrentPlayer = player.id === currentPlayerId;
@@ -204,8 +244,9 @@ export function GameSubmission({
 								<div className="w-full" key={player.id}>
 									<div
 										className={classNames(
-											"flex items-center gap-x-8 rounded-lg border-green-400 px-8 py-4 transition-colors md:px-12",
-											isCurrentPlayer && "border bg-green-50",
+											"flex items-center gap-x-8 rounded-lg px-8 py-4 transition-colors md:px-12",
+											isCurrentPlayer &&
+												"border-2 border-lime-800 bg-lime-800/10 shadow-[inset_4px_0_0_var(--color-amber-300)]",
 										)}
 									>
 										<Avatar
@@ -218,9 +259,9 @@ export function GameSubmission({
 										/>
 										<div className="grid flex-1 gap-y-1 md:gap-y-2">
 											<p className="font-semibold text-xs">
-												{player.playerName}
+												{getDisplayName(player.playerName)}
 												{isSelf && (
-													<span className="font-normal text-neutral-300">
+													<span className="font-normal text-neutral-400">
 														（自分）
 													</span>
 												)}
@@ -231,7 +272,7 @@ export function GameSubmission({
 												{combination ?? "未選択"}
 											</Badge>
 										</div>
-										<Badge color="gray">{player.winCount}勝</Badge>
+										<Badge color="cream">{player.winCount}勝</Badge>
 									</div>
 									{index !== game.players.length - 1 && <Separator />}
 								</div>
@@ -242,7 +283,7 @@ export function GameSubmission({
 					{/* 中央エリア - お題カード + 組み合わせ選択 */}
 					<section
 						className={classNames(
-							"relative mt-8 grid place-items-center rounded-t-2xl border border-gray-300 border-b-0 bg-white p-16",
+							"relative mt-8 grid place-items-center rounded-t-2xl border border-cream-200 border-b-0 bg-cream-50/90 p-16",
 							isActivePhase && "z-30",
 						)}
 					>
@@ -273,8 +314,10 @@ export function GameSubmission({
 					<div className={classNames(isActivePhase && "relative z-30")}>
 						<PlayerCardDisplay
 							cards={mePlayer.playerCards}
+							className="-mx-16 w-[calc(100%+32px)]"
 							isConfirmed={isConfirmed}
 							onCardClick={isMyTurn ? handleCardClick : undefined}
+							reactionBar={reactionBar}
 							selectedCardId={selectedCardId}
 							showPulse={isActivePhase && !selectedCard}
 						/>

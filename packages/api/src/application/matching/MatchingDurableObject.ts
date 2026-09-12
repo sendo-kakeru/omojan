@@ -368,7 +368,14 @@ export class MatchingDurableObject extends DurableObject<Env> {
 		}
 
 		const gameStatus = await this.roomService.getStatus(this.gameId);
-		if (gameStatus !== "waiting") return;
+		if (gameStatus !== "waiting") {
+			// 4人目のjoin時点でactiveになるが、その参加者のWSが繋がるまでDOは何も知らない。
+			// その間にホストが開始を押すとここに来るので、開始済みであることを全員に伝える
+			if (gameStatus === "active") {
+				await this.handleGameBecameActive();
+			}
+			return;
+		}
 
 		try {
 			await this.roomService.startWithCpu({ gameId: this.gameId });

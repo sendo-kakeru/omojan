@@ -1,13 +1,16 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import {
-	gameScreenDecorator,
-	gameScreenParameters,
-} from "~/storybook/decorators";
+import { gameScreenParameters } from "~/storybook/decorators";
 import { ReactionBar } from "./ReactionBar";
 
 const meta: Meta<typeof ReactionBar> = {
 	component: ReactionBar,
-	decorators: [gameScreenDecorator],
+	decorators: [
+		(Story) => (
+			<div className="grid min-h-svh place-items-center bg-table px-16 font-sans text-neutral-800">
+				<Story />
+			</div>
+		),
+	],
 	parameters: gameScreenParameters,
 	tags: ["autodocs"],
 	title: "Game/ReactionBar",

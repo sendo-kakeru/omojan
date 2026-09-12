@@ -13,11 +13,14 @@ import { Link } from "react-router";
 import { Avatar } from "~/components/Avatar";
 import { Badge } from "~/components/Badge";
 import { Button } from "~/components/button/Button";
+import { Confetti } from "~/components/Confetti";
 import { Footer } from "~/components/Footer";
 import { Header } from "~/components/Header";
+import { Tile } from "~/components/Tile";
 import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/Tooltip";
 import { useMe } from "~/context/me/hooks";
 import { useShare } from "~/hooks/useShare";
+import { getDisplayName } from "~/libs/displayName";
 import { AVATAR_IMAGE_DIMENSIONS, buildImageUrl } from "~/libs/image";
 
 function buildXShareUrl({
@@ -57,14 +60,20 @@ export function GameFinalResult({
 	return (
 		<>
 			<Header />
+			<Confetti />
 			<main className="grid gap-y-24 pb-36">
 				<div className="grid gap-y-4">
-					<section className="grid place-items-center gap-y-12 rounded-2xl border border-yellow-300 bg-yellow-100 p-16 shadow">
-						<h1 className="font-bold text-lg text-neutral-600">{title}</h1>
+					<Tile
+						className="grid animate-place-tile place-items-center gap-y-12 p-16 motion-reduce:animate-none"
+						thickness="amber"
+					>
+						<h1 className="font-bold text-base text-neutral-500">{title}</h1>
 						<div className="flex items-center gap-x-8">
-							<FaCrown className="size-20 text-yellow-500" />
-							<h2 className="font-bold text-yellow-700">優勝者</h2>
-							<FaCrown className="size-20 text-yellow-500" />
+							<FaCrown aria-hidden className="size-20 text-amber-500" />
+							<h2 className="carved-text font-bold text-lg text-lime-800">
+								優勝
+							</h2>
+							<FaCrown aria-hidden className="size-20 text-amber-500" />
 						</div>
 						<div className="flex flex-wrap justify-center gap-16">
 							{winners.map((winner) => {
@@ -81,17 +90,17 @@ export function GameFinalResult({
 											/>
 											{me && winner.userId === me.userId && (
 												<Badge
-													className="absolute -bottom-2/5 left-1/2 -translate-x-1/2"
-													color="primary"
+													className="absolute -bottom-12 left-1/2 -translate-x-1/2 ring-2 ring-cream-50"
+													variant="fill"
 												>
 													自分
 												</Badge>
 											)}
 										</div>
-										<p className="mt-20 font-bold text-sm">
-											{winner.playerName}
+										<p className="mt-14 font-bold text-sm">
+											{getDisplayName(winner.playerName)}
 										</p>
-										<p className="font-medium text-sm text-yellow-600">
+										<p className="font-bold text-lime-800 text-sm">
 											{winner.winCount}勝
 										</p>
 									</>
@@ -111,7 +120,7 @@ export function GameFinalResult({
 								);
 							})}
 						</div>
-					</section>
+					</Tile>
 				</div>
 
 				<aside className="flex items-center justify-center gap-x-12">
@@ -125,7 +134,7 @@ export function GameFinalResult({
 						フォロー
 					</a>
 					<button
-						className="flex h-28 items-center gap-x-8 rounded-full bg-cyan-400 pr-16 pl-12 font-bold text-white text-xs transition-opacity hover:opacity-80"
+						className="flex h-28 items-center gap-x-8 rounded-full bg-orange-700 pr-16 pl-12 font-bold text-white text-xs transition-colors hover:bg-orange-900"
 						onClick={share}
 						type="button"
 					>
@@ -136,20 +145,19 @@ export function GameFinalResult({
 
 				{/* Round History */}
 				<section className="grid gap-y-4">
-					<h2 className="font-bold text-neutral-700">ラウンド結果</h2>
+					<h2 className="font-bold text-lime-800">ラウンド結果</h2>
 					<div className="grid gap-y-12">
 						{rounds.map((round) => {
 							return (
-								<div
-									className="overflow-hidden rounded-xl border border-gray-200 bg-white"
-									key={round.roundNo}
-								>
+								<Tile className="overflow-hidden p-0" key={round.roundNo}>
 									{/* Round Header */}
-									<div className="flex items-center gap-x-12 border-gray-100 border-b bg-gray-50 px-16 py-8">
-										<span className="flex size-28 items-center justify-center rounded-full bg-green-600 font-bold text-white">
+									<div className="flex items-center gap-x-12 border-cream-200 border-b bg-cream-100/70 px-16 py-8">
+										<span className="flex size-28 items-center justify-center rounded-full bg-lime-800 font-display text-sm text-white">
 											{round.roundNo}
 										</span>
-										<p className="font-bold text-lg">{round.theme}</p>
+										<p className="font-bold text-base text-lime-800">
+											{round.theme}
+										</p>
 									</div>
 									{/* Round Content */}
 									<div className="grid gap-y-8 p-16">
@@ -165,7 +173,7 @@ export function GameFinalResult({
 														})}
 													/>
 													<p className="flex-1 text-xs md:flex-none">
-														{player.playerName}
+														{getDisplayName(player.playerName)}
 														{me && player.userId === me.userId && (
 															<span className="text-neutral-400">（自分）</span>
 														)}
@@ -177,8 +185,8 @@ export function GameFinalResult({
 													className={classNames(
 														"grid gap-y-4 rounded-lg px-12 py-8 md:flex md:items-center md:gap-x-16",
 														player.isWinner
-															? "border border-yellow-300 bg-yellow-50"
-															: "bg-gray-50",
+															? "border-2 border-amber-300 bg-amber-300/15"
+															: "bg-cream-100/60",
 													)}
 													key={player.id}
 												>
@@ -194,17 +202,19 @@ export function GameFinalResult({
 															playerInfo
 														)}
 														{player.isWinner && (
-															<FaCrown className="size-16 text-yellow-500 md:hidden" />
+															<FaCrown className="size-16 text-amber-500 md:hidden" />
 														)}
 													</div>
 													{player.isWinner && (
-														<FaCrown className="hidden size-16 text-yellow-500 md:block" />
+														<FaCrown className="hidden size-16 text-amber-500 md:block" />
 													)}
 													<div className="flex items-center gap-x-4 md:contents">
 														<p
 															className={classNames(
 																"flex-1 font-bold",
-																player.isWinner && "text-yellow-700",
+																player.isWinner
+																	? "text-lime-800"
+																	: "text-neutral-700",
 															)}
 														>
 															{player.submission}
@@ -231,7 +241,7 @@ export function GameFinalResult({
 											);
 										})}
 									</div>
-								</div>
+								</Tile>
 							);
 						})}
 					</div>

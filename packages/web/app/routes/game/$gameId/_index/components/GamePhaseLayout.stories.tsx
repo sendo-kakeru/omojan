@@ -25,15 +25,7 @@ export const Default: Story = {
 				<p className="text-neutral-600">メインコンテンツエリア</p>
 			</main>
 		),
-		nav: (
-			<GamePhaseNav
-				message="ゲームフェーズのメッセージ"
-				messageVariant="active"
-				roundNo={1}
-				timerCount={30}
-				timerProgress={100}
-			/>
-		),
+		nav: <GamePhaseNav roundNo={1} timerCount={30} timerProgress={100} />,
 	},
 	name: "基本レイアウト",
 };
@@ -58,15 +50,7 @@ export const ComplexContent: Story = {
 				</section>
 			</main>
 		),
-		nav: (
-			<GamePhaseNav
-				message="複雑なレイアウトの例"
-				messageVariant="inactive"
-				roundNo={2}
-				timerCount={15}
-				timerProgress={50}
-			/>
-		),
+		nav: <GamePhaseNav roundNo={2} timerCount={15} timerProgress={50} />,
 	},
 	name: "複雑なコンテンツ",
 };

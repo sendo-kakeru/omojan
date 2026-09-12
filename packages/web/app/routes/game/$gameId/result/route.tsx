@@ -22,7 +22,7 @@ export default function Page({
 
 	if (error) {
 		return (
-			<p className="py-16 text-center text-red-500">
+			<p className="py-16 text-center text-red-700">
 				ゲーム結果の取得に失敗しました
 			</p>
 		);

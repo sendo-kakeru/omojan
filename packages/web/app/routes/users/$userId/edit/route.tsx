@@ -9,9 +9,9 @@ import {
 import { useForm } from "@tanstack/react-form";
 import classNames from "classnames";
 import { useId, useRef, useState, useTransition } from "react";
-import { FaUser } from "react-icons/fa";
 import { FiCamera, FiChevronLeft } from "react-icons/fi";
 import { useNavigate } from "react-router";
+import { Avatar } from "~/components/Avatar";
 import { Button } from "~/components/button/Button";
 import { Footer } from "~/components/Footer";
 import { FieldItem } from "~/components/form/FieldItem";
@@ -156,6 +156,7 @@ function EditForm({ me }: { me: Me }) {
 			<div className="flex w-full items-center gap-x-8">
 				<button
 					aria-label="戻る"
+					className="-m-8 rounded-full p-8 text-neutral-500 transition-colors hover:bg-cream-100 hover:text-neutral-700"
 					onClick={() => void navigate(-1)}
 					type="button"
 				>
@@ -173,22 +174,20 @@ function EditForm({ me }: { me: Me }) {
 							onClick={() => fileInputRef.current?.click()}
 							type="button"
 						>
-							{image ? (
-								<img
-									alt={me.name}
-									className={classNames(
-										"size-96 rounded-full object-cover",
-										!isImageLoaded && "invisible",
-									)}
-									onLoad={() => setIsImageLoaded(true)}
-									src={buildImageUrl({
-										image,
-										size: PROFILE_IMAGE_DIMENSIONS,
-									})}
-								/>
-							) : (
-								<FaUser className="size-96 rounded-full bg-gray-300 p-16 text-gray-500" />
-							)}
+							<Avatar
+								className={classNames(image && !isImageLoaded && "invisible")}
+								name={me.name}
+								onLoad={() => setIsImageLoaded(true)}
+								size="XL"
+								src={
+									image
+										? buildImageUrl({
+												image,
+												size: PROFILE_IMAGE_DIMENSIONS,
+											})
+										: undefined
+								}
+							/>
 							<div className="absolute inset-0 grid place-items-center rounded-full bg-black/20">
 								{isUploading || !isImageLoaded ? (
 									<Spinner className="size-24 text-white" />

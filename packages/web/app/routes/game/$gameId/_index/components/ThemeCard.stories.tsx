@@ -25,7 +25,7 @@ export const Default: Story = {
 
 export const LongTheme: Story = {
 	args: {
-		theme: "プログラミング",
+		theme: "母さんが夜なべをして",
 	},
 	name: "お題カード（長いテーマ）",
 };

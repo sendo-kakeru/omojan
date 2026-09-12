@@ -1,8 +1,8 @@
 import type { FinishedRoom } from "@repo/db/model";
-import { FiChevronRight } from "react-icons/fi";
-import { Button } from "~/components/button/Button";
-import { RoomCard } from "./RoomCard";
-import { RoomCardSkeleton } from "./RoomCardSkeleton";
+import { SectionHeading, SectionMoreLink } from "~/components/SectionHeading";
+import { STAGGER_STEP_MS } from "~/libs/animation";
+import { FinishedRoomCard } from "./roomCard/FinishedRoomCard";
+import { FinishedRoomCardSkeleton } from "./roomCard/FinishedRoomCardSkeleton";
 
 export function FinishedRoomSection({
 	isLoading,
@@ -15,25 +15,14 @@ export function FinishedRoomSection({
 }) {
 	return (
 		<section className="grid gap-y-12">
-			<SectionHeader />
+			<SectionHeading
+				action={<SectionMoreLink to="/room/finished" />}
+				mark="歴"
+			>
+				最近のゲーム
+			</SectionHeading>
 			<FinishedRoomList error={error} isLoading={isLoading} rooms={rooms} />
 		</section>
-	);
-}
-
-function SectionHeader() {
-	return (
-		<div className="flex items-center justify-between">
-			<h2 className="font-bold">🏆 最近のゲーム</h2>
-			<Button
-				as="link"
-				rightIcon={<FiChevronRight className="size-16" />}
-				to="/room/finished"
-				variant="outline"
-			>
-				もっと見る
-			</Button>
-		</div>
 	);
 }
 
@@ -48,9 +37,9 @@ function FinishedRoomList({
 }) {
 	if (isLoading) {
 		return (
-			<div className="grid gap-y-8">
+			<div className="grid gap-y-12">
 				{Array.from({ length: 5 }).map((_, index) => (
-					<RoomCardSkeleton
+					<FinishedRoomCardSkeleton
 						// biome-ignore lint/suspicious/noArrayIndexKey: ローディングのため問題ない
 						key={index}
 						srText={index === 0 ? "最近のゲームを取得中" : undefined}
@@ -62,7 +51,7 @@ function FinishedRoomList({
 
 	if (error) {
 		return (
-			<p className="py-16 text-center text-red-400">
+			<p className="py-16 text-center text-orange-700 text-sm">
 				ゲーム履歴の取得に失敗しました
 			</p>
 		);
@@ -70,16 +59,29 @@ function FinishedRoomList({
 
 	if (!rooms || rooms.length === 0) {
 		return (
-			<p className="py-16 text-center text-neutral-500">
-				ゲームが行われていません
+			<p className="py-16 text-center text-neutral-500 text-sm">
+				まだゲームが行われていません
 			</p>
 		);
 	}
 
+	return <FinishedRoomListItems rooms={rooms} />;
+}
+
+/**
+ * 一覧に増えた部屋だけ登場演出(rise)が走る
+ */
+function FinishedRoomListItems({ rooms }: { rooms: FinishedRoom[] }) {
 	return (
-		<div className="grid gap-y-8">
-			{rooms.map((room) => (
-				<RoomCard key={room.gameId} room={room} status="finished" />
+		<div className="grid gap-y-12">
+			{rooms.map((room, index) => (
+				<div
+					className="animate-rise motion-reduce:animate-none"
+					key={room.gameId}
+					style={{ animationDelay: `${index * STAGGER_STEP_MS}ms` }}
+				>
+					<FinishedRoomCard room={room} />
+				</div>
 			))}
 		</div>
 	);
