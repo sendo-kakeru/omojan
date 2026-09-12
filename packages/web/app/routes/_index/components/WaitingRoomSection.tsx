@@ -1,17 +1,12 @@
 import type { WaitingRoom } from "@repo/db/model";
-import {
-	OFFICIAL_X_ID,
-	PROD_SITE_URL,
-	SITE_NAME,
-} from "@repo/shared/constants/config";
-import { FaXTwitter } from "react-icons/fa6";
-import { IoMdShare } from "react-icons/io";
-import { IoGameController } from "react-icons/io5";
-import { RxUpdate } from "react-icons/rx";
 import { Button } from "~/components/button/Button";
-import { useShare } from "~/hooks/useShare";
-import { RoomCard } from "./RoomCard";
-import { RoomCardSkeleton } from "./RoomCardSkeleton";
+import {
+	SectionHeading,
+	SectionRefreshButton,
+} from "~/components/SectionHeading";
+import { STAGGER_STEP_MS } from "~/libs/animation";
+import { WaitingRoomCard } from "./roomCard/WaitingRoomCard";
+import { WaitingRoomCardSkeleton } from "./roomCard/WaitingRoomCardSkeleton";
 
 export function WaitingRoomSection({
 	isLoading,
@@ -28,85 +23,19 @@ export function WaitingRoomSection({
 }) {
 	return (
 		<section className="grid gap-y-12">
-			<SectionHeader
-				count={rooms?.length}
+			<SectionHeading
+				action={<SectionRefreshButton onClick={onRefresh} />}
+				mark="卓"
+			>
+				募集中の部屋
+			</SectionHeading>
+			<WaitingRoomList
+				error={error}
 				isLoading={isLoading}
 				onCreateRoom={onCreateRoom}
-				onRefresh={onRefresh}
+				rooms={rooms}
 			/>
-			<WaitingRoomList error={error} isLoading={isLoading} rooms={rooms} />
 		</section>
-	);
-}
-
-function SectionHeader({
-	count,
-	isLoading,
-	onCreateRoom,
-	onRefresh,
-}: {
-	count?: number;
-	isLoading: boolean;
-	onCreateRoom: () => void;
-	onRefresh: () => void;
-}) {
-	const { share } = useShare({
-		text: "一緒に遊ぼう！",
-		title: SITE_NAME,
-		url: PROD_SITE_URL,
-	});
-
-	return (
-		<div className="flex items-end justify-between">
-			<div className="grid gap-y-40">
-				<div className="grid gap-y-6">
-					<div className="flex items-center gap-x-8">
-						<a
-							aria-label="公式X"
-							className="rounded-full bg-black p-6 text-white transition-colors hover:bg-gray-700"
-							href={`https://x.com/${OFFICIAL_X_ID}`}
-							rel="noopener noreferrer"
-							target="_blank"
-						>
-							<FaXTwitter className="size-20" />
-						</a>
-						<button
-							aria-label="友達に共有する"
-							className="rounded-full bg-cyan-400 p-6 text-white transition-colors hover:bg-cyan-500"
-							onClick={share}
-							type="button"
-						>
-							<IoMdShare className="size-20" />
-						</button>
-					</div>
-				</div>
-				<div className="flex items-center gap-x-8">
-					<h2 className="font-bold">🎮 募集中の部屋</h2>
-					<span className="text-neutral-500 text-xs sm:text-sm">
-						( {isLoading || count === undefined ? "読み込み中" : `${count}件`} )
-					</span>
-				</div>
-			</div>
-			<div className="flex flex-col gap-y-8 sm:flex-row sm:items-center sm:gap-x-8">
-				<Button
-					as="button"
-					className="ml-auto"
-					color="gray"
-					leftIcon={<RxUpdate />}
-					onClick={onRefresh}
-					variant="outline"
-				>
-					更新
-				</Button>
-				<Button
-					as="button"
-					leftIcon={<IoGameController />}
-					onClick={onCreateRoom}
-				>
-					部屋作成
-				</Button>
-			</div>
-		</div>
 	);
 }
 
@@ -114,38 +43,68 @@ function WaitingRoomList({
 	isLoading,
 	error,
 	rooms,
+	onCreateRoom,
 }: {
 	isLoading: boolean;
 	error?: Error;
 	rooms?: WaitingRoom[];
+	onCreateRoom: () => void;
 }) {
-	const isEmpty = !rooms || rooms.length === 0;
-
 	if (isLoading) {
-		return <RoomCardSkeleton srText="募集中の部屋を取得中" />;
+		return <WaitingRoomCardSkeleton srText="募集中の部屋を取得中" />;
 	}
 
-	if (error || isEmpty) {
+	if (error) {
 		return (
-			<div className="grid h-150 place-items-center rounded-lg border-2 border-gray-200 border-dashed bg-gray-50 p-24">
-				{error ? (
-					<p className="text-red-400">部屋の取得に失敗しました</p>
-				) : (
-					<p className="text-center text-neutral-500 text-sm sm:text-base">
-						現在募集している部屋はありません
-						<br />
-						部屋を作成してみましょう！
-					</p>
-				)}
+			<div className="grid place-items-center rounded-lg border-2 border-orange-600/30 border-dashed bg-orange-100/40 p-24">
+				<p className="font-bold text-orange-700 text-sm">
+					部屋の取得に失敗しました
+				</p>
 			</div>
 		);
 	}
 
+	if (!rooms || rooms.length === 0) {
+		return <EmptyTable onCreateRoom={onCreateRoom} />;
+	}
+
+	return <WaitingRoomListItems rooms={rooms} />;
+}
+
+/**
+ * 一覧に増えた部屋だけ登場演出(rise)が走る
+ */
+function WaitingRoomListItems({ rooms }: { rooms: WaitingRoom[] }) {
 	return (
-		<div className="grid gap-y-8">
-			{rooms.map((room) => (
-				<RoomCard key={room.gameId} room={room} status="waiting" />
+		<div className="grid gap-y-12">
+			{rooms.map((room, index) => (
+				<div
+					className="animate-rise motion-reduce:animate-none"
+					key={room.gameId}
+					style={{ animationDelay: `${index * STAGGER_STEP_MS}ms` }}
+				>
+					<WaitingRoomCard room={room} />
+				</div>
 			))}
+		</div>
+	);
+}
+
+/**
+ * 部屋が無いときの表示
+ */
+function EmptyTable({ onCreateRoom }: { onCreateRoom: () => void }) {
+	return (
+		<div className="grid place-items-center gap-y-16 rounded-2xl border-2 border-cream-300 border-dashed bg-cream-50/50 px-16 py-24">
+			<div className="grid gap-y-6 text-center">
+				<p className="font-bold text-lime-800 text-sm">
+					募集中の部屋はありません
+				</p>
+				<p className="text-neutral-500 text-xs">部屋を作成してみましょう！</p>
+			</div>
+			<Button as="button" color="primary" onClick={onCreateRoom}>
+				部屋をつくる
+			</Button>
 		</div>
 	);
 }

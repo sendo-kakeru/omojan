@@ -1,12 +1,13 @@
 import type { GamePlayerCard } from "@repo/db/model";
 import type { PlayerCardId } from "@repo/db/schema";
 import classNames from "classnames";
+import type { ReactNode } from "react";
+import { Tile } from "~/components/Tile";
 
 /**
  * プレイヤーの手札を表示するコンポーネント
  *
- * 画面下部に固定表示され、使用済み/未使用のスタイル分けと
- * オプションでオーバーレイ表示を行う
+ * 画面下部に固定表示され、使用済み/未使用のスタイル分けとオプションでオーバーレイ表示を行う
  */
 export function PlayerCardDisplay({
 	cards,
@@ -16,6 +17,8 @@ export function PlayerCardDisplay({
 	isConfirmed = false,
 	overlayMessage,
 	showPulse = false,
+	reactionBar,
+	className,
 }: {
 	/** プレイヤーの手札 */
 	cards: GamePlayerCard[];
@@ -31,59 +34,76 @@ export function PlayerCardDisplay({
 	overlayMessage?: string;
 	/** 未選択カードにパルスアニメーションを表示するか */
 	showPulse?: boolean;
+	reactionBar?: ReactNode;
+	className?: string;
 }) {
 	const isInteractive = !!onCardClick && !disabled;
 
 	return (
-		<section className="relative right-1/2 left-1/2 -mx-[50vw] w-screen border-t-2 border-t-gray-300 bg-white py-8 xs:pt-16 sm:py-24">
-			<div className="mx-auto flex max-w-800 flex-wrap gap-8 px-16">
+		<section
+			className={classNames(
+				"relative border-t-4 border-t-amber-500 bg-linear-to-b from-cream-50 to-cream-100 py-8 xs:py-12",
+				className,
+			)}
+		>
+			{reactionBar && (
+				// NOTE: 手札セクションの右肩を基点に、上方向へ出す。独立した固定要素に
+				// するとタイマーや手札と必ずどこかで重なるため。bottom-fullはrelativeな
+				// 祖先が要るので、その箱を持っているここで配置する
+				<div className="absolute right-12 bottom-full z-40 mb-8">
+					{reactionBar}
+				</div>
+			)}
+			<div className="mx-auto flex max-w-800 flex-wrap gap-6 px-16">
 				{cards.map((card) => {
 					const isSelected = selectedCardId === card.id;
+					const cardClassName = classNames(
+						"px-8 py-4 text-center font-bold text-xs xs:text-sm sm:text-base",
+						card.used
+							? "cursor-not-allowed text-neutral-400 opacity-60"
+							: "text-neutral-800",
+
+						isSelected && isConfirmed && "opacity-70",
+						!isSelected &&
+							!card.used &&
+							showPulse &&
+							// NOTE: box-shadowを動かすアニメーションはホバー時のbox-shadowより強く、点滅中はホバーしても厚みが増えず立体に見えないため止める
+							"animate-pulse-card hover:animate-none motion-reduce:animate-none",
+					);
+					const thickness = (() => {
+						if (card.used) return "cream";
+						if (isSelected) return "lime";
+						return "amber";
+					})();
 
 					if (isInteractive) {
 						return (
-							<button
-								className={classNames(
-									"flex rounded-md border px-8 py-4 text-center font-bold text-neutral-800 text-sm xs:text-base transition sm:text-lg",
-									card.used
-										? "cursor-not-allowed border-gray-300 bg-gray-200 opacity-50"
-										: isSelected && isConfirmed
-											? "border-green-500 bg-green-100 opacity-50"
-											: isSelected
-												? "border-green-400 bg-green-50 shadow-sm"
-												: showPulse
-													? "animate-pulse-card border-gray-200 bg-gray-100 hover:bg-green-50"
-													: "border-gray-200 bg-gray-100 hover:bg-green-50",
-								)}
+							<Tile
+								as="button"
+								className={cardClassName}
 								disabled={card.used || isConfirmed}
+								interactive={!card.used && !isConfirmed}
 								key={card.id}
 								onClick={() => onCardClick(card.id)}
-								type="button"
+								raised={isSelected && !isConfirmed}
+								thickness={thickness}
 							>
 								{card.word}
-							</button>
+							</Tile>
 						);
 					}
 
 					return (
-						<div
-							className={classNames(
-								"flex rounded-md border px-8 py-4 text-center font-bold text-sm xs:text-base sm:text-lg",
-								card.used
-									? "border-gray-300 bg-gray-200 text-neutral-400"
-									: "border-gray-200 bg-gray-100 text-neutral-800",
-							)}
-							key={card.id}
-						>
+						<Tile className={cardClassName} key={card.id} thickness={thickness}>
 							{card.word}
-						</div>
+						</Tile>
 					);
 				})}
 			</div>
 			{disabled && (
-				<div className="absolute inset-0 z-50 grid place-items-center bg-black/50">
+				<div className="absolute inset-0 z-50 grid place-items-center bg-lime-800/70">
 					{overlayMessage && (
-						<p className="text-center font-medium text-sm text-white">
+						<p className="text-center font-bold text-sm text-white">
 							{overlayMessage}
 						</p>
 					)}

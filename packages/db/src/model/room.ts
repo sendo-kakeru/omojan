@@ -53,7 +53,7 @@ export const roomPasswordSchema = pipe(
 );
 
 const roomPlayerSchema = object({
-	...pick(playerSchema, ["playerName", "seat"]).entries,
+	...pick(playerSchema, ["playerName", "isCpu"]).entries,
 	id: playerIdSchema,
 	image: nullable(userSchema.entries.image),
 	userId: nullable(playerSchema.entries.userId),

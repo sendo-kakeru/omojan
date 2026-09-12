@@ -313,6 +313,56 @@ describe("gameRoutes", () => {
 			expect(winnerIds).toContain(players[1]?.id);
 		});
 
+		test("ラウンド結果のプレイヤーが席順で返る", async () => {
+			const [game] = await db
+				.insert(gameTable)
+				.values({
+					isPrivate: false,
+					password: null,
+					status: "finished",
+					timeLimit: 30,
+					title: "席順ゲーム",
+				})
+				.returning();
+
+			// 席順と異なる順序で登録し、レスポンスが席順に並び替えられることを確認する
+			for (const data of [
+				{ playerName: "Player3", seat: 3 as PlayerSeat },
+				{ playerName: "Player1", seat: 1 as PlayerSeat },
+				{ playerName: "Player4", seat: 4 as PlayerSeat },
+				{ playerName: "Player2", seat: 2 as PlayerSeat },
+			]) {
+				await db.insert(playerTable).values({
+					gameId: game.id,
+					gameTokenHash: faker.string.alphanumeric(64),
+					userId: null,
+					...data,
+				});
+			}
+
+			const [round] = await db
+				.insert(roundTable)
+				.values({
+					gameId: game.id,
+					roundNo: 1 as RoundNo,
+				})
+				.returning();
+			await db.insert(roundThemeTable).values({
+				roundId: round.id,
+				text: "テスト",
+			});
+
+			const response = await mockHonoClient.v1.games[":gameId"].result.$get({
+				param: { gameId: game.id },
+			});
+
+			expect(response.status).toBe(200);
+			const body = await response.json();
+			expect(
+				body.data?.rounds[0]?.players.map((player) => player.playerName),
+			).toEqual(["Player1", "Player2", "Player3", "Player4"]);
+		});
+
 		test("存在しないゲームIDの場合、404を返す", async () => {
 			const response = await mockHonoClient.v1.games[":gameId"].result.$get({
 				param: { gameId: faker.string.uuid() as GameId },

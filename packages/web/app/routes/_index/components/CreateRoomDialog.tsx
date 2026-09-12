@@ -217,7 +217,7 @@ export function CreateRoomDialog({
 						}}
 					</form.Field>
 				</div>
-				<div className="grid grid-cols-2 gap-x-12">
+				<div className="grid grid-cols-2 gap-x-12 pb-12">
 					<Button as="button" color="gray" onClick={() => setIsOpen(false)}>
 						キャンセル
 					</Button>
@@ -230,6 +230,7 @@ export function CreateRoomDialog({
 						{(state) => (
 							<Button
 								as="button"
+								color="primary"
 								disabled={!state.canSubmit || isPending}
 								leftIcon={
 									isPending ? <Spinner className="size-16" /> : undefined

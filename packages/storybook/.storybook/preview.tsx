@@ -7,25 +7,31 @@ import { MeContext } from "../../web/app/context/me/provider";
 import "../style.css";
 
 const decorator: Decorator = (Story, context) => {
-	return (
-		<BrowserRouter>
-			<MeContext
-				value={{
-					isLoading: false,
-					me: context.parameters.authed ? MOCK_ME : null,
-					mutate: async () => {},
-				}}
-			>
-				<TooltipProvider>
-					<ToastProvider>
-						<div className="font-[Inter] text-neutral-800">
-							<Story />
-						</div>
-					</ToastProvider>
-				</TooltipProvider>
-			</MeContext>
-		</BrowserRouter>
+	const providers = (
+		<MeContext
+			value={{
+				isLoading: false,
+				me: context.parameters.authed ? MOCK_ME : null,
+				mutate: async () => {},
+			}}
+		>
+			<TooltipProvider>
+				<ToastProvider>
+					<div className="font-sans text-neutral-800">
+						<Story />
+					</div>
+				</ToastProvider>
+			</TooltipProvider>
+		</MeContext>
 	);
+
+	// useNavigation などデータルーター前提のフックを使うコンポーネントはストーリー側で RouterProvider を用意する。
+	// Router の入れ子は例外になるため、BrowserRouter で包まない
+	if (context.parameters.ownRouter) {
+		return providers;
+	}
+
+	return <BrowserRouter>{providers}</BrowserRouter>;
 };
 
 const preview: Preview = {

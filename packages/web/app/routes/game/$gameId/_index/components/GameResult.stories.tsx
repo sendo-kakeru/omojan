@@ -103,6 +103,10 @@ export const OtherPlayerWinner: Story = {
 		data: {
 			game: {
 				...baseGameData,
+				players: mockPlayersWithSubmissions.map((p, i) => ({
+					...p,
+					voteCount: [1, 2, 1, 0][i] ?? 0,
+				})),
 				winnerPlayerIds: [createPlayerId("2")],
 			},
 			mePlayer: baseMePlayer,
@@ -118,6 +122,10 @@ export const MultipleWinners: Story = {
 		data: {
 			game: {
 				...baseGameData,
+				players: mockPlayersWithSubmissions.map((p, i) => ({
+					...p,
+					voteCount: [2, 1, 2, 0][i] ?? 0,
+				})),
 				winnerPlayerIds: [createPlayerId("1"), createPlayerId("3")],
 			},
 			mePlayer: baseMePlayer,

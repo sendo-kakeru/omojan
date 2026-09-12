@@ -14,9 +14,9 @@ const PLAYER_2 = "player_2" as PlayerId;
 const PLAYER_3 = "player_3" as PlayerId;
 const PLAYER_4 = "player_4" as PlayerId;
 
-const USER_2 = "user_2" as UserId;
-const USER_3 = "user_3" as UserId;
-const USER_4 = "user_4" as UserId;
+const USER_2 = "00000000-0000-0000-0000-0000000000a2" as UserId;
+const USER_3 = "00000000-0000-0000-0000-0000000000a3" as UserId;
+const USER_4 = "00000000-0000-0000-0000-0000000000a4" as UserId;
 
 const mockResult: GameResultResponseBody = {
 	rounds: [

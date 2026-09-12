@@ -7,10 +7,7 @@ import {
  * Avatar サイズ → Retina 2x リサイズパラメータ
  * Tailwind --spacing: 1px 基準: S=24px, M=32px, L=40px → 各2倍
  */
-export const AVATAR_IMAGE_DIMENSIONS: Record<
-	"S" | "M" | "L",
-	{ h: number; w: number }
-> = {
+export const AVATAR_IMAGE_DIMENSIONS = {
 	L: { h: 80, w: 80 },
 	M: { h: 64, w: 64 },
 	S: { h: 48, w: 48 },

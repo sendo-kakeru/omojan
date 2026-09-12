@@ -8,9 +8,18 @@
 	 */
 	--breakpoint-xs: 24rem;
 
-	--animate-toast-hide: toast-hide 200ms ease-in;
-	--animate-toast-slide-in: toast-slide-in 150ms cubic-bezier(0.16, 1, 0.3, 1);
-	--animate-toast-swipe-out: toast-swipe-out 100ms ease-out;
+	--font-display: "Dela Gothic One", "Zen Maru Gothic", sans-serif;
+	--font-sans: "Zen Maru Gothic", ui-sans-serif, system-ui, sans-serif;
+
+	--color-cream-50: #fffaf0;
+	--color-cream-100: #fff0d8;
+	--color-cream-200: #f2e4c8;
+	--color-cream-300: #ddc9a0;
+	--color-cream-400: #b7a379;
+
+	--shadow-tile-drop: 0 10px 16px -6px rgb(90 60 10 / 0.28);
+	--shadow-tile-drop-lift: 0 20px 30px -10px rgb(90 60 10 / 0.35);
+	--shadow-tile-drop-press: 0 3px 6px -3px rgb(90 60 10 / 0.3);
 
 	@keyframes toast-hide {
 		from {
@@ -37,8 +46,9 @@
 		}
 	}
 
-	/* リアクションフロートアップアニメーション */
-	--animate-reaction-float: reaction-float 3s linear forwards;
+	--animate-toast-hide: toast-hide 200ms ease-in;
+	--animate-toast-slide-in: toast-slide-in 150ms cubic-bezier(0.16, 1, 0.3, 1);
+	--animate-toast-swipe-out: toast-swipe-out 100ms ease-out;
 
 	@keyframes reaction-float {
 		0% {
@@ -59,12 +69,22 @@
 		}
 	}
 
-	/* パルスアニメーション */
-	--animate-pulse-slot: pulse-slot 1.5s ease-in-out infinite;
-	--animate-pulse-card: pulse-card 1.5s ease-in-out infinite;
+	/* リアクションフロートアップアニメーション */
+	--animate-reaction-float: reaction-float 3s linear forwards;
 
-	/* GlobalNavigationProgress */
-	--animate-progress-slide: progress-slide 1.2s ease-in-out infinite;
+	@keyframes glow {
+		0%,
+		100% {
+			box-shadow:
+				0 4px 0 var(--tile-thickness, var(--color-cream-300)),
+				0 0 0 0 rgb(255 210 48 / 0.7);
+		}
+		50% {
+			box-shadow:
+				0 4px 0 var(--tile-thickness, var(--color-cream-300)),
+				0 0 26px 8px rgb(255 210 48 / 0.6);
+		}
+	}
 
 	@keyframes place-card {
 		0% {
@@ -72,18 +92,18 @@
 			transform: scale(2.5) translateY(-16px);
 			filter: blur(2px);
 		}
-		50% {
+		21% {
 			opacity: 1;
-			transform: scale(0.92) translateY(2px);
 			filter: blur(0);
 		}
+		50% {
+			transform: scale(0.86) translateY(2.7px);
+		}
 		70% {
-			transform: scale(1.06) translateY(-1px);
-			filter: blur(0);
+			transform: scale(1.07) translateY(-1px);
 		}
 		85% {
 			transform: scale(0.98);
-			filter: blur(0);
 		}
 		100% {
 			opacity: 1;
@@ -92,25 +112,42 @@
 		}
 	}
 
-	@keyframes place-card-ring {
+	/*
+	 * 牌を場に叩きつける演出
+	 */
+	--animate-place-tile: place-card 0.5s cubic-bezier(0.2, 0.9, 0.2, 1) both;
+
+	/*
+	 * 勝者の牌: 場に置かれた後、少し間を置いて光って知らせる
+	 * NOTE: 同じ要素に動きと発光を別クラスとして指定するとCSSが後勝ちし、片方しか発火しないため1つの変数にまとめている
+	 */
+	--animate-place-tile-winner:
+		place-card 0.5s cubic-bezier(0.2, 0.9, 0.2, 1) both, glow 1.6s ease-in-out 3;
+
+	@keyframes turn-banner {
 		0% {
-			opacity: 0.6;
-			transform: scale(0.8);
+			opacity: 0;
+			transform: scale(0.7);
+		}
+		15% {
+			opacity: 1;
+			transform: scale(1.08);
+		}
+		25% {
+			transform: scale(1);
+		}
+		75% {
+			opacity: 1;
+			transform: scale(1);
 		}
 		100% {
 			opacity: 0;
-			transform: scale(1.8);
+			transform: scale(0.92);
 		}
 	}
 
-	@keyframes place-card-flash {
-		0% {
-			opacity: 1;
-		}
-		100% {
-			opacity: 0;
-		}
-	}
+	/* 自分の番を告知するバナー */
+	--animate-turn-banner: turn-banner 1.6s cubic-bezier(0.2, 0.9, 0.2, 1) both;
 
 	@keyframes progress-slide {
 		0% {
@@ -121,42 +158,195 @@
 		}
 	}
 
-	@keyframes pulse-slot {
-		0%,
-		100% {
-			border-color: oklch(0.792 0.209 151.711); /* green-400 */
-			box-shadow: 0 0 0 0 oklch(0.792 0.209 151.711 / 0.3);
-		}
-		50% {
-			border-color: oklch(0.723 0.219 149.579); /* green-500 */
-			box-shadow: 0 0 12px 4px oklch(0.723 0.219 149.579 / 0.2);
-		}
-	}
-
-	@keyframes pulse-card {
-		0%,
-		100% {
-			box-shadow: 0 0 0 0 oklch(0.792 0.209 151.711 / 0.4);
-		}
-		50% {
-			box-shadow: 0 0 16px 6px oklch(0.723 0.219 149.579 / 0.35);
-		}
-	}
+	/* GlobalNavigationProgress */
+	--animate-progress-slide: progress-slide 1.2s ease-in-out infinite;
 
 	@keyframes button-pop {
 		0% {
 			opacity: 0;
 			transform: translate(-50%, 50%) scale(0);
 		}
+		/* 不透明化は前半で終える */
+		32% {
+			opacity: 1;
+		}
+		/* 行き過ぎてから戻る */
 		50% {
-			transform: translate(-50%, -75%) scale(1.15);
+			transform: translate(-50%, -87%) scale(1.26);
 		}
 		70% {
-			transform: translate(-50%, -75%) scale(0.97);
+			transform: translate(-50%, -75%) scale(0.95);
 		}
 		100% {
 			opacity: 1;
 			transform: translate(-50%, -75%) scale(1);
 		}
 	}
+
+	/* ポップアップ（吹き出し等）。跳ねを二重にかけない理由は place-tile のNOTE参照 */
+	--animate-pop: button-pop 0.35s cubic-bezier(0.2, 0.9, 0.2, 1) both;
+
+	/* 牌を置くスロットの「ここに置ける」表示 */
+	@keyframes pulse-slot {
+		0%,
+		100% {
+			border-color: var(--color-orange-600);
+			box-shadow: 0 0 0 0 rgb(245 73 0 / 0.35);
+		}
+		50% {
+			border-color: var(--color-orange-700);
+			box-shadow: 0 0 14px 5px rgb(245 73 0 / 0.28);
+		}
+	}
+
+	/* 選べる牌の「押してほしい」表示 */
+	@keyframes pulse-card {
+		0%,
+		100% {
+			box-shadow:
+				0 4px 0 var(--tile-thickness, var(--color-cream-300)),
+				0 0 0 0 rgb(245 73 0 / 0.5);
+		}
+		50% {
+			box-shadow:
+				0 4px 0 var(--tile-thickness, var(--color-cream-300)),
+				0 0 16px 6px rgb(245 73 0 / 0.45);
+		}
+	}
+
+	/* パルスアニメーション */
+	--animate-pulse-slot: pulse-slot 1.5s ease-in-out infinite;
+	--animate-pulse-card: pulse-card 1.5s ease-in-out infinite;
+
+	@keyframes rise {
+		0% {
+			opacity: 0;
+			transform: translateY(14px);
+		}
+		100% {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	/* 要素が下から立ち上がる登場演出（スタッガードリビール用） */
+	--animate-rise: rise 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+
+	@keyframes tile-float {
+		0%,
+		100% {
+			transform: translateY(0) rotate(var(--tile-rotate, 0deg));
+		}
+		50% {
+			transform: translateY(-6px) rotate(var(--tile-rotate, 0deg));
+		}
+	}
+
+	/* 要素がゆったり上下にフワフワする */
+	--animate-tile-float: tile-float 5s ease-in-out infinite;
+
+	@keyframes shine {
+		0%,
+		55% {
+			transform: translateX(-120%) skewX(-18deg);
+		}
+		85%,
+		100% {
+			transform: translateX(320%) skewX(-18deg);
+		}
+	}
+
+	/* ボタンの光沢。無限に繰り返すと安っぽく見えるかもしれないため数回で止める */
+	--animate-shine: shine 3.2s ease-in-out 3 forwards;
+
+	@keyframes confetti {
+		0% {
+			opacity: 1;
+			transform: translateY(0) rotate(0deg);
+		}
+		100% {
+			opacity: 0;
+			transform: translateY(70vh) rotate(720deg);
+		}
+	}
+
+	/* 紙吹雪（最終結果） */
+	--animate-confetti: confetti 2.6s cubic-bezier(0.3, 0.6, 0.4, 1) forwards;
+}
+
+/**
+ * 卓の面をイメージした共通背景
+ */
+@utility bg-table {
+	background-color: var(--color-cream-100);
+	background-image: radial-gradient(
+		120% 80% at 50% -20%,
+		rgb(255 255 255 / 0.9),
+		transparent 62%
+	);
+}
+
+/**
+ * 麻雀牌
+ * 上面のハイライトと下辺の厚み（box-shadow）で実体感を出す。
+ * 厚みの色は --tile-thickness で差し替えられる（象牙／山吹／苔緑）
+ */
+@utility tile {
+	background-color: var(--color-cream-50);
+	background-image: linear-gradient(
+		180deg,
+		rgb(255 255 255 / 0.95),
+		rgb(255 255 255 / 0) 45%
+	);
+	border: 1px solid var(--color-cream-200);
+	border-radius: 8px;
+	box-shadow:
+		0 4px 0 var(--tile-thickness, var(--color-cream-300)),
+		var(--shadow-tile-drop);
+}
+
+/** 牌が持ち上がった状態（ホバー） */
+@utility tile-lift {
+	box-shadow:
+		0 8px 0 var(--tile-thickness, var(--color-cream-300)),
+		var(--shadow-tile-drop-lift);
+}
+
+/** 牌が沈み込んだ状態（押下） */
+@utility tile-press {
+	box-shadow:
+		0 1px 0 var(--tile-thickness, var(--color-cream-300)),
+		var(--shadow-tile-drop-press);
+}
+
+/**
+ * 牌に彫られた文字
+ * 上に白のハイライト、下に影を置いて彫り込みを表現する
+ */
+@utility carved-text {
+	text-shadow:
+		0 1px 0 rgb(255 255 255 / 0.9),
+		0 -1px 1px rgb(90 60 10 / 0.25);
+}
+
+/**
+ * 立体テキスト（ホームKV）
+ * キービジュアルと同じく、朱の文字に白フチと山吹の影を重ねる。
+ *
+ * NOTE: 白フチを text-stroke + paint-order で作るとChromeでストロークが描画されない。
+ * そのため標準の text-shadow を8方向に敷いて縁取りを作っている。
+ */
+@utility embossed-text {
+	color: var(--color-orange-600);
+	text-shadow:
+		0.06em 0 0 #fff,
+		-0.06em 0 0 #fff,
+		0 0.06em 0 #fff,
+		0 -0.06em 0 #fff,
+		0.045em 0.045em 0 #fff,
+		-0.045em 0.045em 0 #fff,
+		0.045em -0.045em 0 #fff,
+		-0.045em -0.045em 0 #fff,
+		0 0.14em 0 var(--color-amber-500),
+		0 0.2em 0.2em rgb(90 60 10 / 0.25);
 }

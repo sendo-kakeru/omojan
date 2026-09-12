@@ -11,22 +11,26 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof Badge>;
 
-const COLORS = [
-	"primary",
-	"danger",
-	"black",
-	"gray",
-	"warning",
-] as const satisfies ComponentProps<typeof Badge>["color"][];
+const COLORS = ["primary", "cream"] as const satisfies ComponentProps<
+	typeof Badge
+>["color"][];
+
+const VARIANTS = ["soft", "fill"] as const satisfies ComponentProps<
+	typeof Badge
+>["variant"][];
 
 export const ColorList: Story = {
 	args: {},
 	render: () => (
-		<div className="flex flex-wrap gap-8">
-			{COLORS.map((color) => (
-				<Badge color={color} key={color}>
-					{color}
-				</Badge>
+		<div className="grid w-fit gap-8">
+			{VARIANTS.map((variant) => (
+				<div className="flex flex-wrap gap-8" key={variant}>
+					{COLORS.map((color) => (
+						<Badge color={color} key={color} variant={variant}>
+							{variant} / {color}
+						</Badge>
+					))}
+				</div>
 			))}
 		</div>
 	),

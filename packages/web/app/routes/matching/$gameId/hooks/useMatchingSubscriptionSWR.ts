@@ -6,7 +6,7 @@ import {
 	matchingServerMessageSchema,
 } from "@repo/db/model";
 import type { GameId } from "@repo/db/schema";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import useSWRSubscription, {
 	type SWRSubscriptionOptions,
@@ -34,7 +34,6 @@ export function useMatchingSubscriptionSWR({
 	const navigate = useNavigate();
 	const wsRef = useRef<WebSocket | null>(null);
 	const [isHost, setIsHost] = useState(false);
-	const [transitionCount, setTransitionCount] = useState<number | null>(null);
 
 	const url = getUrl({ gameId });
 
@@ -72,10 +71,13 @@ export function useMatchingSubscriptionSWR({
 							break;
 						}
 						case "PARTICIPANTS": {
-							if (message.participants.length === 4) {
-								setTransitionCount(3);
-							}
 							next(null, message.participants);
+							if (message.participants.length === 4) {
+								void navigate(`/game/${uuid58Encode(gameId)}`, {
+									replace: true,
+								});
+								ws.close(1000, "マッチングが完了しました。");
+							}
 							break;
 						}
 						case "ME_PLAYER": {
@@ -136,22 +138,6 @@ export function useMatchingSubscriptionSWR({
 		},
 	);
 
-	useEffect(() => {
-		if (transitionCount === null) return;
-
-		if (transitionCount <= 0) {
-			void navigate(`/game/${uuid58Encode(gameId)}`, { replace: true });
-			wsRef.current?.close(1000, "マッチングが完了しました。");
-			return;
-		}
-
-		const timer = window.setTimeout(() => {
-			setTransitionCount((prev) => (prev === null ? null : prev - 1));
-		}, 1000);
-
-		return () => clearTimeout(timer);
-	}, [transitionCount, gameId, navigate]);
-
 	const sendExit = (): void => {
 		const ws = wsRef.current;
 		if (!ws || ws.readyState !== WebSocket.OPEN) {
@@ -175,7 +161,6 @@ export function useMatchingSubscriptionSWR({
 		isHost,
 		sendExit,
 		sendStart,
-		transitionCount,
 		wsRef,
 	};
 }

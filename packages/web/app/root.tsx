@@ -51,7 +51,7 @@ export const meta: Route.MetaFunction = () => [
 	{ content: SITE_DESCRIPTION, name: "twitter:description" },
 	{ content: OGP_IMAGE, name: "twitter:image" },
 	// Theme
-	{ content: "#fef9c3", name: "theme-color" },
+	{ content: "#fff0d8", name: "theme-color" },
 ];
 
 export const links: Route.LinksFunction = () => [
@@ -62,7 +62,8 @@ export const links: Route.LinksFunction = () => [
 		rel: "preconnect",
 	},
 	{
-		href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
+		// 見出しは Dela Gothic One（牌の彫り文字）、本文は Zen Maru Gothic（丸ゴシック）
+		href: "https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Maru+Gothic:wght@400;700&display=swap",
 		rel: "stylesheet",
 	},
 	{ href: "/favicon.ico", rel: "icon", sizes: "48x48" },
@@ -101,7 +102,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 				<Meta />
 				<Links />
 			</head>
-			<body className="overflow-x-hidden bg-yellow-50 font-[Inter] text-neutral-800">
+			<body className="overflow-x-hidden bg-table font-sans text-neutral-800">
 				<noscript>
 					<iframe
 						height="0"
@@ -147,7 +148,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
 		return (
 			<div className="flex min-h-svh flex-col items-center justify-center px-16">
 				<div className="grid max-w-600 gap-y-16">
-					<h1 className="font-bold text-2xl text-red-500">
+					<h1 className="font-bold text-2xl text-red-700">
 						開発環境エラー: {error.message}
 					</h1>
 					{error.stack && (

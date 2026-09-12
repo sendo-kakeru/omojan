@@ -1,7 +1,7 @@
 import type { Api } from "@repo/api";
 import type { FinishedRoom, WaitingRoom } from "@repo/db/model";
 import { hc } from "hono/client";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { Footer } from "~/components/Footer";
 import { Header } from "~/components/Header";
 import { cloudflareContext } from "~/libs/cloudflareContext";
@@ -9,6 +9,9 @@ import type { Route } from "./+types/route";
 import { ActiveRoomBadge } from "./components/ActiveRoomBadge";
 import { CreateRoomDialog } from "./components/CreateRoomDialog";
 import { FinishedRoomSection } from "./components/FinishedRoomSection";
+import { HeroCreateRoomButton } from "./components/HeroCreateRoomButton";
+import { HomeTitle } from "./components/HomeTitle";
+import { SocialLinks } from "./components/SocialLinks";
 import { WaitingRoomSection } from "./components/WaitingRoomSection";
 import { useRoomCountSWR } from "./hooks/useRoomCountSWR";
 import { useRoomListSWR } from "./hooks/useRoomListSWR";
@@ -49,6 +52,7 @@ export async function loader({ context }: Route.LoaderArgs) {
 
 export default function Page({ loaderData }: Route.ComponentProps) {
 	const [isOpen, setIsOpen] = useState(false);
+	const socialLabelId = useId();
 
 	// 募集中は全件取得
 	const {
@@ -87,31 +91,45 @@ export default function Page({ loaderData }: Route.ComponentProps) {
 	return (
 		<>
 			<Header />
-			<main className="grid gap-y-12 pt-16 pb-40">
-				<h1 className="sr-only">おもじゃんオンライン</h1>
-				<ActiveRoomBadge
-					count={activeCountData?.count ?? 0}
-					isLoading={activeCountLoading}
-				/>
-				<div className="grid gap-y-24">
-					<WaitingRoomSection
-						error={waitingError}
-						isLoading={waitingLoading}
-						onCreateRoom={() => setIsOpen(true)}
-						onRefresh={() => {
-							waitingMutate();
-							activeCountMutate();
-							finishedMutate();
-						}}
-						rooms={waitingData?.items as WaitingRoom[] | undefined}
-					/>
+			<main className="grid gap-y-32 pb-40">
+				<section className="grid animate-rise place-items-center gap-y-24 pt-16 pb-8 text-center sm:pt-24">
+					<HomeTitle />
+					<div className="grid place-items-center gap-y-16 sm:gap-y-20">
+						<ActiveRoomBadge
+							count={activeCountData?.count ?? 0}
+							isLoading={activeCountLoading}
+						/>
+						<HeroCreateRoomButton onClick={() => setIsOpen(true)} />
+					</div>
+				</section>
 
-					<FinishedRoomSection
-						error={finishedError}
-						isLoading={finishedLoading}
-						rooms={finishedData?.items as FinishedRoom[] | undefined}
-					/>
-				</div>
+				<WaitingRoomSection
+					error={waitingError}
+					isLoading={waitingLoading}
+					onCreateRoom={() => setIsOpen(true)}
+					onRefresh={() => {
+						waitingMutate();
+						activeCountMutate();
+						finishedMutate();
+					}}
+					rooms={waitingData?.items as WaitingRoom[] | undefined}
+				/>
+
+				<aside
+					aria-labelledby={socialLabelId}
+					className="grid place-items-center gap-y-12 pt-8"
+				>
+					<p className="font-bold text-lime-800 text-sm" id={socialLabelId}>
+						友達をさそって遊ぼう
+					</p>
+					<SocialLinks />
+				</aside>
+
+				<FinishedRoomSection
+					error={finishedError}
+					isLoading={finishedLoading}
+					rooms={finishedData?.items as FinishedRoom[] | undefined}
+				/>
 			</main>
 			<Footer />
 			<CreateRoomDialog isOpen={isOpen} setIsOpen={setIsOpen} />

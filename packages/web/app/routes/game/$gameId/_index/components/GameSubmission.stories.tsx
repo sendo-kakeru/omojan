@@ -13,7 +13,6 @@ import {
 } from "~/storybook/decorators";
 import { GameSubmission } from "./GameSubmission";
 
-// eslint-disable-next-line @typescript-eslint/no-empty-function
 const noop = async () => {};
 
 // モックデータ生成ヘルパー
@@ -139,7 +138,7 @@ export const Round4StartLongTheme: Story = {
 				...baseGameData,
 				roundNo: 4 as const,
 				submitted: null,
-				theme: "プログラミング",
+				theme: "母さんが夜なべをして",
 			},
 			mePlayer: {
 				...baseMePlayer,

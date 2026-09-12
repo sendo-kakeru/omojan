@@ -6,6 +6,7 @@ import { IoIosLock, IoMdShare } from "react-icons/io";
 import { Button } from "~/components/button/Button";
 import { Separator } from "~/components/Separator";
 import { Spinner } from "~/components/Spinner";
+import { Tile } from "~/components/Tile";
 import { UserLabel } from "~/components/user/UserLabel";
 import { useClipboard } from "~/hooks/useClipboard";
 import { useShare } from "~/hooks/useShare";
@@ -14,7 +15,6 @@ export function MatchingPresenter({
 	roomMeta,
 	participants,
 	isHost,
-	transitionCount,
 	isStarting,
 	onExit,
 	onStart,
@@ -22,7 +22,6 @@ export function MatchingPresenter({
 	roomMeta: Pick<Room, "title" | "isPrivate" | "password" | "timeLimit">;
 	participants: MatchingParticipant[];
 	isHost: boolean;
-	transitionCount: number | null;
 	isStarting: boolean;
 	onExit: () => void;
 	onStart: () => void;
@@ -34,59 +33,52 @@ export function MatchingPresenter({
 		url: PROD_SITE_URL,
 	});
 	return (
-		<main className="relative my-24 grid gap-y-16 rounded-lg border border-gray-200 bg-white p-16">
-			{transitionCount !== null && (
-				<div className="absolute inset-0 z-10 grid place-items-center bg-gray-200/70 backdrop-blur-sm">
-					<div className="grid gap-y-16 text-center text-neutral-700">
-						<Spinner className="mx-auto size-32" />
-						<p className="font-semibold">
-							参加者が集まりました。
-							<br />
-							{transitionCount}秒後にゲーム画面へ移動します。
-						</p>
-					</div>
+		<main className="relative my-24 grid gap-y-16">
+			{/* タイトル・基本情報 */}
+			<div className="grid gap-y-8 px-4">
+				<div className="flex items-center justify-between gap-x-8">
+					<h1 className="font-bold text-lime-800 text-xl">{roomMeta.title}</h1>
+					{roomMeta.isPrivate && (
+						<div className="rounded-full border border-amber-300 bg-amber-300/20 p-4">
+							<IoIosLock
+								aria-label="プライベート部屋"
+								className="size-24 text-amber-500"
+								role="img"
+							/>
+						</div>
+					)}
 				</div>
-			)}
-			{/* メタセクション */}
-			<section className="grid gap-y-16 py-16">
-				<div className="grid gap-y-8">
-					<div className="flex justify-between">
-						<h1 className="font-bold text-xl">{roomMeta.title}</h1>
-						{roomMeta.isPrivate && (
-							<div className="rounded-full border border-gray-300 bg-gray-100 p-4">
-								<IoIosLock
-									aria-label="プライベート部屋"
-									className="size-24 text-green-400"
-									role="img"
-								/>
-							</div>
-						)}
-					</div>
-					<div className="flex items-center gap-x-8 text-neutral-500">
-						<FaRegClock className="size-20" />
-						<p>制限時間: {roomMeta.timeLimit}秒</p>
-					</div>
+				<div className="flex items-center gap-x-8 text-neutral-500">
+					<FaRegClock className="size-20" />
+					<p>制限時間: {roomMeta.timeLimit}秒</p>
 				</div>
+			</div>
+
+			{/* 操作カード */}
+			<Tile className="grid gap-y-16 p-16" thickness="amber">
 				{roomMeta.isPrivate && (
-					<div className="mx-auto grid w-full max-w-400 gap-y-12 rounded-lg border border-green-300 bg-green-50 p-8 md:p-16">
+					<div className="mx-auto grid w-full max-w-400 gap-y-12 rounded-lg border-2 border-amber-300 border-dashed bg-amber-300/10 p-8 md:p-16">
 						<div className="flex items-center justify-between gap-x-8 px-8">
 							<div className="flex items-center gap-x-16">
 								<p className="break-keep font-semibold text-sm md:text-base">
 									パスワード
 								</p>
-								<p className="w-fit rounded-lg border border-green-300 bg-white p-8 px-24 font-mono text-xl">
+								<Tile
+									className="w-fit p-8 px-24 font-display text-lg text-lime-800 tracking-widest"
+									thickness="amber"
+								>
 									{roomMeta.password}
-								</p>
+								</Tile>
 							</div>
 							<Button
 								as="button"
-								color="gray"
+								color="cream"
 								isIconOnly
 								onClick={copy}
 								variant="outline"
 							>
 								{isCopied ? (
-									<FaCheck className="text-green-400" />
+									<FaCheck className="text-lime-800" />
 								) : (
 									<FaRegCopy />
 								)}
@@ -97,25 +89,12 @@ export function MatchingPresenter({
 						</p>
 					</div>
 				)}
-				<div className="mx-auto flex w-full flex-col items-center justify-center gap-8 sm:flex-row sm:gap-x-12">
-					<Button
-						as="button"
-						className="w-full max-w-280"
-						color="danger"
-						onClick={onExit}
-						variant="outline"
-					>
-						退出する
-					</Button>
+				<div className="mx-auto grid w-full max-w-280 gap-y-12">
 					{isHost && (
 						<Button
 							as="button"
-							className="w-full max-w-280"
-							disabled={
-								isStarting ||
-								participants.length >= 4 ||
-								transitionCount !== null
-							}
+							color="primary"
+							disabled={isStarting || participants.length >= 4}
 							leftIcon={
 								isStarting ? <Spinner className="size-16" /> : undefined
 							}
@@ -124,32 +103,39 @@ export function MatchingPresenter({
 							今すぐ開始
 						</Button>
 					)}
+					<Button as="button" color="danger" onClick={onExit} variant="outline">
+						退出する
+					</Button>
 				</div>
-			</section>
+			</Tile>
 
 			<Separator />
 
 			<section className="grid gap-y-16">
 				<div className="flex items-center justify-between gap-x-8">
-					<h2 className="font-bold">参加者</h2>
-					<button
+					<h2 className="font-bold text-lime-800">参加者</h2>
+					<Button
 						aria-label="友達に共有する"
-						className="flex items-center gap-x-6 rounded-full bg-cyan-400 px-16 py-6 font-medium text-sm text-white transition-colors hover:bg-cyan-500"
+						as="button"
+						color="primary"
+						leftIcon={<IoMdShare className="size-18" />}
 						onClick={share}
-						type="button"
+						size="S"
 					>
-						<IoMdShare className="size-18" />
 						友達を誘う
-					</button>
+					</Button>
 				</div>
 				<p className="text-neutral-500 text-sm">
 					4人揃ったらゲームが開始されます。
 					{isHost && "「今すぐ開始」で募集中のプレイヤーをCPUで開始します。"}
 				</p>
-				<ul className="grid gap-y-12">
+				<ul className="grid gap-y-8">
 					{[1, 2, 3, 4].map((seat) => (
 						<li key={seat}>
-							<MatchingParticipantLabel participant={participants[seat - 1]} />
+							<MatchingParticipantLabel
+								participant={participants[seat - 1]}
+								seat={seat}
+							/>
 						</li>
 					))}
 				</ul>
@@ -160,25 +146,38 @@ export function MatchingPresenter({
 
 function MatchingParticipantLabel({
 	participant,
+	seat,
 }: {
 	participant?: MatchingParticipant;
+	seat: number;
 }) {
+	const seatNumber = (
+		<span className="grid size-24 shrink-0 place-items-center rounded-full bg-cream-100 font-display text-[10px] text-neutral-500">
+			{seat}
+		</span>
+	);
+
 	if (participant) {
 		return (
-			<UserLabel
-				user={{
-					image: participant.image ?? undefined,
-					name: participant.playerName,
-				}}
-			/>
+			<Tile className="flex animate-rise items-center gap-x-12 px-12 py-8">
+				{seatNumber}
+				<UserLabel
+					textProps={{ className: "font-bold text-lime-800" }}
+					user={{
+						image: participant.image ?? undefined,
+						name: participant.playerName,
+					}}
+				/>
+			</Tile>
 		);
 	}
 
 	return (
-		<div className="flex items-center gap-x-8">
-			<div className="size-32 rounded-full border border-gray-300 border-dashed" />
+		<div className="flex items-center gap-x-12 rounded-lg border-2 border-cream-300 border-dashed px-12 py-8">
+			{seatNumber}
+			<div className="size-32 shrink-0 rounded-full border border-cream-300 border-dashed" />
 			<p className="overflow-hidden text-ellipsis whitespace-nowrap text-neutral-400 text-sm">
-				募集中
+				募集中...
 			</p>
 		</div>
 	);

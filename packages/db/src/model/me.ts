@@ -2,16 +2,12 @@ import { createInsertSchema } from "drizzle-valibot";
 import {
 	type BrandSymbol,
 	type InferOutput,
-	maxLength,
-	minLength,
 	nullable,
 	object,
 	optional,
 	pick,
-	pipe,
-	string,
 } from "valibot";
-import { userIdSchema, userSchema, userTable } from "../schema";
+import { userIdSchema, userNameSchema, userSchema, userTable } from "../schema";
 
 export type { BrandSymbol };
 
@@ -26,11 +22,15 @@ export const getMeResponseBodySchema = nullable(meSchema);
 export type GetMeResponseBody = InferOutput<typeof getMeResponseBodySchema>;
 
 // create
-export const createMeRequestBodySchema = pick(createInsertSchema(userTable), [
-	"email",
-	"name",
-	"image",
-]);
+/**
+ * NOTE: name に userNameSchema を当て直している。createInsertSchema が生成する
+ * name は text().notNull() 由来の素の string で、空文字や空白だけでも通ってしまう。
+ * サインアップは外部プロバイダから来た値をそのまま入れる経路なので、ここで弾く
+ */
+export const createMeRequestBodySchema = pick(
+	createInsertSchema(userTable, { name: userNameSchema }),
+	["email", "name", "image"],
+);
 export type CreateMeRequestBody = InferOutput<typeof createMeRequestBodySchema>;
 export const createMeResponseBodySchema = meSchema;
 export type CreateMeResponseBody = InferOutput<
@@ -40,11 +40,7 @@ export type CreateMeResponseBody = InferOutput<
 // update
 export const meProfileSchema = object({
 	image: userSchema.entries.image,
-	name: pipe(
-		string(),
-		minLength(1, "名前を入力してください"),
-		maxLength(50, "名前は50文字以下で入力してください"),
-	),
+	name: userNameSchema,
 });
 
 export const updateMeRequestBodySchema = object({
