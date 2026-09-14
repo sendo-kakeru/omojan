@@ -47,7 +47,7 @@ async function createRoom({
 	).toBeVisible();
 	await clickUntilVisible({
 		target: page.getByLabel("部屋名"),
-		trigger: page.getByRole("button", { name: "部屋作成" }),
+		trigger: page.getByRole("button", { name: "部屋をつくる" }),
 	});
 	await page.getByLabel("部屋名").fill(roomTitle);
 	await page.getByLabel("プレイヤー名").fill(playerName);
@@ -168,19 +168,7 @@ test("参加者3人の部屋に入るとマッチング完了後にゲーム画�
 
 	await joinRoom({ page, playerName: playerD, roomTitle });
 
-	// 4人揃うとカウントダウンが始まりゲーム画面へ遷移する
-	// タイミングによってはカウントダウンメッセージ表示をスキップして直接ゲーム画面に遷移することがある
-	const countdownMessage = page.getByText(
-		/参加者が集まりました。\d+\s*秒後にゲーム画面へ移動します。/,
-	);
-
-	// カウントダウンメッセージまたはゲーム画面遷移を待つ
-	await expect(async () => {
-		const hasCountdown = await countdownMessage.isVisible();
-		const isOnGamePage = page.url().includes(`/game/${gameId}`);
-		expect(hasCountdown || isOnGamePage).toBe(true);
-	}).toPass({ timeout: 15_000 });
-
+	// 4人揃うとゲーム画面へ遷移する
 	// 全プレイヤーがゲーム画面へ遷移することを確認
 	// waitUntil: "commit"を使用して、URLが変更されたら次へ進む（load待ちによるタイムアウトを防ぐ）
 	await Promise.all([
