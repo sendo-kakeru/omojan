@@ -1,8 +1,8 @@
 import type { GameId } from "@repo/db/schema";
 import { buildNoindexMeta } from "~/libs/meta";
 import { decodeUuid58Param } from "~/libs/uuid58";
-import { GameFinalResult } from "~/routes/game/$gameId/_index/components/GameFinalResult";
 import type { Route } from "./+types/route";
+import { GameFinalResult } from "./components/GameFinalResult";
 import { GameResultSkeleton } from "./components/GameResultSkeleton";
 import { useGameResultSWR } from "./hooks/useGameResultSWR";
 
