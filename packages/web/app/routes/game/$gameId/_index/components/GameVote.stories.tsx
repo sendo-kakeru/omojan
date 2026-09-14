@@ -1,5 +1,5 @@
 import type { GameServerVoteMessage } from "@repo/db/model";
-import type { PlayerCardId, PlayerId, PlayerSeat } from "@repo/db/schema";
+import type { PlayerCardId, PlayerId } from "@repo/db/schema";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
 	gameScreenDecorator,
@@ -17,7 +17,6 @@ const mockPlayersWithSubmissions = [
 		id: createPlayerId("1"),
 		image: null,
 		playerName: "プレイヤー1",
-		seat: 1 as PlayerSeat,
 		submission: { position: "prefix" as const, text: "激辛" },
 		winCount: 0,
 	},
@@ -25,7 +24,6 @@ const mockPlayersWithSubmissions = [
 		id: createPlayerId("2"),
 		image: null,
 		playerName: "プレイヤー2",
-		seat: 2 as PlayerSeat,
 		submission: { position: "suffix" as const, text: "究極" },
 		winCount: 1,
 	},
@@ -33,7 +31,6 @@ const mockPlayersWithSubmissions = [
 		id: createPlayerId("3"),
 		image: null,
 		playerName: "プレイヤー3",
-		seat: 3 as PlayerSeat,
 		submission: { position: "prefix" as const, text: "おふくろ" },
 		winCount: 0,
 	},
@@ -41,7 +38,6 @@ const mockPlayersWithSubmissions = [
 		id: createPlayerId("4"),
 		image: null,
 		playerName: "プレイヤー4",
-		seat: 4 as PlayerSeat,
 		submission: { position: "suffix" as const, text: "禁断" },
 		winCount: 2,
 	},
@@ -70,6 +66,9 @@ const baseMePlayer = {
 };
 
 const meta: Meta<typeof GameVote> = {
+	args: {
+		sendVote: async () => {},
+	},
 	component: GameVote,
 	decorators: [gameScreenDecorator],
 	parameters: gameScreenParameters,

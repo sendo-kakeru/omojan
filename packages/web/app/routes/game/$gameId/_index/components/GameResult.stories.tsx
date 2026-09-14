@@ -1,5 +1,5 @@
 import type { GameServerResultMessage } from "@repo/db/model";
-import type { PlayerCardId, PlayerId, PlayerSeat } from "@repo/db/schema";
+import type { PlayerCardId, PlayerId } from "@repo/db/schema";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
 	gameScreenDecorator,
@@ -17,7 +17,6 @@ const mockPlayersWithSubmissions = [
 		id: createPlayerId("1"),
 		image: null,
 		playerName: "プレイヤー1",
-		seat: 1 as PlayerSeat,
 		submission: { position: "prefix" as const, text: "激辛" },
 		voteCount: 2,
 		winCount: 1,
@@ -26,7 +25,6 @@ const mockPlayersWithSubmissions = [
 		id: createPlayerId("2"),
 		image: null,
 		playerName: "プレイヤー2",
-		seat: 2 as PlayerSeat,
 		submission: { position: "suffix" as const, text: "究極" },
 		voteCount: 1,
 		winCount: 0,
@@ -35,7 +33,6 @@ const mockPlayersWithSubmissions = [
 		id: createPlayerId("3"),
 		image: null,
 		playerName: "プレイヤー3",
-		seat: 3 as PlayerSeat,
 		submission: { position: "prefix" as const, text: "おふくろ" },
 		voteCount: 1,
 		winCount: 0,
@@ -44,7 +41,6 @@ const mockPlayersWithSubmissions = [
 		id: createPlayerId("4"),
 		image: null,
 		playerName: "プレイヤー4",
-		seat: 4 as PlayerSeat,
 		submission: { position: "suffix" as const, text: "禁断" },
 		voteCount: 0,
 		winCount: 0,

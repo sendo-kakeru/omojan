@@ -63,6 +63,7 @@ const TIMING = {
 type PlayerState = GamePlayerItem & {
 	cards: GamePlayerCard[];
 	isCpu: Player["isCpu"];
+	seat: Player["seat"];
 };
 
 /** 永続化するゲーム状態の型 */
@@ -568,7 +569,6 @@ export class GameDurableObject extends DurableObject<Env> {
 							id: p.id,
 							image: p.image,
 							playerName: p.playerName,
-							seat: p.seat,
 							submission: null,
 							winCount: p.winCount,
 						})),
@@ -603,7 +603,6 @@ export class GameDurableObject extends DurableObject<Env> {
 							id: p.id,
 							image: p.image,
 							playerName: p.playerName,
-							seat: p.seat,
 							submission: p.submission,
 							winCount: p.winCount,
 						})),
@@ -737,7 +736,6 @@ export class GameDurableObject extends DurableObject<Env> {
 							id: p.id,
 							image: p.image,
 							playerName: p.playerName,
-							seat: p.seat,
 							submission: p.submission,
 							winCount: p.winCount,
 						})),
@@ -791,7 +789,6 @@ export class GameDurableObject extends DurableObject<Env> {
 							id: p.id,
 							image: p.image,
 							playerName: p.playerName,
-							seat: p.seat,
 							submission: p.submission,
 							voteCount: playerVoteCounts.get(p.id) ?? 0,
 							winCount: p.winCount,
@@ -831,7 +828,6 @@ export class GameDurableObject extends DurableObject<Env> {
 							id: p.id,
 							image: p.image,
 							playerName: p.playerName,
-							seat: p.seat,
 							submission: p.submission,
 							winCount: p.winCount,
 						})),
@@ -1249,7 +1245,6 @@ export class GameDurableObject extends DurableObject<Env> {
 				id: p.id,
 				image: p.image,
 				playerName: p.playerName,
-				seat: p.seat,
 				submission: p.submission,
 				winCount: p.winCount,
 			})),

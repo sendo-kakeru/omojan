@@ -4,7 +4,7 @@ import type {
 	GameServerTurnEndMessage,
 	GameServerTurnStartMessage,
 } from "@repo/db/model";
-import type { PlayerCardId, PlayerId, PlayerSeat } from "@repo/db/schema";
+import type { PlayerCardId, PlayerId } from "@repo/db/schema";
 import { WORDS } from "@repo/shared/constants/words";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
@@ -25,7 +25,6 @@ const mockPlayers = [
 		id: createPlayerId("1"),
 		image: null,
 		playerName: "プレイヤー1",
-		seat: 1 as PlayerSeat,
 		submission: null,
 		winCount: 0,
 	},
@@ -33,7 +32,6 @@ const mockPlayers = [
 		id: createPlayerId("2"),
 		image: null,
 		playerName: "プレイヤー2",
-		seat: 2 as PlayerSeat,
 		submission: null,
 		winCount: 1,
 	},
@@ -41,7 +39,6 @@ const mockPlayers = [
 		id: createPlayerId("3"),
 		image: null,
 		playerName: "プレイヤー3",
-		seat: 3 as PlayerSeat,
 		submission: null,
 		winCount: 0,
 	},
@@ -49,7 +46,6 @@ const mockPlayers = [
 		id: createPlayerId("4"),
 		image: null,
 		playerName: "プレイヤー4",
-		seat: 4 as PlayerSeat,
 		submission: null,
 		winCount: 2,
 	},

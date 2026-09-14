@@ -520,7 +520,6 @@ export class RoomService {
 			// 参加中のplayer取得
 			const participatingPlayers = await tx
 				.select({
-					id: playerTable.id,
 					seat: playerTable.seat,
 					userId: playerTable.userId,
 				})
