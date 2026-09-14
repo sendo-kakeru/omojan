@@ -35,7 +35,6 @@ export const gameTable = sqliteTable(
 		title: text("title").notNull(),
 	},
 	(table) => [
-		index("game_status_idx").on(table.status),
 		index("game_status_updated_at_idx").on(table.status, table.updatedAt),
 	],
 );
