@@ -17,7 +17,7 @@ export function ReactionBar({
 	visible: boolean;
 }) {
 	const lastSentAtRef = useRef(0);
-	const [open, setOpen] = useState(true);
+	const [open, setOpen] = useState(false);
 
 	const handleClick = (emoji: ReactionEmoji): void => {
 		const now = Date.now();
