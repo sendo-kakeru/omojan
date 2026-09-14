@@ -3,6 +3,7 @@ import type {
 	GameServerVoteMessage,
 } from "@repo/db/model";
 import type { PlayerId } from "@repo/db/schema";
+import { VOTE_TIMEOUT_MS } from "@repo/shared/constants/game";
 import classNames from "classnames";
 import type { ReactNode } from "react";
 import { useEffect, useState, useTransition } from "react";
@@ -41,7 +42,7 @@ export function GameVote({
 	const { count, progress, start: startCountdown } = useCountdown();
 
 	useEffect(() => {
-		startCountdown(15);
+		startCountdown(VOTE_TIMEOUT_MS / 1000);
 	}, [startCountdown]);
 
 	const getStatusText = (): string => {

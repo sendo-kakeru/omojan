@@ -26,6 +26,10 @@ import {
 	type RoundTheme,
 	type Submission,
 } from "@repo/db/schema";
+import {
+	RESULT_DISPLAY_MS,
+	VOTE_TIMEOUT_MS,
+} from "@repo/shared/constants/game";
 import { and, eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import pRetry from "p-retry";
@@ -48,11 +52,11 @@ const TIMING = {
 	/** ラウンド開始オーバーレイ表示時間 */
 	OVERLAY_DISPLAY_MS: 2_000,
 	/** 結果表示時間 */
-	RESULT_DISPLAY_MS: 6_000,
+	RESULT_DISPLAY_MS,
 	/** 状態遷移間の待機時間 */
 	TRANSITION_DELAY_MS: 1_000,
 	/** 投票タイムアウト時間 */
-	VOTE_TIMEOUT_MS: 15_000,
+	VOTE_TIMEOUT_MS,
 } as const;
 
 /** DurableObject内部で使用するプレイヤー情報（GamePlayerItemを拡張） */
