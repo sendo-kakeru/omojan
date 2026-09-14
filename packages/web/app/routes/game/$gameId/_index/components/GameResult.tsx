@@ -130,7 +130,7 @@ export function GameResult({
 
 				<PlayerCardDisplay
 					cards={mePlayer.playerCards}
-					className="-mx-16 w-[calc(100%+32px)]"
+					className="mx-[calc(50%-50vw)] w-screen"
 					reactionBar={reactionBar}
 				/>
 			</main>

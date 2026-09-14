@@ -40,15 +40,15 @@ export function PlayerCardDisplay({
 				className,
 			)}
 		>
-			{reactionBar && (
-				// NOTE: 手札セクションの右肩を基点に、上方向へ出す。独立した固定要素に
-				// するとタイマーや手札と必ずどこかで重なるため。bottom-fullはrelativeな
-				// 祖先が要るので、その箱を持っているここで配置する
-				<div className="absolute right-12 bottom-full z-40 mb-8">
-					{reactionBar}
-				</div>
-			)}
-			<div className="mx-auto flex max-w-800 flex-wrap gap-6 px-16">
+			<div className="relative mx-auto flex max-w-800 flex-wrap gap-6 px-16">
+				{reactionBar && (
+					// NOTE: 手札の右肩を基点に、上方向へ出す。独立した固定要素にすると
+					// タイマーや手札と必ずどこかで重なるため。bottom-fullはrelativeな
+					// 祖先が要るので、その箱を持っているここで配置する
+					<div className="absolute right-16 bottom-full z-40 mb-8">
+						{reactionBar}
+					</div>
+				)}
 				{cards.map((card) => {
 					const isSelected = selectedCardId === card.id;
 					const cardClassName = classNames(

@@ -314,7 +314,7 @@ export function GameSubmission({
 					<div className={classNames(isActivePhase && "relative z-30")}>
 						<PlayerCardDisplay
 							cards={mePlayer.playerCards}
-							className="-mx-16 w-[calc(100%+32px)]"
+							className="mx-[calc(50%-50vw)] w-screen"
 							isConfirmed={isConfirmed}
 							onCardClick={isMyTurn ? handleCardClick : undefined}
 							reactionBar={reactionBar}
