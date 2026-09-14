@@ -7,37 +7,31 @@ import { Tile } from "~/components/Tile";
 /**
  * プレイヤーの手札を表示するコンポーネント
  *
- * 画面下部に固定表示され、使用済み/未使用のスタイル分けとオプションでオーバーレイ表示を行う
+ * 画面下部に固定表示され、使用済み/未使用のスタイル分けを行う
  */
 export function PlayerCardDisplay({
 	cards,
-	disabled = false,
 	onCardClick,
 	selectedCardId,
 	isConfirmed = false,
-	overlayMessage,
 	showPulse = false,
 	reactionBar,
 	className,
 }: {
 	/** プレイヤーの手札 */
 	cards: GamePlayerCard[];
-	/** 無効化オーバーレイを表示するか */
-	disabled?: boolean;
 	/** カードがクリック可能な場合のハンドラ */
 	onCardClick?: (cardId: PlayerCardId) => void;
 	/** 選択中のカードID */
 	selectedCardId?: PlayerCardId | null;
 	/** 確定済みかどうか（選択後の状態を変えるため） */
 	isConfirmed?: boolean;
-	/** オーバーレイ上に表示するメッセージ */
-	overlayMessage?: string;
 	/** 未選択カードにパルスアニメーションを表示するか */
 	showPulse?: boolean;
 	reactionBar?: ReactNode;
 	className?: string;
 }) {
-	const isInteractive = !!onCardClick && !disabled;
+	const isInteractive = !!onCardClick;
 
 	return (
 		<section
@@ -100,15 +94,6 @@ export function PlayerCardDisplay({
 					);
 				})}
 			</div>
-			{disabled && (
-				<div className="absolute inset-0 z-50 grid place-items-center bg-lime-800/70">
-					{overlayMessage && (
-						<p className="text-center font-bold text-sm text-white">
-							{overlayMessage}
-						</p>
-					)}
-				</div>
-			)}
 		</section>
 	);
 }

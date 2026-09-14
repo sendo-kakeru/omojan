@@ -45,6 +45,7 @@ export class GameService {
 			players: (GamePlayerItem & {
 				cards: GamePlayerCard[];
 				isCpu: boolean;
+				seat: PlayerSeat;
 			})[];
 		}
 	> {
@@ -199,6 +200,7 @@ export class GameService {
 				players: (GamePlayerItem & {
 					cards: GamePlayerCard[];
 					isCpu: boolean;
+					seat: PlayerSeat;
 				})[];
 			};
 		});
@@ -607,9 +609,9 @@ export class GameService {
 			.where(inArray(submissionTable.roundId, roundIds));
 
 		// 提出に紐づくカード（テキスト）を取得
-		const submissionIds = submissions
-			.map((submission) => submission.submissionId)
-			.filter((id) => id !== null);
+		const submissionIds = submissions.map(
+			(submission) => submission.submissionId,
+		);
 		const cards = await this.db
 			.select({
 				submissionId: playerCardTable.submissionId,
@@ -729,6 +731,7 @@ export class GameService {
 			players: (GamePlayerItem & {
 				cards: GamePlayerCard[];
 				isCpu: boolean;
+				seat: PlayerSeat;
 			})[];
 		}
 	> {

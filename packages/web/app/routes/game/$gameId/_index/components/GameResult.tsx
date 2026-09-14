@@ -1,4 +1,5 @@
 import type { GameServerResultMessage } from "@repo/db/model";
+import { RESULT_DISPLAY_MS } from "@repo/shared/constants/game";
 import classNames from "classnames";
 import type { ReactNode } from "react";
 import { useEffect } from "react";
@@ -24,7 +25,7 @@ export function GameResult({
 	const { count, progress, start: startCountdown } = useCountdown();
 
 	useEffect(() => {
-		startCountdown(6);
+		startCountdown(RESULT_DISPLAY_MS / 1000);
 	}, [startCountdown]);
 
 	// 得票数の多い順に並べる

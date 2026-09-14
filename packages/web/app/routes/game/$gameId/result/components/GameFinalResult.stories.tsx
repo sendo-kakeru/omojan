@@ -2,12 +2,12 @@ import type { GameResultResponseBody } from "@repo/db/model";
 import type { PlayerId, UserId } from "@repo/db/schema";
 import { MOCK_ME } from "@repo/mock/model";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { GameResultSkeleton } from "~/routes/game/$gameId/result/components/GameResultSkeleton";
 import {
 	gameScreenDecorator,
 	gameScreenParameters,
 } from "~/storybook/decorators";
 import { GameFinalResult } from "./GameFinalResult";
+import { GameResultSkeleton } from "./GameResultSkeleton";
 
 const PLAYER_1 = "player_1" as PlayerId;
 const PLAYER_2 = "player_2" as PlayerId;

@@ -26,6 +26,10 @@ import {
 	type RoundTheme,
 	type Submission,
 } from "@repo/db/schema";
+import {
+	RESULT_DISPLAY_MS,
+	VOTE_TIMEOUT_MS,
+} from "@repo/shared/constants/game";
 import { and, eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import pRetry from "p-retry";
@@ -48,17 +52,18 @@ const TIMING = {
 	/** ラウンド開始オーバーレイ表示時間 */
 	OVERLAY_DISPLAY_MS: 2_000,
 	/** 結果表示時間 */
-	RESULT_DISPLAY_MS: 6_000,
+	RESULT_DISPLAY_MS,
 	/** 状態遷移間の待機時間 */
 	TRANSITION_DELAY_MS: 1_000,
 	/** 投票タイムアウト時間 */
-	VOTE_TIMEOUT_MS: 15_000,
+	VOTE_TIMEOUT_MS,
 } as const;
 
 /** DurableObject内部で使用するプレイヤー情報（GamePlayerItemを拡張） */
 type PlayerState = GamePlayerItem & {
 	cards: GamePlayerCard[];
 	isCpu: Player["isCpu"];
+	seat: Player["seat"];
 };
 
 /** 永続化するゲーム状態の型 */
@@ -564,7 +569,6 @@ export class GameDurableObject extends DurableObject<Env> {
 							id: p.id,
 							image: p.image,
 							playerName: p.playerName,
-							seat: p.seat,
 							submission: null,
 							winCount: p.winCount,
 						})),
@@ -599,7 +603,6 @@ export class GameDurableObject extends DurableObject<Env> {
 							id: p.id,
 							image: p.image,
 							playerName: p.playerName,
-							seat: p.seat,
 							submission: p.submission,
 							winCount: p.winCount,
 						})),
@@ -733,7 +736,6 @@ export class GameDurableObject extends DurableObject<Env> {
 							id: p.id,
 							image: p.image,
 							playerName: p.playerName,
-							seat: p.seat,
 							submission: p.submission,
 							winCount: p.winCount,
 						})),
@@ -787,7 +789,6 @@ export class GameDurableObject extends DurableObject<Env> {
 							id: p.id,
 							image: p.image,
 							playerName: p.playerName,
-							seat: p.seat,
 							submission: p.submission,
 							voteCount: playerVoteCounts.get(p.id) ?? 0,
 							winCount: p.winCount,
@@ -827,7 +828,6 @@ export class GameDurableObject extends DurableObject<Env> {
 							id: p.id,
 							image: p.image,
 							playerName: p.playerName,
-							seat: p.seat,
 							submission: p.submission,
 							winCount: p.winCount,
 						})),
@@ -1245,7 +1245,6 @@ export class GameDurableObject extends DurableObject<Env> {
 				id: p.id,
 				image: p.image,
 				playerName: p.playerName,
-				seat: p.seat,
 				submission: p.submission,
 				winCount: p.winCount,
 			})),

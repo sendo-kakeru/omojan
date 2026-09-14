@@ -55,30 +55,12 @@ export const Default: Story = {
 	name: "基本表示",
 };
 
-// 無効化状態（オーバーレイ付き）
-export const Disabled: Story = {
-	args: {
-		cards: mockCards,
-		disabled: true,
-	},
-	name: "無効化状態",
-};
-
 // 使用済みカードあり
 export const WithUsedCards: Story = {
 	args: {
 		cards: mockCardsWithUsed,
 	},
 	name: "使用済みカードあり",
-};
-
-// 使用済みカード+無効化
-export const WithUsedCardsDisabled: Story = {
-	args: {
-		cards: mockCardsWithUsed,
-		disabled: true,
-	},
-	name: "使用済み+無効化",
 };
 
 // インタラクティブ（選択可能）
