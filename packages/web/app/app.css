@@ -149,6 +149,62 @@
 	/* 自分の番を告知するバナー */
 	--animate-turn-banner: turn-banner 1.6s cubic-bezier(0.2, 0.9, 0.2, 1) both;
 
+	@keyframes turn-banner-fade {
+		0%,
+		70% {
+			opacity: 1;
+		}
+		100% {
+			opacity: 0;
+		}
+	}
+
+	/*
+	 * 自分の番を告知するバナー
+	 * NOTE: animate-noneにすると出たままになるため、拡大縮小だけを外す
+	 */
+	--animate-turn-banner-fade: turn-banner-fade 1.6s ease-out both;
+
+	@keyframes round-banner {
+		0% {
+			opacity: 0;
+			transform: scale(0.7);
+		}
+		15% {
+			opacity: 1;
+			transform: scale(1.08);
+		}
+		25% {
+			transform: scale(1);
+		}
+		70% {
+			opacity: 1;
+			transform: scale(1);
+		}
+		100% {
+			opacity: 0;
+			transform: scale(0.92);
+		}
+	}
+
+	/*
+	 * ラウンド開始を告知するバナー
+	 */
+	--animate-round-banner: round-banner 1.2s cubic-bezier(0.2, 0.9, 0.2, 1) both;
+
+	@keyframes round-scrim {
+		0%,
+		55% {
+			opacity: 1;
+		}
+		100% {
+			opacity: 0;
+		}
+	}
+
+	/* ラウンド開始バナーの背景の暗幕。バナーが消えるのに合わせて盤面を明るく戻す */
+	--animate-round-scrim: round-scrim 1.4s ease-out both;
+
 	@keyframes progress-slide {
 		0% {
 			transform: translateX(-100%);

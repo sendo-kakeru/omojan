@@ -28,6 +28,7 @@ import {
 } from "@repo/db/schema";
 import {
 	RESULT_DISPLAY_MS,
+	ROUND_START_DISPLAY_MS,
 	VOTE_TIMEOUT_MS,
 } from "@repo/shared/constants/game";
 import { and, eq } from "drizzle-orm";
@@ -49,10 +50,10 @@ const REACTION_RATE_LIMIT_MS = 300 as const;
 const TIMING = {
 	/** 初期接続待機時間 */
 	INITIAL_WAIT_MS: 10_000,
-	/** ラウンド開始オーバーレイ表示時間 */
-	OVERLAY_DISPLAY_MS: 2_000,
 	/** 結果表示時間 */
 	RESULT_DISPLAY_MS,
+	/** ラウンド開始の合図の表示時間 */
+	ROUND_START_DISPLAY_MS,
 	/** 状態遷移間の待機時間 */
 	TRANSITION_DELAY_MS: 1_000,
 	/** 投票タイムアウト時間 */
@@ -411,8 +412,10 @@ export class GameDurableObject extends DurableObject<Env> {
 			// ソケットが見つからない場合はスキップ（fetch()でsendCurrentStateToPlayer()が呼ばれる）
 			await this.broadcastRoundStart();
 
-			// 2秒後にTURN_STARTを送信（開始オーバーレイ表示用の待機）
-			await this.ctx.storage.setAlarm(Date.now() + TIMING.OVERLAY_DISPLAY_MS);
+			// ラウンド開始の合図を見せてからTURN_STARTを送信する
+			await this.ctx.storage.setAlarm(
+				Date.now() + TIMING.ROUND_START_DISPLAY_MS,
+			);
 		} catch (error) {
 			console.error("ゲーム開始処理に失敗しました:", error);
 			// エラー時は異常終了処理を実行
@@ -1132,9 +1135,9 @@ export class GameDurableObject extends DurableObject<Env> {
 		// ROUND_STARTを送信
 		await this.broadcastRoundStart();
 
-		// 2秒後にTURN_STARTを送信（開始オーバーレイ表示用の待機）
+		// ラウンド開始の合図を見せてからTURN_STARTを送信する
 		this.state = "START_PENDING";
-		await this.ctx.storage.setAlarm(Date.now() + TIMING.OVERLAY_DISPLAY_MS);
+		await this.ctx.storage.setAlarm(Date.now() + TIMING.ROUND_START_DISPLAY_MS);
 	}
 
 	/**

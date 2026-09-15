@@ -10,7 +10,6 @@ import { Avatar } from "~/components/Avatar";
 import { Badge } from "~/components/Badge";
 import { Separator } from "~/components/Separator";
 import { Spinner } from "~/components/Spinner";
-import { Tile } from "~/components/Tile";
 import { useCountdown } from "~/hooks/useCountdown";
 import { getDisplayName } from "~/libs/displayName";
 import { AVATAR_IMAGE_DIMENSIONS, buildImageUrl } from "~/libs/image";
@@ -48,9 +47,6 @@ export function GameSubmission({
 		position: Position;
 		text: PlayerCard["text"];
 	} | null>(null);
-	// 自分の番になった瞬間だけ、画面中央に一瞬バナーを表示する
-	const [showMyTurnBanner, setShowMyTurnBanner] = useState(false);
-
 	const selectedCard = mePlayer.playerCards.find(
 		(card) => card.id === selectedCardId,
 	);
@@ -69,13 +65,6 @@ export function GameSubmission({
 			startCountdown(game.timeLimit);
 		}
 	}, [data.type, game.timeLimit, startCountdown]);
-
-	useEffect(() => {
-		if (data.type !== "TURN_START" || !isMyTurn) return;
-		setShowMyTurnBanner(true);
-		const timer = setTimeout(() => setShowMyTurnBanner(false), 1600);
-		return () => clearTimeout(timer);
-	}, [data.type, isMyTurn]);
 
 	// プレイヤーの組み合わせ文字列を取得
 	const getPlayerCombination = (playerId: PlayerId): string | null => {
@@ -97,8 +86,12 @@ export function GameSubmission({
 		});
 	};
 
+	// 自分の番の合図を描画するか
+	// NOTE: 表示も非表示もアニメーションが持つので状態は持たない。
+	const showMyTurnBanner = isMyTurn && !isStarting;
+
 	// 操作フェーズの判定
-	const isActivePhase = isMyTurn && !isConfirmed;
+	const isActivePhase = isMyTurn && !isConfirmed && !isStarting;
 
 	// 確定済みの提出情報（自分 or 他プレイヤー）
 	const resolvedSubmission = (() => {
@@ -124,7 +117,9 @@ export function GameSubmission({
 
 	// ナビバーに表示する自分の番かどうかのメッセージ
 	const getStatusText = (): string | undefined => {
-		if (isStarting) return undefined;
+		// 開始の合図は視覚的にはバナーで伝わるが、お題は読み上げにも必要
+		if (isStarting)
+			return `ラウンド${game.roundNo}が始まります。お題は「${game.theme}」`;
 		if (isMyTurn) {
 			return isConfirmed
 				? "提出完了！他のプレイヤーを待っています"
@@ -169,41 +164,32 @@ export function GameSubmission({
 
 	return (
 		<>
+			{/* ラウンド開始の合図 */}
 			{isStarting && (
-				<div className="fixed inset-0 z-80 flex max-h-svh max-w-svw items-center justify-center overflow-hidden bg-olive-900/55 p-16">
-					<Tile
-						className="grid w-full max-w-xs animate-place-tile place-items-center gap-y-24 px-24 py-32 motion-reduce:animate-none"
-						thickness="amber"
+				<>
+					<div className="pointer-events-none fixed inset-0 z-20 animate-round-scrim bg-olive-900/50 motion-reduce:animate-none" />
+					<div
+						aria-hidden="true"
+						className="pointer-events-none fixed inset-0 z-50 grid place-items-center"
 					>
-						<div className="grid place-items-center gap-y-4">
-							<p className="font-display text-[10px] text-lime-800/70 tracking-widest">
-								ROUND
-							</p>
-							<p className="font-display text-5xl text-lime-800">
+						<div className="grid animate-round-banner place-items-center gap-y-4 text-cream-50 drop-shadow-[0_4px_24px_var(--color-orange-600)] motion-reduce:animate-none">
+							<p className="font-display text-xs tracking-[0.3em]">ROUND</p>
+							<p className="font-display text-6xl">
 								{game.roundNo}
-								<span className="text-2xl text-neutral-400"> / 4</span>
+								<span className="text-2xl text-cream-50/70"> / 4</span>
 							</p>
 						</div>
-						<div className="grid w-full place-items-center gap-y-8">
-							<p className="font-bold text-neutral-500 text-xs">お題</p>
-							<p className="wrap-break-word w-full rounded-lg border-2 border-amber-300 bg-amber-300/15 px-16 py-12 text-center font-bold text-lime-800 text-xl xs:text-2xl">
-								{game.theme}
-							</p>
-						</div>
-						<div className="flex items-center gap-x-8 text-lime-800">
-							<Spinner className="size-20" />
-							<p className="font-bold text-sm">まもなく開始...</p>
-						</div>
-					</Tile>
-				</div>
+					</div>
+				</>
 			)}
 			<GamePhaseLayout
 				nav={
 					<GamePhaseNav
 						roundNo={game.roundNo}
 						statusText={getStatusText()}
-						timerCount={count}
-						timerProgress={progress}
+						// NOTE: ラウンド開始モーダル表示中は満タンの状態を見せる
+						timerCount={isStarting ? game.timeLimit : count}
+						timerProgress={isStarting ? 100 : progress}
 					/>
 				}
 			>
@@ -214,20 +200,28 @@ export function GameSubmission({
 
 				{/* 自分の番になった瞬間だけ、画面中央に一瞬表示する合図 */}
 				{showMyTurnBanner && (
-					<div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center">
-						<p className="animate-turn-banner px-16 text-center font-display text-4xl text-cream-50 drop-shadow-[0_4px_24px_var(--color-orange-600)] motion-reduce:animate-none">
+					<div
+						aria-hidden="true"
+						className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center"
+					>
+						<p
+							className={classNames(
+								"px-16 text-center font-display text-4xl text-cream-50",
+								"animate-turn-banner drop-shadow-[0_4px_24px_var(--color-orange-600)] motion-reduce:animate-turn-banner-fade",
+							)}
+						>
 							あなたの番です
 						</p>
 					</div>
 				)}
 
-				{/* 他プレイヤーの提出待機中メッセージ */}
-				{!isMyTurn && !isStarting && (
+				{/* 自分が操作できない間、進行中であることを示すメッセージ */}
+				{(isStarting || !isMyTurn) && (
 					<div className="pointer-events-none fixed bottom-120 left-1/2 z-20 -translate-x-1/2">
 						<div className="flex items-center gap-x-8 rounded-full bg-lime-800/90 px-24 py-12 shadow-2xl">
 							<Spinner className="size-24 text-white" />
 							<p className="whitespace-nowrap font-bold text-sm text-white">
-								他のプレイヤーが選択中...
+								{isStarting ? "まもなく開始..." : "他のプレイヤーが選択中..."}
 							</p>
 						</div>
 					</div>
@@ -318,7 +312,9 @@ export function GameSubmission({
 							cards={mePlayer.playerCards}
 							className="mx-[calc(50%-50vw)] w-screen"
 							isConfirmed={isConfirmed}
-							onCardClick={isMyTurn ? handleCardClick : undefined}
+							onCardClick={
+								isMyTurn && !isStarting ? handleCardClick : undefined
+							}
 							reactionBar={reactionBar}
 							selectedCardId={selectedCardId}
 							showPulse={isActivePhase && !selectedCard}
