@@ -63,7 +63,7 @@ function Players({ players }: { players: FinishedRoom["players"] }) {
 	const others = players.filter((player) => !player.isWinner);
 
 	return (
-		<div className="grid gap-y-8 sm:flex sm:items-start sm:justify-between sm:gap-x-16">
+		<div className="grid gap-y-8 sm:flex sm:items-end sm:justify-between sm:gap-x-16">
 			<ul className="grid min-w-0 gap-y-6 sm:flex-1">
 				{winners.map((player) => (
 					<li className="flex items-center gap-x-8" key={player.id}>
