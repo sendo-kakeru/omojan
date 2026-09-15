@@ -170,7 +170,7 @@ export function GameSubmission({
 	return (
 		<>
 			{isStarting && (
-				<div className="fixed inset-0 z-80 flex items-center justify-center bg-olive-900/55">
+				<div className="fixed inset-0 z-80 flex max-h-svh max-w-svw items-center justify-center overflow-hidden bg-olive-900/55 p-16">
 					<Tile
 						className="grid w-full max-w-xs animate-place-tile place-items-center gap-y-24 px-24 py-32 motion-reduce:animate-none"
 						thickness="amber"
@@ -283,7 +283,9 @@ export function GameSubmission({
 					{/* 中央エリア - お題カード + 組み合わせ選択 */}
 					<section
 						className={classNames(
-							"relative mt-8 grid place-items-center rounded-t-2xl border border-cream-200 border-b-0 bg-cream-50/90 p-16",
+							// NOTE: overflow-x-clip は牌を叩きつける演出の拡大が横スクロール領域を
+							// 広げないようにするため（縦はみ出しは演出なので clip しない）
+							"relative mt-8 grid place-items-center overflow-x-clip rounded-t-2xl border border-cream-200 border-b-0 bg-cream-50/90 p-16",
 							isActivePhase && "z-30",
 						)}
 					>
