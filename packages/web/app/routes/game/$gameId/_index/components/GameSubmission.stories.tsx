@@ -5,8 +5,10 @@ import type {
 	GameServerTurnStartMessage,
 } from "@repo/db/model";
 import type { PlayerCardId, PlayerId } from "@repo/db/schema";
+import { ROUND_START_DISPLAY_MS } from "@repo/shared/constants/game";
 import { WORDS } from "@repo/shared/constants/words";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { useEffect, useState } from "react";
 import {
 	gameScreenDecorator,
 	gameScreenParameters,
@@ -84,7 +86,7 @@ const meta: Meta<typeof GameSubmission> = {
 export default meta;
 type Story = StoryObj<typeof GameSubmission>;
 
-// ラウンド1開始時（オーバーレイ表示）
+// ラウンド1開始時（ラウンドバナー表示）
 export const RoundStart: Story = {
 	args: {
 		data: {
@@ -98,10 +100,10 @@ export const RoundStart: Story = {
 		} satisfies GameServerRoundStartMessage,
 		sendSubmission: noop,
 	},
-	name: "ラウンド1開始（オーバーレイ表示）",
+	name: "ラウンド1開始（ラウンドバナー）",
 };
 
-// ラウンド3開始時（オーバーレイ表示）
+// ラウンド3開始時（ラウンドバナー表示）
 export const Round3Start: Story = {
 	args: {
 		data: {
@@ -122,10 +124,10 @@ export const Round3Start: Story = {
 		} satisfies GameServerRoundStartMessage,
 		sendSubmission: noop,
 	},
-	name: "ラウンド3開始（オーバーレイ表示）",
+	name: "ラウンド3開始（ラウンドバナー）",
 };
 
-// ラウンド4開始時（オーバーレイ表示・長いテーマ）
+// ラウンド4開始時（ラウンドバナー表示・長いテーマ）
 export const Round4StartLongTheme: Story = {
 	args: {
 		data: {
@@ -147,6 +149,46 @@ export const Round4StartLongTheme: Story = {
 		sendSubmission: noop,
 	},
 	name: "ラウンド4開始（長いテーマ）",
+};
+
+/** 自分の番のプレビューを表示する時間(ms) */
+const MY_TURN_PREVIEW_MS = 4_000 as const;
+
+function RoundStartAndMyTurnSequence({
+	startsWith,
+}: {
+	startsWith: "roundStart" | "myTurn";
+}) {
+	const [isStarting, setIsStarting] = useState(startsWith === "roundStart");
+
+	useEffect(() => {
+		const timer = setTimeout(
+			() => setIsStarting((prev) => !prev),
+			isStarting ? ROUND_START_DISPLAY_MS : MY_TURN_PREVIEW_MS,
+		);
+		return () => clearTimeout(timer);
+	}, [isStarting]);
+
+	const base = {
+		currentPlayerId: createPlayerId("1"),
+		game: { ...baseGameData, submitted: null },
+		mePlayer: baseMePlayer,
+	};
+	const data: GameServerSubmissionMessage = isStarting
+		? { ...base, type: "ROUND_START" }
+		: { ...base, type: "TURN_START" };
+
+	return <GameSubmission data={data} sendSubmission={noop} />;
+}
+
+export const RoundStartToMyTurn: Story = {
+	name: "ラウンド開始→自分の番",
+	render: () => <RoundStartAndMyTurnSequence startsWith="roundStart" />,
+};
+
+export const MyTurnToRoundStart: Story = {
+	name: "自分の番→ラウンド開始（再接続）",
+	render: () => <RoundStartAndMyTurnSequence startsWith="myTurn" />,
 };
 
 // 自分のターン開始
