@@ -11,6 +11,7 @@ import {
 	nullable,
 	pipe,
 	string,
+	trim,
 	union,
 	uuid,
 } from "valibot";
@@ -68,6 +69,7 @@ export const playerTable = sqliteTable(
 
 export const playerNameSchema = pipe(
 	string(),
+	trim(),
 	minLength(1, "プレイヤー名を入力してください"),
 	maxLength(50, "プレイヤー名は50文字以下で入力してください"),
 );

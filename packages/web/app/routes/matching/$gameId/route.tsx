@@ -43,7 +43,6 @@ export default function Page({
 		wsRef,
 		sendExit,
 		sendStart,
-		transitionCount,
 		isHost,
 	} = useMatchingSubscriptionSWR({
 		gameId,
@@ -156,7 +155,6 @@ export default function Page({
 			onStart={handleStart}
 			participants={participants}
 			roomMeta={roomMetaResult.data}
-			transitionCount={transitionCount}
 		/>
 	);
 }

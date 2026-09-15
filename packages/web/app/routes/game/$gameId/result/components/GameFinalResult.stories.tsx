@@ -2,21 +2,21 @@ import type { GameResultResponseBody } from "@repo/db/model";
 import type { PlayerId, UserId } from "@repo/db/schema";
 import { MOCK_ME } from "@repo/mock/model";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { GameResultSkeleton } from "~/routes/game/$gameId/result/components/GameResultSkeleton";
 import {
 	gameScreenDecorator,
 	gameScreenParameters,
 } from "~/storybook/decorators";
 import { GameFinalResult } from "./GameFinalResult";
+import { GameResultSkeleton } from "./GameResultSkeleton";
 
 const PLAYER_1 = "player_1" as PlayerId;
 const PLAYER_2 = "player_2" as PlayerId;
 const PLAYER_3 = "player_3" as PlayerId;
 const PLAYER_4 = "player_4" as PlayerId;
 
-const USER_2 = "user_2" as UserId;
-const USER_3 = "user_3" as UserId;
-const USER_4 = "user_4" as UserId;
+const USER_2 = "00000000-0000-0000-0000-0000000000a2" as UserId;
+const USER_3 = "00000000-0000-0000-0000-0000000000a3" as UserId;
+const USER_4 = "00000000-0000-0000-0000-0000000000a4" as UserId;
 
 const mockResult: GameResultResponseBody = {
 	rounds: [

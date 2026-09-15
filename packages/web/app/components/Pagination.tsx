@@ -2,7 +2,8 @@ import type { Pagination as PaginationMeta } from "@repo/db/model";
 import classNames from "classnames";
 import type * as React from "react";
 import { LuChevronLeft, LuChevronRight, LuEllipsis } from "react-icons/lu";
-import { type AnchorButtonProps, Button } from "./button/Button";
+import { Link } from "react-router";
+import { Tile } from "./Tile";
 
 function PaginationRoot({ className, ...props }: React.ComponentProps<"nav">) {
 	return (
@@ -35,28 +36,35 @@ function PaginationItem({ ...props }: React.ComponentProps<"li">) {
 function PaginationLink({
 	className,
 	isActive,
-	size = "M",
 	isCircle = false,
+	children,
 	...props
 }: {
 	isActive?: boolean;
 	isCircle?: boolean;
-} & Pick<
-	AnchorButtonProps,
-	"size" | "color" | "to" | "leftIcon" | "rightIcon" | "children" | "className"
->) {
+} & Pick<React.ComponentProps<typeof Link>, "to" | "children" | "className">) {
 	return (
-		<Button
+		<Link
 			aria-current={isActive ? "page" : undefined}
-			as="link"
-			className={classNames(className)}
+			className={classNames("block w-fit", className)}
 			data-active={isActive}
 			data-slot="pagination-link"
-			isIconOnly={isCircle}
-			size={size}
-			variant={isActive ? "outline" : "fill"}
 			{...props}
-		/>
+		>
+			<Tile
+				className={classNames(
+					"grid place-items-center font-bold text-sm",
+					isCircle ? "size-32 rounded-full" : "px-12 py-4",
+					isActive
+						? "border-amber-500 bg-amber-300/25 text-lime-800"
+						: "text-lime-800/70",
+				)}
+				interactive
+				thickness={isActive ? "amber" : "cream"}
+			>
+				{children}
+			</Tile>
+		</Link>
 	);
 }
 
@@ -69,7 +77,6 @@ function PaginationPrevious({
 			aria-label="Go to previous page"
 			className={className}
 			isCircle
-			size="M"
 			{...props}
 		>
 			<LuChevronLeft className="size-24 shrink-0" />
@@ -86,7 +93,6 @@ function PaginationNext({
 			aria-label="Go to next page"
 			className={className}
 			isCircle
-			size="M"
 			{...props}
 		>
 			<LuChevronRight className="size-24 shrink-0" />
@@ -102,7 +108,7 @@ function PaginationEllipsis({
 		<span
 			aria-hidden
 			className={classNames(
-				"flex size-32 items-center justify-center [&_svg:not([class*='size-'])]:size-16",
+				"flex size-32 items-center justify-center text-lime-800/60 [&_svg:not([class*='size-'])]:size-16",
 				className,
 			)}
 			data-slot="pagination-ellipsis"
@@ -179,13 +185,10 @@ function Pagination({
 	page,
 	totalPages,
 	getPageUrl,
-	color = "primary",
 	className,
 }: Pick<PaginationMeta, "page" | "totalPages"> & {
 	/** ページ番号からURLを生成する関数 */
 	getPageUrl: (page: number) => string;
-	/** ボタンのカラー */
-	color?: "primary" | "danger" | "black" | "gray";
 	/** 追加のclassName */
 	className?: string;
 }) {
@@ -202,7 +205,7 @@ function Pagination({
 			<PaginationContent>
 				{hasPrevious && (
 					<PaginationItem>
-						<PaginationPrevious color={color} to={getPageUrl(page - 1)} />
+						<PaginationPrevious to={getPageUrl(page - 1)} />
 					</PaginationItem>
 				)}
 
@@ -214,7 +217,6 @@ function Pagination({
 					) : (
 						<PaginationItem key={item.page}>
 							<PaginationLink
-								color={color}
 								isActive={item.page === page}
 								isCircle
 								to={getPageUrl(item.page)}
@@ -227,7 +229,7 @@ function Pagination({
 
 				{hasNext && (
 					<PaginationItem>
-						<PaginationNext color={color} to={getPageUrl(page + 1)} />
+						<PaginationNext to={getPageUrl(page + 1)} />
 					</PaginationItem>
 				)}
 			</PaginationContent>

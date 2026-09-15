@@ -23,8 +23,8 @@ const createWaitingRoom = (overrides?: Partial<WaitingRoom>): WaitingRoom => ({
 		{
 			id: "player-1" as WaitingRoom["players"][0]["id"],
 			image: null,
+			isCpu: false,
 			playerName: "ホスト",
-			seat: 1,
 			userId: DUMMY_USER_ID,
 		},
 	],
@@ -48,15 +48,15 @@ export const WithRooms: Story = () => (
 					{
 						id: "player-1" as WaitingRoom["players"][0]["id"],
 						image: null,
+						isCpu: false,
 						playerName: "ホスト",
-						seat: 1,
 						userId: DUMMY_USER_ID,
 					},
 					{
 						id: "player-2" as WaitingRoom["players"][0]["id"],
 						image: null,
+						isCpu: false,
 						playerName: "参加者A",
-						seat: 2,
 						userId: null,
 					},
 				],

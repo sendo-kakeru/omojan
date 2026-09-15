@@ -4,16 +4,18 @@ import type { FinishedRoom, PublicUser } from "@repo/db/model";
 import type { UserId } from "@repo/db/schema";
 import { OFFICIAL_X_ID } from "@repo/shared/constants/config";
 import { hc } from "hono/client";
-import { FaCrown, FaUser } from "react-icons/fa";
+import { FaCrown } from "react-icons/fa";
 import { FiChevronLeft, FiEdit } from "react-icons/fi";
 import { IoGameController } from "react-icons/io5";
 import { useNavigate } from "react-router";
+import { Avatar } from "~/components/Avatar";
 import { Button } from "~/components/button/Button";
 import { Footer } from "~/components/Footer";
 import { Header } from "~/components/Header";
 import { Spinner } from "~/components/Spinner";
 import { useMe } from "~/context/me/hooks";
 import { cloudflareContext } from "~/libs/cloudflareContext";
+import { getDisplayName } from "~/libs/displayName";
 import { buildImageUrl, PROFILE_IMAGE_DIMENSIONS } from "~/libs/image";
 import { buildNoindexMeta } from "~/libs/meta";
 import { decodeUuid58Param } from "~/libs/uuid58";
@@ -108,6 +110,7 @@ function UserProfile({ user }: { user: PublicUser }) {
 			<div className="flex justify-between">
 				<button
 					aria-label="戻る"
+					className="-m-8 rounded-full p-8 text-neutral-500 transition-colors hover:bg-cream-100 hover:text-neutral-700"
 					onClick={() => void navigate(-1)}
 					type="button"
 				>
@@ -117,7 +120,7 @@ function UserProfile({ user }: { user: PublicUser }) {
 				{isMe && (
 					<Button
 						as="link"
-						color="gray"
+						color="secondary"
 						leftIcon={<FiEdit />}
 						size="S"
 						to={`/users/${uuid58Encode(user.userId)}/edit`}
@@ -129,34 +132,40 @@ function UserProfile({ user }: { user: PublicUser }) {
 			</div>
 			<div className="grid place-items-center gap-y-32">
 				<div className="grid place-items-center gap-y-24">
-					{user.image ? (
-						<img
-							alt={user.name}
-							className="size-96 rounded-full object-cover"
-							src={buildImageUrl({
-								image: user.image,
-								size: PROFILE_IMAGE_DIMENSIONS,
-							})}
-						/>
-					) : (
-						<FaUser className="size-96 rounded-full bg-gray-300 p-16 text-gray-500" />
-					)}
+					<Avatar
+						name={user.name}
+						size="XL"
+						src={
+							user.image
+								? buildImageUrl({
+										image: user.image,
+										size: PROFILE_IMAGE_DIMENSIONS,
+									})
+								: undefined
+						}
+					/>
 
-					<h1 className="font-bold text-xl">{user.name}</h1>
+					<h1 className="font-bold text-lime-800 text-xl">
+						{getDisplayName(user.name)}
+					</h1>
 				</div>
 
 				<div className="flex gap-x-32">
 					<div className="grid place-items-center gap-y-4">
-						<span className="font-bold text-xl">{user.playCount}</span>
+						<span className="font-bold text-lime-800 text-xl">
+							{user.playCount}
+						</span>
 						<span className="flex items-center gap-x-4 text-neutral-500 text-sm">
-							<IoGameController className="size-16 text-green-500" />
+							<IoGameController className="size-16 text-lime-800" />
 							プレイ
 						</span>
 					</div>
 					<div className="grid place-items-center gap-y-4">
-						<span className="font-bold text-xl">{user.winCount}</span>
+						<span className="font-bold text-lime-800 text-xl">
+							{user.winCount}
+						</span>
 						<span className="flex items-center gap-x-4 text-neutral-500 text-sm">
-							<FaCrown className="size-16 text-yellow-500" />
+							<FaCrown className="size-16 text-amber-500" />
 							勝利
 						</span>
 					</div>

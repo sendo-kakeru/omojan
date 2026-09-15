@@ -3,6 +3,7 @@ import type {
 	GameClientVoteMessage,
 	GameServerMessage,
 } from "@repo/db/model";
+import type { ReactNode } from "react";
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router";
 import { GameResult } from "./GameResult";
@@ -11,10 +12,12 @@ import { GameVote } from "./GameVote";
 
 export function GamePresenter({
 	data,
+	reactionBar,
 	sendSubmission,
 	sendVote,
 }: {
 	data: GameServerMessage;
+	reactionBar?: ReactNode;
 	sendSubmission: (
 		message: GameClientSubmissionMessage["submission"],
 	) => Promise<void>;
@@ -36,13 +39,21 @@ export function GamePresenter({
 		data.type === "TURN_START" ||
 		data.type === "TURN_END"
 	) {
-		return <GameSubmission data={data} sendSubmission={sendSubmission} />;
+		return (
+			<GameSubmission
+				data={data}
+				reactionBar={reactionBar}
+				sendSubmission={sendSubmission}
+			/>
+		);
 	}
 	if (data.type === "VOTE_START") {
-		return <GameVote data={data} sendVote={sendVote} />;
+		return (
+			<GameVote data={data} reactionBar={reactionBar} sendVote={sendVote} />
+		);
 	}
 	if (data.type === "RESULT") {
-		return <GameResult data={data} />;
+		return <GameResult data={data} reactionBar={reactionBar} />;
 	}
 	return null;
 }

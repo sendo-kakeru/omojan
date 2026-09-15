@@ -14,6 +14,13 @@
 			"tag": "0001_redundant_boom_boom",
 			"version": "6",
 			"when": 1770208896815
+		},
+		{
+			"breakpoints": true,
+			"idx": 2,
+			"tag": "0002_right_monster_badoon",
+			"version": "6",
+			"when": 1789361195386
 		}
 	],
 	"version": "7"

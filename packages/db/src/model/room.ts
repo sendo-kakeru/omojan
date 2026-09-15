@@ -1,3 +1,4 @@
+import { stringToInt } from "@repo/shared/schema";
 import { createSelectSchema } from "drizzle-valibot";
 import {
 	array,
@@ -53,7 +54,7 @@ export const roomPasswordSchema = pipe(
 );
 
 const roomPlayerSchema = object({
-	...pick(playerSchema, ["playerName", "seat"]).entries,
+	...pick(playerSchema, ["playerName", "isCpu"]).entries,
 	id: playerIdSchema,
 	image: nullable(userSchema.entries.image),
 	userId: nullable(playerSchema.entries.userId),
@@ -217,6 +218,12 @@ export type CreateRoomResponseBody = InferOutput<
 
 // verify token
 export const verifyRoomTokenRequestQuerySchema = object({
+	/**
+	 * 接続生成順を示す単調増加のシーケンス番号。
+	 * リクエスト順に接続を入れ替えても、DBのレスポンスがその順に返らないと正しく動かないことがあったため、
+	 * 多重でリクエスト送信された時のためにインクリメントした番号の大きさで最新リクエストを判断する（主にReact strict mode）
+	 */
+	connectSeq: stringToInt(0),
 	token: string(),
 });
 

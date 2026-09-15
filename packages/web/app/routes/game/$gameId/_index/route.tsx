@@ -64,10 +64,12 @@ export default function Page({
 			<ReactionOverlay reactions={reactions} />
 			<GamePresenter
 				data={data}
+				reactionBar={
+					<ReactionBar sendReaction={sendReaction} visible={showReactionBar} />
+				}
 				sendSubmission={sendSubmission}
 				sendVote={sendVote}
 			/>
-			<ReactionBar sendReaction={sendReaction} visible={showReactionBar} />
 		</>
 	);
 }

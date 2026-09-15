@@ -27,7 +27,7 @@ const meta: Meta<typeof Pagination> = {
 	component: Pagination,
 	decorators: [
 		(Story) => (
-			<div className="bg-black-50 p-32">
+			<div className="bg-table p-32">
 				<Story />
 			</div>
 		),
@@ -79,25 +79,6 @@ export const FewPages: Story = {
 export const SinglePage: Story = {
 	render: () => (
 		<Pagination {...createMeta(1, 1)} getPageUrl={(page) => `?page=${page}`} />
-	),
-};
-
-const COLORS = ["primary", "danger", "black", "gray"] as const;
-
-export const Colors: Story = {
-	render: () => (
-		<div className="flex flex-col gap-16">
-			{COLORS.map((color) => (
-				<div className="flex flex-col gap-8" key={color}>
-					<p className="text-neutral-500 text-sm">color: {color}</p>
-					<Pagination
-						{...createMeta(2, 10)}
-						color={color}
-						getPageUrl={(page) => `?page=${page}`}
-					/>
-				</div>
-			))}
-		</div>
 	),
 };
 

@@ -3,11 +3,15 @@ import type {
 	GameServerVoteMessage,
 } from "@repo/db/model";
 import type { PlayerId } from "@repo/db/schema";
+import { VOTE_TIMEOUT_MS } from "@repo/shared/constants/game";
 import classNames from "classnames";
+import type { ReactNode } from "react";
 import { useEffect, useState, useTransition } from "react";
 import { Avatar } from "~/components/Avatar";
 import { Badge } from "~/components/Badge";
+import { Tile } from "~/components/Tile";
 import { useCountdown } from "~/hooks/useCountdown";
+import { getDisplayName } from "~/libs/displayName";
 import { AVATAR_IMAGE_DIMENSIONS, buildImageUrl } from "~/libs/image";
 import { createCombination } from "../libs/gameUtils";
 import { GamePhaseLayout } from "./GamePhaseLayout";
@@ -16,9 +20,11 @@ import { PlayerCardDisplay } from "./PlayerCardDisplay";
 
 export function GameVote({
 	data,
+	reactionBar,
 	sendVote,
 }: {
 	data: GameServerVoteMessage;
+	reactionBar?: ReactNode;
 	sendVote: (
 		votePlayerId: GameClientVoteMessage["votePlayerId"],
 	) => Promise<void>;
@@ -36,14 +42,14 @@ export function GameVote({
 	const { count, progress, start: startCountdown } = useCountdown();
 
 	useEffect(() => {
-		startCountdown(15);
+		startCountdown(VOTE_TIMEOUT_MS / 1000);
 	}, [startCountdown]);
 
-	const getMessage = (): string | null => {
+	const getStatusText = (): string => {
 		if (confirmedPlayerId) {
-			return "投票完了！他のプレイヤーを待っています";
+			return "投票完了。他のプレイヤーを待っています";
 		}
-		return null;
+		return "投票してください";
 	};
 
 	const handlePlayerClick = (playerId: PlayerId): void => {
@@ -72,9 +78,8 @@ export function GameVote({
 		<GamePhaseLayout
 			nav={
 				<GamePhaseNav
-					message={getMessage()}
-					messageVariant={confirmedPlayerId ? "inactive" : "active"}
 					roundNo={game.roundNo}
+					statusText={getStatusText()}
 					timerCount={count}
 					timerProgress={progress}
 				/>
@@ -82,7 +87,7 @@ export function GameVote({
 		>
 			{/* プレイヤーカード以外を暗くするオーバーレイ */}
 			{!confirmedPlayerId && (
-				<div className="pointer-events-none fixed inset-0 z-20 bg-black/50" />
+				<div className="pointer-events-none fixed inset-0 z-20 bg-olive-900/55" />
 			)}
 
 			<main className="grid grid-rows-[1fr_auto]">
@@ -105,24 +110,30 @@ export function GameVote({
 
 						return (
 							<div className="relative w-full" key={player.id}>
-								<button
+								<Tile
+									as="button"
 									className={classNames(
-										"flex w-full items-center gap-x-12 rounded-2xl px-12 py-8 transition-all duration-200 md:py-12",
-										isSelf
-											? "cursor-not-allowed border-2 border-transparent bg-gray-200 opacity-90"
-											: isConfirmed
-												? "border-2 border-green-500 bg-green-100"
-												: isSelected
-													? "z-10 scale-[1.02] border-2 border-green-500 bg-green-50 shadow-md"
-													: confirmedPlayerId
-														? "border border-gray-200 bg-white"
-														: "animate-pulse-card border border-gray-200 bg-white hover:scale-[1.02]",
+										"flex w-full items-center gap-x-12 px-12 py-8 md:py-12",
+										isSelf && "cursor-not-allowed opacity-60",
+										isConfirmed && "border-lime-800 bg-lime-800/10",
+										isSelected && !isConfirmed && "z-10",
+										!isSelf &&
+											!confirmedPlayerId &&
+											!isSelected &&
+											// NOTE: box-shadowを動かすアニメーションはホバー時のbox-shadowより強く、点滅中はホバーしても厚みが増えず立体に見えないため止める
+											"animate-pulse-card hover:animate-none motion-reduce:animate-none",
 									)}
 									disabled={isSelf || !!confirmedPlayerId}
+									interactive={!isSelf && !confirmedPlayerId}
 									onClick={() => handlePlayerClick(player.id)}
-									type="button"
+									raised={isSelected && !isConfirmed}
+									thickness={(() => {
+										if (isSelf) return "cream";
+										if (isConfirmed || isSelected) return "lime";
+										return "amber";
+									})()}
 								>
-									<div className="grid flex-1 gap-y-2">
+									<div className="grid min-w-0 flex-1 gap-y-2">
 										<div className="flex items-center gap-x-8">
 											<Avatar
 												name={player.playerName}
@@ -132,17 +143,19 @@ export function GameVote({
 													size: AVATAR_IMAGE_DIMENSIONS.S,
 												})}
 											/>
-											<p className="font-semibold text-neutral-400 text-xs">
-												{player.playerName}
+											<p className="font-bold text-neutral-500 text-xs">
+												{getDisplayName(player.playerName)}
 												{isSelf && (
-													<span className="text-neutral-400">（自分）</span>
+													<span className="font-normal text-neutral-400">
+														（自分）
+													</span>
 												)}
 											</p>
 										</div>
 										<p
 											className={classNames(
-												"font-bold text-base md:text-lg",
-												isSelf && "text-neutral-400",
+												"wrap-break-word carved-text font-bold text-sm md:text-base",
+												isSelf ? "text-neutral-400" : "text-lime-800",
 											)}
 										>
 											{combination}
@@ -151,20 +164,24 @@ export function GameVote({
 									{/* 固定幅でバッジの位置を安定させる */}
 									<div className="grid w-64 place-items-center">
 										{isConfirmed ? (
-											<span className="whitespace-nowrap rounded-full bg-green-600 px-8 py-2 text-white text-xs">
+											<span className="whitespace-nowrap rounded-full bg-lime-800 px-8 py-2 font-bold text-white text-xs">
 												投票済み
 											</span>
 										) : (
-											<Badge color="gray">{player.winCount}勝</Badge>
+											<Badge color="cream">{player.winCount}勝</Badge>
 										)}
 									</div>
-								</button>
+								</Tile>
 							</div>
 						);
 					})}
 				</section>
 
-				<PlayerCardDisplay cards={mePlayer.playerCards} />
+				<PlayerCardDisplay
+					cards={mePlayer.playerCards}
+					className="mx-[calc(50%-50vw)] w-screen"
+					reactionBar={reactionBar}
+				/>
 			</main>
 		</GamePhaseLayout>
 	);

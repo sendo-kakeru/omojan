@@ -1,12 +1,15 @@
 import type { FinishedRoom } from "@repo/db/model";
 import { FiChevronLeft } from "react-icons/fi";
-import { RxUpdate } from "react-icons/rx";
 import { Link, useSearchParams } from "react-router";
-import { Button } from "~/components/button/Button";
+import { Footer } from "~/components/Footer";
 import { Header } from "~/components/Header";
 import { Pagination } from "~/components/Pagination";
-import { RoomCard } from "~/routes/_index/components/RoomCard";
-import { RoomCardSkeleton } from "~/routes/_index/components/RoomCardSkeleton";
+import {
+	SectionHeading,
+	SectionRefreshButton,
+} from "~/components/SectionHeading";
+import { FinishedRoomCard } from "~/routes/_index/components/roomCard/FinishedRoomCard";
+import { FinishedRoomCardSkeleton } from "~/routes/_index/components/roomCard/FinishedRoomCardSkeleton";
 import { useRoomListSWR } from "~/routes/_index/hooks/useRoomListSWR";
 
 const PER_PAGE = 20;
@@ -31,29 +34,26 @@ export default function FinishedRoomsPage() {
 	};
 
 	return (
-		<>
+		<div className="grid min-h-full grid-rows-[auto_1fr_auto]">
 			<Header />
-			<main className="grid gap-y-16 pb-40">
-				<div className="flex items-center justify-between">
-					<div className="flex items-center gap-x-8">
-						<Link
-							aria-label="トップへ戻る"
-							className="flex items-center gap-x-4 text-neutral-500 hover:text-neutral-700"
-							to="/"
-						>
-							<FiChevronLeft className="size-20" />
-						</Link>
-						<h1 className="font-bold text-lg">過去のゲーム</h1>
-					</div>
-					<Button
-						as="button"
-						color="gray"
-						leftIcon={<RxUpdate />}
-						onClick={() => mutate()}
-						variant="outline"
+			<main className="grid content-start gap-y-16 pb-40">
+				<div className="flex items-center gap-x-8">
+					<Link
+						aria-label="トップへ戻る"
+						className="rounded-full text-neutral-500 transition-colors hover:bg-cream-100 hover:text-neutral-700"
+						to="/"
 					>
-						更新
-					</Button>
+						<FiChevronLeft className="size-24" />
+					</Link>
+					<div className="flex-1">
+						<SectionHeading
+							action={<SectionRefreshButton onClick={() => mutate()} />}
+							headingTag="h1"
+							mark="歴"
+						>
+							過去のゲーム
+						</SectionHeading>
+					</div>
 				</div>
 
 				<FinishedRoomList error={error} isLoading={isLoading} rooms={rooms} />
@@ -66,7 +66,8 @@ export default function FinishedRoomsPage() {
 					/>
 				)}
 			</main>
-		</>
+			<Footer />
+		</div>
 	);
 }
 
@@ -83,7 +84,7 @@ function FinishedRoomList({
 		return (
 			<div className="grid gap-y-8">
 				{Array.from({ length: 5 }).map((_, index) => (
-					<RoomCardSkeleton
+					<FinishedRoomCardSkeleton
 						// biome-ignore lint/suspicious/noArrayIndexKey: ローディングのため問題ない
 						key={index}
 						srText={index === 0 ? "過去のゲームを取得中" : undefined}
@@ -95,7 +96,7 @@ function FinishedRoomList({
 
 	if (error) {
 		return (
-			<p className="py-16 text-center text-red-400">
+			<p className="py-16 text-center text-orange-700 text-sm">
 				ゲームの取得に失敗しました
 			</p>
 		);
@@ -103,7 +104,7 @@ function FinishedRoomList({
 
 	if (!rooms || rooms.length === 0) {
 		return (
-			<p className="py-16 text-center text-neutral-500">
+			<p className="py-16 text-center text-neutral-500 text-sm">
 				ゲームが行われていません
 			</p>
 		);
@@ -112,7 +113,7 @@ function FinishedRoomList({
 	return (
 		<div className="grid gap-y-8">
 			{rooms.map((room) => (
-				<RoomCard key={room.gameId} room={room} status="finished" />
+				<FinishedRoomCard key={room.gameId} room={room} />
 			))}
 		</div>
 	);

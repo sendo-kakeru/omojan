@@ -50,6 +50,14 @@
 				"linkedProjects": ["packages/image-processor/Cargo.toml"]
 			}
 		},
+		"tailwindcss-language-server": {
+			"settings": {
+				"classFunctions": ["classNames", "tv"],
+				"experimental": {
+					"configFile": "packages/web/app/app.css"
+				}
+			}
+		},
 		"vtsls": {
 			"initialization_options": {
 				"typescript": {

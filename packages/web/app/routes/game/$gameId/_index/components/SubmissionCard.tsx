@@ -1,8 +1,12 @@
 import type { Submission } from "@repo/db/schema";
 import classNames from "classnames";
+import { Tile } from "~/components/Tile";
 
 const POSITIONS = ["prefix", "suffix"] as const;
 
+/**
+ * 提出する組み合わせ
+ */
 export function SubmissionCard(
 	props:
 		| {
@@ -22,54 +26,70 @@ export function SubmissionCard(
 
 	if (state === "confirmed") {
 		return (
-			<div className="relative w-full rounded-xl border-2 border-green-500 bg-green-100 px-16 py-12 shadow-md">
+			<Tile
+				className="relative w-full animate-place-tile px-24 py-12 motion-reduce:animate-none"
+				thickness="lime"
+			>
 				<PositionBadge position={props.position} />
-				<p className="text-center font-bold text-neutral-700 text-sm sm:text-base">
+				<p className="carved-text text-center font-bold text-lg text-lime-800 xs:text-xl">
 					{props.text}
 				</p>
-			</div>
+			</Tile>
 		);
 	}
 
 	// state === "selecting"
 	return (
-		<div className="relative z-10 grid w-full gap-y-8">
-			{POSITIONS.map((position) => (
-				<button
-					className={classNames(
-						"relative w-full cursor-pointer rounded-xl border-2 px-16 py-12 transition-colors duration-200",
-						props.position === position
-							? "border-green-500 bg-green-100 shadow-md"
-							: "animate-pulse-slot border-green-300 bg-green-50/50 hover:border-green-500 hover:bg-green-100",
-					)}
-					key={position}
-					onClick={() => props.onSelect(position)}
-					type="button"
-				>
-					<PositionBadge position={position} />
-					<CombinationText
-						isSelected={props.position === position}
-						position={position}
-						theme={props.theme}
-						word={props.word}
-					/>
-					{/* 選択中の吹き出し */}
-					{props.position === position && (
-						<span className="absolute -top-4 left-1/2 -translate-x-1/2 -translate-y-full animate-bounce whitespace-nowrap rounded-lg bg-green-600 px-8 py-4 text-white text-xs shadow-lg before:absolute before:top-full before:left-1/2 before:-translate-x-1/2 before:border-6 before:border-t-green-600 before:border-r-transparent before:border-b-transparent before:border-l-transparent">
-							もう一度タップで決定
-						</span>
-					)}
-				</button>
-			))}
+		<div className="relative z-10 grid w-full gap-y-12">
+			{POSITIONS.map((position) => {
+				const isSelected = props.position === position;
+				return (
+					<button
+						className={classNames(
+							"relative w-full cursor-pointer rounded-lg border-2 px-24 py-12 transition-all duration-200",
+							isSelected
+								? "tile-lift -translate-y-4 border-lime-800 bg-lime-800/10 [--tile-thickness:var(--color-lime-800)]"
+								: "animate-pulse-slot border-orange-600 border-dashed bg-cream-50/70 hover:border-lime-800 hover:bg-lime-800/5 motion-reduce:animate-none",
+						)}
+						key={position}
+						onClick={() => props.onSelect(position)}
+						type="button"
+					>
+						<PositionBadge position={position} />
+						<CombinationText
+							isSelected={isSelected}
+							position={position}
+							theme={props.theme}
+							word={props.word}
+						/>
+						{/* 選択中の吹き出し */}
+						{isSelected && (
+							<span
+								className={classNames(
+									"absolute -top-6 left-1/2 -translate-x-1/2 animate-pop whitespace-nowrap rounded-full bg-orange-700 px-10 py-4 text-white text-xs shadow-lg motion-reduce:animate-none",
+									"before:absolute before:top-full before:left-1/2 before:-translate-x-1/2 before:border-6 before:border-t-orange-700 before:border-r-transparent before:border-b-transparent before:border-l-transparent",
+								)}
+							>
+								もう一度タップで決定
+							</span>
+						)}
+					</button>
+				);
+			})}
 		</div>
 	);
 }
 
+/** 前置き／後置きを示す牌 */
 function PositionBadge({ position }: { position: Submission["position"] }) {
 	return (
-		<span className="absolute top-1/2 left-0 grid size-24 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-green-500 text-white text-xs">
+		<Tile
+			as="span"
+			className="absolute top-1/2 left-0 grid size-26 -translate-x-1/2 -translate-y-1/2 place-items-center font-bold text-orange-600 text-xs"
+			thickness="orange"
+		>
 			{position === "prefix" ? "前" : "後"}
-		</span>
+		</Tile>
 	);
 }
 
@@ -88,7 +108,7 @@ function CombinationText({
 		<span
 			className={classNames(
 				"transition-colors duration-200",
-				isSelected ? "text-neutral-700" : "text-neutral-400",
+				isSelected ? "text-lime-800" : "text-neutral-400",
 			)}
 		>
 			{word}
@@ -97,7 +117,7 @@ function CombinationText({
 	const themeElement = <span className="text-neutral-700">{theme}</span>;
 
 	return (
-		<p className="text-center font-bold text-sm sm:text-base">
+		<p className="wrap-break-word text-center font-bold text-lg xs:text-xl">
 			{position === "prefix" ? (
 				<>
 					{wordElement}

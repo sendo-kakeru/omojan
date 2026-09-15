@@ -21,25 +21,24 @@ type Story = StoryObj<typeof GamePhaseNav>;
 // 基本的な使用例
 export const Default: Story = {
 	args: {
-		message: "あなたの番です。面白いと思う組み合わせを選んでください。",
-		messageVariant: "active",
 		roundNo: 1,
+		// NOTE: 画面には出ない。読み上げ専用
+		statusText: "あなたの番です",
 		timerCount: 30,
 		timerProgress: 100,
 	},
-	name: "基本（アクティブ）",
+	name: "基本",
 };
 
-// 非アクティブ状態
-export const Inactive: Story = {
+// 残り時間が少ない状態
+export const LowTimer: Story = {
 	args: {
-		message: "他のプレイヤーの提出を待っています。",
-		messageVariant: "inactive",
 		roundNo: 2,
-		timerCount: 15,
-		timerProgress: 50,
+		statusText: "他のプレイヤーの番です",
+		timerCount: 5,
+		timerProgress: 16,
 	},
-	name: "非アクティブ状態",
+	name: "残り時間わずか",
 };
 
 // 各ラウンド
@@ -50,8 +49,6 @@ export const AllRounds: Story = {
 			{[1, 2, 3, 4].map((roundNo) => (
 				<GamePhaseNav
 					key={roundNo}
-					message={`ラウンド ${roundNo} のメッセージ`}
-					messageVariant={roundNo % 2 === 1 ? "active" : "inactive"}
 					roundNo={roundNo}
 					timerCount={30 - (roundNo - 1) * 5}
 					timerProgress={100 - (roundNo - 1) * 20}
@@ -72,13 +69,7 @@ export const WithCountdown: Story = {
 		}, [start]);
 
 		return (
-			<GamePhaseNav
-				message="カウントダウン中..."
-				messageVariant="active"
-				roundNo={1}
-				timerCount={count}
-				timerProgress={progress}
-			/>
+			<GamePhaseNav roundNo={1} timerCount={count} timerProgress={progress} />
 		);
 	},
 };

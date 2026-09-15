@@ -383,6 +383,59 @@ describe("roomRoutes", () => {
 				expect(body.data?.items?.[0].title).toBe("Waiting Room");
 			});
 
+			test("プレイヤーが席順で返る", async () => {
+				const [game] = await db
+					.insert(gameTable)
+					.values({
+						isPrivate: false,
+						password: null,
+						status: "waiting",
+						timeLimit: 30,
+						title: "Seat Order Room",
+					})
+					.returning();
+
+				// 席順と異なる順序で登録し、レスポンスが席順に並び替えられることを確認する
+				await db.insert(playerTable).values([
+					{
+						gameId: game.id,
+						gameTokenHash: hashGameToken("token-seat-3"),
+						playerName: "Player 3",
+						seat: 3 as PlayerSeat,
+						userId: null,
+					},
+					{
+						gameId: game.id,
+						gameTokenHash: hashGameToken("token-seat-1"),
+						playerName: "Player 1",
+						seat: 1 as PlayerSeat,
+						userId: null,
+					},
+					{
+						gameId: game.id,
+						gameTokenHash: hashGameToken("token-seat-2"),
+						playerName: "Player 2",
+						seat: 2 as PlayerSeat,
+						userId: null,
+					},
+				]);
+
+				const response = await mockHonoClient.v1.rooms.$get({
+					query: { status: "waiting" },
+				});
+
+				expect(response.status).toBe(200);
+				const body = await response.json();
+				const room = body.data?.items?.find(
+					(item) => item.title === "Seat Order Room",
+				);
+				expect(room?.players.map((player) => player.playerName)).toEqual([
+					"Player 1",
+					"Player 2",
+					"Player 3",
+				]);
+			});
+
 			test("ページネーションが正しく動作する", async () => {
 				// 5つのルームを作成
 				for (let i = 1; i <= 5; i++) {
