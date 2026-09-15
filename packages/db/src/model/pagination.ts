@@ -1,3 +1,4 @@
+import { stringToInt } from "@repo/shared/schema";
 import {
 	array,
 	type GenericSchema,
@@ -5,34 +6,7 @@ import {
 	number,
 	object,
 	optional,
-	pipe,
-	rawTransform,
-	string,
 } from "valibot";
-
-/**
- * 文字列を整数に変換するスキーマ（バリデーション付き）
- */
-const stringToInt = (minVal: number, maxVal?: number) =>
-	pipe(
-		string(),
-		rawTransform(({ dataset, addIssue, NEVER }) => {
-			const num = Number.parseInt(dataset.value, 10);
-			if (Number.isNaN(num)) {
-				addIssue({ message: "数値で入力してください" });
-				return NEVER;
-			}
-			if (num < minVal) {
-				addIssue({ message: `${minVal}以上で入力してください` });
-				return NEVER;
-			}
-			if (maxVal !== undefined && num > maxVal) {
-				addIssue({ message: `${maxVal}以下で入力してください` });
-				return NEVER;
-			}
-			return num;
-		}),
-	);
 
 /**
  * ページネーションクエリパラメータ（リクエスト用）
