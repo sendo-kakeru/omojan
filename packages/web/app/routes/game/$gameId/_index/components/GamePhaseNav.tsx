@@ -1,17 +1,15 @@
-import classNames from "classnames";
-import type { ReactNode } from "react";
 import { CircularTimerProgress } from "~/components/CircularTimerProgress";
+import { Tile } from "~/components/Tile";
 
 /**
  * ゲームフェーズ共通のナビゲーションバー
  *
- * Round表示、メッセージエリア、タイマーを含む
+ * Round表示とタイマーを含む
  */
 export function GamePhaseNav({
 	roundNo,
 	totalRounds = 4,
-	message,
-	messageVariant = "inactive",
+	statusText,
 	timerCount,
 	timerProgress,
 }: {
@@ -19,10 +17,14 @@ export function GamePhaseNav({
 	roundNo: number;
 	/** 総ラウンド数 */
 	totalRounds?: number;
-	/** メッセージ内容（nullの場合は非表示） */
-	message?: ReactNode;
-	/** メッセージエリアのスタイルバリエーション */
-	messageVariant?: "active" | "inactive";
+	/**
+	 * 画面の状態を読み上げにだけ伝える文言
+	 *
+	 * NOTE: 手番や完了は行のハイライト・手札のパルス・投票済みバッジで
+	 * 視覚的に伝わるので画面には出さない。ただしそれらは視覚専用で、
+	 * 制限時間のあるゲームで手番に気づけないと困るためここで読み上げる
+	 */
+	statusText?: string;
 	/** タイマーのカウント（秒） */
 	timerCount: number;
 	/** タイマーの進捗（0-100） */
@@ -32,21 +34,15 @@ export function GamePhaseNav({
 		<nav className="relative flex w-full items-center gap-x-8">
 			{/* Round表示はオーバーレイの下に配置 */}
 			<RoundIndicator roundNo={roundNo} totalRounds={totalRounds} />
-			{/* メッセージとタイマーはオーバーレイの上に表示 */}
-			{message ? (
-				<p
-					className={classNames(
-						"relative z-40 flex h-full flex-1 items-center rounded-lg border px-8 py-2 text-sm",
-						messageVariant === "active"
-							? "border-green-300 bg-white text-green-600"
-							: "border-gray-300 bg-gray-50 text-neutral-500",
-					)}
-				>
-					{message}
-				</p>
-			) : (
-				<div className="flex-1" />
-			)}
+			<div className="flex-1" />
+			{/*
+			 * NOTE: 状態が変わったときに読み上げさせたいので、空でも常に描画する。
+			 * 条件付きで出し入れするとライブリージョンとして機能しない
+			 */}
+			<p aria-live="polite" className="sr-only">
+				{statusText}
+			</p>
+			{/* タイマーはオーバーレイの上に表示 */}
 			<div className="relative z-40">
 				<CircularTimerProgress count={timerCount} progress={timerProgress} />
 			</div>
@@ -69,12 +65,19 @@ export function RoundIndicator({
 	totalRounds?: number;
 }) {
 	return (
-		<div className="grid w-fit place-items-center rounded-lg border border-gray-200 bg-white px-8 py-2 font-mono text-neutral-600">
-			<span className="text-xs">Round</span>
-			<div className="flex items-center">
-				<span className="text-base">{roundNo}</span>/
-				<span className="text-base">{totalRounds}</span>
+		<Tile
+			className="grid w-fit shrink-0 place-items-center px-12 py-2"
+			thickness="amber"
+		>
+			<span className="font-display text-[9px] text-lime-800/70 tracking-widest">
+				ROUND
+			</span>
+			<div className="flex items-baseline font-display text-lime-800">
+				<span className="text-base leading-none">{roundNo}</span>
+				<span className="ml-4 text-[10px] text-neutral-400">
+					/{totalRounds}
+				</span>
 			</div>
-		</div>
+		</Tile>
 	);
 }

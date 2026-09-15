@@ -1,11 +1,14 @@
 import type { FinishedRoom } from "@repo/db/model";
 import type { UserId } from "@repo/db/schema";
 import { FiChevronLeft } from "react-icons/fi";
-import { RxUpdate } from "react-icons/rx";
 import { Link, useSearchParams } from "react-router";
-import { Button } from "~/components/button/Button";
+import { Footer } from "~/components/Footer";
 import { Header } from "~/components/Header";
 import { Pagination } from "~/components/Pagination";
+import {
+	SectionHeading,
+	SectionRefreshButton,
+} from "~/components/SectionHeading";
 import { decodeUuid58Param } from "~/libs/uuid58";
 import { useRoomListSWR } from "~/routes/_index/hooks/useRoomListSWR";
 import { UserGameList } from "~/routes/users/$userId/_index/components/UserGameSection";
@@ -37,29 +40,26 @@ export default function Page({
 	};
 
 	return (
-		<>
+		<div className="grid min-h-full grid-rows-[auto_1fr_auto]">
 			<Header />
-			<main className="grid gap-y-16 pb-40">
-				<div className="flex items-center justify-between">
-					<div className="flex items-center gap-x-8">
-						<Link
-							aria-label="ユーザーページへ戻る"
-							className="flex items-center gap-x-4 text-neutral-500 hover:text-neutral-700"
-							to={`/users/${encodedUserId}`}
-						>
-							<FiChevronLeft className="size-20" />
-						</Link>
-						<h1 className="font-bold text-lg">対戦履歴</h1>
-					</div>
-					<Button
-						as="button"
-						color="gray"
-						leftIcon={<RxUpdate />}
-						onClick={() => mutate()}
-						variant="outline"
+			<main className="grid content-start gap-y-16 pb-40">
+				<div className="flex items-center gap-x-8">
+					<Link
+						aria-label="ユーザーページへ戻る"
+						className="-m-8 rounded-full p-8 text-neutral-500 transition-colors hover:bg-cream-100 hover:text-neutral-700"
+						to={`/users/${encodedUserId}`}
 					>
-						更新
-					</Button>
+						<FiChevronLeft className="size-20" />
+					</Link>
+					<div className="flex-1">
+						<SectionHeading
+							action={<SectionRefreshButton onClick={() => mutate()} />}
+							headingTag="h1"
+							mark="歴"
+						>
+							対戦履歴
+						</SectionHeading>
+					</div>
 				</div>
 
 				<UserGameList error={error} isLoading={isLoading} rooms={rooms} />
@@ -72,6 +72,7 @@ export default function Page({
 					/>
 				)}
 			</main>
-		</>
+			<Footer />
+		</div>
 	);
 }

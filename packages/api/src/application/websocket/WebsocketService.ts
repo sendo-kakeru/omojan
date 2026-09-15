@@ -8,6 +8,31 @@ import { safeParse } from "valibot";
  */
 export class WebSocketService {
 	/**
+	 * プレイヤーIDと直近で受理した接続のシーケンス番号のマップ
+	 */
+	private readonly lastConnectSeq = new Map<PlayerId, number>();
+
+	/**
+	 * 接続試行がこのプレイヤーにとって最新かどうか判定し、最新なら記録する。
+	 * 接続処理に非同期処理を挟むため、到達順は生成順と一致しない。
+	 * 古いリクエストの場合は接続要求を拒否する。
+	 * @param connectSeq クライアントでリクエストごとにインクリメントした値。大きい方が最新のリクエストとなる
+	 * @returns 最新の接続試行であれば true、古い場合は false
+	 */
+	acceptIfLatestConnect({
+		playerId,
+		connectSeq,
+	}: {
+		playerId: PlayerId;
+		connectSeq: number;
+	}): boolean {
+		const lastConnectSeq = this.lastConnectSeq.get(playerId) ?? -1;
+		if (connectSeq <= lastConnectSeq) return false;
+		this.lastConnectSeq.set(playerId, connectSeq);
+		return true;
+	}
+
+	/**
 	 * 受け付け済みソケットを指定して 101 Switching Protocols を返す。
 	 */
 	upgradeResponse({ client }: { client: WebSocket }): Response {

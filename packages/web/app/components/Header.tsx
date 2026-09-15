@@ -1,21 +1,25 @@
 import { Link } from "react-router";
 import { AuthUserMenuButton } from "./auth/AuthUserMenuButton";
 import { BeginnerMarkIcon } from "./icons/BeginnerMarkIcon";
+import { Tile } from "./Tile";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./Tooltip";
 
 export function Header() {
 	return (
 		<header className="flex items-start justify-between bg-transparent p-16">
-			<Link
-				className="hover:translate-0.5 flex size-32 overflow-hidden rounded-md shadow transition hover:shadow-none"
-				to="/"
-			>
-				<img
-					alt="おもじゃんオンライン"
-					height={32}
-					src="/icons/omojan.webp"
-					width={32}
-				/>
+			<Link aria-label="おもじゃんオンライン" className="w-fit" to="/">
+				<Tile
+					className="grid size-40 place-items-center"
+					interactive
+					thickness="amber"
+				>
+					<span
+						aria-hidden="true"
+						className="carved-text font-bold text-2xl text-orange-600"
+					>
+						お
+					</span>
+				</Tile>
 			</Link>
 			<div className="flex items-center gap-x-8">
 				<Tooltip>

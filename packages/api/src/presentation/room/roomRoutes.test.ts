@@ -383,6 +383,59 @@ describe("roomRoutes", () => {
 				expect(body.data?.items?.[0].title).toBe("Waiting Room");
 			});
 
+			test("プレイヤーが席順で返る", async () => {
+				const [game] = await db
+					.insert(gameTable)
+					.values({
+						isPrivate: false,
+						password: null,
+						status: "waiting",
+						timeLimit: 30,
+						title: "Seat Order Room",
+					})
+					.returning();
+
+				// 席順と異なる順序で登録し、レスポンスが席順に並び替えられることを確認する
+				await db.insert(playerTable).values([
+					{
+						gameId: game.id,
+						gameTokenHash: hashGameToken("token-seat-3"),
+						playerName: "Player 3",
+						seat: 3 as PlayerSeat,
+						userId: null,
+					},
+					{
+						gameId: game.id,
+						gameTokenHash: hashGameToken("token-seat-1"),
+						playerName: "Player 1",
+						seat: 1 as PlayerSeat,
+						userId: null,
+					},
+					{
+						gameId: game.id,
+						gameTokenHash: hashGameToken("token-seat-2"),
+						playerName: "Player 2",
+						seat: 2 as PlayerSeat,
+						userId: null,
+					},
+				]);
+
+				const response = await mockHonoClient.v1.rooms.$get({
+					query: { status: "waiting" },
+				});
+
+				expect(response.status).toBe(200);
+				const body = await response.json();
+				const room = body.data?.items?.find(
+					(item) => item.title === "Seat Order Room",
+				);
+				expect(room?.players.map((player) => player.playerName)).toEqual([
+					"Player 1",
+					"Player 2",
+					"Player 3",
+				]);
+			});
+
 			test("ページネーションが正しく動作する", async () => {
 				// 5つのルームを作成
 				for (let i = 1; i <= 5; i++) {
@@ -691,6 +744,69 @@ describe("roomRoutes", () => {
 					total: 3,
 					totalPages: 2,
 				});
+			});
+		});
+
+		describe("GET /rooms/count", () => {
+			test("status=activeで対戦中のルーム件数を取得できる", async () => {
+				// 募集中ルーム
+				await db.insert(gameTable).values({
+					isPrivate: false,
+					password: null,
+					status: "waiting",
+					timeLimit: 30,
+					title: "Waiting Room",
+				});
+
+				// 対戦中ルーム
+				const [activeGame] = await db
+					.insert(gameTable)
+					.values({
+						isPrivate: false,
+						password: null,
+						status: "active",
+						timeLimit: 30,
+						title: "Active Room",
+					})
+					.returning();
+				await db.insert(playerTable).values({
+					gameId: activeGame.id,
+					gameTokenHash: hashGameToken("token-1"),
+					playerName: "Player 1",
+					seat: 1 as PlayerSeat,
+					userId: null,
+				});
+
+				// 終了済みルーム
+				await db.insert(gameTable).values({
+					isPrivate: false,
+					password: null,
+					status: "finished",
+					timeLimit: 30,
+					title: "Finished Room",
+				});
+
+				const response = await app.request("/v1/rooms/count?status=active");
+
+				expect(response.status).toBe(200);
+				const body = await response.json();
+				expect(body.data?.count).toBe(1);
+			});
+
+			test("対戦中のルームが無い場合は0を返す", async () => {
+				await db.insert(gameTable).values({
+					isPrivate: false,
+					password: null,
+					status: "waiting",
+					timeLimit: 30,
+					title: "Waiting Room",
+				});
+
+				const response = await app.request("/v1/rooms/count?status=active");
+
+				expect(response.status).toBe(200);
+				const body = await response.json();
+				expect(body.data?.count).toBe(0);
 			});
 		});
 

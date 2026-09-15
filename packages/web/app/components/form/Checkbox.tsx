@@ -9,7 +9,7 @@ export function Checkbox({
 	disabled,
 	hasError,
 	...props
-}: Omit<React.ComponentPropsWithRef<"input">, "id" | "type"> & {
+}: Omit<React.ComponentProps<"input">, "id" | "type"> & {
 	label?: React.ReactNode;
 	hasError?: boolean;
 }) {

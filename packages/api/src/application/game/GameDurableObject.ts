@@ -26,6 +26,11 @@ import {
 	type RoundTheme,
 	type Submission,
 } from "@repo/db/schema";
+import {
+	RESULT_DISPLAY_MS,
+	ROUND_START_DISPLAY_MS,
+	VOTE_TIMEOUT_MS,
+} from "@repo/shared/constants/game";
 import { and, eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import pRetry from "p-retry";
@@ -45,20 +50,21 @@ const REACTION_RATE_LIMIT_MS = 300 as const;
 const TIMING = {
 	/** 初期接続待機時間 */
 	INITIAL_WAIT_MS: 10_000,
-	/** ラウンド開始オーバーレイ表示時間 */
-	OVERLAY_DISPLAY_MS: 2_000,
 	/** 結果表示時間 */
-	RESULT_DISPLAY_MS: 6_000,
+	RESULT_DISPLAY_MS,
+	/** ラウンド開始の合図の表示時間 */
+	ROUND_START_DISPLAY_MS,
 	/** 状態遷移間の待機時間 */
 	TRANSITION_DELAY_MS: 1_000,
 	/** 投票タイムアウト時間 */
-	VOTE_TIMEOUT_MS: 15_000,
+	VOTE_TIMEOUT_MS,
 } as const;
 
 /** DurableObject内部で使用するプレイヤー情報（GamePlayerItemを拡張） */
 type PlayerState = GamePlayerItem & {
 	cards: GamePlayerCard[];
 	isCpu: Player["isCpu"];
+	seat: Player["seat"];
 };
 
 /** 永続化するゲーム状態の型 */
@@ -139,7 +145,7 @@ export class GameDurableObject extends DurableObject<Env> {
 		// Durable Objectのハイバネーション復帰時に状態を復元
 		await this.restoreState();
 
-		const { gameId, token } = this.getSearchParams(request);
+		const { gameId, token, connectSeq } = this.getSearchParams(request);
 		this.ensureGameId({ gameId });
 
 		// ゲームステータスをチェック（終了したゲームへの接続を拒否）
@@ -158,6 +164,18 @@ export class GameDurableObject extends DurableObject<Env> {
 		if (!client || !server) {
 			throw new HTTPException(500, {
 				message: "WebSocket Pairの作成に失敗しました。",
+			});
+		}
+
+		// より新しい接続があったら接続拒否（主にReact strict mode）
+		if (
+			!this.webSocketService.acceptIfLatestConnect({
+				connectSeq,
+				playerId: player.id,
+			})
+		) {
+			throw new HTTPException(409, {
+				message: "より新しい接続が既に確立されています",
 			});
 		}
 
@@ -394,8 +412,10 @@ export class GameDurableObject extends DurableObject<Env> {
 			// ソケットが見つからない場合はスキップ（fetch()でsendCurrentStateToPlayer()が呼ばれる）
 			await this.broadcastRoundStart();
 
-			// 2秒後にTURN_STARTを送信（開始オーバーレイ表示用の待機）
-			await this.ctx.storage.setAlarm(Date.now() + TIMING.OVERLAY_DISPLAY_MS);
+			// ラウンド開始の合図を見せてからTURN_STARTを送信する
+			await this.ctx.storage.setAlarm(
+				Date.now() + TIMING.ROUND_START_DISPLAY_MS,
+			);
 		} catch (error) {
 			console.error("ゲーム開始処理に失敗しました:", error);
 			// エラー時は異常終了処理を実行
@@ -436,9 +456,13 @@ export class GameDurableObject extends DurableObject<Env> {
 	}
 
 	/**
-	 * 共通クエリ（token / gameId）を抽出し検証する。
+	 * 共通クエリ（token / gameId / connectSeq）を抽出し検証する。
 	 */
-	private getSearchParams(request: Request): { gameId: GameId; token: string } {
+	private getSearchParams(request: Request): {
+		gameId: GameId;
+		token: string;
+		connectSeq: number;
+	} {
 		let url: URL;
 
 		try {
@@ -457,7 +481,17 @@ export class GameDurableObject extends DurableObject<Env> {
 			throw new HTTPException(400, { message: "gameIdが正しくありません" });
 		}
 
-		return { gameId, token };
+		const connectSeqParam = url.searchParams.get("connectSeq");
+		const connectSeq = Number(connectSeqParam);
+		if (connectSeqParam === null || !Number.isFinite(connectSeq)) {
+			throw new HTTPException(400, { message: "connectSeqが正しくありません" });
+		}
+
+		return {
+			connectSeq,
+			gameId,
+			token,
+		};
 	}
 
 	/**
@@ -564,7 +598,6 @@ export class GameDurableObject extends DurableObject<Env> {
 							id: p.id,
 							image: p.image,
 							playerName: p.playerName,
-							seat: p.seat,
 							submission: null,
 							winCount: p.winCount,
 						})),
@@ -599,7 +632,6 @@ export class GameDurableObject extends DurableObject<Env> {
 							id: p.id,
 							image: p.image,
 							playerName: p.playerName,
-							seat: p.seat,
 							submission: p.submission,
 							winCount: p.winCount,
 						})),
@@ -733,7 +765,6 @@ export class GameDurableObject extends DurableObject<Env> {
 							id: p.id,
 							image: p.image,
 							playerName: p.playerName,
-							seat: p.seat,
 							submission: p.submission,
 							winCount: p.winCount,
 						})),
@@ -787,7 +818,6 @@ export class GameDurableObject extends DurableObject<Env> {
 							id: p.id,
 							image: p.image,
 							playerName: p.playerName,
-							seat: p.seat,
 							submission: p.submission,
 							voteCount: playerVoteCounts.get(p.id) ?? 0,
 							winCount: p.winCount,
@@ -827,7 +857,6 @@ export class GameDurableObject extends DurableObject<Env> {
 							id: p.id,
 							image: p.image,
 							playerName: p.playerName,
-							seat: p.seat,
 							submission: p.submission,
 							winCount: p.winCount,
 						})),
@@ -1106,9 +1135,9 @@ export class GameDurableObject extends DurableObject<Env> {
 		// ROUND_STARTを送信
 		await this.broadcastRoundStart();
 
-		// 2秒後にTURN_STARTを送信（開始オーバーレイ表示用の待機）
+		// ラウンド開始の合図を見せてからTURN_STARTを送信する
 		this.state = "START_PENDING";
-		await this.ctx.storage.setAlarm(Date.now() + TIMING.OVERLAY_DISPLAY_MS);
+		await this.ctx.storage.setAlarm(Date.now() + TIMING.ROUND_START_DISPLAY_MS);
 	}
 
 	/**
@@ -1245,7 +1274,6 @@ export class GameDurableObject extends DurableObject<Env> {
 				id: p.id,
 				image: p.image,
 				playerName: p.playerName,
-				seat: p.seat,
 				submission: p.submission,
 				winCount: p.winCount,
 			})),

@@ -99,7 +99,6 @@ export class CleanupService {
 		const gamesWithInsufficientPlayers = await this.db
 			.select({
 				gameId: playerTable.gameId,
-				playerCount: sql<number>`count(*)`.as("player_count"),
 			})
 			.from(playerTable)
 			.innerJoin(gameTable, eq(playerTable.gameId, gameTable.id))

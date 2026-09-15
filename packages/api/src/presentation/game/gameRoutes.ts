@@ -25,7 +25,7 @@ export const routes = new Hono<
 		vValidator("param", gameIdRequestParamSchema),
 		async (c) => {
 			const { gameId } = c.req.valid("param");
-			const { token } = c.req.valid("query");
+			const { connectSeq, token } = c.req.valid("query");
 
 			const id = c.env.GAME_DURABLE_OBJECT.idFromName(gameId);
 			const gameStub = c.env.GAME_DURABLE_OBJECT.get(id);
@@ -34,6 +34,7 @@ export const routes = new Hono<
 			durableObjectUrl.search = "";
 			durableObjectUrl.searchParams.set("token", token);
 			durableObjectUrl.searchParams.set("gameId", gameId);
+			durableObjectUrl.searchParams.set("connectSeq", String(connectSeq));
 
 			return gameStub.fetch(
 				new Request(durableObjectUrl.toString(), c.req.raw),

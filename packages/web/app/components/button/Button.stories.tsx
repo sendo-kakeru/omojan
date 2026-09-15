@@ -27,11 +27,12 @@ type Args = {
 
 const COLORS = [
 	"primary",
+	"secondary",
 	"danger",
-	"black",
 	"gray",
+	"cream",
 ] as const satisfies ComponentProps<typeof Button>["color"][];
-const SIZES = ["S", "M", "L"] as const satisfies ComponentProps<
+const SIZES = ["S", "M", "L", "XL"] as const satisfies ComponentProps<
 	typeof Button
 >["size"][];
 const VARIANTS = ["fill", "outline"] as const satisfies ComponentProps<

@@ -45,6 +45,7 @@ export class GameService {
 			players: (GamePlayerItem & {
 				cards: GamePlayerCard[];
 				isCpu: boolean;
+				seat: PlayerSeat;
 			})[];
 		}
 	> {
@@ -199,6 +200,7 @@ export class GameService {
 				players: (GamePlayerItem & {
 					cards: GamePlayerCard[];
 					isCpu: boolean;
+					seat: PlayerSeat;
 				})[];
 			};
 		});
@@ -567,12 +569,12 @@ export class GameService {
 				id: playerTable.id,
 				image: userTable.image,
 				playerName: playerNameExpression,
-				seat: playerTable.seat,
 				userId: playerTable.userId,
 			})
 			.from(playerTable)
 			.leftJoin(userTable, eq(playerTable.userId, userTable.id))
-			.where(eq(playerTable.gameId, gameId));
+			.where(eq(playerTable.gameId, gameId))
+			.orderBy(asc(playerTable.seat));
 
 		// ラウンド一覧を取得
 		const rounds = await this.db
@@ -607,9 +609,9 @@ export class GameService {
 			.where(inArray(submissionTable.roundId, roundIds));
 
 		// 提出に紐づくカード（テキスト）を取得
-		const submissionIds = submissions
-			.map((submission) => submission.submissionId)
-			.filter((id) => id !== null);
+		const submissionIds = submissions.map(
+			(submission) => submission.submissionId,
+		);
 		const cards = await this.db
 			.select({
 				submissionId: playerCardTable.submissionId,
@@ -672,35 +674,33 @@ export class GameService {
 				);
 
 				return {
-					players: players
-						.sort((a, b) => a.seat - b.seat)
-						.map((player) => {
-							const submission = roundSubmissions.find(
-								(submission) => submission.playerId === player.id,
-							);
-							const card = submission
-								? cards.find(
-										(card) => card.submissionId === submission.submissionId,
-									)
-								: undefined;
+					players: players.map((player) => {
+						const submission = roundSubmissions.find(
+							(submission) => submission.playerId === player.id,
+						);
+						const card = submission
+							? cards.find(
+									(card) => card.submissionId === submission.submissionId,
+								)
+							: undefined;
 
-							// テーマとカードテキストを組み合わせて提出テキストを生成
-							const submissionText =
-								submission?.position === "prefix"
-									? `${card?.text ?? ""}${theme?.text ?? ""}`
-									: `${theme?.text ?? ""}${card?.text ?? ""}`;
+						// テーマとカードテキストを組み合わせて提出テキストを生成
+						const submissionText =
+							submission?.position === "prefix"
+								? `${card?.text ?? ""}${theme?.text ?? ""}`
+								: `${theme?.text ?? ""}${card?.text ?? ""}`;
 
-							return {
-								id: player.id,
-								image: player.image,
-								isWinner: (roundWinnersByRoundId.get(round.id) ?? []).includes(
-									player.id,
-								),
-								playerName: player.playerName,
-								submission: submissionText,
-								userId: player.userId,
-							};
-						}),
+						return {
+							id: player.id,
+							image: player.image,
+							isWinner: (roundWinnersByRoundId.get(round.id) ?? []).includes(
+								player.id,
+							),
+							playerName: player.playerName,
+							submission: submissionText,
+							userId: player.userId,
+						};
+					}),
 					roundNo: round.roundNo,
 					theme: theme?.text ?? "",
 				};
@@ -731,6 +731,7 @@ export class GameService {
 			players: (GamePlayerItem & {
 				cards: GamePlayerCard[];
 				isCpu: boolean;
+				seat: PlayerSeat;
 			})[];
 		}
 	> {

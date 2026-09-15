@@ -1,3 +1,4 @@
+import { stringToInt } from "@repo/shared/schema";
 import { createSelectSchema } from "drizzle-valibot";
 import {
 	array,
@@ -43,13 +44,17 @@ export type { BrandSymbol };
 export const roomStatusSchema = picklist(["waiting", "finished"]);
 export type RoomStatus = InferOutput<typeof roomStatusSchema>;
 
+/** 部屋件数取得で使用するステータス */
+export const roomCountStatusSchema = picklist(["active"]);
+export type RoomCountStatus = InferOutput<typeof roomCountStatusSchema>;
+
 export const roomPasswordSchema = pipe(
 	string("パスワードを入力してください"),
 	length(6, "パスワードは6文字で入力してください"),
 );
 
 const roomPlayerSchema = object({
-	...pick(playerSchema, ["playerName", "seat"]).entries,
+	...pick(playerSchema, ["playerName", "isCpu"]).entries,
 	id: playerIdSchema,
 	image: nullable(userSchema.entries.image),
 	userId: nullable(playerSchema.entries.userId),
@@ -72,6 +77,22 @@ export const getRoomListRequestQuerySchema = object({
 });
 export type GetRoomListRequestQuery = InferOutput<
 	typeof getRoomListRequestQuerySchema
+>;
+
+// count
+export const getRoomCountRequestQuerySchema = object({
+	/** 部屋のステータス（default: "active"） */
+	status: optional(roomCountStatusSchema),
+});
+export type GetRoomCountRequestQuery = InferOutput<
+	typeof getRoomCountRequestQuerySchema
+>;
+
+export const getRoomCountResponseBodySchema = object({
+	count: number(),
+});
+export type GetRoomCountResponseBody = InferOutput<
+	typeof getRoomCountResponseBodySchema
 >;
 
 /** 募集中の部屋 */
@@ -197,6 +218,12 @@ export type CreateRoomResponseBody = InferOutput<
 
 // verify token
 export const verifyRoomTokenRequestQuerySchema = object({
+	/**
+	 * 接続生成順を示す単調増加のシーケンス番号。
+	 * リクエスト順に接続を入れ替えても、DBのレスポンスがその順に返らないと正しく動かないことがあったため、
+	 * 多重でリクエスト送信された時のためにインクリメントした番号の大きさで最新リクエストを判断する（主にReact strict mode）
+	 */
+	connectSeq: stringToInt(0),
 	token: string(),
 });
 

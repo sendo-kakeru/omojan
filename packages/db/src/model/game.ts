@@ -70,7 +70,7 @@ const playerSubmissionSchema = object({
 });
 
 const gamePlayerItemSchema = object({
-	...pick(playerSchema, ["id", "playerName", "seat"]).entries,
+	...pick(playerSchema, ["id", "playerName"]).entries,
 	...pick(userSchema, ["image"]).entries,
 	submission: nullable(playerSubmissionSchema),
 	winCount: number(),

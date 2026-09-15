@@ -10,6 +10,7 @@ import type {
 	GetRoomResponseBody,
 	JoinRoomRequestBody,
 	JoinRoomResponseBody,
+	RoomCountStatus,
 } from "@repo/db/model";
 import {
 	type Game,
@@ -30,6 +31,7 @@ import {
 } from "@repo/db/schema";
 import {
 	and,
+	asc,
 	count,
 	desc,
 	type ExtractTablesWithRelations,
@@ -156,15 +158,13 @@ export class RoomService {
 				createdAt: game.createdAt.toISOString(),
 				gameId: game.id,
 				isPrivate: game.isPrivate,
-				players: (groupedPlayersByGameId.get(game.id) ?? [])
-					.sort((a, b) => a.seat - b.seat)
-					.map((player) => ({
-						id: player.id,
-						image: player.image,
-						playerName: player.playerName,
-						seat: player.seat,
-						userId: player.userId,
-					})),
+				players: (groupedPlayersByGameId.get(game.id) ?? []).map((player) => ({
+					id: player.id,
+					image: player.image,
+					isCpu: player.isCpu,
+					playerName: player.playerName,
+					userId: player.userId,
+				})),
 				timeLimit: game.timeLimit,
 				title: game.title,
 			})),
@@ -175,6 +175,22 @@ export class RoomService {
 				totalPages: Math.ceil(total / limit),
 			},
 		};
+	}
+
+	/**
+	 * ルーム件数を取得する
+	 */
+	async countByStatus({
+		status,
+	}: {
+		status: RoomCountStatus;
+	}): Promise<number> {
+		const [result] = await this.db
+			.select({ count: count() })
+			.from(gameTable)
+			.where(eq(gameTable.status, status));
+
+		return result?.count ?? 0;
 	}
 
 	/**
@@ -249,16 +265,16 @@ export class RoomService {
 					finishedAt: game.finishedAt.toISOString(),
 					gameId: game.id,
 					isPrivate: game.isPrivate,
-					players: (groupedPlayersByGameId.get(game.id) ?? [])
-						.sort((a, b) => a.seat - b.seat)
-						.map((player) => ({
+					players: (groupedPlayersByGameId.get(game.id) ?? []).map(
+						(player) => ({
 							id: player.id,
 							image: player.image,
+							isCpu: player.isCpu,
 							isWinner: winnerIds.has(player.id),
 							playerName: player.playerName,
-							seat: player.seat,
 							userId: player.userId,
-						})),
+						}),
+					),
 					timeLimit: game.timeLimit,
 					title: game.title,
 				};
@@ -281,13 +297,14 @@ export class RoomService {
 				gameId: playerTable.gameId,
 				id: playerTable.id,
 				image: userTable.image,
+				isCpu: playerTable.isCpu,
 				playerName: playerNameExpression,
-				seat: playerTable.seat,
 				userId: playerTable.userId,
 			})
 			.from(playerTable)
 			.leftJoin(userTable, eq(playerTable.userId, userTable.id))
-			.where(inArray(playerTable.gameId, gameIds));
+			.where(inArray(playerTable.gameId, gameIds))
+			.orderBy(asc(playerTable.seat));
 
 		const groupedPlayers = new Map<GameId, typeof players>();
 		for (const player of players) {
@@ -503,7 +520,6 @@ export class RoomService {
 			// 参加中のplayer取得
 			const participatingPlayers = await tx
 				.select({
-					id: playerTable.id,
 					seat: playerTable.seat,
 					userId: playerTable.userId,
 				})

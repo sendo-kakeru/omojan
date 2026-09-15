@@ -76,7 +76,6 @@ const defaultArgs = {
 	isStarting: false,
 	onExit: noop,
 	onStart: noop,
-	transitionCount: null,
 };
 
 export const OneParticipant: Story = {
@@ -145,16 +144,6 @@ export const HostStarting: Story = {
 		roomMeta: defaultRoomMeta,
 	},
 	name: "ホスト - 開始処理中",
-};
-
-export const MatchingCompleted: Story = {
-	args: {
-		...defaultArgs,
-		participants: mockParticipants,
-		roomMeta: defaultRoomMeta,
-		transitionCount: 3,
-	},
-	name: "マッチング完了",
 };
 
 export const PrivateRoomGuest: Story = {

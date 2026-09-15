@@ -1,10 +1,9 @@
 import { uuid58Encode } from "@nakanoaas/uuid58";
 import type { FinishedRoom } from "@repo/db/model";
 import type { UserId } from "@repo/db/schema";
-import { FiChevronRight } from "react-icons/fi";
-import { Button } from "~/components/button/Button";
-import { RoomCard } from "~/routes/_index/components/RoomCard";
-import { RoomCardSkeleton } from "~/routes/_index/components/RoomCardSkeleton";
+import { SectionHeading, SectionMoreLink } from "~/components/SectionHeading";
+import { FinishedRoomCard } from "~/routes/_index/components/roomCard/FinishedRoomCard";
+import { FinishedRoomCardSkeleton } from "~/routes/_index/components/roomCard/FinishedRoomCardSkeleton";
 import { USER_GAMES_LIMIT } from "../constants";
 
 export function UserGameSection({
@@ -22,19 +21,16 @@ export function UserGameSection({
 }) {
 	return (
 		<section className="grid gap-y-12">
-			<div className="flex items-center justify-between">
-				<h2 className="font-bold">対戦履歴</h2>
-				{total && total > USER_GAMES_LIMIT && (
-					<Button
-						as="link"
-						rightIcon={<FiChevronRight className="size-16" />}
-						to={`/users/${uuid58Encode(userId)}/games`}
-						variant="outline"
-					>
-						もっと見る
-					</Button>
-				)}
-			</div>
+			<SectionHeading
+				action={
+					total !== undefined && total > USER_GAMES_LIMIT ? (
+						<SectionMoreLink to={`/users/${uuid58Encode(userId)}/games`} />
+					) : undefined
+				}
+				mark="歴"
+			>
+				対戦履歴
+			</SectionHeading>
 			<UserGameList error={error} isLoading={isLoading} rooms={rooms} />
 		</section>
 	);
@@ -53,7 +49,7 @@ export function UserGameList({
 		return (
 			<div className="grid gap-y-8">
 				{Array.from({ length: 5 }).map((_, index) => (
-					<RoomCardSkeleton
+					<FinishedRoomCardSkeleton
 						// biome-ignore lint/suspicious/noArrayIndexKey: ローディングのため問題ない
 						key={index}
 						srText={index === 0 ? "対戦履歴を取得中" : undefined}
@@ -65,7 +61,7 @@ export function UserGameList({
 
 	if (error) {
 		return (
-			<p className="py-16 text-center text-red-400">
+			<p className="py-16 text-center text-orange-700 text-sm">
 				対戦履歴の取得に失敗しました
 			</p>
 		);
@@ -73,14 +69,16 @@ export function UserGameList({
 
 	if (!rooms || rooms.length === 0) {
 		return (
-			<p className="py-16 text-center text-neutral-500">対戦履歴がありません</p>
+			<p className="py-16 text-center text-neutral-500 text-sm">
+				対戦履歴がありません
+			</p>
 		);
 	}
 
 	return (
 		<div className="grid gap-y-8">
 			{rooms.map((room) => (
-				<RoomCard key={room.gameId} room={room} status="finished" />
+				<FinishedRoomCard key={room.gameId} room={room} />
 			))}
 		</div>
 	);

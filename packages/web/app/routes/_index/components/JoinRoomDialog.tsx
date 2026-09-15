@@ -138,7 +138,7 @@ export function JoinRoomDialog({
 			title={room.title}
 		>
 			<div className="grid gap-y-16">
-				<div className="grid gap-y-4 rounded-lg border border-gray-200 bg-gray-50 p-12">
+				<div className="grid gap-y-4 rounded-lg border border-cream-200 bg-cream-100/50 p-12">
 					<div className="grid gap-y-4">
 						<div className="flex items-center gap-x-4 text-neutral-500">
 							<FaRegClock />
@@ -169,7 +169,7 @@ export function JoinRoomDialog({
 					onSubmit={(event) => {
 						event.preventDefault();
 						event.stopPropagation();
-						form.handleSubmit();
+						void form.handleSubmit();
 					}}
 				>
 					<div className="grid gap-y-12">
@@ -248,7 +248,7 @@ export function JoinRoomDialog({
 							</form.Field>
 						)}
 					</div>
-					<div className="grid grid-cols-2 gap-x-12">
+					<div className="grid grid-cols-2 gap-x-12 pb-12">
 						<Button as="button" color="gray" onClick={() => setIsOpen(false)}>
 							キャンセル
 						</Button>
@@ -261,6 +261,7 @@ export function JoinRoomDialog({
 							{(state) => (
 								<Button
 									as="button"
+									color="primary"
 									disabled={!state.canSubmit || isPending}
 									leftIcon={
 										isPending ? <Spinner className="size-16" /> : undefined

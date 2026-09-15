@@ -1,7 +1,7 @@
 /**
  * 日付を相対時間形式でフォーマットする
  * @param dateString ISO形式の日付文字列
- * @returns n分前、n時間前、n日前、n週間前 形式の文字列
+ * @returns n分前、n時間前、n日前、n週間前、nヶ月前 形式の文字列
  */
 export function formatRelativeTime(dateString: string): string {
 	const date = new Date(dateString);
@@ -11,6 +11,7 @@ export function formatRelativeTime(dateString: string): string {
 	const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
 	const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 	const diffWeeks = Math.floor(diffDays / 7);
+	const diffMonths = Math.floor(diffDays / 30);
 
 	if (diffMinutes < 1) {
 		return "たった今";
@@ -24,7 +25,10 @@ export function formatRelativeTime(dateString: string): string {
 	if (diffDays < 7) {
 		return `${diffDays}日前`;
 	}
-	return `${diffWeeks}週間前`;
+	if (diffDays < 30) {
+		return `${diffWeeks}週間前`;
+	}
+	return `${diffMonths}ヶ月前`;
 }
 
 /**

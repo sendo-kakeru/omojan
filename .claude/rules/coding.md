@@ -13,3 +13,4 @@ paths: ["**/*.{ts,tsx}"]
 - 関数の引数が複数あるものは基本的にオブジェクトで渡す。
 - 型定義は interface ではなく type
 - 型定義はなるべくモデルのフィールドを参照する。（特に id）
+- 要素の props 型は `React.ComponentProps` に統一する。React 19 では `ComponentPropsWithRef` と同一のため使い分けない。ref を受け取らせない場合のみ `ComponentPropsWithoutRef` を使う

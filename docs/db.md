@@ -21,12 +21,13 @@
 ## スキーマ変更フロー
 
 1. `packages/db/src/schema/` 配下のスキーマファイルを編集
-2. `pnpm run db:changed --filter @repo/db` を実行
+2. `turso auth login` でCLIをログイン
+3. `pnpm run db:changed --filter @repo/db` を実行
    - マイグレーションファイル生成（`db:gen`）
    - ローカル・E2E DBへの適用（`db:migrate:local`, `db:migrate:e2e`）
    - ローカルDBダンプ（`db:dump`）
-3. 既存データの変換が必要な場合、生成されたマイグレーションファイルにSQL文を手動で追加する
-4. 生成されたマイグレーションファイル（`packages/db/src/migrations/`）をコミットに含める
-5. STG・本番への適用はブランチマージ時にGitHub Actionsで自動実行
+4. 既存データの変換が必要な場合、生成されたマイグレーションファイルにSQL文を手動で追加する
+5. 生成されたマイグレーションファイル（`packages/db/src/migrations/`）をコミットに含める
+6. STG・本番への適用はブランチマージ時にGitHub Actionsで自動実行
    - `staging`ブランチへのマージ → STG DBに適用
    - `main`ブランチへのマージ → 本番DBに適用

@@ -4,12 +4,14 @@ import type {
 } from "@repo/db/model";
 import type { PlayerCard, PlayerCardId, PlayerId } from "@repo/db/schema";
 import classNames from "classnames";
+import type { ReactNode } from "react";
 import { useEffect, useState, useTransition } from "react";
 import { Avatar } from "~/components/Avatar";
 import { Badge } from "~/components/Badge";
 import { Separator } from "~/components/Separator";
 import { Spinner } from "~/components/Spinner";
 import { useCountdown } from "~/hooks/useCountdown";
+import { getDisplayName } from "~/libs/displayName";
 import { AVATAR_IMAGE_DIMENSIONS, buildImageUrl } from "~/libs/image";
 import { createCombination, vibrate } from "../libs/gameUtils";
 import { GamePhaseLayout } from "./GamePhaseLayout";
@@ -22,9 +24,11 @@ type Position = "prefix" | "suffix";
 
 export function GameSubmission({
 	data,
+	reactionBar,
 	sendSubmission,
 }: {
 	data: GameServerSubmissionMessage;
+	reactionBar?: ReactNode;
 	sendSubmission: (
 		message: GameClientSubmissionMessage["submission"],
 	) => Promise<void>;
@@ -82,8 +86,12 @@ export function GameSubmission({
 		});
 	};
 
+	// 自分の番の合図を描画するか
+	// NOTE: 表示も非表示もアニメーションが持つので状態は持たない。
+	const showMyTurnBanner = isMyTurn && !isStarting;
+
 	// 操作フェーズの判定
-	const isActivePhase = isMyTurn && !isConfirmed;
+	const isActivePhase = isMyTurn && !isConfirmed && !isStarting;
 
 	// 確定済みの提出情報（自分 or 他プレイヤー）
 	const resolvedSubmission = (() => {
@@ -106,6 +114,19 @@ export function GameSubmission({
 			return { position: game.submitted.position, text };
 		}
 	})();
+
+	// ナビバーに表示する自分の番かどうかのメッセージ
+	const getStatusText = (): string | undefined => {
+		// 開始の合図は視覚的にはバナーで伝わるが、お題は読み上げにも必要
+		if (isStarting)
+			return `ラウンド${game.roundNo}が始まります。お題は「${game.theme}」`;
+		if (isMyTurn) {
+			return isConfirmed
+				? "提出完了！他のプレイヤーを待っています"
+				: "あなたの番です";
+		}
+		return "他のプレイヤーの番です";
+	};
 
 	const handleCardClick = (cardId: PlayerCardId): void => {
 		if (isConfirmed) return;
@@ -143,58 +164,71 @@ export function GameSubmission({
 
 	return (
 		<>
+			{/* ラウンド開始の合図 */}
 			{isStarting && (
-				<div className="fixed inset-0 z-80 flex items-center justify-center bg-black/40">
-					<div className="grid w-full max-w-xs place-items-center gap-y-24 rounded-2xl bg-white px-24 py-32 shadow-xl">
-						<div className="grid place-items-center gap-y-8">
-							<p className="font-mono text-neutral-500 text-sm">Round</p>
-							<p className="font-bold text-4xl text-neutral-800">
+				<>
+					<div className="pointer-events-none fixed inset-0 z-20 animate-round-scrim bg-olive-900/50 motion-reduce:animate-none" />
+					<div
+						aria-hidden="true"
+						className="pointer-events-none fixed inset-0 z-50 grid place-items-center"
+					>
+						<div className="grid animate-round-banner place-items-center gap-y-4 text-cream-50 drop-shadow-[0_4px_24px_var(--color-orange-600)] motion-reduce:animate-none">
+							<p className="font-display text-xs tracking-[0.3em]">ROUND</p>
+							<p className="font-display text-6xl">
 								{game.roundNo}
-								<span className="text-neutral-400"> / 4</span>
+								<span className="text-2xl text-cream-50/70"> / 4</span>
 							</p>
-						</div>
-						<div className="grid w-full place-items-center gap-y-8">
-							<p className="text-neutral-500 text-sm">お題</p>
-							<p className="w-full rounded-lg border border-yellow-300 bg-yellow-50 px-16 py-12 text-center font-bold text-lg text-neutral-800">
-								{game.theme}
-							</p>
-						</div>
-						<div className="flex items-center gap-x-8 text-neutral-500">
-							<Spinner className="size-20" />
-							<p className="text-sm">まもなく開始...</p>
 						</div>
 					</div>
-				</div>
+				</>
 			)}
 			<GamePhaseLayout
 				nav={
 					<GamePhaseNav
-						messageVariant={isMyTurn ? "active" : "inactive"}
 						roundNo={game.roundNo}
-						timerCount={count}
-						timerProgress={progress}
+						statusText={getStatusText()}
+						// NOTE: ラウンド開始モーダル表示中は満タンの状態を見せる
+						timerCount={isStarting ? game.timeLimit : count}
+						timerProgress={isStarting ? 100 : progress}
 					/>
 				}
 			>
 				{/* 自分の番でオーバーレイ（操作対象以外を暗く） */}
 				{isActivePhase && (
-					<div className="pointer-events-none fixed inset-0 z-20 bg-black/50" />
+					<div className="pointer-events-none fixed inset-0 z-20 bg-olive-900/55" />
 				)}
 
-				{/* 他プレイヤーの提出待機中メッセージ */}
-				{!isMyTurn && !isStarting && (
+				{/* 自分の番になった瞬間だけ、画面中央に一瞬表示する合図 */}
+				{showMyTurnBanner && (
+					<div
+						aria-hidden="true"
+						className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center"
+					>
+						<p
+							className={classNames(
+								"px-16 text-center font-display text-4xl text-cream-50",
+								"animate-turn-banner drop-shadow-[0_4px_24px_var(--color-orange-600)] motion-reduce:animate-turn-banner-fade",
+							)}
+						>
+							あなたの番です
+						</p>
+					</div>
+				)}
+
+				{/* 自分が操作できない間、進行中であることを示すメッセージ */}
+				{(isStarting || !isMyTurn) && (
 					<div className="pointer-events-none fixed bottom-120 left-1/2 z-20 -translate-x-1/2">
-						<div className="flex items-center gap-x-8 rounded-full bg-neutral-900/60 px-24 py-12 shadow-2xl">
+						<div className="flex items-center gap-x-8 rounded-full bg-lime-800/90 px-24 py-12 shadow-2xl">
 							<Spinner className="size-24 text-white" />
-							<p className="whitespace-nowrap text-white">
-								他のプレイヤーが選択中...
+							<p className="whitespace-nowrap font-bold text-sm text-white">
+								{isStarting ? "まもなく開始..." : "他のプレイヤーが選択中..."}
 							</p>
 						</div>
 					</div>
 				)}
 
 				<main className="relative grid grid-rows-[auto_1fr_auto]">
-					<section className="relative grid rounded-lg border border-gray-200 bg-white">
+					<section className="relative grid rounded-lg border border-cream-200 bg-cream-50/85">
 						{game.players.map((player, index) => {
 							const isSelf = player.id === mePlayer.id;
 							const isCurrentPlayer = player.id === currentPlayerId;
@@ -204,8 +238,9 @@ export function GameSubmission({
 								<div className="w-full" key={player.id}>
 									<div
 										className={classNames(
-											"flex items-center gap-x-8 rounded-lg border-green-400 px-8 py-4 transition-colors md:px-12",
-											isCurrentPlayer && "border bg-green-50",
+											"flex items-center gap-x-8 rounded-lg px-8 py-4 transition-colors md:px-12",
+											isCurrentPlayer &&
+												"border-2 border-lime-800 bg-lime-800/10 shadow-[inset_4px_0_0_var(--color-amber-300)]",
 										)}
 									>
 										<Avatar
@@ -218,9 +253,9 @@ export function GameSubmission({
 										/>
 										<div className="grid flex-1 gap-y-1 md:gap-y-2">
 											<p className="font-semibold text-xs">
-												{player.playerName}
+												{getDisplayName(player.playerName)}
 												{isSelf && (
-													<span className="font-normal text-neutral-300">
+													<span className="font-normal text-neutral-400">
 														（自分）
 													</span>
 												)}
@@ -231,7 +266,7 @@ export function GameSubmission({
 												{combination ?? "未選択"}
 											</Badge>
 										</div>
-										<Badge color="gray">{player.winCount}勝</Badge>
+										<Badge color="cream">{player.winCount}勝</Badge>
 									</div>
 									{index !== game.players.length - 1 && <Separator />}
 								</div>
@@ -242,7 +277,9 @@ export function GameSubmission({
 					{/* 中央エリア - お題カード + 組み合わせ選択 */}
 					<section
 						className={classNames(
-							"relative mt-8 grid place-items-center rounded-t-2xl border border-gray-300 border-b-0 bg-white p-16",
+							// NOTE: overflow-x-clip は牌を叩きつける演出の拡大が横スクロール領域を
+							// 広げないようにするため（縦はみ出しは演出なので clip しない）
+							"relative mt-8 grid place-items-center overflow-x-clip rounded-t-2xl border border-cream-200 border-b-0 bg-cream-50/90 p-16",
 							isActivePhase && "z-30",
 						)}
 					>
@@ -273,8 +310,12 @@ export function GameSubmission({
 					<div className={classNames(isActivePhase && "relative z-30")}>
 						<PlayerCardDisplay
 							cards={mePlayer.playerCards}
+							className="mx-[calc(50%-50vw)] w-screen"
 							isConfirmed={isConfirmed}
-							onCardClick={isMyTurn ? handleCardClick : undefined}
+							onCardClick={
+								isMyTurn && !isStarting ? handleCardClick : undefined
+							}
+							reactionBar={reactionBar}
 							selectedCardId={selectedCardId}
 							showPulse={isActivePhase && !selectedCard}
 						/>

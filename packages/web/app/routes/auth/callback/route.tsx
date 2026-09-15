@@ -1,5 +1,6 @@
 import type { Api } from "@repo/api";
 import { hc } from "hono/client";
+import { InPageError } from "~/components/InPageError";
 import { Spinner } from "~/components/Spinner";
 import { cognito } from "~/libs/cognito";
 import { buildNoindexMeta } from "~/libs/meta";
@@ -8,7 +9,20 @@ import type { Route } from "./+types/route";
 export const meta: Route.MetaFunction = ({ matches }) =>
 	buildNoindexMeta(matches.flatMap((m) => m?.meta ?? []));
 
-// TODO: UI
+/**
+ * プロバイダから来た名前を userNameSchema が通る形に整える
+ */
+function buildInitialUserName({
+	email,
+	name,
+}: {
+	email: string;
+	name?: string;
+}): string {
+	const candidate = name?.trim() || email.split("@")[0]?.trim() || email;
+	return candidate.slice(0, 50);
+}
+
 export async function clientLoader({ request }: Route.LoaderArgs) {
 	const url = new URL(request.url);
 	const code = url.searchParams.get("code");
@@ -35,14 +49,17 @@ export async function clientLoader({ request }: Route.LoaderArgs) {
 		// 初回ログインでなければトップへ
 		if (getMeResult.data) {
 			window.location.href = "/";
-			return;
+			return { hasError: false };
 		}
 
 		const createMeResponse = await honoClient.v1.me.$post({
 			json: {
 				email: payload.email,
 				image: payload.picture,
-				name: payload.name ?? payload.email.split("@")[0] ?? payload.email,
+				name: buildInitialUserName({
+					email: payload.email,
+					name: payload.name,
+				}),
 			},
 		});
 		const createdMeResult = await createMeResponse.json();
@@ -51,11 +68,13 @@ export async function clientLoader({ request }: Route.LoaderArgs) {
 				createdMeResult.message || "ユーザーの作成に失敗しました",
 			);
 		}
+
+		window.location.href = "/";
+		return { hasError: false };
 	} catch (error) {
 		console.error("認証後の処理に失敗しました:", error);
-		alert("認証後の処理に失敗しました");
-	} finally {
-		window.location.href = "/";
+		window.history.replaceState(null, "", url.pathname);
+		return { hasError: true };
 	}
 }
 
@@ -67,11 +86,9 @@ function AuthenticatingView() {
 				className="size-80 animate-bounce rounded-md"
 				src="/icons/omojan.webp"
 			/>
-			<div className="flex items-center gap-x-8">
-				<Spinner className="size-20 text-gray-500" />
-				<p className="font-medium text-14 text-neutral-600">
-					ログインしています…
-				</p>
+			<div className="flex items-center gap-x-8 text-lime-800">
+				<Spinner className="size-20" />
+				<p className="font-bold text-sm">ログインしています…</p>
 			</div>
 		</div>
 	);
@@ -81,6 +98,17 @@ export function HydrateFallback() {
 	return <AuthenticatingView />;
 }
 
-export default function AuthCallbackPage() {
+export default function AuthCallbackPage({ loaderData }: Route.ComponentProps) {
+	if (loaderData.hasError) {
+		return (
+			<InPageError
+				description="ログインの途中で問題が発生しました。時間を置いて再度お試しください。"
+				heading="ログインに失敗しました"
+				replaceNavigation
+				showLogo
+			/>
+		);
+	}
+
 	return <AuthenticatingView />;
 }

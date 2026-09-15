@@ -5,7 +5,7 @@ import type { Decorator } from "@storybook/react-vite";
  * 実際のページレイアウト（root.tsx）を再現する
  */
 export const gameScreenDecorator: Decorator = (Story) => (
-	<div className="@container bg-yellow-50 font-[Inter] text-neutral-800">
+	<div className="bg-table font-sans text-neutral-800">
 		<div className="mx-auto grid min-h-svh max-w-800 px-16">
 			<div>
 				<Story />

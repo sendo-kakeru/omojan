@@ -65,6 +65,7 @@
 	],
 	"prConcurrentLimit": 30,
 	"prHourlyLimit": 0,
+	"reviewers": ["sendo-kakeru"],
 	"schedule": ["* * * * 5"],
 	"timezone": "Asia/Tokyo"
 }
