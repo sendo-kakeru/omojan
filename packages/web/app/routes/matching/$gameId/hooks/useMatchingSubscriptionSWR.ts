@@ -13,6 +13,13 @@ import useSWRSubscription, {
 } from "swr/subscription";
 import { parse } from "valibot";
 
+/**
+ * 接続生成順を示す単調増加のシーケンス番号。
+ * インクリメントした番号の大きさで最新リクエストを判断する。
+ * ページ読み込み時刻を初期値にすることで、リロードされてもサーバー側の前回の番号より大きい値となる。
+ */
+let connectSequence = Date.now();
+
 function getUrl({ gameId }: { gameId: GameId }): URL | undefined {
 	try {
 		return new URL(`/v1/matchings/${gameId}`, import.meta.env.VITE_API_URL);
@@ -54,6 +61,8 @@ export function useMatchingSubscriptionSWR({
 			}
 
 			url.searchParams.set("token", gameToken);
+			connectSequence += 1;
+			url.searchParams.set("connectSeq", String(connectSequence));
 
 			const ws = new WebSocket(url.toString());
 			wsRef.current = ws;

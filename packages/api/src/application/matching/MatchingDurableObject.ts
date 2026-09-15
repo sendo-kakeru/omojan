@@ -53,7 +53,7 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	 * HTTP/WS のリクエストを受け取り、WebSocket のみを受け付ける。
 	 */
 	async fetch(request: Request): Promise<Response> {
-		const { token, gameId } = this.getSearchParams(request);
+		const { token, gameId, connectSeq } = this.getSearchParams(request);
 		this.ensureGameId(gameId);
 
 		// ゲームステータスをチェック
@@ -79,6 +79,18 @@ export class MatchingDurableObject extends DurableObject<Env> {
 		if (!client || !server) {
 			throw new HTTPException(500, {
 				message: "WebSocket Pairの作成に失敗しました。",
+			});
+		}
+
+		// より新しい接続があったら接続拒否（主にReact strict mode）
+		if (
+			!this.webSocketService.acceptIfLatestConnect({
+				connectSeq,
+				playerId: player.id,
+			})
+		) {
+			throw new HTTPException(409, {
+				message: "より新しい接続が既に確立されています",
 			});
 		}
 
@@ -558,9 +570,13 @@ export class MatchingDurableObject extends DurableObject<Env> {
 	}
 
 	/**
-	 * 共通クエリ（token / gameId）を抽出し検証する。
+	 * 共通クエリ（token / gameId / connectSeq）を抽出し検証する。
 	 */
-	private getSearchParams(request: Request): { token: string; gameId: GameId } {
+	private getSearchParams(request: Request): {
+		token: string;
+		gameId: GameId;
+		connectSeq: number;
+	} {
 		let url: URL;
 
 		try {
@@ -579,7 +595,17 @@ export class MatchingDurableObject extends DurableObject<Env> {
 			throw new HTTPException(400, { message: "gameIdが正しくありません" });
 		}
 
-		return { gameId, token };
+		const connectSeqParam = url.searchParams.get("connectSeq");
+		const connectSeq = Number(connectSeqParam);
+		if (connectSeqParam === null || !Number.isFinite(connectSeq)) {
+			throw new HTTPException(400, { message: "connectSeqが正しくありません" });
+		}
+
+		return {
+			connectSeq,
+			gameId,
+			token,
+		};
 	}
 
 	/**

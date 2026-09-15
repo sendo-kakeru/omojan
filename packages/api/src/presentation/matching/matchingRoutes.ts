@@ -10,7 +10,7 @@ export const routes = new Hono<BaseContext>().get(
 	vValidator("param", gameIdRequestParamSchema),
 	async (c) => {
 		const { gameId } = c.req.valid("param");
-		const { token } = c.req.valid("query");
+		const { connectSeq, token } = c.req.valid("query");
 
 		const id = c.env.MATCHING_DURABLE_OBJECT.idFromName(gameId);
 		const roomStub = c.env.MATCHING_DURABLE_OBJECT.get(id);
@@ -19,6 +19,7 @@ export const routes = new Hono<BaseContext>().get(
 		durableObjectUrl.search = "";
 		durableObjectUrl.searchParams.set("token", token);
 		durableObjectUrl.searchParams.set("gameId", gameId);
+		durableObjectUrl.searchParams.set("connectSeq", String(connectSeq));
 
 		return roomStub.fetch(new Request(durableObjectUrl.toString(), c.req.raw));
 	},
