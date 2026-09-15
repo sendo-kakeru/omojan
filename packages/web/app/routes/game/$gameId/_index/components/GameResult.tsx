@@ -45,7 +45,8 @@ export function GameResult({
 		>
 			<main className="grid grid-rows-[1fr_auto]">
 				{/* プレイヤー結果エリア */}
-				<section className="relative my-auto grid h-fit content-center gap-y-4 rounded-lg">
+				{/*　NOTE: overflow-x-clip は演出の拡大が横スクロール領域を広げないようにするため*/}
+				<section className="relative my-auto grid h-fit content-center gap-y-4 overflow-x-clip rounded-lg">
 					<div className="mb-12 grid justify-items-center gap-y-2">
 						<p className="text-center font-bold text-lime-800">
 							ラウンド {game.roundNo} の結果
