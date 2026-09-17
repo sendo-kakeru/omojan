@@ -10,7 +10,7 @@
 		"drizzle-valibot": "0.4.2",
 		"drizzle-seed": "0.3.1",
 		"tsx": "4.23.13",
-		"valibot": "1.4.2"
+		"valibot": "1.5.0"
 	},
 	"exports": {
 		"./schema": {
