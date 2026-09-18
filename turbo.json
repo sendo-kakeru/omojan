@@ -1,5 +1,6 @@
 {
 	"$schema": "https://v2-10-6.turborepo.dev/schema.json",
+	"globalEnv": ["VITE_*"],
 	"tasks": {
 		"build": {
 			"dependsOn": ["^build"],
