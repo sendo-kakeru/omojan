@@ -20,21 +20,27 @@ const meta: Meta<typeof FinishedRoomCard> = {
 export default meta;
 type Story = StoryFn<typeof FinishedRoomCard>;
 
-const DUMMY_USER_ID = "00000000-0000-0000-0000-000000000001" as UserId;
-
 type PlayerId = FinishedRoom["players"][0]["id"];
 
-/** 先頭だけログインユーザー、残りはゲスト */
+const createDummyUserId = (index: number) =>
+	`00000000-0000-0000-0000-00000000000${index + 1}` as UserId;
+
+/** hasUser 未指定なら先頭だけログインユーザー、残りはゲスト */
 const createPlayers = (
-	entries: { playerName: string; isWinner: boolean }[],
+	entries: {
+		playerName: string;
+		isWinner: boolean;
+		hasUser?: boolean;
+		isCpu?: boolean;
+	}[],
 ): FinishedRoom["players"] =>
-	entries.map(({ playerName, isWinner }, index) => ({
+	entries.map(({ playerName, isWinner, hasUser, isCpu = false }, index) => ({
 		id: `player-${index + 1}` as PlayerId,
 		image: null,
-		isCpu: false,
+		isCpu,
 		isWinner,
 		playerName,
-		userId: index === 0 ? DUMMY_USER_ID : null,
+		userId: (hasUser ?? index === 0) ? createDummyUserId(index) : null,
 	}));
 
 const createFinishedRoom = (
@@ -95,6 +101,36 @@ export const LongTitle: Story = () => (
 	<FinishedRoomCard
 		room={createFinishedRoom({
 			title: "とても長いタイトルの部屋名がここに入りますがどうなるでしょうか",
+		})}
+	/>
+);
+
+/** 全員ログインユーザー（全員がユーザーページへのリンクになる） */
+export const AllUsersLinked: Story = () => (
+	<FinishedRoomCard
+		room={createFinishedRoom({
+			players: createPlayers([
+				{ hasUser: true, isWinner: true, playerName: "優勝者A" },
+				{ hasUser: true, isWinner: false, playerName: "参加者B" },
+				{ hasUser: true, isWinner: false, playerName: "参加者C" },
+				{ hasUser: true, isWinner: false, playerName: "参加者D" },
+			]),
+			title: "全員ログイン済みの部屋",
+		})}
+	/>
+);
+
+/** ゲスト・CPU混在（リンクにならないプレイヤーがいる） */
+export const WithGuestAndCpu: Story = () => (
+	<FinishedRoomCard
+		room={createFinishedRoom({
+			players: createPlayers([
+				{ hasUser: true, isWinner: true, playerName: "優勝者A" },
+				{ hasUser: false, isWinner: false, playerName: "ゲストB" },
+				{ hasUser: false, isCpu: true, isWinner: false, playerName: "CPU" },
+				{ hasUser: true, isWinner: false, playerName: "参加者D" },
+			]),
+			title: "ゲストとCPUがいる部屋",
 		})}
 	/>
 );

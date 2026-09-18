@@ -30,7 +30,7 @@ export function FinishedRoomCardSkeleton({
 			</div>
 
 			{/* 勝者と、その他のプレイヤー */}
-			<div className="grid gap-y-8 sm:flex sm:items-start sm:justify-between sm:gap-x-16">
+			<div className="grid gap-y-8 sm:flex sm:items-end sm:justify-between sm:gap-x-16">
 				<div className="flex min-w-0 items-center gap-x-8 sm:flex-1">
 					<div className="size-24 shrink-0 rounded-full bg-cream-200" />
 					<div className="grid min-h-30 content-center gap-y-1">
@@ -39,12 +39,11 @@ export function FinishedRoomCardSkeleton({
 					</div>
 				</div>
 				<div className="flex shrink-0 items-center gap-x-6">
-					<div className="flex items-center">
+					<div className="-mx-2 flex items-center">
 						{[1, 2, 3].map((seat) => (
-							<div
-								className="-ml-6 size-20 shrink-0 rounded-full bg-cream-200 shadow-[0_0_0_2px_var(--color-cream-50)] first:ml-0"
-								key={seat}
-							/>
+							<div className="-ml-10 p-2 first:ml-0" key={seat}>
+								<div className="size-24 shrink-0 rounded-full bg-cream-200 shadow-[0_0_0_2px_var(--color-cream-50)]" />
+							</div>
 						))}
 					</div>
 					<div className="h-12 w-32 rounded-full bg-cream-200" />
