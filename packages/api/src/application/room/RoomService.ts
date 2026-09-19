@@ -24,7 +24,6 @@ import {
 	type RoundId,
 	roundTable,
 	submissionTable,
-	type User,
 	type UserId,
 	userTable,
 	voteTable,
@@ -417,25 +416,12 @@ export class RoomService {
 	}
 
 	async create({
-		sub,
+		userId,
 		...dto
 	}: CreateRoomRequestBody & {
-		sub: User["sub"] | null;
+		userId: UserId | null;
 	}): Promise<CreateRoomResponseBody> {
 		return await this.db.transaction(async (tx) => {
-			// 認証済みならユーザー取得
-			// 匿名ならnullで続行
-			const authUser = await (async () => {
-				if (!sub) return null;
-
-				const [findUser] = await tx
-					.select({ id: userTable.id })
-					.from(userTable)
-					.where(eq(userTable.sub, sub));
-
-				return findUser;
-			})();
-
 			// game作成
 			const [createdGame] = await tx
 				.insert(gameTable)
@@ -462,22 +448,23 @@ export class RoomService {
 				isHost: true,
 				playerName: dto.playerName,
 				seat: 1,
-				userId: authUser?.id ?? null,
+				userId,
 			});
 
 			return { gameId: createdGame.id, token: gameToken };
 		});
 	}
+
 	async join({
 		gameId,
 		password,
 		playerName,
-		sub,
+		userId,
 		heldToken,
 	}: {
 		gameId: GameId;
 	} & JoinRoomRequestBody & {
-			sub: User["sub"] | null;
+			userId: UserId | null;
 		}): Promise<JoinRoomResponseBody> {
 		return await this.db.transaction(async (tx) => {
 			// game取得
@@ -548,21 +535,10 @@ export class RoomService {
 
 			const { gameToken, gameTokenHash } = this.generateGameTokenPair();
 
-			const authUser = await (async () => {
-				if (!sub) return null;
-
-				const [findUser] = await tx
-					.select({ id: userTable.id })
-					.from(userTable)
-					.where(eq(userTable.sub, sub));
-
-				return findUser;
-			})();
-
 			// クライアントが保持しているトークンのプレイヤーは存在しないが、認証済みユーザーのプレイヤーが存在していたらトークンを生成して返す（通常は発生し得ない）
 			if (
-				authUser &&
-				participatingPlayers.some((player) => player.userId === authUser.id)
+				userId &&
+				participatingPlayers.some((player) => player.userId === userId)
 			) {
 				await tx
 					.update(playerTable)
@@ -570,7 +546,7 @@ export class RoomService {
 					.where(
 						and(
 							eq(playerTable.gameId, findGame.id),
-							eq(playerTable.userId, authUser.id),
+							eq(playerTable.userId, userId),
 						),
 					);
 
@@ -601,7 +577,7 @@ export class RoomService {
 				isHost: false,
 				playerName,
 				seat,
-				userId: authUser?.id,
+				userId,
 			});
 
 			// INSERT後に実際のプレイヤー数をDBから取得して、4人揃ったらactivateする

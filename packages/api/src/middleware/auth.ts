@@ -1,10 +1,13 @@
-import { userTable } from "@repo/db/schema";
 import { CognitoService } from "@repo/shared/libs/cognito";
-import { eq } from "drizzle-orm";
-import type { MiddlewareHandler } from "hono";
+import type { Context, MiddlewareHandler } from "hono";
 import { HTTPException } from "hono/http-exception";
-import type { DrizzleClient } from "../libs/drizzle";
-import type { HybridRouteContext, PrivateRouteContext } from "../types";
+import { MeService } from "../application/me/MeService";
+import type {
+	BaseContext,
+	HybridRouteContext,
+	PrivateRouteContext,
+	RegistrationRouteContext,
+} from "../types";
 
 /**
  * CognitoService のインスタンスキャッシュ。
@@ -13,51 +16,52 @@ import type { HybridRouteContext, PrivateRouteContext } from "../types";
  */
 let cognitoService: CognitoService | null = null;
 
-/**
- * ユーザーが無効化されていないことを確認する。
- * ユーザーが未登録の場合（新規登録フロー）はスキップする。
- */
-async function assertUserActive(db: DrizzleClient, sub: string): Promise<void> {
-	const [user] = await db
-		.select({ status: userTable.status })
-		.from(userTable)
-		.where(eq(userTable.sub, sub))
-		.limit(1);
+/** Authorization ヘッダーのアクセストークンを検証して sub を返却 */
+async function authenticate(
+	c: Pick<Context<BaseContext>, "env" | "req">,
+): Promise<string | null> {
+	cognitoService ??= new CognitoService({
+		clientId: c.env.COGNITO_CLIENT_ID,
+		userPoolId: c.env.COGNITO_USER_POOL_ID,
+	});
+	const token = cognitoService.extractToken({
+		authorizationHeader: c.req.header("Authorization"),
+	});
 
-	if (user && user.status !== "active") {
-		throw new HTTPException(403, {
-			message: "このアカウントは無効化されています",
-		});
+	if (!token) return null;
+
+	try {
+		const tokenPayload = await cognitoService.verifyAccessToken({ token });
+		return tokenPayload.sub;
+	} catch (error) {
+		console.error("Tokenの検証に失敗しました:", error);
+		return null;
 	}
 }
 
 /**
- * @returns MiddlewareHandler<HybridRouteContext>
  * ハイブリッド認証ミドルウェア
- * 認証されたユーザーと未認証のユーザーの両方がアクセスでき、認証済みであればsubを設定します。
+ * 認証されたユーザーと未認証のユーザーの両方がアクセスでき、認証済みであれば auth を設定します。
  */
 export function hybridAuthMiddleware(): MiddlewareHandler<HybridRouteContext> {
 	return async (c, next): Promise<void> => {
-		try {
-			cognitoService ??= new CognitoService({
-				clientId: c.env.COGNITO_CLIENT_ID,
-				userPoolId: c.env.COGNITO_USER_POOL_ID,
-			});
-			const token = cognitoService.extractToken({
-				authorizationHeader: c.req.header("Authorization"),
-			});
+		const sub = await authenticate(c);
 
-			if (token) {
-				const tokenPayload = await cognitoService.verifyAccessToken({ token });
-				await assertUserActive(c.var.db, tokenPayload.sub);
-				c.set("sub", tokenPayload.sub);
-			} else {
-				c.set("sub", null);
-			}
-		} catch (error) {
-			if (error instanceof HTTPException) throw error;
-			console.error("Tokenの検証に失敗しました:", error);
-			c.set("sub", null);
+		if (sub) {
+			const findResult = await new MeService(c.var.db)
+				.findBySub({ sub })
+				.catch((error) => {
+					console.error("ユーザー情報の取得に失敗しました:", error);
+					throw new HTTPException(500, {
+						message: "ユーザー情報の取得に失敗しました",
+					});
+				});
+			c.set(
+				"auth",
+				findResult?.status === "active" ? { me: findResult.me, sub } : null,
+			);
+		} else {
+			c.set("auth", null);
 		}
 
 		await next();
@@ -65,38 +69,56 @@ export function hybridAuthMiddleware(): MiddlewareHandler<HybridRouteContext> {
 }
 
 /**
- * @returns MiddlewareHandler<PrivateRouteContext>
  * プライベート認証ミドルウェア
- * 認証されたユーザーのみがアクセスでき、subを設定します。
+ * 有効な登録済みユーザーのみがアクセスでき、 auth を設定します。
  */
 export function privateAuthMiddleware(): MiddlewareHandler<PrivateRouteContext> {
 	return async (c, next): Promise<void> => {
-		try {
-			cognitoService ??= new CognitoService({
-				clientId: c.env.COGNITO_CLIENT_ID,
-				userPoolId: c.env.COGNITO_USER_POOL_ID,
-			});
-			const token = cognitoService.extractToken({
-				authorizationHeader: c.req.header("Authorization"),
-			});
+		const sub = await authenticate(c);
 
-			if (!token) {
-				throw new HTTPException(401, {
-					message: "Authorization headerが存在しません",
+		if (!sub) {
+			throw new HTTPException(401, { message: "認証が必要です" });
+		}
+
+		const foundResult = await new MeService(c.var.db)
+			.findBySub({ sub })
+			.catch((error) => {
+				console.error("ユーザー情報の取得に失敗しました:", error);
+				throw new HTTPException(500, {
+					message: "ユーザー情報の取得に失敗しました",
 				});
-			}
+			});
 
-			const tokenPayload = await cognitoService.verifyAccessToken({ token });
-			await assertUserActive(c.var.db, tokenPayload.sub);
-			c.set("sub", tokenPayload.sub);
+		if (!foundResult) {
+			throw new HTTPException(404, { message: "ユーザーが存在しません" });
+		}
 
-			await next();
-		} catch (error) {
-			console.error("Tokenの検証に失敗しました:", error);
-			if (error instanceof HTTPException) throw error;
-			throw new HTTPException(401, {
-				message: "無効または期限切れのトークンです",
+		if (foundResult.status !== "active") {
+			throw new HTTPException(403, {
+				message: "このアカウントは無効化されています",
 			});
 		}
+
+		c.set("auth", { me: foundResult.me, sub });
+
+		await next();
+	};
+}
+
+/**
+ * 登録処理用の認証ミドルウェア
+ * users はこれから作る段階なので、 sub のみを Context に渡す。
+ */
+export function registrationAuthMiddleware(): MiddlewareHandler<RegistrationRouteContext> {
+	return async (c, next): Promise<void> => {
+		const sub = await authenticate(c);
+
+		if (!sub) {
+			throw new HTTPException(401, { message: "認証が必要です" });
+		}
+
+		c.set("auth", { sub });
+
+		await next();
 	};
 }
