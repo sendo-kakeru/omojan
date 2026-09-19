@@ -14,11 +14,13 @@ import {
 	voteTable,
 } from "@repo/db/schema";
 import { MOCK_USER } from "@repo/mock/model";
+import { honoErrorHandler } from "@repo/shared/libs/honoErrorHandler";
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { testClient } from "hono/testing";
 import { beforeEach, describe, expect, test } from "vitest";
 import { createTestDbClient } from "../../__tests__/createTestDbClient";
+import { MeService } from "../../application/me/MeService";
 import type { HybridRouteContext } from "../../types";
 import { routes } from "./roomRoutes";
 
@@ -35,9 +37,18 @@ describe("roomRoutes", () => {
 		const app = new Hono<HybridRouteContext>()
 			.use("*", async (c, next) => {
 				c.set("db", db);
-				c.set("sub", MOCK_USER.sub);
+				const foundResult = await new MeService(db).findBySub({
+					sub: MOCK_USER.sub,
+				});
+				c.set(
+					"auth",
+					foundResult?.status === "active"
+						? { me: foundResult.me, sub: MOCK_USER.sub }
+						: null,
+				);
 				await next();
 			})
+			.onError(honoErrorHandler)
 			.route("/v1/rooms", routes);
 		const mockHonoClient = testClient<typeof app>(app);
 
@@ -900,10 +911,11 @@ describe("roomRoutes", () => {
 	describe("未認証ユーザー", () => {
 		const app = new Hono<HybridRouteContext>()
 			.use("*", async (c, next) => {
+				c.set("auth", null);
 				c.set("db", db);
-				c.set("sub", null);
 				await next();
 			})
+			.onError(honoErrorHandler)
 			.route("/v1/rooms", routes);
 		const mockHonoClient = testClient<typeof app>(app);
 

@@ -10,7 +10,10 @@ import type { HttpRespondReturn } from "@repo/shared/types";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { MeService } from "../../application/me/MeService";
-import type { PrivateRouteContext } from "../../types";
+import type {
+	PrivateRouteContext,
+	RegistrationRouteContext,
+} from "../../types";
 
 const R2_KEY_PATTERN = /^[a-zA-Z0-9\-_/.]+$/;
 
@@ -27,55 +30,26 @@ function isSafeR2Key(key: string): boolean {
 	return R2_KEY_PATTERN.test(key);
 }
 
-export const routes = new Hono<
-	PrivateRouteContext & { Variables: { meService: MeService } }
+/** 登録処理用 */
+export const registrationRoutes = new Hono<
+	RegistrationRouteContext & { Variables: { meService: MeService } }
 >()
 	.use(async (c, next) => {
 		const meService = new MeService(c.var.db);
 		c.set("meService", meService);
 		await next();
 	})
-	.get("/", async (c): Promise<HttpRespondReturn<GetMeResponseBody>> => {
-		const { meService, sub } = c.var;
-
-		try {
-			const findMe = await meService.findBySub({ sub });
-
-			if (findMe) {
-				return c.json(
-					{
-						data: findMe,
-						message: "OK",
-					},
-					200,
-				);
-			}
-
-			return c.json(
-				{
-					data: findMe,
-					message: "ユーザーが存在しません",
-				},
-				404,
-			);
-		} catch (error) {
-			console.error("Meの取得に失敗しました:", error);
-			if (error instanceof HTTPException) throw error;
-
-			throw new HTTPException(500, { message: "Meの取得に失敗しました" });
-		}
-	})
 	.post(
 		"/",
 		vValidator("json", createMeRequestBodySchema),
 		async (c): Promise<HttpRespondReturn<CreateMeResponseBody>> => {
 			const body = c.req.valid("json");
-			const { meService, sub } = c.var;
+			const { auth, meService } = c.var;
 
 			try {
 				const createdMe = await meService.register({
 					...body,
-					sub,
+					sub: auth.sub,
 				});
 				return c.json({ data: createdMe, message: "Created" }, 201);
 			} catch (error) {
@@ -87,24 +61,35 @@ export const routes = new Hono<
 				});
 			}
 		},
+	);
+
+export const routes = new Hono<
+	PrivateRouteContext & { Variables: { meService: MeService } }
+>()
+	.use(async (c, next) => {
+		const meService = new MeService(c.var.db);
+		c.set("meService", meService);
+		await next();
+	})
+	.get(
+		"/",
+		(c): HttpRespondReturn<GetMeResponseBody> =>
+			c.json({ data: c.var.auth.me, message: "OK" }, 200),
 	)
 	.patch(
 		"/",
 		vValidator("json", updateMeRequestBodySchema),
 		async (c): Promise<HttpRespondReturn<UpdateMeResponseBody>> => {
 			const body = c.req.valid("json");
-			const { meService, sub } = c.var;
+			const { auth, meService } = c.var;
 
 			try {
-				// 画像更新時は UPDATE 前に旧画像キーを取得する
-				let oldImageKey: string | null = null;
-				if (body.image) {
-					oldImageKey = await meService.getImageKey({ sub });
-				}
+				// 旧画像キーは認証ミドルウェアが解決済みの値をそのまま使う
+				const oldImageKey = body.image ? auth.me.image : null;
 
 				const updatedMe = await meService.update({
 					...body,
-					sub,
+					userId: auth.me.userId,
 				});
 
 				// 旧画像が R2 キー（外部 URL でない）かつ新旧が異なる場合、CDN から削除
