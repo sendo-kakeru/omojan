@@ -24,6 +24,6 @@
 		"@repo/tsup-config": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
 		"@types/node": "24.13.3",
-		"wrangler": "4.130.0"
+		"wrangler": "4.134.0"
 	}
 }
