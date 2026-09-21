@@ -29,6 +29,8 @@ export const app = new Hono<BaseContext>()
 		return corsMiddleware(c, next);
 	})
 	.onError(honoErrorHandler)
+	// ヘルスチェック用
+	.get("/", (c) => c.json({ message: "OK" }, 200))
 	.route("", routes);
 
 export type Api = typeof routes;
