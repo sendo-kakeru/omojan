@@ -60,7 +60,7 @@ function TabsTrigger({
 	return (
 		<TabsPrimitive.Trigger
 			className={classNames(
-				"relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-6 whitespace-nowrap rounded-md border border-transparent px-6 py-2 font-medium text-neutral-500 text-sm transition-all hover:text-neutral-700 focus-visible:border-green-400 focus-visible:outline-1 focus-visible:outline-green-400 focus-visible:ring-3 focus-visible:ring-green-400/50 disabled:pointer-events-none disabled:opacity-50",
+				"relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-6 whitespace-nowrap rounded-md border border-transparent px-6 py-2 font-medium text-neutral-500 text-sm transition-all hover:text-neutral-700 focus-visible:outline-2 focus-visible:outline-lime-800 focus-visible:outline-offset-2 disabled:pointer-events-none disabled:opacity-50",
 				"group-data-[orientation=vertical]/tabs:w-full group-data-[orientation=vertical]/tabs:justify-start group-data-[variant=default]/tabs-list:data-[state=active]:shadow-sm group-data-[variant=line]/tabs-list:data-[state=active]:shadow-none",
 				"[&_svg:not([class*='size-'])]:size-16 [&_svg]:pointer-events-none [&_svg]:shrink-0",
 				"group-data-[variant=line]/tabs-list:bg-transparent group-data-[variant=line]/tabs-list:data-[state=active]:bg-transparent",

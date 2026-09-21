@@ -72,6 +72,12 @@
 	/* リアクションフロートアップアニメーション */
 	--animate-reaction-float: reaction-float 3s linear forwards;
 
+	/*
+	 * 発光共通のルール
+	 *
+	 * NOTE: 横方向の広がりはページ左右の余白（16px）に収める。
+	 * はみ出すとbody の overflow-x-hidden や牌一覧の overflow-x-clip に当たり、カードの左右で途切れて見えるため。
+	 */
 	@keyframes glow {
 		0%,
 		100% {
@@ -82,7 +88,7 @@
 		50% {
 			box-shadow:
 				0 4px 0 var(--tile-thickness, var(--color-cream-300)),
-				0 0 26px 8px rgb(255 210 48 / 0.6);
+				0 0 10px 4px rgb(255 210 48 / 0.75);
 		}
 	}
 
@@ -251,7 +257,7 @@
 		}
 		50% {
 			border-color: var(--color-orange-700);
-			box-shadow: 0 0 14px 5px rgb(245 73 0 / 0.28);
+			box-shadow: 0 0 10px 3px rgb(245 73 0 / 0.34);
 		}
 	}
 
@@ -266,7 +272,7 @@
 		50% {
 			box-shadow:
 				0 4px 0 var(--tile-thickness, var(--color-cream-300)),
-				0 0 16px 6px rgb(245 73 0 / 0.45);
+				0 0 10px 3px rgb(245 73 0 / 0.55);
 		}
 	}
 

@@ -131,7 +131,7 @@ export function MatchingPresenter({
 				</p>
 				<ul className="grid gap-y-8">
 					{[1, 2, 3, 4].map((seat) => (
-						<li key={seat}>
+						<li className="min-w-0" key={seat}>
 							<MatchingParticipantLabel
 								participant={participants[seat - 1]}
 								seat={seat}
