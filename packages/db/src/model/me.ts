@@ -1,11 +1,13 @@
 import { createInsertSchema } from "drizzle-valibot";
 import {
 	type BrandSymbol,
+	check,
 	type InferOutput,
 	nullable,
 	object,
 	optional,
 	pick,
+	pipe,
 } from "valibot";
 import { userIdSchema, userNameSchema, userSchema, userTable } from "../schema";
 
@@ -43,10 +45,16 @@ export const meProfileSchema = object({
 	name: userNameSchema,
 });
 
-export const updateMeRequestBodySchema = object({
-	image: optional(meProfileSchema.entries.image),
-	name: optional(meProfileSchema.entries.name),
-});
+export const updateMeRequestBodySchema = pipe(
+	object({
+		image: optional(meProfileSchema.entries.image),
+		name: optional(meProfileSchema.entries.name),
+	}),
+	check(
+		({ image, name }) => image !== undefined || name !== undefined,
+		"更新する項目を指定してください",
+	),
+);
 export type UpdateMeRequestBody = InferOutput<typeof updateMeRequestBodySchema>;
 export const updateMeResponseBodySchema = meSchema;
 export type UpdateMeResponseBody = InferOutput<

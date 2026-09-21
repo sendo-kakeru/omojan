@@ -1,14 +1,14 @@
 {
 	"devDependencies": {
-		"@pulumi/aws": "7.44.0",
+		"@pulumi/aws": "7.46.0",
 		"@pulumi/cloudflare": "6.20.0",
-		"@pulumi/gcp": "9.36.1",
-		"@pulumi/pulumi": "3.261.0",
+		"@pulumi/gcp": "9.37.0",
+		"@pulumi/pulumi": "3.262.0",
 		"@repo/typescript-config": "workspace:*",
 		"@types/node": "24.13.3",
 		"dotenv": "17.4.2",
 		"typescript": "7.0.2",
-		"valibot": "1.4.2"
+		"valibot": "1.5.0"
 	},
 	"license": "UNLICENSED",
 	"main": "index.ts",

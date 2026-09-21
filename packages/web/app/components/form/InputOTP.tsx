@@ -16,7 +16,9 @@ function InputOTP({
 		<OTPInput
 			className={classNames("disabled:cursor-not-allowed", className)}
 			containerClassName={classNames(
-				"flex items-center gap-8 overflow-hidden has-disabled:opacity-50",
+				// NOTE: -m-3/p-3 は overflow-hidden の切り取り線を外側にずらすため。
+				// マスの高さ＝コンテナの高さなので、入力中の outline が上下左右すべてで途切れる
+				"-m-3 flex items-center gap-8 overflow-hidden p-3 has-disabled:opacity-50",
 				containerClassName,
 			)}
 			data-slot="input-otp"
@@ -49,9 +51,9 @@ function InputOTPSlot({
 	return (
 		<div
 			className={classNames(
-				"relative flex h-36 w-36 items-center justify-center border-cream-200 border-y border-r bg-cream-50 text-sm shadow-xs outline-none transition-all",
+				"relative flex h-36 w-36 items-center justify-center border-cream-200 border-y border-r bg-cream-50 text-sm shadow-xs transition-all",
 				"first:rounded-l-md first:border-l last:rounded-r-md aria-invalid:border-red-600",
-				"data-[active=true]:z-10 data-[active=true]:border-lime-800 data-[active=true]:ring-3 data-[active=true]:ring-lime-800/50 data-[active=true]:aria-invalid:border-red-600 data-[active=true]:aria-invalid:ring-red-600/20",
+				"data-[active=true]:z-10 data-[active=true]:border-lime-800 data-[active=true]:outline-3 data-[active=true]:outline-lime-800/50 data-[active=true]:aria-invalid:border-red-600 data-[active=true]:aria-invalid:outline-red-600/20",
 				className,
 			)}
 			data-active={isActive}

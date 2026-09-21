@@ -90,7 +90,7 @@ export function GameFinalResult({
 											/>
 											{me && winner.userId === me.userId && (
 												<Badge
-													className="absolute -bottom-12 left-1/2 -translate-x-1/2 ring-2 ring-cream-50"
+													className="absolute -bottom-12 left-1/2 -translate-x-1/2 outline-2 outline-cream-50"
 													variant="fill"
 												>
 													自分

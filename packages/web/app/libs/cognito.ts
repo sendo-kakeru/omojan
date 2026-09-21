@@ -37,6 +37,9 @@ export type CognitoIdTokenPayload = InferOutput<
 
 class Cognito {
 	private readonly userPool: CognitoUserPool;
+	/** 実行中の getCurrentSession。同時呼び出しで共有する */
+	private currentSessionPromise: Promise<CognitoUserSession | null> | null =
+		null;
 
 	constructor() {
 		this.userPool = new CognitoUserPool({
@@ -212,23 +215,29 @@ class Cognito {
 	}
 
 	async getCurrentSession(): Promise<CognitoUserSession | null> {
-		return new Promise((resolve) => {
-			const cognitoUser = this.userPool.getCurrentUser();
-			if (!cognitoUser) {
-				resolve(null);
-				return;
-			}
+		this.currentSessionPromise ??= new Promise<CognitoUserSession | null>(
+			(resolve) => {
+				const cognitoUser = this.userPool.getCurrentUser();
+				if (!cognitoUser) {
+					resolve(null);
+					return;
+				}
 
-			cognitoUser.getSession(
-				(error: Error | null, session: CognitoUserSession | null) => {
-					if (error || !session) {
-						resolve(null);
-						return;
-					}
-					resolve(session);
-				},
-			);
+				cognitoUser.getSession(
+					(error: Error | null, session: CognitoUserSession | null) => {
+						if (error || !session) {
+							resolve(null);
+							return;
+						}
+						resolve(session);
+					},
+				);
+			},
+		).finally(() => {
+			this.currentSessionPromise = null;
 		});
+
+		return this.currentSessionPromise;
 	}
 
 	async getAccessToken(): Promise<string | null> {

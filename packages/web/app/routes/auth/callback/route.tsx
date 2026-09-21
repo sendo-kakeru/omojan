@@ -23,11 +23,42 @@ function buildInitialUserName({
 	return candidate.slice(0, 50);
 }
 
-export async function clientLoader({ request }: Route.LoaderArgs) {
+type AuthCallbackError = "deactivated" | "unauthorized" | "unknown";
+
+const AUTH_CALLBACK_ERRORS: Record<
+	AuthCallbackError,
+	{ description: string; heading: string }
+> = {
+	deactivated: {
+		description:
+			"このアカウントは無効化されています。心当たりがない場合はお問い合わせください。",
+		heading: "アカウントを利用できません",
+	},
+	unauthorized: {
+		description:
+			"認証情報を確認できませんでした。お手数ですが、再度ログインしてください。",
+		heading: "ログインに失敗しました",
+	},
+	unknown: {
+		description:
+			"ログインの途中で問題が発生しました。時間を置いて再度お試しください。",
+		heading: "ログインに失敗しました",
+	},
+};
+
+type AuthCallbackResult = { error: AuthCallbackError | null };
+
+export async function clientLoader({
+	request,
+}: Route.LoaderArgs): Promise<AuthCallbackResult> {
 	const url = new URL(request.url);
 	const code = url.searchParams.get("code");
 	const state = url.searchParams.get("state");
 	const oauthError = url.searchParams.get("error");
+
+	// code と state は取得済みなので、この時点でURL削除
+	window.history.replaceState(null, "", url.pathname);
+
 	try {
 		if (oauthError) {
 			throw new Error(`OAuth error: ${oauthError}`);
@@ -45,11 +76,18 @@ export async function clientLoader({ request }: Route.LoaderArgs) {
 		});
 
 		const getMeResponse = await honoClient.v1.me.$get();
-		const getMeResult = await getMeResponse.json();
-		// 初回ログインでなければトップへ
-		if (getMeResult.data) {
+
+		// 登録済みならトップへ
+		if (getMeResponse.ok) {
 			window.location.href = "/";
-			return { hasError: false };
+			return { error: null };
+		}
+
+		// 404 のみが初回ログイン。それ以外は登録に進まず理由を表示する
+		if (getMeResponse.status === 403) return { error: "deactivated" };
+		if (getMeResponse.status === 401) return { error: "unauthorized" };
+		if (getMeResponse.status !== 404) {
+			throw new Error(`Meの取得に失敗しました: ${getMeResponse.status}`);
 		}
 
 		const createMeResponse = await honoClient.v1.me.$post({
@@ -70,11 +108,10 @@ export async function clientLoader({ request }: Route.LoaderArgs) {
 		}
 
 		window.location.href = "/";
-		return { hasError: false };
+		return { error: null };
 	} catch (error) {
 		console.error("認証後の処理に失敗しました:", error);
-		window.history.replaceState(null, "", url.pathname);
-		return { hasError: true };
+		return { error: "unknown" };
 	}
 }
 
@@ -99,11 +136,12 @@ export function HydrateFallback() {
 }
 
 export default function AuthCallbackPage({ loaderData }: Route.ComponentProps) {
-	if (loaderData.hasError) {
+	if (loaderData.error) {
+		const { description, heading } = AUTH_CALLBACK_ERRORS[loaderData.error];
 		return (
 			<InPageError
-				description="ログインの途中で問題が発生しました。時間を置いて再度お試しください。"
-				heading="ログインに失敗しました"
+				description={description}
+				heading={heading}
 				replaceNavigation
 				showLogo
 			/>
