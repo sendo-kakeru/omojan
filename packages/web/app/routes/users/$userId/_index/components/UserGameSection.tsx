@@ -2,8 +2,8 @@ import { uuid58Encode } from "@nakanoaas/uuid58";
 import type { FinishedRoom } from "@repo/db/model";
 import type { UserId } from "@repo/db/schema";
 import { SectionHeading, SectionMoreLink } from "~/components/SectionHeading";
-import { FinishedRoomCard } from "~/routes/_index/components/roomCard/FinishedRoomCard";
-import { FinishedRoomCardSkeleton } from "~/routes/_index/components/roomCard/FinishedRoomCardSkeleton";
+import { FinishedRoomCard } from "~/routes/_index/components/room-card/FinishedRoomCard";
+import { FinishedRoomCardSkeleton } from "~/routes/_index/components/room-card/FinishedRoomCardSkeleton";
 import { USER_GAMES_LIMIT } from "../constants";
 
 export function UserGameSection({

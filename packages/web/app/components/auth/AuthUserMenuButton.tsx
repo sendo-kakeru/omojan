@@ -4,7 +4,7 @@ import { useState } from "react";
 import { LuLogIn } from "react-icons/lu";
 import { Link } from "react-router";
 import { useSWRConfig } from "swr";
-import { useMe } from "~/context/me/hooks";
+import { useMe } from "~/contexts/me/hooks";
 import { cognito } from "~/libs/cognito";
 import { AVATAR_IMAGE_DIMENSIONS, buildImageUrl } from "~/libs/image";
 import { Avatar } from "../Avatar";

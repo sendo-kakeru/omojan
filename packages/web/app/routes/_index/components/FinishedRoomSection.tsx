@@ -1,8 +1,8 @@
 import type { FinishedRoom } from "@repo/db/model";
 import { SectionHeading, SectionMoreLink } from "~/components/SectionHeading";
 import { STAGGER_STEP_MS } from "~/libs/animation";
-import { FinishedRoomCard } from "./roomCard/FinishedRoomCard";
-import { FinishedRoomCardSkeleton } from "./roomCard/FinishedRoomCardSkeleton";
+import { FinishedRoomCard } from "./room-card/FinishedRoomCard";
+import { FinishedRoomCardSkeleton } from "./room-card/FinishedRoomCardSkeleton";
 
 export function FinishedRoomSection({
 	isLoading,

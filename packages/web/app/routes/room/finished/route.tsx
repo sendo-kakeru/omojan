@@ -8,8 +8,8 @@ import {
 	SectionHeading,
 	SectionRefreshButton,
 } from "~/components/SectionHeading";
-import { FinishedRoomCard } from "~/routes/_index/components/roomCard/FinishedRoomCard";
-import { FinishedRoomCardSkeleton } from "~/routes/_index/components/roomCard/FinishedRoomCardSkeleton";
+import { FinishedRoomCard } from "~/routes/_index/components/room-card/FinishedRoomCard";
+import { FinishedRoomCardSkeleton } from "~/routes/_index/components/room-card/FinishedRoomCardSkeleton";
 import { useRoomListSWR } from "~/routes/_index/hooks/useRoomListSWR";
 
 const PER_PAGE = 20;

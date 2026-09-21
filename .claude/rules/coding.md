@@ -14,3 +14,10 @@ paths: ["**/*.{ts,tsx}"]
 - 型定義は interface ではなく type
 - 型定義はなるべくモデルのフィールドを参照する。（特に id）
 - 要素の props 型は `React.ComponentProps` に統一する。React 19 では `ComponentPropsWithRef` と同一のため使い分けない。ref を受け取らせない場合のみ `ComponentPropsWithoutRef` を使う
+
+## ディレクトリ命名規約
+
+- 小文字で統一し、2 語以上は kebab-case（`room-card`）。camelCase・PascalCase は使わない
+- 同種のものを列挙して入れる「箱」は複数形（`components`、`hooks`、`routes`、`constants`、`migrations`、`contexts`）
+- アーキテクチャの層・役割・単一の概念は単数形（`application`、`presentation`、`middleware`）
+- 「箱」の中でカテゴリ分けするディレクトリは単数形（`components/button`、`components/form`、`components/icon`）

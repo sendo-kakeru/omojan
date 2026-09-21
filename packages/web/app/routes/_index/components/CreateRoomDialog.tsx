@@ -18,7 +18,7 @@ import { Input } from "~/components/form/Input";
 import { Select } from "~/components/form/Select";
 import { Spinner } from "~/components/Spinner";
 import { useToast } from "~/components/Toast";
-import { useMe } from "~/context/me/hooks";
+import { useMe } from "~/contexts/me/hooks";
 import { honoClient } from "~/libs/apiClient.client";
 import { gameTokenLocalStorage } from "~/libs/gameTokenLocalStorage";
 import { LoginPrompt } from "~/routes/_index/components/LoginPrompt";

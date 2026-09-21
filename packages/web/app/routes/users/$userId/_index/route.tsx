@@ -13,7 +13,7 @@ import { Button } from "~/components/button/Button";
 import { Footer } from "~/components/Footer";
 import { Header } from "~/components/Header";
 import { Spinner } from "~/components/Spinner";
-import { useMe } from "~/context/me/hooks";
+import { useMe } from "~/contexts/me/hooks";
 import { cloudflareContext } from "~/libs/cloudflareContext";
 import { getDisplayName } from "~/libs/displayName";
 import { buildImageUrl, PROFILE_IMAGE_DIMENSIONS } from "~/libs/image";
