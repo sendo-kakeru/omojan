@@ -9,7 +9,12 @@ import {
 	pick,
 	pipe,
 } from "valibot";
-import { userIdSchema, userNameSchema, userSchema, userTable } from "../schema";
+import {
+	userIdSchema,
+	userNameSchema,
+	userSchema,
+	userTable,
+} from "../schemas";
 
 export type { BrandSymbol };
 

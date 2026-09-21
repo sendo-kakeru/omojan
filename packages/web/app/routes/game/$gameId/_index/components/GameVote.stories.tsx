@@ -1,5 +1,5 @@
-import type { GameServerVoteMessage } from "@repo/db/model";
-import type { PlayerCardId, PlayerId } from "@repo/db/schema";
+import type { GameServerVoteMessage } from "@repo/db/models";
+import type { PlayerCardId, PlayerId } from "@repo/db/schemas";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
 	gameScreenDecorator,

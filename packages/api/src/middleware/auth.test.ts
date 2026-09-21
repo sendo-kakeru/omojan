@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
-import type { Me } from "@repo/db/model";
-import { userTable } from "@repo/db/schema";
+import type { Me } from "@repo/db/models";
+import { userTable } from "@repo/db/schemas";
 import { MOCK_USER } from "@repo/mock/model";
 import { honoErrorHandler } from "@repo/shared/libs/honoErrorHandler";
 import { Hono } from "hono";

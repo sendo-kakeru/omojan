@@ -1,4 +1,4 @@
-import type { GameServerResultMessage } from "@repo/db/model";
+import type { GameServerResultMessage } from "@repo/db/models";
 import { RESULT_DISPLAY_MS } from "@repo/shared/constants/game";
 import classNames from "classnames";
 import type { ReactNode } from "react";

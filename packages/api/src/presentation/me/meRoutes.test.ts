@@ -3,8 +3,8 @@ import type {
 	CreateMeRequestBody,
 	Me,
 	UpdateMeRequestBody,
-} from "@repo/db/model";
-import { userTable } from "@repo/db/schema";
+} from "@repo/db/models";
+import { userTable } from "@repo/db/schemas";
 import { MOCK_ME, MOCK_USER } from "@repo/mock/model";
 import { honoErrorHandler } from "@repo/shared/libs/honoErrorHandler";
 import { eq } from "drizzle-orm";

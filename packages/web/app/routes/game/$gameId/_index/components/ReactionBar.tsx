@@ -1,4 +1,4 @@
-import { REACTION_EMOJIS, type ReactionEmoji } from "@repo/db/model";
+import { REACTION_EMOJIS, type ReactionEmoji } from "@repo/db/models";
 import classNames from "classnames";
 import { useRef, useState } from "react";
 import { Tile } from "~/components/Tile";

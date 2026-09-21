@@ -1,4 +1,4 @@
-import type { GameId } from "@repo/db/schema";
+import type { GameId } from "@repo/db/schemas";
 import { buildNoindexMeta } from "~/libs/meta";
 import { decodeUuid58Param } from "~/libs/uuid58";
 import type { Route } from "./+types/route";

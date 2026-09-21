@@ -11,7 +11,7 @@ import type {
 	JoinRoomRequestBody,
 	JoinRoomResponseBody,
 	RoomCountStatus,
-} from "@repo/db/model";
+} from "@repo/db/models";
 import {
 	type Game,
 	type GameId,
@@ -27,7 +27,7 @@ import {
 	type UserId,
 	userTable,
 	voteTable,
-} from "@repo/db/schema";
+} from "@repo/db/schemas";
 import {
 	and,
 	asc,

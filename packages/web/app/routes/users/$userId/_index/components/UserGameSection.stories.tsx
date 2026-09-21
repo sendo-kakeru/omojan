@@ -1,5 +1,5 @@
-import type { FinishedRoom } from "@repo/db/model";
-import type { UserId } from "@repo/db/schema";
+import type { FinishedRoom } from "@repo/db/models";
+import type { UserId } from "@repo/db/schemas";
 import type { Meta, StoryFn } from "@storybook/react-vite";
 import { UserGameSection } from "./UserGameSection";
 

@@ -1,6 +1,6 @@
 import { uuid58Encode } from "@nakanoaas/uuid58";
-import { type Me, meProfileSchema } from "@repo/db/model";
-import type { UserId } from "@repo/db/schema";
+import { type Me, meProfileSchema } from "@repo/db/models";
+import type { UserId } from "@repo/db/schemas";
 import {
 	ALLOWED_IMAGE_MIME_TYPES,
 	type ImageMimeType,
@@ -19,7 +19,7 @@ import { Input } from "~/components/form/Input";
 import { Header } from "~/components/Header";
 import { Spinner } from "~/components/Spinner";
 import { useToast } from "~/components/Toast";
-import { useMe } from "~/context/me/hooks";
+import { useMe } from "~/contexts/me/hooks";
 import { useImageUpload } from "~/hooks/useImageUpload";
 import { honoClient } from "~/libs/apiClient.client";
 import { buildImageUrl, PROFILE_IMAGE_DIMENSIONS } from "~/libs/image";

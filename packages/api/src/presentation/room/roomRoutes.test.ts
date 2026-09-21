@@ -1,7 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { sha256 } from "@noble/hashes/sha2.js";
 import { bytesToHex } from "@noble/hashes/utils.js";
-import type { CreateRoomRequestBody } from "@repo/db/model";
+import type { CreateRoomRequestBody } from "@repo/db/models";
 import {
 	type GameId,
 	gameTable,
@@ -12,7 +12,7 @@ import {
 	submissionTable,
 	userTable,
 	voteTable,
-} from "@repo/db/schema";
+} from "@repo/db/schemas";
 import { MOCK_USER } from "@repo/mock/model";
 import { honoErrorHandler } from "@repo/shared/libs/honoErrorHandler";
 import { eq } from "drizzle-orm";

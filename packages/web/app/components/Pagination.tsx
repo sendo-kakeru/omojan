@@ -1,4 +1,4 @@
-import type { Pagination as PaginationMeta } from "@repo/db/model";
+import type { Pagination as PaginationMeta } from "@repo/db/models";
 import classNames from "classnames";
 import type * as React from "react";
 import { LuChevronLeft, LuChevronRight, LuEllipsis } from "react-icons/lu";
@@ -175,7 +175,7 @@ function generatePageNumbers(
  * ページネーションコンポーネント
  *
  * @example
- * // metaはPagination型（@repo/db/model）
+ * // metaはPagination型（@repo/db/models）
  * <Pagination
  *   {...meta}
  *   getPageUrl={(page) => `?page=${page}`}

@@ -1,4 +1,4 @@
-import type { RoundTheme, Submission } from "@repo/db/schema";
+import type { RoundTheme, Submission } from "@repo/db/schemas";
 
 export function createCombination({
 	text,

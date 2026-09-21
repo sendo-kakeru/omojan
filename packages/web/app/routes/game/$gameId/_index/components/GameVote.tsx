@@ -1,8 +1,8 @@
 import type {
 	GameClientVoteMessage,
 	GameServerVoteMessage,
-} from "@repo/db/model";
-import type { PlayerId } from "@repo/db/schema";
+} from "@repo/db/models";
+import type { PlayerId } from "@repo/db/schemas";
 import { VOTE_TIMEOUT_MS } from "@repo/shared/constants/game";
 import classNames from "classnames";
 import type { ReactNode } from "react";

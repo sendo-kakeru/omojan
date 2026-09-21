@@ -1,5 +1,5 @@
-import { verifyRoomTokenRequestQuerySchema } from "@repo/db/model";
-import { gameIdRequestParamSchema } from "@repo/db/schema";
+import { verifyRoomTokenRequestQuerySchema } from "@repo/db/models";
+import { gameIdRequestParamSchema } from "@repo/db/schemas";
 import { vValidator } from "@repo/shared/libs/vValidator";
 import { Hono } from "hono";
 import type { BaseContext } from "../../types";

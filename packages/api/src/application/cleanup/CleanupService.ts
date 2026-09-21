@@ -1,4 +1,4 @@
-import { gameTable, playerTable } from "@repo/db/schema";
+import { gameTable, playerTable } from "@repo/db/schemas";
 import { and, eq, gte, lt, sql } from "drizzle-orm";
 import type { DrizzleClient } from "../../libs/drizzle";
 
