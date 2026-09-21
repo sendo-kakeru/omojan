@@ -1,4 +1,4 @@
-import type { Room } from "@repo/db/model";
+import type { Room } from "@repo/db/models";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 import { JoinRoomDialog } from "./JoinRoomDialog";

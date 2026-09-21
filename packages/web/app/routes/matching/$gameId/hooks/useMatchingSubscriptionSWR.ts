@@ -4,8 +4,8 @@ import {
 	type MatchingClientMessage,
 	type MatchingParticipant,
 	matchingServerMessageSchema,
-} from "@repo/db/model";
-import type { GameId } from "@repo/db/schema";
+} from "@repo/db/models";
+import type { GameId } from "@repo/db/schemas";
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import useSWRSubscription, {

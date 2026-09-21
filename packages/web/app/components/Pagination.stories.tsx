@@ -1,4 +1,4 @@
-import type { Pagination as PaginationMeta } from "@repo/db/model";
+import type { Pagination as PaginationMeta } from "@repo/db/models";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
 	Pagination,

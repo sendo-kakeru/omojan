@@ -1,4 +1,4 @@
-import type { WaitingRoom } from "@repo/db/model";
+import type { WaitingRoom } from "@repo/db/models";
 import classNames from "classnames";
 import { useState } from "react";
 import { FaRegClock } from "react-icons/fa6";

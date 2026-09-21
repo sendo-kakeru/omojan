@@ -1,7 +1,7 @@
 import { uuid58Encode } from "@nakanoaas/uuid58";
 import type { Api } from "@repo/api";
-import type { FinishedRoom, PublicUser } from "@repo/db/model";
-import type { UserId } from "@repo/db/schema";
+import type { FinishedRoom, PublicUser } from "@repo/db/models";
+import type { UserId } from "@repo/db/schemas";
 import { OFFICIAL_X_ID } from "@repo/shared/constants/config";
 import { hc } from "hono/client";
 import { FaCrown } from "react-icons/fa";

@@ -1,6 +1,6 @@
 import { uuid58Encode } from "@nakanoaas/uuid58";
-import { type Me, meProfileSchema } from "@repo/db/model";
-import type { UserId } from "@repo/db/schema";
+import { type Me, meProfileSchema } from "@repo/db/models";
+import type { UserId } from "@repo/db/schemas";
 import {
 	ALLOWED_IMAGE_MIME_TYPES,
 	type ImageMimeType,

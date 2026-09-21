@@ -6,8 +6,8 @@ import {
 	type GameServerReactionMessage,
 	gameServerMessageSchema,
 	type ReactionEmoji,
-} from "@repo/db/model";
-import type { GameId, PlayerId } from "@repo/db/schema";
+} from "@repo/db/models";
+import type { GameId, PlayerId } from "@repo/db/schemas";
 import pRetry from "p-retry";
 import { useRef } from "react";
 import { useNavigate } from "react-router";

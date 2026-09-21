@@ -1,6 +1,6 @@
 "use client";
 import { uuid58Encode } from "@nakanoaas/uuid58";
-import { createRoomRequestBodySchema } from "@repo/db/model";
+import { createRoomRequestBodySchema } from "@repo/db/models";
 import { LOCALSTORAGE_OPERATION_FAILED_MESSAGE } from "@repo/shared/error";
 import { useForm } from "@tanstack/react-form";
 import {

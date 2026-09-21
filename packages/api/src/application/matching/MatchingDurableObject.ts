@@ -3,7 +3,7 @@ import {
 	type MatchingServerMePlayerMessage,
 	type MatchingServerParticipantsMessage,
 	matchingClientMessageSchema,
-} from "@repo/db/model";
+} from "@repo/db/models";
 import {
 	type GameId,
 	gameTable,
@@ -14,7 +14,7 @@ import {
 	playerTable,
 	type User,
 	userTable,
-} from "@repo/db/schema";
+} from "@repo/db/schemas";
 import { and, asc, eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import type { Env } from "../../env";

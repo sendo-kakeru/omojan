@@ -1,5 +1,5 @@
 import type { Api } from "@repo/api";
-import type { FinishedRoom, WaitingRoom } from "@repo/db/model";
+import type { FinishedRoom, WaitingRoom } from "@repo/db/models";
 import { hc } from "hono/client";
 import { useId, useState } from "react";
 import { Footer } from "~/components/Footer";

@@ -1,5 +1,5 @@
 import { uuid58Encode } from "@nakanoaas/uuid58";
-import type { Me } from "@repo/db/model";
+import type { Me } from "@repo/db/models";
 import { useState } from "react";
 import { LuLogIn } from "react-icons/lu";
 import { Link } from "react-router";

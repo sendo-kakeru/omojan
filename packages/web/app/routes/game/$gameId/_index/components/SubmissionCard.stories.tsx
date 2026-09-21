@@ -1,4 +1,4 @@
-import type { Submission } from "@repo/db/schema";
+import type { Submission } from "@repo/db/schemas";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 import {

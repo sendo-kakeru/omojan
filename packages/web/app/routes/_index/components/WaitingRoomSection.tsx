@@ -1,4 +1,4 @@
-import type { WaitingRoom } from "@repo/db/model";
+import type { WaitingRoom } from "@repo/db/models";
 import { Button } from "~/components/button/Button";
 import {
 	SectionHeading,

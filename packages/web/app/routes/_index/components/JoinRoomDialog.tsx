@@ -1,8 +1,8 @@
 "use client";
 
 import { uuid58Encode } from "@nakanoaas/uuid58";
-import type { JoinRoomRequestBody, Room } from "@repo/db/model";
-import { joinRoomRequestBodySchema, roomPasswordSchema } from "@repo/db/model";
+import type { JoinRoomRequestBody, Room } from "@repo/db/models";
+import { joinRoomRequestBodySchema, roomPasswordSchema } from "@repo/db/models";
 import { LOCALSTORAGE_OPERATION_FAILED_MESSAGE } from "@repo/shared/error";
 import { useForm } from "@tanstack/react-form";
 import {

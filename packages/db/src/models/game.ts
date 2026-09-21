@@ -23,7 +23,7 @@ import {
 	roundThemeSchema,
 	submissionSchema,
 	userSchema,
-} from "../schema";
+} from "../schemas";
 
 const gameStateSchema = union([
 	/**

@@ -1,4 +1,4 @@
-import type { FinishedRoom } from "@repo/db/model";
+import type { FinishedRoom } from "@repo/db/models";
 import { FiChevronLeft } from "react-icons/fi";
 import { Link, useSearchParams } from "react-router";
 import { Footer } from "~/components/Footer";

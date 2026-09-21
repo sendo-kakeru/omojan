@@ -1,5 +1,5 @@
-import type { HeartbeatPingMessage } from "@repo/db/model";
-import { isPlayerId, type PlayerId } from "@repo/db/schema";
+import type { HeartbeatPingMessage } from "@repo/db/models";
+import { isPlayerId, type PlayerId } from "@repo/db/schemas";
 import type { BaseIssue, BaseSchema, InferOutput } from "valibot";
 import { safeParse } from "valibot";
 

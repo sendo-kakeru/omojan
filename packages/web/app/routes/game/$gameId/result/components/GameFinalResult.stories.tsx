@@ -1,5 +1,5 @@
-import type { GameResultResponseBody } from "@repo/db/model";
-import type { PlayerId, UserId } from "@repo/db/schema";
+import type { GameResultResponseBody } from "@repo/db/models";
+import type { PlayerId, UserId } from "@repo/db/schemas";
 import { MOCK_ME } from "@repo/mock/model";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import {

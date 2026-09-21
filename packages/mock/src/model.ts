@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
-import type { Me } from "@repo/db/model";
-import type { User, UserId } from "@repo/db/schema";
+import type { Me } from "@repo/db/models";
+import type { User, UserId } from "@repo/db/schemas";
 
 export const MOCK_USER: User = {
 	createdAt: new Date(),

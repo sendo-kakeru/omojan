@@ -1,4 +1,4 @@
-import type { FinishedRoom } from "@repo/db/model";
+import type { FinishedRoom } from "@repo/db/models";
 import { SectionHeading, SectionMoreLink } from "~/components/SectionHeading";
 import { STAGGER_STEP_MS } from "~/libs/animation";
 import { FinishedRoomCard } from "./room-card/FinishedRoomCard";

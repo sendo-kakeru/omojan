@@ -1,6 +1,6 @@
 import { uuid58Encode } from "@nakanoaas/uuid58";
-import type { FinishedRoom } from "@repo/db/model";
-import type { UserId } from "@repo/db/schema";
+import type { FinishedRoom } from "@repo/db/models";
+import type { UserId } from "@repo/db/schemas";
 import { SectionHeading, SectionMoreLink } from "~/components/SectionHeading";
 import { FinishedRoomCard } from "~/routes/_index/components/room-card/FinishedRoomCard";
 import { FinishedRoomCardSkeleton } from "~/routes/_index/components/room-card/FinishedRoomCardSkeleton";

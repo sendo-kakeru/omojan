@@ -18,6 +18,10 @@ paths: ["**/*.{ts,tsx}"]
 ## ディレクトリ命名規約
 
 - 小文字で統一し、2 語以上は kebab-case（`room-card`）。camelCase・PascalCase は使わない
-- 同種のものを列挙して入れる「箱」は複数形（`components`、`hooks`、`routes`、`constants`、`migrations`、`contexts`）
-- アーキテクチャの層・役割・単一の概念は単数形（`application`、`presentation`、`middleware`）
-- 「箱」の中でカテゴリ分けするディレクトリは単数形（`components/button`、`components/form`、`components/icon`）
+- ディレクトリ名が「子要素そのものの種類」を指す場合は複数形
+  - `components`、`hooks`、`routes`、`contexts`、`libs`、`constants`、`workers`、`models`、`schemas`、`migrations`
+  - 判定方法: 子に対して「これは◯◯です」と言えるか（`Button.tsx` は component、`user.ts` は schema）
+- ディレクトリ名が「そのディレクトリ自身の役割・層・分類」を指す場合は単数形
+  - `application`、`presentation`（子は `game` などのドメインであって application ではない）
+  - `components/button`、`components/form`、`components/icon`（子は分類の構成要素）
+- 例外: 不可算名詞は上記に関わらず単数（`middleware`）

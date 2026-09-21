@@ -1,5 +1,5 @@
 import { uuid58Encode } from "@nakanoaas/uuid58";
-import type { FinishedRoom } from "@repo/db/model";
+import type { FinishedRoom } from "@repo/db/models";
 import classNames from "classnames";
 import type { ReactNode } from "react";
 import { FaCrown, FaRegClock } from "react-icons/fa6";

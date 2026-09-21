@@ -1,5 +1,5 @@
 import { uuid58Encode } from "@nakanoaas/uuid58";
-import type { GameResultResponseBody } from "@repo/db/model";
+import type { GameResultResponseBody } from "@repo/db/models";
 import {
 	OFFICIAL_X_ID,
 	PROD_SITE_URL,

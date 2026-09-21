@@ -1,5 +1,5 @@
-import type { Me } from "@repo/db/model";
-import type { User } from "@repo/db/schema";
+import type { Me } from "@repo/db/models";
+import type { User } from "@repo/db/schemas";
 import type { Env as HonoEnv } from "hono";
 import type { Env } from "./env";
 import type { DrizzleClient } from "./libs/drizzle";
