@@ -12,7 +12,7 @@ import {
 	playerNameSchema,
 	playerSchema,
 	userSchema,
-} from "../schema";
+} from "../schemas";
 import {
 	heartbeatPingMessageSchema,
 	heartbeatPongMessageSchema,

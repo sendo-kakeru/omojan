@@ -3,7 +3,7 @@
 		"@repo/shared": "workspace:*",
 		"@repo/tsup-config": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
-		"@types/node": "24.13.3",
+		"@types/node": "24.13.5",
 		"drizzle-kit": "0.31.10",
 		"dotenv": "17.4.2",
 		"drizzle-orm": "0.45.2",
@@ -13,15 +13,15 @@
 		"valibot": "1.5.0"
 	},
 	"exports": {
-		"./schema": {
-			"types": "./dist/schema/index.d.ts",
-			"import": "./dist/esm/schema/index.js",
-			"require": "./dist/schema/index.js"
+		"./schemas": {
+			"types": "./dist/schemas/index.d.ts",
+			"import": "./dist/esm/schemas/index.js",
+			"require": "./dist/schemas/index.js"
 		},
-		"./model": {
-			"types": "./dist/model/index.d.ts",
-			"import": "./dist/esm/model/index.js",
-			"require": "./dist/model/index.js"
+		"./models": {
+			"types": "./dist/models/index.d.ts",
+			"import": "./dist/esm/models/index.js",
+			"require": "./dist/models/index.js"
 		}
 	},
 	"license": "UNLICENSED",

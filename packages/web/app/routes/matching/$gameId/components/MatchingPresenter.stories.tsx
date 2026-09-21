@@ -1,5 +1,5 @@
-import type { MatchingParticipant } from "@repo/db/model";
-import type { PlayerId } from "@repo/db/schema";
+import type { MatchingParticipant } from "@repo/db/models";
+import type { PlayerId } from "@repo/db/schemas";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { MatchingPresenter } from "./MatchingPresenter";
 

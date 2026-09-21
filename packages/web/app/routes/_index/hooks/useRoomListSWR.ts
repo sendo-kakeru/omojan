@@ -1,4 +1,4 @@
-import type { GetRoomListRequestQuery } from "@repo/db/model";
+import type { GetRoomListRequestQuery } from "@repo/db/models";
 import useSWR from "swr";
 import { honoClient, honoFetcher } from "~/libs/apiClient.client";
 

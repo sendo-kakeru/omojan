@@ -2,8 +2,8 @@ import {
 	type GameResultResponseBody,
 	gameResultRequestParamSchema,
 	verifyRoomTokenRequestQuerySchema,
-} from "@repo/db/model";
-import { gameIdRequestParamSchema } from "@repo/db/schema";
+} from "@repo/db/models";
+import { gameIdRequestParamSchema } from "@repo/db/schemas";
 import { vValidator } from "@repo/shared/libs/vValidator";
 import type { HttpRespondReturn } from "@repo/shared/types";
 import { Hono } from "hono";

@@ -1,4 +1,4 @@
-import { REACTION_EMOJIS } from "@repo/db/model";
+import { REACTION_EMOJIS } from "@repo/db/models";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
 	gameScreenDecorator,

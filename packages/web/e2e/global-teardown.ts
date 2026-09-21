@@ -1,4 +1,4 @@
-import * as schema from "@repo/db/schema";
+import * as schema from "@repo/db/schemas";
 import dotenv from "dotenv";
 import { drizzle } from "drizzle-orm/libsql";
 import { reset } from "drizzle-seed";

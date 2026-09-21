@@ -3,7 +3,7 @@ import type {
 	GamePlayerItem,
 	GameResultResponseBody,
 	GameServerRoundStartMessage,
-} from "@repo/db/model";
+} from "@repo/db/models";
 import {
 	type GameId,
 	gameTable,
@@ -24,7 +24,7 @@ import {
 	submissionTable,
 	userTable,
 	voteTable,
-} from "@repo/db/schema";
+} from "@repo/db/schemas";
 import { WORDS } from "@repo/shared/constants/words";
 import { and, asc, count, eq, inArray } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";

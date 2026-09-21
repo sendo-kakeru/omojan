@@ -3,8 +3,8 @@ import type {
 	GameServerSubmissionMessage,
 	GameServerTurnEndMessage,
 	GameServerTurnStartMessage,
-} from "@repo/db/model";
-import type { PlayerCardId, PlayerId } from "@repo/db/schema";
+} from "@repo/db/models";
+import type { PlayerCardId, PlayerId } from "@repo/db/schemas";
 import { ROUND_START_DISPLAY_MS } from "@repo/shared/constants/game";
 import { WORDS } from "@repo/shared/constants/words";
 import type { Meta, StoryObj } from "@storybook/react-vite";

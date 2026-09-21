@@ -1,4 +1,4 @@
-import * as schema from "@repo/db/schema";
+import * as schema from "@repo/db/schemas";
 import { reset } from "drizzle-seed";
 import { createTestDbClient } from "./createTestDbClient";
 

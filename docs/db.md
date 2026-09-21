@@ -20,7 +20,7 @@
 
 ## スキーマ変更フロー
 
-1. `packages/db/src/schema/` 配下のスキーマファイルを編集
+1. `packages/db/src/schemas/` 配下のスキーマファイルを編集
 2. `turso auth login` でCLIをログイン
 3. `pnpm run db:changed --filter @repo/db` を実行
    - マイグレーションファイル生成（`db:gen`）

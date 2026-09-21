@@ -1,5 +1,5 @@
 import { type InferOutput, nullable, number, object } from "valibot";
-import { userIdSchema, userSchema } from "../schema";
+import { userIdSchema, userSchema } from "../schemas";
 
 export const publicUserSchema = object({
 	image: userSchema.entries.image,

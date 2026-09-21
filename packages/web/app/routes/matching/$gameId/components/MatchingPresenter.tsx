@@ -1,4 +1,4 @@
-import type { MatchingParticipant, Room } from "@repo/db/model";
+import type { MatchingParticipant, Room } from "@repo/db/models";
 import { PROD_SITE_URL, SITE_NAME } from "@repo/shared/constants/config";
 import { FaRegCopy } from "react-icons/fa";
 import { FaCheck, FaRegClock } from "react-icons/fa6";

@@ -32,7 +32,7 @@ import {
 	playerTable,
 	userIdSchema,
 	userSchema,
-} from "../schema";
+} from "../schemas";
 import {
 	paginatedResponseSchema,
 	paginationRequestQuerySchema,

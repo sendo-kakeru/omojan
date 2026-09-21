@@ -1,4 +1,4 @@
-import type { GetPublicUserResponseBody, PublicUser } from "@repo/db/model";
+import type { GetPublicUserResponseBody, PublicUser } from "@repo/db/models";
 import {
 	type GameId,
 	gameTable,
@@ -11,7 +11,7 @@ import {
 	type UserId,
 	userTable,
 	voteTable,
-} from "@repo/db/schema";
+} from "@repo/db/schemas";
 import { and, eq, inArray } from "drizzle-orm";
 import type { DrizzleClient } from "../../libs/drizzle";
 import { GameService } from "../game/GameService";

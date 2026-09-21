@@ -1,5 +1,5 @@
-import type { GamePlayerCard } from "@repo/db/model";
-import type { PlayerCardId } from "@repo/db/schema";
+import type { GamePlayerCard } from "@repo/db/models";
+import type { PlayerCardId } from "@repo/db/schemas";
 import classNames from "classnames";
 import type { ReactNode } from "react";
 import { Tile } from "~/components/Tile";

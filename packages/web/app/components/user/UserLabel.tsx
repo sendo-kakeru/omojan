@@ -1,4 +1,4 @@
-import type { User } from "@repo/db/schema";
+import type { User } from "@repo/db/schemas";
 import classNames from "classnames";
 import type { ComponentProps } from "react";
 import { getDisplayName } from "~/libs/displayName";

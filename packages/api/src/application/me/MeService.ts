@@ -4,8 +4,8 @@ import type {
 	Me,
 	UpdateMeRequestBody,
 	UpdateMeResponseBody,
-} from "@repo/db/model";
-import { type User, type UserId, userTable } from "@repo/db/schema";
+} from "@repo/db/models";
+import { type User, type UserId, userTable } from "@repo/db/schemas";
 import { isUniqueConstraintError } from "@repo/shared/error";
 import { eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";

@@ -14,7 +14,7 @@ import {
 	submissionTable,
 	userTable,
 	voteTable,
-} from "@repo/db/schema";
+} from "@repo/db/schemas";
 import { MOCK_USER } from "@repo/mock/model";
 import { Hono } from "hono";
 import { testClient } from "hono/testing";

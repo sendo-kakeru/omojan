@@ -1,7 +1,7 @@
 import {
 	type GetPublicUserResponseBody,
 	userRequestParamSchema,
-} from "@repo/db/model";
+} from "@repo/db/models";
 import { vValidator } from "@repo/shared/libs/vValidator";
 import type { HttpRespondReturn } from "@repo/shared/types";
 import { Hono } from "hono";

@@ -1,4 +1,4 @@
-import type { GameId } from "@repo/db/schema";
+import type { GameId } from "@repo/db/schemas";
 import { LOCALSTORAGE_OPERATION_FAILED_MESSAGE } from "@repo/shared/error";
 import { DetailedError } from "hono/client";
 import { useRef, useState } from "react";

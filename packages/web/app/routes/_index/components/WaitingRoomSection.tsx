@@ -1,12 +1,12 @@
-import type { WaitingRoom } from "@repo/db/model";
+import type { WaitingRoom } from "@repo/db/models";
 import { Button } from "~/components/button/Button";
 import {
 	SectionHeading,
 	SectionRefreshButton,
 } from "~/components/SectionHeading";
 import { STAGGER_STEP_MS } from "~/libs/animation";
-import { WaitingRoomCard } from "./roomCard/WaitingRoomCard";
-import { WaitingRoomCardSkeleton } from "./roomCard/WaitingRoomCardSkeleton";
+import { WaitingRoomCard } from "./room-card/WaitingRoomCard";
+import { WaitingRoomCardSkeleton } from "./room-card/WaitingRoomCardSkeleton";
 
 export function WaitingRoomSection({
 	isLoading,

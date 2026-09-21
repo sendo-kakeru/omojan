@@ -12,7 +12,7 @@ import {
 	type GameState,
 	gameClientMessageSchema,
 	type ReactionEmoji,
-} from "@repo/db/model";
+} from "@repo/db/models";
 import {
 	type Game,
 	type GameId,
@@ -25,7 +25,7 @@ import {
 	type RoundNo,
 	type RoundTheme,
 	type Submission,
-} from "@repo/db/schema";
+} from "@repo/db/schemas";
 import {
 	RESULT_DISPLAY_MS,
 	ROUND_START_DISPLAY_MS,

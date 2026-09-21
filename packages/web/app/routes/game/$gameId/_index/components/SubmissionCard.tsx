@@ -1,4 +1,4 @@
-import type { Submission } from "@repo/db/schema";
+import type { Submission } from "@repo/db/schemas";
 import classNames from "classnames";
 import { Tile } from "~/components/Tile";
 

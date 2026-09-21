@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 import { AuthUserMenuButton } from "./auth/AuthUserMenuButton";
-import { BeginnerMarkIcon } from "./icons/BeginnerMarkIcon";
+import { BeginnerMarkIcon } from "./icon/BeginnerMarkIcon";
 import { Tile } from "./Tile";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./Tooltip";
 
