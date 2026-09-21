@@ -15,7 +15,7 @@ export function DropdownMenu({
 			<DropdownMenuPrimitive.Portal>
 				<DropdownMenuPrimitive.Content
 					className={classNames(
-						"z-50 max-h-(--radix-dropdown-menu-content-available-height) min-w-160 origin-(--radix-dropdown-menu-content-transform-origin) overflow-y-auto overflow-x-hidden rounded-md border border-cream-200 bg-cream-50 p-4 shadow-tile",
+						"z-50 max-h-(--radix-dropdown-menu-content-available-height) min-w-160 origin-(--radix-dropdown-menu-content-transform-origin) overflow-y-auto overflow-x-hidden rounded-md border border-cream-200 bg-cream-50 p-4 shadow-tile-drop",
 						"data-[side=bottom]:slide-in-from-top-8 data-[side=left]:slide-in-from-right-8 data-[side=right]:slide-in-from-left-8 data-[side=top]:slide-in-from-bottom-8 data-[state=closed]:animate-out data-[state=open]:animate-in",
 						"data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
 					)}

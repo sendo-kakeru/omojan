@@ -87,8 +87,8 @@ function MaybeUserProfileLink({
 		<Link
 			aria-label={label}
 			className={classNames(
-				"pointer-events-auto relative outline-none transition-[background-color,opacity]",
-				"focus-visible:ring-2 focus-visible:ring-orange-600",
+				"pointer-events-auto relative transition-[background-color,opacity]",
+				"focus-visible:outline-2 focus-visible:outline-lime-800 focus-visible:outline-offset-2",
 				className,
 			)}
 			to={`/users/${uuid58Encode(player.userId)}`}
