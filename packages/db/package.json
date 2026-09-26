@@ -9,7 +9,7 @@
 		"drizzle-orm": "0.45.3",
 		"drizzle-valibot": "0.4.2",
 		"drizzle-seed": "0.3.1",
-		"tsx": "4.23.13",
+		"tsx": "4.23.15",
 		"valibot": "1.5.0"
 	},
 	"exports": {

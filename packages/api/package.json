@@ -19,7 +19,7 @@
 		"@repo/typescript-config": "workspace:*",
 		"@types/node": "24.13.5",
 		"drizzle-seed": "0.3.1",
-		"tsx": "4.23.13",
+		"tsx": "4.23.15",
 		"vitest": "5.0.1",
 		"wrangler": "4.134.0"
 	},
