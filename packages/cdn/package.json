@@ -17,13 +17,13 @@
 	},
 	"dependencies": {
 		"@repo/shared": "workspace:*",
-		"hono": "4.13.7",
+		"hono": "4.13.8",
 		"valibot": "1.5.0"
 	},
 	"devDependencies": {
 		"@repo/tsup-config": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
-		"@types/node": "24.13.5",
-		"wrangler": "4.134.0"
+		"@types/node": "24.13.6",
+		"wrangler": "4.137.0"
 	}
 }

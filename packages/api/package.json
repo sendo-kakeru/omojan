@@ -6,9 +6,9 @@
 		"@repo/db": "workspace:*",
 		"@repo/shared": "workspace:*",
 		"aws-jwt-verify": "5.2.1",
-		"drizzle-orm": "0.45.2",
+		"drizzle-orm": "0.45.3",
 		"drizzle-valibot": "0.4.2",
-		"hono": "4.13.7",
+		"hono": "4.13.8",
 		"p-retry": "8.0.1",
 		"valibot": "1.5.0"
 	},
@@ -17,11 +17,11 @@
 		"@repo/mock": "workspace:*",
 		"@repo/tsup-config": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
-		"@types/node": "24.13.5",
+		"@types/node": "24.13.6",
 		"drizzle-seed": "0.3.1",
-		"tsx": "4.23.13",
-		"vitest": "5.0.0",
-		"wrangler": "4.134.0"
+		"tsx": "4.23.15",
+		"vitest": "5.0.1",
+		"wrangler": "4.137.0"
 	},
 	"exports": {
 		".": "./dist/index.d.ts"

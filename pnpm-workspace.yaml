@@ -2,7 +2,7 @@ packages:
   - "packages/*"
 minimumReleaseAge: 4320
 overrides:
-  "@types/node": "24.13.5"
+  "@types/node": "24.13.6"
 allowBuilds:
   "@parcel/watcher": true
   "@sentry/cli": true
