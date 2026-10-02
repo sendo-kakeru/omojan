@@ -1,4 +1,4 @@
-import { wrapRequestHandler } from "@sentry/cloudflare";
+import { wrapRequestHandler } from "@sentry/cloudflare/request";
 import { createRequestHandler, RouterContextProvider } from "react-router";
 import { cloudflareContext } from "../app/libs/cloudflareContext";
 import { maintenanceHtml } from "./maintenance";
@@ -30,7 +30,6 @@ export default {
 				context: executionContext,
 				options: {
 					dsn: "https://0059254ef5a4ea86918e8a1721f51288@o4511000575541248.ingest.us.sentry.io/4511000584192000",
-					sendDefaultPii: true,
 				},
 				request: request,
 			},
