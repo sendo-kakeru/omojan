@@ -17,7 +17,7 @@
 		"@repo/mock": "workspace:*",
 		"@repo/tsup-config": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
-		"@types/node": "24.13.6",
+		"@types/node": "24.19.0",
 		"drizzle-seed": "0.3.1",
 		"tsx": "4.23.15",
 		"vitest": "5.0.2",
