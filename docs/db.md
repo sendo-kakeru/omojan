@@ -46,3 +46,13 @@
 - `player_game_id_idx`（`player (game_id)`）
 - `game_status_updated_at_idx`（`game (status, updated_at)`）
 - `vote_player_id_round_id_unique`（`vote (player_id, round_id)` の UNIQUE）
+
+## 件数カウンター（`game_counter`）の更新ルール
+
+終了済みゲームの総件数は、`count()` による全件走査を避けるため `game_counter` テーブル（`status = 'finished'` の行）で管理している。
+詳細は `docs/design-docs/finished-game-counter.md` を参照。
+
+- ゲームを finished にする処理、または finished のゲームを操作する処理を追加する場合は、同一トランザクションで `game_counter` を更新すること
+  - 現状アプリケーションで更新しているのは `GameService.endGame`（finished でないゲームを finished に更新できた場合のみ +1）のみ
+- finished のゲームの削除は、Cleanup（`CleanupService.runAll`）の最後に行う再計算で件数を合わせるため、個別の更新は不要
+- 更新を忘れても、Cleanup（cron 2時間ごと）の再計算で最大2時間以内に修復される
