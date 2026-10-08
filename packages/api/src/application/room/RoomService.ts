@@ -15,6 +15,7 @@ import type {
 import {
 	type Game,
 	type GameId,
+	gameCounterTable,
 	gameTable,
 	isPlayerSeat,
 	type PlayerId,
@@ -219,7 +220,17 @@ export class RoomService {
 
 		// 総件数とゲーム一覧を1往復で取得
 		const [countResults, games] = await this.db.batch([
-			this.db.select({ count: count() }).from(gameTable).where(whereCondition),
+			userId
+				? this.db
+						.select({ count: count() })
+						.from(gameTable)
+						.where(whereCondition)
+				: // 絞り込みなしの総件数は、全件走査を避けるためカウンターから取得する
+					// NOTE: 将来的にもっと Read を減らしたいとなったらユーザーの絞り込みも対応する
+					this.db
+						.select({ count: gameCounterTable.count })
+						.from(gameCounterTable)
+						.where(eq(gameCounterTable.status, "finished")),
 			this.db
 				.select({
 					finishedAt: gameTable.updatedAt,

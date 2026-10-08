@@ -6,6 +6,7 @@ import type {
 } from "@repo/db/models";
 import {
 	type GameId,
+	gameCounterTable,
 	gameTable,
 	isRoundNo,
 	type PlayerCard,
@@ -26,7 +27,7 @@ import {
 	voteTable,
 } from "@repo/db/schemas";
 import { WORDS } from "@repo/shared/constants/words";
-import { and, asc, count, eq, inArray } from "drizzle-orm";
+import { and, asc, count, eq, inArray, ne, sql } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import type { DrizzleClient } from "../../libs/drizzle";
 
@@ -489,12 +490,24 @@ export class GameService {
 
 	/**
 	 * ゲームを終了状態に更新する
+	 * - 終了済みゲーム数のカウンターを同一トランザクションで加算する
+	 * - 既に終了済みのゲームは更新・加算しない（二重加算の防止）
 	 */
 	async endGame({ gameId }: { gameId: GameId }): Promise<void> {
-		await this.db
-			.update(gameTable)
-			.set({ status: "finished" })
-			.where(eq(gameTable.id, gameId));
+		await this.db.transaction(async (tx) => {
+			const updated = await tx
+				.update(gameTable)
+				.set({ status: "finished" })
+				.where(and(eq(gameTable.id, gameId), ne(gameTable.status, "finished")))
+				.returning({ id: gameTable.id });
+
+			if (updated.length === 0) return;
+
+			await tx
+				.update(gameCounterTable)
+				.set({ count: sql`${gameCounterTable.count} + 1` })
+				.where(eq(gameCounterTable.status, "finished"));
+		});
 	}
 
 	/**
