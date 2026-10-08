@@ -1,4 +1,4 @@
-import { sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { index, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 import { createSelectSchema } from "drizzle-valibot";
 import { brand, type InferOutput, pipe, string, uuid } from "valibot";
 import { idBaseColumn, tableBaseColumns } from "./common";
@@ -32,7 +32,11 @@ export const voteTable = sqliteTable(
 			.references(() => submissionTable.id, { onDelete: "cascade" }),
 	},
 	(table) => [
-		uniqueIndex("vote_player_round_unique").on(table.playerId, table.roundId),
+		uniqueIndex("vote_player_id_round_id_unique").on(
+			table.playerId,
+			table.roundId,
+		),
+		index("vote_round_id_idx").on(table.roundId),
 	],
 );
 

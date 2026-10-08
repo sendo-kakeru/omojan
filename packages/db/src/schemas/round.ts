@@ -1,4 +1,9 @@
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import {
+	integer,
+	sqliteTable,
+	text,
+	uniqueIndex,
+} from "drizzle-orm/sqlite-core";
 import { createSelectSchema } from "drizzle-valibot";
 import {
 	brand,
@@ -27,15 +32,24 @@ export function isRoundNo(value: unknown): value is RoundNo {
 	return is(roundNoSchema, value);
 }
 
-export const roundTable = sqliteTable("round", {
-	...tableBaseColumns,
-	gameId: text("game_id")
-		.notNull()
-		.$type<GameId>()
-		.references(() => gameTable.id, { onDelete: "cascade" }),
-	id: idBaseColumn.$type<RoundId>(),
-	roundNo: integer("round_no").notNull().$type<RoundNo>(),
-});
+export const roundTable = sqliteTable(
+	"round",
+	{
+		...tableBaseColumns,
+		gameId: text("game_id")
+			.notNull()
+			.$type<GameId>()
+			.references(() => gameTable.id, { onDelete: "cascade" }),
+		id: idBaseColumn.$type<RoundId>(),
+		roundNo: integer("round_no").notNull().$type<RoundNo>(),
+	},
+	(table) => [
+		uniqueIndex("round_game_id_round_no_unique").on(
+			table.gameId,
+			table.roundNo,
+		),
+	],
+);
 
 export const roundSchema = createSelectSchema(roundTable, {
 	gameId: gameIdSchema,
