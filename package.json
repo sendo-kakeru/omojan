@@ -10,7 +10,7 @@
 		"node": "24.21.0"
 	},
 	"name": "omojan",
-	"packageManager": "pnpm@12.8.1",
+	"packageManager": "pnpm@12.9.1",
 	"private": true,
 	"scripts": {
 		"build": "turbo run build",
