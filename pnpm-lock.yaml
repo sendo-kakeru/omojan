@@ -325,8 +325,8 @@ importers:
         specifier: 6.21.0
         version: 6.21.0(supports-color@10.2.2)(typescript@7.0.2)
       '@pulumi/gcp':
-        specifier: 9.37.0
-        version: 9.37.0(supports-color@10.2.2)(typescript@7.0.2)
+        specifier: 9.37.1
+        version: 9.37.1(supports-color@10.2.2)(typescript@7.0.2)
       '@pulumi/pulumi':
         specifier: 3.265.0
         version: 3.265.0(supports-color@10.2.2)(typescript@7.0.2)
@@ -2497,8 +2497,8 @@ packages:
   '@pulumi/cloudflare@6.21.0':
     resolution: {integrity: sha512-IW8oBur+LcdXt2/Gv29P8TNxI7ILL+ZC2LKo8QtDcmCjQL5KFuR1A9rh0OxGEn08zPWxpMfHT6o1wZ5s0q3DIw==}
 
-  '@pulumi/gcp@9.37.0':
-    resolution: {integrity: sha512-LQ4AOUmFqP6mIIC/nDpCdJOfUqOfFsCVf9E/vf6WJB9lwchi+4aKf21q6QYhx3AoKVjvRmasi5NNSBJm1vFlfw==}
+  '@pulumi/gcp@9.37.1':
+    resolution: {integrity: sha512-KDUykcf1CYwn4/QQ+/TcfU2qhKPhYyENtPcQq6+5x4pIc3FyycuhfMXDybERmONQMiqo3tG5LNkMlgtSKJHo9A==}
 
   '@pulumi/pulumi@3.265.0':
     resolution: {integrity: sha512-rg/aFiQ1DIWcqQOQLuzg/9vIC5J4L6eLLkT54FPlIf0yhYTvEnREF7uip+WLSdHhHTi81PzeU0MPYRtiPTJ+IQ==}
@@ -8110,7 +8110,7 @@ snapshots:
       - ts-node
       - typescript
 
-  '@pulumi/gcp@9.37.0(supports-color@10.2.2)(typescript@7.0.2)':
+  '@pulumi/gcp@9.37.1(supports-color@10.2.2)(typescript@7.0.2)':
     dependencies:
       '@pulumi/pulumi': 3.265.0(supports-color@10.2.2)(typescript@7.0.2)
       '@types/express': 4.17.25
