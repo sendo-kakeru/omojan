@@ -618,7 +618,12 @@ export class GameService {
 				text: playerCardTable.text,
 			})
 			.from(playerCardTable)
-			.where(inArray(playerCardTable.submissionId, submissionIds));
+			.where(
+				and(
+					eq(playerCardTable.gameId, gameId),
+					inArray(playerCardTable.submissionId, submissionIds),
+				),
+			);
 
 		// 投票一覧を取得
 		const votes = await this.db
