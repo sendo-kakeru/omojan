@@ -1,4 +1,4 @@
-import { gameTable, playerTable } from "@repo/db/schemas";
+import { gameCounterTable, gameTable, playerTable } from "@repo/db/schemas";
 import { and, eq, gte, lt, sql } from "drizzle-orm";
 import type { DrizzleClient } from "../../libs/drizzle";
 
@@ -28,20 +28,58 @@ export class CleanupService {
 			staleWaitingRooms: 0,
 		};
 
-		// 1. 募集中で1時間以上経過した部屋を削除
-		results.staleWaitingRooms = await this.deleteStaleWaitingRooms();
+		try {
+			// 1. 募集中で1時間以上経過した部屋を削除
+			results.staleWaitingRooms = await this.deleteStaleWaitingRooms();
 
-		// 2. プレイヤーが3人以下の非募集中の部屋を削除
-		results.insufficientPlayerRooms =
-			await this.deleteRoomsWithInsufficientPlayers();
+			// 2. プレイヤーが3人以下の非募集中の部屋を削除
+			results.insufficientPlayerRooms =
+				await this.deleteRoomsWithInsufficientPlayers();
 
-		// 3. アクティブで1時間以上経過した部屋を削除
-		results.staleActiveRooms = await this.deleteStaleActiveRooms();
+			// 3. アクティブで1時間以上経過した部屋を削除
+			results.staleActiveRooms = await this.deleteStaleActiveRooms();
 
-		// 4. 孤立したプレイヤーを削除
-		results.orphanedPlayers = await this.deleteOrphanedPlayers();
+			// 4. 孤立したプレイヤーを削除
+			results.orphanedPlayers = await this.deleteOrphanedPlayers();
+		} finally {
+			// 5. 終了済みゲーム数のカウンターを再計算
+			// 削除による件数の減少を反映するため、途中の削除処理が失敗しても最後に必ず実行する
+			await this.recalculateFinishedGameCount();
+		}
 
 		return results;
+	}
+
+	/**
+	 * 終了済みゲーム数を数え直してカウンターを上書きする
+	 * - 集計と更新を単一の文で行い、間にゲームが終了しても件数がずれないようにする
+	 */
+	private async recalculateFinishedGameCount(): Promise<void> {
+		const finishedCountSql = sql<number>`(SELECT count(*) FROM ${gameTable} WHERE ${gameTable.status} = 'finished')`;
+
+		const [previousResults, updatedResults] = await this.db.batch([
+			this.db
+				.select({ count: gameCounterTable.count })
+				.from(gameCounterTable)
+				.where(eq(gameCounterTable.status, "finished")),
+			this.db
+				.insert(gameCounterTable)
+				.values({ count: finishedCountSql, status: "finished" })
+				.onConflictDoUpdate({
+					set: { count: finishedCountSql },
+					target: gameCounterTable.status,
+				})
+				.returning({ count: gameCounterTable.count }),
+		]);
+		const previousCount = previousResults[0]?.count;
+		const updatedCount = updatedResults[0]?.count;
+
+		if (previousCount !== updatedCount) {
+			console.log("終了済みゲーム数のカウンターを再計算で更新しました:", {
+				previousCount: previousCount ?? null,
+				updatedCount,
+			});
+		}
 	}
 
 	/**
