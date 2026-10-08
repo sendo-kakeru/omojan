@@ -91,7 +91,7 @@ function DialogContent({
 			<DialogOverlay />
 			<DialogPrimitive.Content
 				className={classNames(
-					"fixed top-1/2 left-1/2 z-50 flex max-h-[calc(100%-2rem)] w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] flex-col gap-16 overflow-hidden rounded-lg border border-cream-200 bg-cream-50 p-24 shadow-tile duration-200 sm:max-w-lg",
+					"fixed top-1/2 left-1/2 z-50 flex max-h-[calc(100%-2rem)] w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] flex-col gap-16 overflow-hidden rounded-lg border border-cream-200 bg-cream-50 p-24 shadow-tile-drop duration-200 sm:max-w-lg",
 					"data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:animate-out data-[state=open]:animate-in",
 					className,
 				)}

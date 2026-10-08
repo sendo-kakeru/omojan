@@ -1,4 +1,4 @@
-import type { GameServerReactionMessage } from "@repo/db/model";
+import type { GameServerReactionMessage } from "@repo/db/models";
 import { useState } from "react";
 
 export type Reaction = GameServerReactionMessage & {

@@ -6,22 +6,22 @@
 		"@repo/db": "workspace:*",
 		"@repo/shared": "workspace:*",
 		"aws-jwt-verify": "5.2.1",
-		"drizzle-orm": "0.45.2",
+		"drizzle-orm": "0.45.3",
 		"drizzle-valibot": "0.4.2",
-		"hono": "4.13.7",
+		"hono": "4.13.10",
 		"p-retry": "8.0.1",
-		"valibot": "1.4.2"
+		"valibot": "1.5.0"
 	},
 	"devDependencies": {
 		"@faker-js/faker": "10.6.0",
 		"@repo/mock": "workspace:*",
 		"@repo/tsup-config": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
-		"@types/node": "24.13.3",
+		"@types/node": "24.19.0",
 		"drizzle-seed": "0.3.1",
-		"tsx": "4.23.13",
-		"vitest": "5.0.0",
-		"wrangler": "4.130.0"
+		"tsx": "4.23.15",
+		"vitest": "5.0.2",
+		"wrangler": "4.143.0"
 	},
 	"exports": {
 		".": "./dist/index.d.ts"

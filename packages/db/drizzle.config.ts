@@ -45,5 +45,5 @@ export default defineConfig({
 	},
 	dialect: "turso",
 	out: "./src/migrations",
-	schema: "./src/schema",
+	schema: "./src/schemas",
 }) satisfies Config;

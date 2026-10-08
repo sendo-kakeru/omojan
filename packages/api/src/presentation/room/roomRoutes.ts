@@ -10,8 +10,8 @@ import {
 	getRoomListRequestQuerySchema,
 	type JoinRoomResponseBody,
 	joinRoomRequestBodySchema,
-} from "@repo/db/model";
-import { gameIdRequestParamSchema } from "@repo/db/schema";
+} from "@repo/db/models";
+import { gameIdRequestParamSchema } from "@repo/db/schemas";
 import { vValidator } from "@repo/shared/libs/vValidator";
 import type { HttpRespondReturn } from "@repo/shared/types";
 import { Hono } from "hono";
@@ -84,13 +84,13 @@ export const routes = new Hono<
 		"/",
 		vValidator("json", createRoomRequestBodySchema),
 		async (c): Promise<HttpRespondReturn<CreateRoomResponseBody>> => {
-			const { roomService, sub } = c.var;
+			const { auth, roomService } = c.var;
 			const body = c.req.valid("json");
 
 			try {
 				const result = await roomService.create({
 					...body,
-					sub,
+					userId: auth?.me.userId ?? null,
 				});
 				return c.json(
 					{
@@ -167,7 +167,7 @@ export const routes = new Hono<
 		vValidator("json", joinRoomRequestBodySchema),
 		vValidator("param", gameIdRequestParamSchema),
 		async (c): Promise<HttpRespondReturn<JoinRoomResponseBody>> => {
-			const { roomService, sub } = c.var;
+			const { auth, roomService } = c.var;
 			const body = c.req.valid("json");
 			const { gameId } = c.req.valid("param");
 
@@ -175,7 +175,7 @@ export const routes = new Hono<
 				const playerToken = await roomService.join({
 					...body,
 					gameId,
-					sub,
+					userId: auth?.me.userId ?? null,
 				});
 
 				return c.json(

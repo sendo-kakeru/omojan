@@ -1,4 +1,4 @@
-import type { GameId } from "@repo/db/schema";
+import type { GameId } from "@repo/db/schemas";
 import useSWRImmutable from "swr/immutable";
 import { honoClient, honoFetcher } from "~/libs/apiClient.client";
 

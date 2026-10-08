@@ -1,7 +1,7 @@
 import { uuid58Encode } from "@nakanoaas/uuid58";
 import type { Api } from "@repo/api";
-import type { FinishedRoom, PublicUser } from "@repo/db/model";
-import type { UserId } from "@repo/db/schema";
+import type { FinishedRoom, PublicUser } from "@repo/db/models";
+import type { UserId } from "@repo/db/schemas";
 import { OFFICIAL_X_ID } from "@repo/shared/constants/config";
 import { hc } from "hono/client";
 import { FaCrown } from "react-icons/fa";
@@ -13,7 +13,7 @@ import { Button } from "~/components/button/Button";
 import { Footer } from "~/components/Footer";
 import { Header } from "~/components/Header";
 import { Spinner } from "~/components/Spinner";
-import { useMe } from "~/context/me/hooks";
+import { useMe } from "~/contexts/me/hooks";
 import { cloudflareContext } from "~/libs/cloudflareContext";
 import { getDisplayName } from "~/libs/displayName";
 import { buildImageUrl, PROFILE_IMAGE_DIMENSIONS } from "~/libs/image";

@@ -1,5 +1,5 @@
-import type { FinishedRoom } from "@repo/db/model";
-import type { UserId } from "@repo/db/schema";
+import type { FinishedRoom } from "@repo/db/models";
+import type { UserId } from "@repo/db/schemas";
 import { FiChevronLeft } from "react-icons/fi";
 import { Link, useSearchParams } from "react-router";
 import { Footer } from "~/components/Footer";

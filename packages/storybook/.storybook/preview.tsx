@@ -3,7 +3,7 @@ import type { Decorator, Preview } from "@storybook/react-vite";
 import { BrowserRouter } from "react-router";
 import { ToastProvider } from "../../web/app/components/Toast";
 import { TooltipProvider } from "../../web/app/components/Tooltip";
-import { MeContext } from "../../web/app/context/me/provider";
+import { MeContext } from "../../web/app/contexts/me/provider";
 import "../style.css";
 
 const decorator: Decorator = (Story, context) => {

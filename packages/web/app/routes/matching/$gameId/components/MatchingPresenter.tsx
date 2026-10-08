@@ -1,4 +1,4 @@
-import type { MatchingParticipant, Room } from "@repo/db/model";
+import type { MatchingParticipant, Room } from "@repo/db/models";
 import { PROD_SITE_URL, SITE_NAME } from "@repo/shared/constants/config";
 import { FaRegCopy } from "react-icons/fa";
 import { FaCheck, FaRegClock } from "react-icons/fa6";
@@ -131,7 +131,7 @@ export function MatchingPresenter({
 				</p>
 				<ul className="grid gap-y-8">
 					{[1, 2, 3, 4].map((seat) => (
-						<li key={seat}>
+						<li className="min-w-0" key={seat}>
 							<MatchingParticipantLabel
 								participant={participants[seat - 1]}
 								seat={seat}

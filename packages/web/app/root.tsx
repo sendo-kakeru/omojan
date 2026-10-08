@@ -19,7 +19,7 @@ import { ErrorPage } from "./components/ErrorPage";
 import { GlobalNavigationProgress } from "./components/GlobalNavigationProgress";
 import { ToastProvider } from "./components/Toast";
 import { TooltipProvider } from "./components/Tooltip";
-import { MeProvider } from "./context/me/provider";
+import { MeProvider } from "./contexts/me/provider";
 
 const SITE_DESCRIPTION =
 	"おもじゃんをオンラインで遊ぼう！言葉を組み合わせて一番面白い人が勝ち。4人対戦ワードゲーム。";

@@ -1,4 +1,4 @@
-import { REACTION_EMOJIS, type ReactionEmoji } from "@repo/db/model";
+import { REACTION_EMOJIS, type ReactionEmoji } from "@repo/db/models";
 import classNames from "classnames";
 import { useRef, useState } from "react";
 import { Tile } from "~/components/Tile";
@@ -50,7 +50,7 @@ export function ReactionBar({
 
 				<div
 					className={classNames(
-						"absolute right-2 bottom-full mb-8 flex origin-bottom flex-col gap-y-4 rounded-full border border-cream-200 bg-cream-50/95 py-8 shadow-tile backdrop-blur-sm transition-all duration-200 ease-out",
+						"absolute right-2 bottom-full mb-8 flex origin-bottom flex-col gap-y-4 rounded-full border border-cream-200 bg-cream-50/95 py-8 shadow-tile-drop backdrop-blur-sm transition-all duration-200 ease-out",
 						open
 							? "scale-y-100 opacity-100"
 							: "pointer-events-none scale-y-0 opacity-0",

@@ -11,7 +11,7 @@ import {
 	string,
 	url,
 } from "valibot";
-import * as schema from "./schema";
+import * as schema from "./schemas";
 
 const dotenvFileMap = {
 	development: ".env.local",

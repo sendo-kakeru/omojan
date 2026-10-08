@@ -1,5 +1,5 @@
 import { uuid58Encode } from "@nakanoaas/uuid58";
-import type { GameResultResponseBody } from "@repo/db/model";
+import type { GameResultResponseBody } from "@repo/db/models";
 import {
 	OFFICIAL_X_ID,
 	PROD_SITE_URL,
@@ -18,7 +18,7 @@ import { Footer } from "~/components/Footer";
 import { Header } from "~/components/Header";
 import { Tile } from "~/components/Tile";
 import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/Tooltip";
-import { useMe } from "~/context/me/hooks";
+import { useMe } from "~/contexts/me/hooks";
 import { useShare } from "~/hooks/useShare";
 import { getDisplayName } from "~/libs/displayName";
 import { AVATAR_IMAGE_DIMENSIONS, buildImageUrl } from "~/libs/image";
@@ -90,7 +90,7 @@ export function GameFinalResult({
 											/>
 											{me && winner.userId === me.userId && (
 												<Badge
-													className="absolute -bottom-12 left-1/2 -translate-x-1/2 ring-2 ring-cream-50"
+													className="absolute -bottom-12 left-1/2 -translate-x-1/2 outline-2 outline-cream-50"
 													variant="fill"
 												>
 													自分

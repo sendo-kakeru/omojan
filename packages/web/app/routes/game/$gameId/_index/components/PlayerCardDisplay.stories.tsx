@@ -1,4 +1,4 @@
-import type { PlayerCardId } from "@repo/db/schema";
+import type { PlayerCardId } from "@repo/db/schemas";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useState } from "react";
 import { gameScreenParameters } from "~/storybook/decorators";

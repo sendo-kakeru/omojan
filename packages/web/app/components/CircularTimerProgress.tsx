@@ -28,7 +28,7 @@ export function CircularTimerProgress({
 		>
 			<svg
 				className={classNames(
-					"size-full rounded-full bg-cream-50 shadow-tile",
+					"size-full rounded-full bg-cream-50 shadow-tile-drop",
 					isUrgent ? "text-orange-600" : "text-lime-800",
 				)}
 				viewBox="0 0 32 32"

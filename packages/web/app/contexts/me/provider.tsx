@@ -1,4 +1,4 @@
-import type { Me } from "@repo/db/model";
+import type { Me } from "@repo/db/models";
 import type { HttpResponseBody } from "@repo/shared/types";
 import type { InferRequestType } from "hono";
 import { createContext, type PropsWithChildren } from "react";

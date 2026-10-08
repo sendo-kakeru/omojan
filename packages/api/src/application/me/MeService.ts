@@ -1,31 +1,39 @@
 import type {
 	CreateMeRequestBody,
 	CreateMeResponseBody,
-	GetMeResponseBody,
 	Me,
 	UpdateMeRequestBody,
 	UpdateMeResponseBody,
-} from "@repo/db/model";
-import { type User, type UserId, userTable } from "@repo/db/schema";
+} from "@repo/db/models";
+import { type User, type UserId, userTable } from "@repo/db/schemas";
 import { isUniqueConstraintError } from "@repo/shared/error";
 import { eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import type { DrizzleClient } from "../../libs/drizzle";
 
+const meColumns = {
+	email: userTable.email,
+	image: userTable.image,
+	name: userTable.name,
+	userId: userTable.id,
+} as const;
+
 export class MeService {
 	constructor(private readonly db: DrizzleClient) {}
 
-	async findBySub({ sub }: Pick<User, "sub">): Promise<GetMeResponseBody> {
+	async findBySub({
+		sub,
+	}: Pick<User, "sub">): Promise<{ me: Me; status: User["status"] } | null> {
 		const [findUser] = await this.db
-			.select({
-				email: userTable.email,
-				id: userTable.id,
-				image: userTable.image,
-				name: userTable.name,
-			})
+			.select({ ...meColumns, status: userTable.status })
 			.from(userTable)
-			.where(eq(userTable.sub, sub));
-		return findUser ? this.convertUserToMe(findUser) : null;
+			.where(eq(userTable.sub, sub))
+			.limit(1);
+
+		if (!findUser) return null;
+
+		const { status, ...me } = findUser;
+		return { me, status };
 	}
 
 	async register(
@@ -35,12 +43,7 @@ export class MeService {
 			const [createdUser] = await this.db
 				.insert(userTable)
 				.values(dto)
-				.returning({
-					email: userTable.email,
-					id: userTable.id,
-					image: userTable.image,
-					name: userTable.name,
-				});
+				.returning(meColumns);
 
 			if (!createdUser) {
 				throw new HTTPException(500, {
@@ -48,7 +51,7 @@ export class MeService {
 				});
 			}
 
-			return this.convertUserToMe(createdUser);
+			return createdUser;
 		} catch (error) {
 			if (isUniqueConstraintError(error)) {
 				throw new HTTPException(409, {
@@ -59,30 +62,15 @@ export class MeService {
 		}
 	}
 
-	async getImageKey({ sub }: Pick<User, "sub">): Promise<string | null> {
-		const [user] = await this.db
-			.select({ image: userTable.image })
-			.from(userTable)
-			.where(eq(userTable.sub, sub))
-			.limit(1);
-		return user?.image ?? null;
-	}
-
-	async update(
-		dto: UpdateMeRequestBody & Pick<User, "sub">,
-	): Promise<UpdateMeResponseBody> {
-		const { sub, ...setValues } = dto;
-
+	async update({
+		userId,
+		...setValues
+	}: UpdateMeRequestBody & { userId: UserId }): Promise<UpdateMeResponseBody> {
 		const [updatedUser] = await this.db
 			.update(userTable)
 			.set(setValues)
-			.where(eq(userTable.sub, sub))
-			.returning({
-				email: userTable.email,
-				id: userTable.id,
-				image: userTable.image,
-				name: userTable.name,
-			});
+			.where(eq(userTable.id, userId))
+			.returning(meColumns);
 
 		if (!updatedUser) {
 			throw new HTTPException(404, {
@@ -90,17 +78,6 @@ export class MeService {
 			});
 		}
 
-		return this.convertUserToMe(updatedUser);
-	}
-
-	private convertUserToMe(
-		user: Pick<User, "email" | "name" | "image"> & { id: UserId },
-	): Me {
-		return {
-			email: user.email,
-			image: user.image,
-			name: user.name,
-			userId: user.id,
-		};
+		return updatedUser;
 	}
 }

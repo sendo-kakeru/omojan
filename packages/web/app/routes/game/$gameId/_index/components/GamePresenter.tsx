@@ -2,7 +2,7 @@ import type {
 	GameClientSubmissionMessage,
 	GameClientVoteMessage,
 	GameServerMessage,
-} from "@repo/db/model";
+} from "@repo/db/models";
 import type { ReactNode } from "react";
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router";

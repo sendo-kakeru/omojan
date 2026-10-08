@@ -1,8 +1,8 @@
 import type {
 	GameClientSubmissionMessage,
 	GameServerSubmissionMessage,
-} from "@repo/db/model";
-import type { PlayerCard, PlayerCardId, PlayerId } from "@repo/db/schema";
+} from "@repo/db/models";
+import type { PlayerCard, PlayerCardId, PlayerId } from "@repo/db/schemas";
 import classNames from "classnames";
 import type { ReactNode } from "react";
 import { useEffect, useState, useTransition } from "react";

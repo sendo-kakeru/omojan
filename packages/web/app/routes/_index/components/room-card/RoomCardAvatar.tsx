@@ -1,4 +1,4 @@
-import type { FinishedRoom, WaitingRoom } from "@repo/db/model";
+import type { FinishedRoom, WaitingRoom } from "@repo/db/models";
 import classNames from "classnames";
 import type { ComponentProps } from "react";
 import { FaUser } from "react-icons/fa";
