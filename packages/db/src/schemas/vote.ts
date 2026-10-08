@@ -32,7 +32,10 @@ export const voteTable = sqliteTable(
 			.references(() => submissionTable.id, { onDelete: "cascade" }),
 	},
 	(table) => [
-		uniqueIndex("vote_player_round_unique").on(table.playerId, table.roundId),
+		uniqueIndex("vote_player_id_round_id_unique").on(
+			table.playerId,
+			table.roundId,
+		),
 	],
 );
 
