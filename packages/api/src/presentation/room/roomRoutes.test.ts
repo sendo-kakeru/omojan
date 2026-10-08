@@ -4,6 +4,7 @@ import { bytesToHex } from "@noble/hashes/utils.js";
 import type { CreateRoomRequestBody } from "@repo/db/models";
 import {
 	type GameId,
+	gameCounterTable,
 	gameTable,
 	type PlayerSeat,
 	playerTable,
@@ -15,11 +16,13 @@ import {
 } from "@repo/db/schemas";
 import { MOCK_USER } from "@repo/mock/model";
 import { honoErrorHandler } from "@repo/shared/libs/honoErrorHandler";
-import { eq } from "drizzle-orm";
+import { count, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { testClient } from "hono/testing";
 import { beforeEach, describe, expect, test } from "vitest";
 import { createTestDbClient } from "../../__tests__/createTestDbClient";
+import { CleanupService } from "../../application/cleanup/CleanupService";
+import { GameService } from "../../application/game/GameService";
 import { MeService } from "../../application/me/MeService";
 import type { HybridRouteContext } from "../../types";
 import { routes } from "./roomRoutes";
@@ -59,6 +62,10 @@ describe("roomRoutes", () => {
 			await db.delete(playerTable);
 			await db.delete(gameTable);
 			await db.delete(userTable);
+			await db.delete(gameCounterTable);
+			await db
+				.insert(gameCounterTable)
+				.values({ count: 0, status: "finished" });
 		});
 
 		describe("POST /rooms", () => {
@@ -731,15 +738,20 @@ describe("roomRoutes", () => {
 			});
 
 			test("終了済みルームのページネーションが正しく動作する", async () => {
-				// 3つの終了済みルームを作成
+				// 対戦中のルームを3つ作成し、ゲーム終了処理で終了済みにする
+				const gameService = new GameService(db);
 				for (let i = 1; i <= 3; i++) {
-					await db.insert(gameTable).values({
-						isPrivate: false,
-						password: null,
-						status: "finished",
-						timeLimit: 30,
-						title: `Finished Room ${i}`,
-					});
+					const [game] = await db
+						.insert(gameTable)
+						.values({
+							isPrivate: false,
+							password: null,
+							status: "active",
+							timeLimit: 30,
+							title: `Finished Room ${i}`,
+						})
+						.returning({ id: gameTable.id });
+					await gameService.endGame({ gameId: game.id });
 				}
 
 				const response = await app.request(
@@ -753,6 +765,128 @@ describe("roomRoutes", () => {
 					limit: 2,
 					page: 1,
 					total: 3,
+					totalPages: 2,
+				});
+			});
+
+			test("ゲーム終了とクリーンアップを経た総件数が終了済みルームの実件数と一致する", async () => {
+				const gameService = new GameService(db);
+
+				// 4人参加のルーム3つと、クリーンアップで削除される1人参加のルーム1つを終了させる
+				for (const [index, playerCount] of [4, 4, 4, 1].entries()) {
+					const [game] = await db
+						.insert(gameTable)
+						.values({
+							isPrivate: false,
+							password: null,
+							status: "active",
+							timeLimit: 30,
+							title: `Finished Room ${index + 1}`,
+						})
+						.returning({ id: gameTable.id });
+					await db.insert(playerTable).values(
+						Array.from({ length: playerCount }, (_, seatIndex) => ({
+							gameId: game.id,
+							gameTokenHash: hashGameToken(`token-${index}-${seatIndex}`),
+							playerName: `Player ${seatIndex + 1}`,
+							seat: (seatIndex + 1) as PlayerSeat,
+							userId: null,
+						})),
+					);
+					await gameService.endGame({ gameId: game.id });
+					// 同じゲームに対する重複呼び出し
+					await gameService.endGame({ gameId: game.id });
+				}
+
+				await new CleanupService(db).runAll();
+
+				const response = await app.request(
+					"/v1/rooms?status=finished&limit=2&page=1",
+				);
+
+				expect(response.status).toBe(200);
+				const body = await response.json();
+				const [finishedCount] = await db
+					.select({ count: count() })
+					.from(gameTable)
+					.where(eq(gameTable.status, "finished"));
+				expect(finishedCount?.count).toBe(3);
+				expect(body.data?.meta).toEqual({
+					limit: 2,
+					page: 1,
+					total: finishedCount?.count,
+					totalPages: 2,
+				});
+			});
+
+			test("絞り込みなしの総件数はカウンターから取得する", async () => {
+				await db.insert(gameTable).values({
+					isPrivate: false,
+					password: null,
+					status: "finished",
+					timeLimit: 30,
+					title: "Finished Room",
+				});
+				// 実際の件数（1件）とは異なる値をカウンターに設定する
+				await db
+					.update(gameCounterTable)
+					.set({ count: 45 })
+					.where(eq(gameCounterTable.status, "finished"));
+
+				const response = await app.request(
+					"/v1/rooms?status=finished&limit=20&page=1",
+				);
+
+				expect(response.status).toBe(200);
+				const body = await response.json();
+				expect(body.data?.items?.length).toBe(1);
+				expect(body.data?.meta).toEqual({
+					limit: 20,
+					page: 1,
+					total: 45,
+					totalPages: 3,
+				});
+			});
+
+			test("userId指定ありの総件数はカウンターを使わずに数える", async () => {
+				const [user] = await db.insert(userTable).values(MOCK_USER).returning();
+
+				// ユーザーが参加した終了済みルーム2件と、参加していない終了済みルーム1件
+				for (let i = 1; i <= 3; i++) {
+					const [game] = await db
+						.insert(gameTable)
+						.values({
+							isPrivate: false,
+							password: null,
+							status: "finished",
+							timeLimit: 30,
+							title: `Finished Room ${i}`,
+						})
+						.returning();
+					await db.insert(playerTable).values({
+						gameId: game.id,
+						gameTokenHash: hashGameToken(`token-${i}`),
+						playerName: `Player ${i}`,
+						seat: 1 as PlayerSeat,
+						userId: i <= 2 ? user.id : null,
+					});
+				}
+				await db
+					.update(gameCounterTable)
+					.set({ count: 45 })
+					.where(eq(gameCounterTable.status, "finished"));
+
+				const response = await app.request(
+					`/v1/rooms?status=finished&limit=1&page=1&userId=${user.id}`,
+				);
+
+				expect(response.status).toBe(200);
+				const body = await response.json();
+				expect(body.data?.items?.length).toBe(1);
+				expect(body.data?.meta).toEqual({
+					limit: 1,
+					page: 1,
+					total: 2,
 					totalPages: 2,
 				});
 			});
