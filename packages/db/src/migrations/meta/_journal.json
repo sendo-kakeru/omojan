@@ -21,6 +21,20 @@
 			"tag": "0002_right_monster_badoon",
 			"version": "6",
 			"when": 1789361195386
+		},
+		{
+			"breakpoints": true,
+			"idx": 3,
+			"tag": "0003_workable_maggott",
+			"version": "6",
+			"when": 1791462776583
+		},
+		{
+			"breakpoints": true,
+			"idx": 4,
+			"tag": "0004_zippy_nitro",
+			"version": "6",
+			"when": 1791464385292
 		}
 	],
 	"version": "7"

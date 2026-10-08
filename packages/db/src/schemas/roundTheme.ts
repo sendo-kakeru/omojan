@@ -1,4 +1,4 @@
-import { sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { index, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { createSelectSchema } from "drizzle-valibot";
 import { brand, type InferOutput, pipe, string, uuid } from "valibot";
 import { idBaseColumn, tableBaseColumns } from "./common";
@@ -11,15 +11,19 @@ export const roundThemeIdSchema = pipe(
 );
 export type RoundThemeId = InferOutput<typeof roundThemeIdSchema>;
 
-export const roundThemeTable = sqliteTable("round_theme", {
-	...tableBaseColumns,
-	id: idBaseColumn.$type<RoundThemeId>(),
-	roundId: text("round_id")
-		.notNull()
-		.$type<RoundId>()
-		.references(() => roundTable.id, { onDelete: "cascade" }),
-	text: text("text").notNull(),
-});
+export const roundThemeTable = sqliteTable(
+	"round_theme",
+	{
+		...tableBaseColumns,
+		id: idBaseColumn.$type<RoundThemeId>(),
+		roundId: text("round_id")
+			.notNull()
+			.$type<RoundId>()
+			.references(() => roundTable.id, { onDelete: "cascade" }),
+		text: text("text").notNull(),
+	},
+	(table) => [index("round_theme_round_id_idx").on(table.roundId)],
+);
 
 export const roundThemeSchema = createSelectSchema(roundThemeTable, {
 	id: roundThemeIdSchema,

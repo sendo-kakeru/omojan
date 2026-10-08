@@ -1,4 +1,5 @@
 export * from "./game";
+export * from "./gameCounter";
 export * from "./player";
 export * from "./playerCard";
 export * from "./round";
