@@ -31,3 +31,18 @@
 6. STG・本番への適用はブランチマージ時にGitHub Actionsで自動実行
    - `staging`ブランチへのマージ → STG DBに適用
    - `main`ブランチへのマージ → 本番DBに適用
+
+## インデックスの命名規約
+
+`{テーブル名}_{列名}_{idx|unique}` とする。
+
+- 列名はDB上の列名（スネークケース）をそのまま使い、`_id` なども省略しない
+- 複合インデックスは列をインデックスの定義順に `_` で連結する
+- 末尾は通常のインデックスは `idx`、UNIQUE インデックスは `unique`
+  - drizzle の `.unique()` で自動生成される名前もこの形式になる
+
+例:
+
+- `player_game_id_idx`（`player (game_id)`）
+- `game_status_updated_at_idx`（`game (status, updated_at)`）
+- `vote_player_id_round_id_unique`（`vote (player_id, round_id)` の UNIQUE）
