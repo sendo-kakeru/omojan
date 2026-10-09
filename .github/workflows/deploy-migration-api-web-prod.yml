@@ -1,0 +1,31 @@
+name: Deploy Production (Migration → API → Web)
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+# 本番デプロイは重複実行禁止
+concurrency:
+  group: deploy-migration-api-web-prod
+  cancel-in-progress: false
+
+# マイグレーション → API → Web の順に直列で実行
+# その他本番デプロイ は DB・API に依存しないため、別ワークフローで並列実行
+jobs:
+  migration:
+    # 手動実行時に main 以外のブランチを本番へデプロイしないようにする
+    # 後続のジョブは needs によりスキップされる
+    if: github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/migration-prod.yml
+    secrets: inherit
+
+  deploy-api:
+    needs: migration
+    uses: ./.github/workflows/deploy-api-prod.yml
+    secrets: inherit
+
+  deploy-web:
+    needs: deploy-api
+    uses: ./.github/workflows/deploy-web-prod.yml
+    secrets: inherit
