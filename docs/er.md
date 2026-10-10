@@ -7,9 +7,11 @@ USER {
     text id PK
     text name
     text email UK
-    text image
+    text image "nullable"
     text sub UK
-    text status
+    text status "active | deactivated"
+    text created_at
+    text updated_at
 }
 
 GAME {
@@ -17,19 +19,29 @@ GAME {
     text title
     integer time_limit
     boolean is_private
-    text password
-    text status
+    text password "nullable"
+    text status "waiting | active | finished"
+    text created_at
+    text updated_at
+}
+
+GAME_COUNTER {
+    text status PK "finished"
+    integer count
 }
 
 PLAYER {
     text id PK
     text player_name
-    integer seat
+    integer seat "1〜4"
     boolean is_host
     boolean is_cpu
+    boolean is_winner "ゲーム終了時に確定"
     text game_token_hash UK
-    text user_id FK
+    text user_id FK "nullable（匿名ユーザー）"
     text game_id FK
+    text created_at
+    text updated_at
 }
 
 PLAYER_CARD {
@@ -37,34 +49,44 @@ PLAYER_CARD {
     text text
     text game_id FK
     text player_id FK
-    text round_id FK
-    text submission_id FK
+    text round_id FK "nullable"
+    text submission_id FK "nullable"
+    text created_at
+    text updated_at
 }
 
 ROUND {
     text id PK
-    integer round_no
+    integer round_no "UK(game_id, round_no)"
     text game_id FK
+    text created_at
+    text updated_at
 }
 
 ROUND_THEME {
     text id PK
     text text
     text round_id FK
+    text created_at
+    text updated_at
 }
 
 SUBMISSION {
     text id PK
-    text position
+    text position "prefix | suffix"
     text player_id FK
     text round_id FK
+    text created_at
+    text updated_at
 }
 
 VOTE {
     text id PK
-    text round_id FK
-    text player_id FK
+    text round_id FK "UK(player_id, round_id)"
+    text player_id FK "UK(player_id, round_id)"
     text submission_id FK
+    text created_at
+    text updated_at
 }
 
 
