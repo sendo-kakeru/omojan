@@ -1,8 +1,7 @@
 name: Migration Production
 on:
-  push:
-    branches:
-      - main
+  # deploy-migration-api-web-prod.yml から呼び出す
+  workflow_call:
 jobs:
   migration:
     runs-on: ubuntu-latest
