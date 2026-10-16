@@ -12,7 +12,7 @@
 		"@sentry/cloudflare": "11.7.0",
 		"@sentry/react-router": "11.7.0",
 		"@tanstack/react-form": "1.33.5",
-		"amazon-cognito-identity-js": "6.3.20",
+		"amazon-cognito-identity-js": "6.3.21",
 		"classnames": "2.5.1",
 		"hono": "4.13.13",
 		"input-otp": "1.5.0",
