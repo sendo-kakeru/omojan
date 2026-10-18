@@ -206,11 +206,11 @@ importers:
         specifier: 5.2.1
         version: 5.2.1
       drizzle-orm:
-        specifier: 0.45.3
-        version: 0.45.3(@libsql/client@0.18.0)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6)
+        specifier: 0.45.4
+        version: 0.45.4(@libsql/client@0.18.0)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6)
       drizzle-valibot:
         specifier: 0.4.2
-        version: 0.4.2(drizzle-orm@0.45.3(@libsql/client@0.18.0)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6))(valibot@1.5.0(typescript@7.0.2))
+        version: 0.4.2(drizzle-orm@0.45.4(@libsql/client@0.18.0)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6))(valibot@1.5.0(typescript@7.0.2))
       hono:
         specifier: 4.13.13
         version: 4.13.13
@@ -238,7 +238,7 @@ importers:
         version: 24.19.2
       drizzle-seed:
         specifier: 0.3.1
-        version: 0.3.1(drizzle-orm@0.45.3(@libsql/client@0.18.0)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6))
+        version: 0.3.1(drizzle-orm@0.45.4(@libsql/client@0.18.0)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6))
       tsx:
         specifier: 4.23.15
         version: 4.23.15
@@ -299,14 +299,14 @@ importers:
         specifier: 0.31.11
         version: 0.31.11
       drizzle-orm:
-        specifier: 0.45.3
-        version: 0.45.3(@libsql/client@0.18.0)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6)
+        specifier: 0.45.4
+        version: 0.45.4(@libsql/client@0.18.0)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6)
       drizzle-seed:
         specifier: 0.3.1
-        version: 0.3.1(drizzle-orm@0.45.3(@libsql/client@0.18.0)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6))
+        version: 0.3.1(drizzle-orm@0.45.4(@libsql/client@0.18.0)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6))
       drizzle-valibot:
         specifier: 0.4.2
-        version: 0.4.2(drizzle-orm@0.45.3(@libsql/client@0.18.0)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6))(valibot@1.5.0(typescript@7.0.2))
+        version: 0.4.2(drizzle-orm@0.45.4(@libsql/client@0.18.0)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6))(valibot@1.5.0(typescript@7.0.2))
       tsx:
         specifier: 4.23.15
         version: 4.23.15
@@ -371,7 +371,7 @@ importers:
         version: 5.2.1
       drizzle-valibot:
         specifier: 0.4.2
-        version: 0.4.2(drizzle-orm@0.45.3(@libsql/client@0.18.0)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6))(valibot@1.5.0(typescript@7.0.2))
+        version: 0.4.2(drizzle-orm@0.45.4(@libsql/client@0.18.0)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6))(valibot@1.5.0(typescript@7.0.2))
       hono:
         specifier: 4.13.13
         version: 4.13.13
@@ -611,11 +611,11 @@ importers:
         specifier: 18.0.8
         version: 18.0.8
       drizzle-orm:
-        specifier: 0.45.3
-        version: 0.45.3(@libsql/client@0.18.0)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6)
+        specifier: 0.45.4
+        version: 0.45.4(@libsql/client@0.18.0)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6)
       drizzle-seed:
         specifier: 0.3.1
-        version: 0.3.1(drizzle-orm@0.45.3(@libsql/client@0.18.0)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6))
+        version: 0.3.1(drizzle-orm@0.45.4(@libsql/client@0.18.0)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6))
       remix-flat-routes:
         specifier: 0.8.5
         version: 0.8.5
@@ -4761,8 +4761,8 @@ packages:
     resolution: {integrity: sha512-YCYqxTLIB2OCqf6w9/Vef13baBVbwQIPcbT4Y56AfO6B9ajZhDhD8Jkveg/hJvT/iuMloKD/IYYkyMMNhr7Kqg==}
     hasBin: true
 
-  drizzle-orm@0.45.3:
-    resolution: {integrity: sha512-CAloER21cDdcgZ1OmjrZX82EeRNsdP+y0onX/eyoYDaYzki/adrAa91lzM5jWh7zZPK4qUbw/6LGv9J+A+uizA==}
+  drizzle-orm@0.45.4:
+    resolution: {integrity: sha512-NiM1YZpJ2UxyeE67DpDDZ+Tsw4YLX3trSlkNT7Tm9eKoUNb1LvaAaQzXgYQsWs+AQ9TUmmwMmBOCXuqqxUWKKQ==}
     peerDependencies:
       '@aws-sdk/client-rds-data': '>=3'
       '@cloudflare/workers-types': '>=4'
@@ -10384,22 +10384,22 @@ snapshots:
       esbuild: 0.25.12
       tsx: 4.23.15
 
-  drizzle-orm@0.45.3(@libsql/client@0.18.0)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6):
+  drizzle-orm@0.45.4(@libsql/client@0.18.0)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6):
     optionalDependencies:
       '@libsql/client': 0.18.0
       '@neondatabase/serverless': 1.0.2
       '@opentelemetry/api': 1.9.1
       '@types/pg': 8.15.6
 
-  drizzle-seed@0.3.1(drizzle-orm@0.45.3(@libsql/client@0.18.0)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6)):
+  drizzle-seed@0.3.1(drizzle-orm@0.45.4(@libsql/client@0.18.0)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6)):
     dependencies:
       pure-rand: 6.1.0
     optionalDependencies:
-      drizzle-orm: 0.45.3(@libsql/client@0.18.0)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6)
+      drizzle-orm: 0.45.4(@libsql/client@0.18.0)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6)
 
-  drizzle-valibot@0.4.2(drizzle-orm@0.45.3(@libsql/client@0.18.0)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6))(valibot@1.5.0(typescript@7.0.2)):
+  drizzle-valibot@0.4.2(drizzle-orm@0.45.4(@libsql/client@0.18.0)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6))(valibot@1.5.0(typescript@7.0.2)):
     dependencies:
-      drizzle-orm: 0.45.3(@libsql/client@0.18.0)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6)
+      drizzle-orm: 0.45.4(@libsql/client@0.18.0)(@neondatabase/serverless@1.0.2)(@opentelemetry/api@1.9.1)(@types/pg@8.15.6)
       valibot: 1.5.0(typescript@7.0.2)
 
   dunder-proto@1.0.1:
