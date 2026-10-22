@@ -38,15 +38,12 @@ export function FinishedRoomCardSkeleton({
 						<div className="h-14 w-96 rounded-full bg-cream-200" />
 					</div>
 				</div>
-				<div className="flex shrink-0 items-center gap-x-6">
-					<div className="-mx-2 flex items-center">
-						{[1, 2, 3].map((seat) => (
-							<div className="-ml-10 p-2 first:ml-0" key={seat}>
-								<div className="size-24 shrink-0 rounded-full bg-cream-200 shadow-[0_0_0_2px_var(--color-cream-50)]" />
-							</div>
-						))}
-					</div>
-					<div className="h-12 w-32 rounded-full bg-cream-200" />
+				<div className="-mx-2 flex shrink-0 items-center">
+					{[1, 2, 3].map((seat) => (
+						<div className="-ml-10 p-2 first:ml-0" key={seat}>
+							<div className="size-24 shrink-0 rounded-full bg-cream-200 shadow-[0_0_0_2px_var(--color-cream-50)]" />
+						</div>
+					))}
 				</div>
 			</div>
 		</Tile>
