@@ -2,7 +2,7 @@
 	"dependencies": {
 		"react": "19.3.0",
 		"react-dom": "19.3.0",
-		"react-router": "8.4.0"
+		"react-router": "8.5.0"
 	},
 	"devDependencies": {
 		"@chromatic-com/storybook": "5.5.1",
