@@ -132,26 +132,21 @@ function Players({ players }: { players: FinishedRoom["players"] }) {
 				))}
 			</ul>
 			{others.length > 0 && (
-				<div className="flex shrink-0 items-center gap-x-6">
-					<ul className="-mx-2 flex items-center">
-						{others.map((player) => (
-							<li className="-ml-6 flex first:ml-0" key={player.id}>
-								<MaybeUserProfileLink
-									className="rounded-full p-2 hover:opacity-80"
+				<ul className="-mx-2 flex shrink-0 items-center">
+					{others.map((player) => (
+						<li className="-ml-6 flex first:ml-0" key={player.id}>
+							<MaybeUserProfileLink
+								className="rounded-full p-2 hover:opacity-80"
+								player={player}
+							>
+								<RoomCardAvatar
+									className="shadow-[0_0_0_2px_var(--color-cream-50)]"
 									player={player}
-								>
-									<RoomCardAvatar
-										className="shadow-[0_0_0_2px_var(--color-cream-50)]"
-										player={player}
-									/>
-								</MaybeUserProfileLink>
-							</li>
-						))}
-					</ul>
-					<span className="text-[10px] text-neutral-400">
-						他{others.length}人
-					</span>
-				</div>
+								/>
+							</MaybeUserProfileLink>
+						</li>
+					))}
+				</ul>
 			)}
 		</div>
 	);
