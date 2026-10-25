@@ -1,9 +1,9 @@
 {
 	"devDependencies": {
-		"@pulumi/aws": "7.50.0",
-		"@pulumi/cloudflare": "6.22.0",
+		"@pulumi/aws": "7.51.1",
+		"@pulumi/cloudflare": "6.22.1",
 		"@pulumi/gcp": "10.1.1",
-		"@pulumi/pulumi": "3.268.0",
+		"@pulumi/pulumi": "3.270.0",
 		"@repo/typescript-config": "workspace:*",
 		"@types/node": "24.19.2",
 		"dotenv": "18.0.8",
