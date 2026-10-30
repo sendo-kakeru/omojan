@@ -67,7 +67,7 @@ export function SubmissionCard(
 							<span
 								className={classNames(
 									"absolute -top-6 left-1/2 -translate-x-1/2 animate-pop rounded-full bg-orange-700 px-10 py-4 text-xs whitespace-nowrap text-white shadow-lg motion-reduce:animate-none",
-									"before:absolute before:top-full before:left-1/2 before:-translate-x-1/2 before:border-6 before:border-t-orange-700 before:border-r-transparent before:border-b-transparent before:border-l-transparent",
+									"before:absolute before:top-full before:left-1/2 before:-translate-x-1/2 before:border-6 before:border-x-transparent before:border-t-orange-700 before:border-b-transparent",
 								)}
 							>
 								もう一度タップで決定
@@ -85,7 +85,7 @@ function PositionBadge({ position }: { position: Submission["position"] }) {
 	return (
 		<Tile
 			as="span"
-			className="absolute top-1/2 left-0 grid size-26 -translate-x-1/2 -translate-y-1/2 place-items-center text-xs font-bold text-orange-600"
+			className="absolute top-1/2 left-0 grid size-26 -translate-1/2 place-items-center text-xs font-bold text-orange-600"
 			thickness="orange"
 		>
 			{position === "prefix" ? "前" : "後"}

@@ -46,6 +46,7 @@
 				"useAwaitThenable": "error",
 				"useNullishCoalescing": "error",
 				"usePromiseRejectErrors": "error",
+				"useTailwindShorthandClasses": "warn",
 				"useTailwindSortedClasses": "warn"
 			},
 			"preset": "recommended",

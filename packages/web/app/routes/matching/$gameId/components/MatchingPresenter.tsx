@@ -176,9 +176,7 @@ function MatchingParticipantLabel({
 		<div className="flex items-center gap-x-12 rounded-lg border-2 border-dashed border-cream-300 px-12 py-8">
 			{seatNumber}
 			<div className="size-32 shrink-0 rounded-full border border-dashed border-cream-300" />
-			<p className="overflow-hidden text-sm text-ellipsis whitespace-nowrap text-neutral-400">
-				募集中...
-			</p>
+			<p className="truncate text-sm text-neutral-400">募集中...</p>
 		</div>
 	);
 }

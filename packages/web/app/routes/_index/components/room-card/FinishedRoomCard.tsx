@@ -123,7 +123,7 @@ function Players({ players }: { players: FinishedRoom["players"] }) {
 								<span className="text-[9px] font-bold text-amber-500">
 									優勝
 								</span>
-								<span className="overflow-hidden text-xs font-bold text-ellipsis whitespace-nowrap text-neutral-700">
+								<span className="truncate text-xs font-bold text-neutral-700">
 									{getDisplayName(player.playerName)}
 								</span>
 							</div>
