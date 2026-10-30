@@ -71,7 +71,7 @@ export class GameService {
 
 			if (existingRounds.length > 0) {
 				// 既に初期化済みの場合は、既存データを取得して返す
-				return await this.getExistingGameData({
+				return await this.getExistingGameDataWithTransaction({
 					gameId,
 					timeLimit: game.timeLimit,
 					tx,
@@ -272,7 +272,7 @@ export class GameService {
 			}
 
 			// 既に提出済みの場合は保存せず、既存の提出内容を返す
-			const existingSubmission = await this.findSubmission({
+			const existingSubmission = await this.findSubmissionWithTransaction({
 				playerId,
 				roundId: round.id,
 				tx,
@@ -319,7 +319,7 @@ export class GameService {
 	 * 保存済みの提出内容（位置と提出したカードの文字）を取得する
 	 * 提出がない場合はundefinedを返す
 	 */
-	private async findSubmission({
+	private async findSubmissionWithTransaction({
 		playerId,
 		roundId,
 		tx,
@@ -885,7 +885,7 @@ export class GameService {
 	/**
 	 * 既に初期化済みのゲームデータを取得する（重複初期化時に使用）
 	 */
-	private async getExistingGameData({
+	private async getExistingGameDataWithTransaction({
 		gameId,
 		timeLimit,
 		tx,
