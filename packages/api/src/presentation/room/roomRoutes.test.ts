@@ -554,7 +554,8 @@ describe("roomRoutes", () => {
 					.values({
 						isPrivate: false,
 						password: null,
-						status: "finished",
+						// 勝者はゲーム終了時に確定するため、進行中のゲームを作成して終了させる
+						status: "active",
 						timeLimit: 30,
 						title: "Finished Room",
 					})
@@ -621,6 +622,8 @@ describe("roomRoutes", () => {
 					},
 				]);
 
+				await new GameService(db).endGame({ gameId: finishedGame.id });
+
 				const response = await app.request("/v1/rooms?status=finished");
 
 				expect(response.status).toBe(200);
@@ -649,7 +652,8 @@ describe("roomRoutes", () => {
 					.values({
 						isPrivate: false,
 						password: null,
-						status: "finished",
+						// 勝者はゲーム終了時に確定するため、進行中のゲームを作成して終了させる
+						status: "active",
 						timeLimit: 30,
 						title: "Multi Round Game",
 					})
@@ -718,6 +722,8 @@ describe("roomRoutes", () => {
 						},
 					]);
 				}
+
+				await new GameService(db).endGame({ gameId: finishedGame.id });
 
 				const response = await app.request("/v1/rooms?status=finished");
 
