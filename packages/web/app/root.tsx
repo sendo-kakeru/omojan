@@ -148,7 +148,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
 		return (
 			<div className="flex min-h-svh flex-col items-center justify-center px-16">
 				<div className="grid max-w-600 gap-y-16">
-					<h1 className="font-bold text-2xl text-red-700">
+					<h1 className="text-2xl font-bold text-red-700">
 						開発環境エラー: {error.message}
 					</h1>
 					{error.stack && (

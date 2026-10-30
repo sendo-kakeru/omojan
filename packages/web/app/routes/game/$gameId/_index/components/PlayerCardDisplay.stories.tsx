@@ -73,7 +73,7 @@ export const Interactive: Story = {
 
 		return (
 			<div className="grid gap-y-16">
-				<p className="text-neutral-600 text-sm">
+				<p className="text-sm text-neutral-600">
 					選択中: {selectedCardId ?? "なし"}
 				</p>
 				<PlayerCardDisplay

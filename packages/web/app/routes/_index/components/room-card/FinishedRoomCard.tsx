@@ -31,7 +31,7 @@ export function FinishedRoomCard({
 			>
 				<div className="pointer-events-none grid gap-y-8">
 					<div className="flex min-h-28 items-start">
-						<h3 className="font-bold text-base text-lime-800">
+						<h3 className="text-base font-bold text-lime-800">
 							<Link
 								aria-label={`${room.title}の結果を見る`}
 								className={ROOM_CARD_ACTION_CLASS_NAME}
@@ -42,7 +42,7 @@ export function FinishedRoomCard({
 						</h3>
 					</div>
 
-					<div className="flex items-center gap-x-12 text-neutral-500 text-xs">
+					<div className="flex items-center gap-x-12 text-xs text-neutral-500">
 						<span className="flex items-center gap-x-4">
 							<FaRegClock aria-hidden="true" />
 							{room.timeLimit}秒
@@ -88,7 +88,7 @@ function MaybeUserProfileLink({
 			aria-label={label}
 			className={classNames(
 				"pointer-events-auto relative transition-[background-color,opacity]",
-				"focus-visible:outline-2 focus-visible:outline-lime-800 focus-visible:outline-offset-2",
+				"focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-800",
 				className,
 			)}
 			to={`/users/${uuid58Encode(player.userId)}`}
@@ -120,10 +120,10 @@ function Players({ players }: { players: FinishedRoom["players"] }) {
 								/>
 							</div>
 							<div className="grid min-w-0 flex-1 gap-y-1">
-								<span className="font-bold text-[9px] text-amber-500">
+								<span className="text-[9px] font-bold text-amber-500">
 									優勝
 								</span>
-								<span className="overflow-hidden text-ellipsis whitespace-nowrap font-bold text-neutral-700 text-xs">
+								<span className="overflow-hidden text-xs font-bold text-ellipsis whitespace-nowrap text-neutral-700">
 									{getDisplayName(player.playerName)}
 								</span>
 							</div>

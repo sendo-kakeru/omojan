@@ -143,7 +143,7 @@ export function GameVote({
 													size: AVATAR_IMAGE_DIMENSIONS.S,
 												})}
 											/>
-											<p className="font-bold text-neutral-500 text-xs">
+											<p className="text-xs font-bold text-neutral-500">
 												{getDisplayName(player.playerName)}
 												{isSelf && (
 													<span className="font-normal text-neutral-400">
@@ -154,7 +154,7 @@ export function GameVote({
 										</div>
 										<p
 											className={classNames(
-												"wrap-break-word carved-text font-bold text-sm md:text-base",
+												"text-sm font-bold wrap-break-word carved-text md:text-base",
 												isSelf ? "text-neutral-400" : "text-lime-800",
 											)}
 										>
@@ -164,7 +164,7 @@ export function GameVote({
 									{/* 固定幅でバッジの位置を安定させる */}
 									<div className="grid w-64 place-items-center">
 										{isConfirmed ? (
-											<span className="whitespace-nowrap rounded-full bg-lime-800 px-8 py-2 font-bold text-white text-xs">
+											<span className="rounded-full bg-lime-800 px-8 py-2 text-xs font-bold whitespace-nowrap text-white">
 												投票済み
 											</span>
 										) : (

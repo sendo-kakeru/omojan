@@ -67,10 +67,10 @@ export function GameFinalResult({
 						className="grid animate-place-tile place-items-center gap-y-12 p-16 motion-reduce:animate-none"
 						thickness="amber"
 					>
-						<h1 className="font-bold text-base text-neutral-500">{title}</h1>
+						<h1 className="text-base font-bold text-neutral-500">{title}</h1>
 						<div className="flex items-center gap-x-8">
 							<FaCrown aria-hidden className="size-20 text-amber-500" />
-							<h2 className="carved-text font-bold text-lg text-lime-800">
+							<h2 className="text-lg font-bold text-lime-800 carved-text">
 								優勝
 							</h2>
 							<FaCrown aria-hidden className="size-20 text-amber-500" />
@@ -97,10 +97,10 @@ export function GameFinalResult({
 												</Badge>
 											)}
 										</div>
-										<p className="mt-14 font-bold text-sm">
+										<p className="mt-14 text-sm font-bold">
 											{getDisplayName(winner.playerName)}
 										</p>
-										<p className="font-bold text-lime-800 text-sm">
+										<p className="text-sm font-bold text-lime-800">
 											{winner.winCount}勝
 										</p>
 									</>
@@ -125,7 +125,7 @@ export function GameFinalResult({
 
 				<aside className="flex items-center justify-center gap-x-12">
 					<a
-						className="flex h-28 items-center gap-x-8 rounded-full bg-neutral-800 pr-16 pl-12 font-bold text-white text-xs transition-opacity hover:opacity-80"
+						className="flex h-28 items-center gap-x-8 rounded-full bg-neutral-800 pr-16 pl-12 text-xs font-bold text-white transition-opacity hover:opacity-80"
 						href={`https://x.com/${OFFICIAL_X_ID}`}
 						rel="noopener noreferrer"
 						target="_blank"
@@ -134,7 +134,7 @@ export function GameFinalResult({
 						フォロー
 					</a>
 					<button
-						className="flex h-28 items-center gap-x-8 rounded-full bg-orange-700 pr-16 pl-12 font-bold text-white text-xs transition-colors hover:bg-orange-900"
+						className="flex h-28 items-center gap-x-8 rounded-full bg-orange-700 pr-16 pl-12 text-xs font-bold text-white transition-colors hover:bg-orange-900"
 						onClick={share}
 						type="button"
 					>
@@ -151,11 +151,11 @@ export function GameFinalResult({
 							return (
 								<Tile className="overflow-hidden p-0" key={round.roundNo}>
 									{/* Round Header */}
-									<div className="flex items-center gap-x-12 border-cream-200 border-b bg-cream-100/70 px-16 py-8">
+									<div className="flex items-center gap-x-12 border-b border-cream-200 bg-cream-100/70 px-16 py-8">
 										<span className="flex size-28 items-center justify-center rounded-full bg-lime-800 font-display text-sm text-white">
 											{round.roundNo}
 										</span>
-										<p className="font-bold text-base text-lime-800">
+										<p className="text-base font-bold text-lime-800">
 											{round.theme}
 										</p>
 									</div>

@@ -26,7 +26,7 @@ export function Checkbox({
 			{label && (
 				<Label
 					className={classNames(
-						"shrink-0 text-neutral-500 text-sm group-has-[input:checked]:text-neutral-800 md:text-base",
+						"shrink-0 text-sm text-neutral-500 group-has-[input:checked]:text-neutral-800 md:text-base",
 						!disabled && !hasError && "hover:text-neutral-800",
 					)}
 					disabled={disabled}

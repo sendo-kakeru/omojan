@@ -35,7 +35,7 @@ export function UserLabel({
 				className={classNames(
 					// NOTE: min-w-0 がないと flex アイテムの最小幅が名前の全長になり、
 					// 省略されずに行ごと画面外へ伸びる
-					"min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-sm",
+					"min-w-0 overflow-hidden text-sm text-ellipsis whitespace-nowrap",
 					textProps?.className,
 				)}
 			>

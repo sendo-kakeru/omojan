@@ -125,7 +125,7 @@ function AuthenticatingView() {
 			/>
 			<div className="flex items-center gap-x-8 text-lime-800">
 				<Spinner className="size-20" />
-				<p className="font-bold text-sm">ログインしています…</p>
+				<p className="text-sm font-bold">ログインしています…</p>
 			</div>
 		</div>
 	);
