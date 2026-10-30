@@ -19,9 +19,9 @@ const tileVariants = tv(
 				 */
 				true: classNames(
 					"relative cursor-pointer",
-					"hover:tile-lift hover:-translate-y-4",
+					"hover:-translate-y-4 hover:tile-lift",
 					// active:duration-75指定により、押し込みと戻りで速度を変える
-					"active:tile-press active:translate-y-3 active:duration-75",
+					"active:translate-y-3 active:tile-press active:duration-75",
 					"after:absolute after:inset-x-0 after:top-full after:h-0 after:content-[''] hover:after:h-4",
 				),
 			},
@@ -30,7 +30,7 @@ const tileVariants = tv(
 			 */
 			raised: {
 				false: "",
-				true: "tile-lift -translate-y-4",
+				true: "-translate-y-4 tile-lift",
 			},
 			/**
 			 * 牌を横から見たときの厚み（側面）の色

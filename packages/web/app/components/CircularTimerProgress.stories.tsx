@@ -46,7 +46,7 @@ export const Countdown: Story = {
 		return (
 			<div className="flex flex-col gap-8">
 				<CircularTimerProgress count={count} progress={progress} />
-				<p className="text-neutral-600 text-sm">残り {count} 秒</p>
+				<p className="text-sm text-neutral-600">残り {count} 秒</p>
 				<Button as="button" className="w-fit" onClick={() => start(30)}>
 					カウントダウン開始
 				</Button>

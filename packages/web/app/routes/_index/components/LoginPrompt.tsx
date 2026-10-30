@@ -17,7 +17,7 @@ export function LoginPrompt({ guestLabel }: { guestLabel: string }) {
 			</div>
 			<div className="flex items-center gap-x-12">
 				<div className="h-px flex-1 bg-gray-200" />
-				<p className="text-neutral-400 text-xs">{guestLabel}</p>
+				<p className="text-xs text-neutral-400">{guestLabel}</p>
 				<div className="h-px flex-1 bg-gray-200" />
 			</div>
 		</>

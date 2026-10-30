@@ -45,24 +45,24 @@ export function FieldItem({
 		>
 			<div className="grid gap-y-8">
 				<div className="inline-flex cursor-pointer items-center gap-x-4">
-					<Label className="font-bold text-sm md:text-base" htmlFor={htmlFor}>
+					<Label className="text-sm font-bold md:text-base" htmlFor={htmlFor}>
 						{label}
 					</Label>
 					{required && showRequiredLabel && <RequiredBadge />}
 				</div>
 				{supportText && (
-					<p className="whitespace-pre-line text-xs">{supportText}</p>
+					<p className="text-xs whitespace-pre-line">{supportText}</p>
 				)}
 			</div>
 			<div className="grid grid-cols-1 gap-y-4 p-4">
 				{children}
 				{note && (
-					<p className="whitespace-pre-line text-neutral-500 text-xs">{note}</p>
+					<p className="text-xs whitespace-pre-line text-neutral-500">{note}</p>
 				)}
 				{errorMessage && (
 					<p className="flex items-center gap-x-8">
 						<FaCircleExclamation aria-hidden className="text-red-700" />
-						<span className="text-red-600 text-sm">{errorMessage}</span>
+						<span className="text-sm text-red-600">{errorMessage}</span>
 					</p>
 				)}
 			</div>

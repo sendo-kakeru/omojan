@@ -418,7 +418,7 @@ export const AllStates: Story = {
 			<div className="grid gap-y-32">
 				{states.map(({ data, label }) => (
 					<div key={label}>
-						<p className="mb-8 font-bold text-neutral-600 text-sm">{label}</p>
+						<p className="mb-8 text-sm font-bold text-neutral-600">{label}</p>
 						<div className="h-600 overflow-x-hidden rounded-lg border bg-yellow-50">
 							<div className="mx-auto grid h-full max-w-800 px-16">
 								<div>

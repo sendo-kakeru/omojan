@@ -18,16 +18,11 @@ import {
 	gameCounterTable,
 	gameTable,
 	isPlayerSeat,
-	type PlayerId,
 	type PlayerSeat,
 	playerNameExpression,
 	playerTable,
-	type RoundId,
-	roundTable,
-	submissionTable,
 	type UserId,
 	userTable,
-	voteTable,
 } from "@repo/db/schemas";
 import {
 	and,
@@ -41,7 +36,6 @@ import {
 import type { SQLiteTransaction } from "drizzle-orm/sqlite-core";
 import { HTTPException } from "hono/http-exception";
 import type { DrizzleClient } from "../../libs/drizzle";
-import { GameService } from "../game/GameService";
 
 export class RoomService {
 	private readonly encoder = new TextEncoder();
@@ -265,30 +259,22 @@ export class RoomService {
 		const groupedPlayersByGameId =
 			await this.getPlayersGroupedByGameId(gameIds);
 
-		// 勝者計算
-		const winnerIdsByGameId = await this.calculateGameWinnerIds(gameIds);
-
 		return {
-			items: games.map((game) => {
-				const winnerIds = winnerIdsByGameId.get(game.id) ?? new Set<PlayerId>();
-				return {
-					finishedAt: game.finishedAt.toISOString(),
-					gameId: game.id,
-					isPrivate: game.isPrivate,
-					players: (groupedPlayersByGameId.get(game.id) ?? []).map(
-						(player) => ({
-							id: player.id,
-							image: player.image,
-							isCpu: player.isCpu,
-							isWinner: winnerIds.has(player.id),
-							playerName: player.playerName,
-							userId: player.userId,
-						}),
-					),
-					timeLimit: game.timeLimit,
-					title: game.title,
-				};
-			}),
+			items: games.map((game) => ({
+				finishedAt: game.finishedAt.toISOString(),
+				gameId: game.id,
+				isPrivate: game.isPrivate,
+				players: (groupedPlayersByGameId.get(game.id) ?? []).map((player) => ({
+					id: player.id,
+					image: player.image,
+					isCpu: player.isCpu,
+					isWinner: player.isWinner,
+					playerName: player.playerName,
+					userId: player.userId,
+				})),
+				timeLimit: game.timeLimit,
+				title: game.title,
+			})),
 			meta: {
 				limit,
 				page,
@@ -308,6 +294,7 @@ export class RoomService {
 				id: playerTable.id,
 				image: userTable.image,
 				isCpu: playerTable.isCpu,
+				isWinner: playerTable.isWinner,
 				playerName: playerNameExpression,
 				userId: playerTable.userId,
 			})
@@ -323,107 +310,6 @@ export class RoomService {
 			groupedPlayers.set(player.gameId, gamePlayers);
 		}
 		return groupedPlayers;
-	}
-
-	/**
-	 * 複数ゲームの勝者IDセットを計算する
-	 */
-	private async calculateGameWinnerIds(
-		gameIds: GameId[],
-	): Promise<Map<GameId, Set<PlayerId>>> {
-		// ラウンド取得
-		const rounds = await this.db
-			.select({
-				gameId: roundTable.gameId,
-				id: roundTable.id,
-			})
-			.from(roundTable)
-			.where(inArray(roundTable.gameId, gameIds));
-
-		const roundIds = rounds.map((r) => r.id);
-
-		// 提出・投票取得
-		const submissions =
-			roundIds.length > 0
-				? await this.db
-						.select({
-							playerId: submissionTable.playerId,
-							roundId: submissionTable.roundId,
-							submissionId: submissionTable.id,
-						})
-						.from(submissionTable)
-						.where(inArray(submissionTable.roundId, roundIds))
-				: [];
-
-		const votes =
-			roundIds.length > 0
-				? await this.db
-						.select({
-							roundId: voteTable.roundId,
-							submissionId: voteTable.submissionId,
-						})
-						.from(voteTable)
-						.where(inArray(voteTable.roundId, roundIds))
-				: [];
-
-		// 事前にMapでインデックス化
-		const roundsByGameId = new Map<GameId, typeof rounds>();
-		for (const round of rounds) {
-			const arr = roundsByGameId.get(round.gameId) ?? [];
-			arr.push(round);
-			roundsByGameId.set(round.gameId, arr);
-		}
-
-		const submissionsByRoundId = new Map<RoundId, typeof submissions>();
-		for (const sub of submissions) {
-			const arr = submissionsByRoundId.get(sub.roundId) ?? [];
-			arr.push(sub);
-			submissionsByRoundId.set(sub.roundId, arr);
-		}
-
-		const votesByRoundId = new Map<RoundId, typeof votes>();
-		for (const vote of votes) {
-			const arr = votesByRoundId.get(vote.roundId) ?? [];
-			arr.push(vote);
-			votesByRoundId.set(vote.roundId, arr);
-		}
-
-		// gameIdごとの勝者IDセットを計算
-		const winnerIdsByGameId = new Map<GameId, Set<PlayerId>>();
-
-		for (const gameId of gameIds) {
-			const gameRounds = roundsByGameId.get(gameId) ?? [];
-			const winCountByPlayer = new Map<PlayerId, number>();
-
-			for (const round of gameRounds) {
-				const roundSubmissions = submissionsByRoundId.get(round.id) ?? [];
-				const roundVotes = votesByRoundId.get(round.id) ?? [];
-
-				const { winnerPlayerIds } =
-					GameService.calculateWinnersAndVoteCountsFromVotes({
-						submissions: roundSubmissions,
-						votes: roundVotes,
-					});
-
-				for (const playerId of winnerPlayerIds) {
-					const currentWinCount = winCountByPlayer.get(playerId) ?? 0;
-					winCountByPlayer.set(playerId, currentWinCount + 1);
-				}
-			}
-
-			// 最大勝利数を持つプレイヤーを勝者とする
-			const maxWinCount = Math.max(...winCountByPlayer.values(), 0);
-
-			const winnerIds = new Set<PlayerId>(
-				[...winCountByPlayer.entries()]
-					.filter(([, winCount]) => winCount === maxWinCount && maxWinCount > 0)
-					.map(([playerId]) => playerId),
-			);
-
-			winnerIdsByGameId.set(gameId, winnerIds);
-		}
-
-		return winnerIdsByGameId;
 	}
 
 	async create({

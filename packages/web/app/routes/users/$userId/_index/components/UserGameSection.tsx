@@ -61,7 +61,7 @@ export function UserGameList({
 
 	if (error) {
 		return (
-			<p className="py-16 text-center text-orange-700 text-sm">
+			<p className="py-16 text-center text-sm text-orange-700">
 				対戦履歴の取得に失敗しました
 			</p>
 		);
@@ -69,7 +69,7 @@ export function UserGameList({
 
 	if (!rooms || rooms.length === 0) {
 		return (
-			<p className="py-16 text-center text-neutral-500 text-sm">
+			<p className="py-16 text-center text-sm text-neutral-500">
 				対戦履歴がありません
 			</p>
 		);

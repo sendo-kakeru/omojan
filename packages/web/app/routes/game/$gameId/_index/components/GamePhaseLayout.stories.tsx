@@ -45,7 +45,7 @@ export const ComplexContent: Story = {
 						))}
 					</div>
 				</section>
-				<section className="mt-8 grid place-items-center rounded-t-2xl border border-gray-300 border-b-0 bg-white p-16">
+				<section className="mt-8 grid place-items-center rounded-t-2xl border border-b-0 border-gray-300 bg-white p-16">
 					<p className="text-neutral-500">コンテンツエリア</p>
 				</section>
 			</main>

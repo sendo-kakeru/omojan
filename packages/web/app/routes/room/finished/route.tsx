@@ -96,7 +96,7 @@ function FinishedRoomList({
 
 	if (error) {
 		return (
-			<p className="py-16 text-center text-orange-700 text-sm">
+			<p className="py-16 text-center text-sm text-orange-700">
 				ゲームの取得に失敗しました
 			</p>
 		);
@@ -104,7 +104,7 @@ function FinishedRoomList({
 
 	if (!rooms || rooms.length === 0) {
 		return (
-			<p className="py-16 text-center text-neutral-500 text-sm">
+			<p className="py-16 text-center text-sm text-neutral-500">
 				ゲームが行われていません
 			</p>
 		);

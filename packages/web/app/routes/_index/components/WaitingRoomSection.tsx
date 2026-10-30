@@ -56,8 +56,8 @@ function WaitingRoomList({
 
 	if (error) {
 		return (
-			<div className="grid place-items-center rounded-lg border-2 border-orange-600/30 border-dashed bg-orange-100/40 p-24">
-				<p className="font-bold text-orange-700 text-sm">
+			<div className="grid place-items-center rounded-lg border-2 border-dashed border-orange-600/30 bg-orange-100/40 p-24">
+				<p className="text-sm font-bold text-orange-700">
 					部屋の取得に失敗しました
 				</p>
 			</div>
@@ -95,12 +95,12 @@ function WaitingRoomListItems({ rooms }: { rooms: WaitingRoom[] }) {
  */
 function EmptyTable({ onCreateRoom }: { onCreateRoom: () => void }) {
 	return (
-		<div className="grid place-items-center gap-y-16 rounded-2xl border-2 border-cream-300 border-dashed bg-cream-50/50 px-16 py-24">
+		<div className="grid place-items-center gap-y-16 rounded-2xl border-2 border-dashed border-cream-300 bg-cream-50/50 px-16 py-24">
 			<div className="grid gap-y-6 text-center">
-				<p className="font-bold text-lime-800 text-sm">
+				<p className="text-sm font-bold text-lime-800">
 					募集中の部屋はありません
 				</p>
-				<p className="text-neutral-500 text-xs">部屋を作成してみましょう！</p>
+				<p className="text-xs text-neutral-500">部屋を作成してみましょう！</p>
 			</div>
 			<Button as="button" color="primary" onClick={onCreateRoom}>
 				部屋をつくる

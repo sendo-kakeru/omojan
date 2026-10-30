@@ -53,7 +53,7 @@ function PaginationLink({
 		>
 			<Tile
 				className={classNames(
-					"grid place-items-center font-bold text-sm",
+					"grid place-items-center text-sm font-bold",
 					isCircle ? "size-32 rounded-full" : "px-12 py-4",
 					isActive
 						? "border-amber-500 bg-amber-300/25 text-lime-800"

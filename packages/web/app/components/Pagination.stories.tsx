@@ -89,7 +89,7 @@ export const PagePatterns: Story = {
 		<div className="flex flex-col gap-16">
 			{PAGE_PATTERNS.map((currentPage) => (
 				<div className="flex flex-col gap-8" key={currentPage}>
-					<p className="text-neutral-500 text-sm">page: {currentPage} / 10</p>
+					<p className="text-sm text-neutral-500">page: {currentPage} / 10</p>
 					<Pagination
 						{...createMeta(currentPage, 10)}
 						getPageUrl={(page) => `?page=${page}`}

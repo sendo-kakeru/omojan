@@ -69,7 +69,7 @@ export function RoundIndicator({
 			className="grid w-fit shrink-0 place-items-center px-12 py-2"
 			thickness="amber"
 		>
-			<span className="font-display text-[9px] text-lime-800/70 tracking-widest">
+			<span className="font-display text-[9px] tracking-widest text-lime-800/70">
 				ROUND
 			</span>
 			<div className="flex items-baseline font-display text-lime-800">

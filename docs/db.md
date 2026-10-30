@@ -56,3 +56,13 @@
   - 現状アプリケーションで更新しているのは `GameService.endGame`（finished でないゲームを finished に更新できた場合のみ +1）のみ
 - finished のゲームの削除は、Cleanup（`CleanupService.runAll`）の最後に行う再計算で件数を合わせるため、個別の更新は不要
 - 更新を忘れても、Cleanup（cron 2時間ごと）の再計算で最大2時間以内に修復される
+
+## ゲームの勝者（`player.is_winner`）の更新ルール
+
+勝者はゲーム終了時に `player.is_winner` に保存し、結果は一覧・ユーザー統計の勝者はここから読んでいる。
+詳細は `docs/design-docs/game-winner-column.md` を参照。
+
+- ゲームを finished にする処理を追加する場合は、同一トランザクションで `player.is_winner` も更新すること
+  - 現状アプリケーションで更新しているのは `GameService.endGame`（finished でないゲームを finished に更新できた場合のみ）のみ
+- `game_counter` と異なり定期的な再計算は行わないため、更新を忘れると修復されない
+  - 取りこぼしが見つかった場合は、`packages/db/src/migrations/0005_daily_wolfpack.sql` のバックフィル SQL を再実行する

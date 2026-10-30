@@ -42,7 +42,7 @@ const VARIANTS = ["fill", "outline"] as const satisfies ComponentProps<
 function ButtonTemplate({ args }: { args?: { disabled?: boolean } & Args }) {
 	return (
 		<div className="flex flex-col gap-16">
-			<p className="font-bold text-black-0">Default Button</p>
+			<p className="text-black-0 font-bold">Default Button</p>
 			{SIZES.map((size) => (
 				<div className="flex flex-col gap-16" key={size}>
 					<p>size: {size}</p>
@@ -128,7 +128,7 @@ function ButtonTemplate({ args }: { args?: { disabled?: boolean } & Args }) {
 function LinkTemplate({ args }: { args?: Args }) {
 	return (
 		<div className="flex flex-col gap-16">
-			<p className="font-bold text-black-0">Link Button</p>
+			<p className="text-black-0 font-bold">Link Button</p>
 			{SIZES.map((size) => (
 				<div className="flex flex-col gap-16" key={size}>
 					<p>size: {size}</p>

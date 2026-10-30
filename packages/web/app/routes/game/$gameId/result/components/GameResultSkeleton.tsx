@@ -35,7 +35,7 @@ export function GameResultSkeleton() {
 					<div className="grid gap-y-12">
 						{[1, 2].map((round) => (
 							<Tile className="overflow-hidden p-0" key={round}>
-								<div className="flex items-center gap-x-12 border-cream-200 border-b bg-cream-100/70 px-16 py-8">
+								<div className="flex items-center gap-x-12 border-b border-cream-200 bg-cream-100/70 px-16 py-8">
 									<div className="size-28 rounded-full bg-cream-200" />
 									<div className="h-20 w-120 rounded-full bg-cream-200" />
 								</div>

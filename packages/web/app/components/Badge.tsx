@@ -2,7 +2,7 @@ import { tv, type VariantProps } from "tailwind-variants";
 
 const badgeVariants = tv(
 	{
-		base: "inline-flex w-fit shrink-0 items-center overflow-hidden whitespace-nowrap rounded-full border px-8 py-2 font-medium text-xs transition-colors",
+		base: "inline-flex w-fit shrink-0 items-center overflow-hidden rounded-full border px-8 py-2 text-xs font-medium whitespace-nowrap transition-colors",
 		compoundVariants: [
 			{
 				class: "border-lime-800/30 bg-lime-800/10 text-lime-800",

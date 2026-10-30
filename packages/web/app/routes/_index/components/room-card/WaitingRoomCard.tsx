@@ -33,7 +33,7 @@ export function WaitingRoomCard({
 			>
 				<div className="pointer-events-none grid gap-y-8">
 					<div className="flex min-h-28 items-start justify-between gap-x-8">
-						<h3 className="font-bold text-base text-lime-800">
+						<h3 className="text-base font-bold text-lime-800">
 							<button
 								aria-label={`${room.title}に参加`}
 								className={ROOM_CARD_ACTION_CLASS_NAME}
@@ -52,7 +52,7 @@ export function WaitingRoomCard({
 						)}
 					</div>
 
-					<div className="flex items-center gap-x-12 text-neutral-500 text-xs">
+					<div className="flex items-center gap-x-12 text-xs text-neutral-500">
 						<span className="flex items-center gap-x-4">
 							<FaRegClock aria-hidden="true" />
 							{room.timeLimit}秒
@@ -105,13 +105,13 @@ function Seats({
 				))}
 				{Array.from({ length: emptySeatCount }, (_, index) => (
 					<div
-						className="-ml-10 size-32 shrink-0 rounded-full border-2 border-cream-300 border-dashed bg-transparent first:ml-0"
+						className="-ml-10 size-32 shrink-0 rounded-full border-2 border-dashed border-cream-300 bg-transparent first:ml-0"
 						// biome-ignore lint/suspicious/noArrayIndexKey: 空席は入れ替わらない固定枠なので問題ない
 						key={index}
 					/>
 				))}
 			</div>
-			<span className="text-neutral-500 text-xs">
+			<span className="text-xs text-neutral-500">
 				<span className="font-bold text-lime-900">{players.length}</span>/
 				{MAX_SEATS}人
 			</span>

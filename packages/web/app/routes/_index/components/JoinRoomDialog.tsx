@@ -209,7 +209,7 @@ export function JoinRoomDialog({
 										<FieldItem
 											className="md:grid-cols-[160px_minmax(0,1fr)]"
 											errorMessage={
-												passwordError ||
+												passwordError ??
 												(!field.state.meta.isValid &&
 													field.state.meta.errors[0]?.message)
 											}

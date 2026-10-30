@@ -1151,7 +1151,16 @@ export class GameDurableObject extends DurableObject<Env> {
 		if (!this.gameId) return;
 
 		try {
-			await this.gameService.endGame({ gameId: this.gameId });
+			await pRetry(
+				async () => {
+					if (!this.gameId) return;
+
+					await this.gameService.endGame({ gameId: this.gameId });
+				},
+				{
+					retries: 3,
+				},
+			);
 		} catch (error) {
 			console.error("ゲームステータスの更新に失敗しました:", error);
 		}
