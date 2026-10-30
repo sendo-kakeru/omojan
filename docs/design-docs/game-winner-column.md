@@ -105,7 +105,7 @@ flowchart LR
 
 - `RoomService.calculateGameWinnerIds` と `UserService.calculateStats` の勝者計算は削除する
   - 複数ゲームをまとめて計算する構造で `RoomService` に置かれているため、流用せず `GameService` に1ゲーム単位の関数として作り直す
-- `getResult` は `calculateWinnersAndWinCountsFromRoundWinners` の結果を使い、勝者が0人の場合のみ全プレイヤーを勝者として返す処理を呼び出し側に明示的に残す（既存の挙動を維持するため。「既知でオープンな問題」参照）
+- `getResult` は `calculateWinnersAndWinCountsFromRoundWinners` の結果を使う。勝者が0人の場合は一覧・ユーザー統計と同様に勝者なしとする（#1449 で揃えた）
 
 #### 書き込むタイミング
 
@@ -327,22 +327,20 @@ static calculateWinnersAndWinCountsFromRoundWinners({
 }
 ```
 
-`getResult`（勝者が0人の場合の既存の挙動を明示的に残す）:
+`getResult`（勝者が0人の場合は勝者なし）:
 
 ```ts
 const { winCountByPlayer, winnerPlayerIds } =
   GameService.calculateWinnersAndWinCountsFromRoundWinners({
     winnerPlayerIdsPerRound: [...roundWinnersByRoundId.values()],
   });
-// NOTE: 既存の挙動に合わせ、勝者が0人の場合は全プレイヤーを勝者とする（一覧・統計の is_winner とは異なる）
-const winners = (
-  winnerPlayerIds.length > 0
-    ? players.filter((player) => winnerPlayerIds.includes(player.id))
-    : players
-).map((player) => ({
-  // ...
-  winCount: winCountByPlayer.get(player.id) ?? 0,
-}));
+// NOTE: 一覧・ユーザー統計と同様に、勝者が0人の場合は勝者なしとする
+const winners = players
+  .filter((player) => winnerPlayerIds.includes(player.id))
+  .map((player) => ({
+    // ...
+    winCount: winCountByPlayer.get(player.id) ?? 0,
+  }));
 ```
 
 `handleGameEnd`（再試行）:
@@ -399,9 +397,8 @@ const [stats] = await this.db
   - ラウンドごとの勝者表示（`rounds[].players[].isWinner`）と提出テキストのために round / submission / vote / player_card を読む必要があり、`is_winner` を使っても Read はほぼ減らない
   - 勝者一覧（`winners`）を `is_winner` から作る変更は可能だが、効果が小さいため今回は行わない。勝者のルールは `calculateWinnersAndWinCountsFromRoundWinners` を共有することで一致させる
   - 結果画面の Read を減らすには、ラウンド結果ごと保存する（スナップショット化）など別の設計が必要
-- **結果画面と一覧で「勝者なし」の扱いが異なる（既存の挙動）**
-  - `getResult` の `winners` は最大勝利数が 0 の場合に全プレイヤーを勝者として返すが、一覧・ユーザー統計（および本設計の `is_winner`）は勝者なしとする
-  - 本件では挙動を変えず、`getResult` 側に分岐として明示的に残す。必要であれば別 Issue で揃える（分岐を削除するだけで揃う）
+- **結果画面と一覧で「勝者なし」の扱いが異なる（解消済み）**
+  - #1449 で `getResult` の分岐を削除し、最大勝利数が 0 の場合は結果画面も勝者なしとした
 - **新しく finished にする処理での更新漏れ**
   - `endGame` 以外でゲームを finished にする処理を追加した場合、`is_winner` が更新されない
   - `game_counter` と異なり定期的な再計算は行わない（勝者は終了後に変化しないため、正しく書き込めば修復の必要がない）。必要になればバックフィル SQL を Cleanup に組み込める

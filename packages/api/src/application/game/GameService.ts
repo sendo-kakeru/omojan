@@ -770,18 +770,16 @@ export class GameService {
 			});
 
 		// 勝者一覧
-		// NOTE: 勝者が0人の場合は全プレイヤーを勝者とする
-		const winners: GameResultResponseBody["winners"] = (
-			gameWinnerPlayerIds.length > 0
-				? players.filter((player) => gameWinnerPlayerIds.includes(player.id))
-				: players
-		).map((player) => ({
-			id: player.id,
-			image: player.image,
-			playerName: player.playerName,
-			userId: player.userId,
-			winCount: winCountByPlayer.get(player.id) ?? 0,
-		}));
+		// NOTE: 勝者が0人の場合は勝者なしとする
+		const winners: GameResultResponseBody["winners"] = players
+			.filter((player) => gameWinnerPlayerIds.includes(player.id))
+			.map((player) => ({
+				id: player.id,
+				image: player.image,
+				playerName: player.playerName,
+				userId: player.userId,
+				winCount: winCountByPlayer.get(player.id) ?? 0,
+			}));
 
 		// ラウンド情報を構築
 		const roundResults: GameResultResponseBody["rounds"] = rounds.map(

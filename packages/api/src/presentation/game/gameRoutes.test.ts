@@ -313,7 +313,7 @@ describe("gameRoutes", () => {
 			expect(winnerIds).toContain(players[1]?.id);
 		});
 
-		test("全ラウンドで投票がない場合、全プレイヤーが勝者として返される", async () => {
+		test("全ラウンドで投票がない場合、勝者なしとして返される", async () => {
 			const [game] = await db
 				.insert(gameTable)
 				.values({
@@ -356,11 +356,7 @@ describe("gameRoutes", () => {
 
 			expect(response.status).toBe(200);
 			const body = await response.json();
-			// NOTE: 既存の挙動に合わせ、勝者が0人の場合は全プレイヤーを勝者とする
-			expect(body.data?.winners).toHaveLength(4);
-			for (const winner of body.data?.winners ?? []) {
-				expect(winner.winCount).toBe(0);
-			}
+			expect(body.data?.winners).toHaveLength(0);
 		});
 
 		test("ラウンド結果のプレイヤーが席順で返る", async () => {

@@ -56,11 +56,13 @@ export function GameFinalResult({
 		title: SITE_NAME,
 		url: PROD_SITE_URL,
 	});
+	// NOTE: 全ラウンドで誰も票を得なかった場合は勝者なし(普通はあり得ない)
+	const hasWinner = winners.length > 0;
 
 	return (
 		<>
 			<Header />
-			<Confetti />
+			{hasWinner && <Confetti />}
 			<main className="grid gap-y-24 pb-36">
 				<div className="grid gap-y-4">
 					<Tile
@@ -68,58 +70,71 @@ export function GameFinalResult({
 						thickness="amber"
 					>
 						<h1 className="text-base font-bold text-neutral-500">{title}</h1>
-						<div className="flex items-center gap-x-8">
-							<FaCrown aria-hidden className="size-20 text-amber-500" />
-							<h2 className="text-lg font-bold text-lime-800 carved-text">
-								優勝
-							</h2>
-							<FaCrown aria-hidden className="size-20 text-amber-500" />
-						</div>
-						<div className="flex flex-wrap justify-center gap-16">
-							{winners.map((winner) => {
-								const winnerContent = (
-									<>
-										<div className="relative">
-											<Avatar
-												name={winner.playerName}
-												size="L"
-												src={buildImageUrl({
-													image: winner.image,
-													size: AVATAR_IMAGE_DIMENSIONS.L,
-												})}
-											/>
-											{me && winner.userId === me.userId && (
-												<Badge
-													className="absolute -bottom-12 left-1/2 -translate-x-1/2 outline-2 outline-cream-50"
-													variant="fill"
-												>
-													自分
-												</Badge>
-											)}
-										</div>
-										<p className="mt-14 text-sm font-bold">
-											{getDisplayName(winner.playerName)}
-										</p>
-										<p className="text-sm font-bold text-lime-800">
-											{winner.winCount}勝
-										</p>
-									</>
-								);
-								return winner.userId ? (
-									<Link
-										className="grid place-items-center"
-										key={winner.id}
-										to={`/users/${uuid58Encode(winner.userId)}`}
-									>
-										{winnerContent}
-									</Link>
-								) : (
-									<div className="grid place-items-center" key={winner.id}>
-										{winnerContent}
-									</div>
-								);
-							})}
-						</div>
+						{hasWinner ? (
+							<>
+								<div className="flex items-center gap-x-8">
+									<FaCrown aria-hidden className="size-20 text-amber-500" />
+									<h2 className="text-lg font-bold text-lime-800 carved-text">
+										優勝
+									</h2>
+									<FaCrown aria-hidden className="size-20 text-amber-500" />
+								</div>
+								<div className="flex flex-wrap justify-center gap-16">
+									{winners.map((winner) => {
+										const winnerContent = (
+											<>
+												<div className="relative">
+													<Avatar
+														name={winner.playerName}
+														size="L"
+														src={buildImageUrl({
+															image: winner.image,
+															size: AVATAR_IMAGE_DIMENSIONS.L,
+														})}
+													/>
+													{me && winner.userId === me.userId && (
+														<Badge
+															className="absolute -bottom-12 left-1/2 -translate-x-1/2 outline-2 outline-cream-50"
+															variant="fill"
+														>
+															自分
+														</Badge>
+													)}
+												</div>
+												<p className="mt-14 text-sm font-bold">
+													{getDisplayName(winner.playerName)}
+												</p>
+												<p className="text-sm font-bold text-lime-800">
+													{winner.winCount}勝
+												</p>
+											</>
+										);
+										return winner.userId ? (
+											<Link
+												className="grid place-items-center"
+												key={winner.id}
+												to={`/users/${uuid58Encode(winner.userId)}`}
+											>
+												{winnerContent}
+											</Link>
+										) : (
+											<div className="grid place-items-center" key={winner.id}>
+												{winnerContent}
+											</div>
+										);
+									})}
+								</div>
+							</>
+						) : (
+							<>
+								<h2 className="text-lg font-bold text-lime-800 carved-text">
+									勝者なし
+								</h2>
+								<p className="text-sm text-neutral-500">
+									どのラウンドでも票が入りませんでした
+								</p>
+							</>
+						)}
 					</Tile>
 				</div>
 
