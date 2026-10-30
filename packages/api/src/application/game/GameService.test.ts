@@ -4,7 +4,9 @@ import {
 	gameTable,
 	type PlayerId,
 	type PlayerSeat,
+	playerCardTable,
 	playerTable,
+	type RoundId,
 	type RoundNo,
 	roundTable,
 	submissionTable,
@@ -127,6 +129,7 @@ describe("GameService", () => {
 
 	beforeEach(async () => {
 		await db.delete(voteTable);
+		await db.delete(playerCardTable);
 		await db.delete(submissionTable);
 		await db.delete(roundTable);
 		await db.delete(playerTable);
@@ -325,6 +328,102 @@ describe("GameService", () => {
 
 			expect(result.winnerPlayerIds).toEqual([]);
 			expect(result.winCountByPlayer.size).toBe(0);
+		});
+	});
+
+	describe("saveSubmission", () => {
+		const setupRound = async (): Promise<{
+			gameId: GameId;
+			playerId: PlayerId;
+			roundId: RoundId;
+		}> => {
+			const gameId = await insertGame("active");
+			const [playerId] = await insertPlayers({ gameId, playerCount: 1 });
+			const [round] = await db
+				.insert(roundTable)
+				.values({ gameId, roundNo: 1 })
+				.returning({ id: roundTable.id });
+			await db.insert(playerCardTable).values([
+				{ gameId, playerId, text: "カードA" },
+				{ gameId, playerId, text: "カードB" },
+			]);
+			return { gameId, playerId, roundId: round.id };
+		};
+
+		const getSubmissions = async ({ roundId }: { roundId: RoundId }) =>
+			await db
+				.select()
+				.from(submissionTable)
+				.where(eq(submissionTable.roundId, roundId));
+
+		test("提出を保存し、カードに提出を紐付ける", async () => {
+			const { gameId, playerId, roundId } = await setupRound();
+
+			const saved = await gameService.saveSubmission({
+				gameId,
+				playerId,
+				position: "prefix",
+				roundNo: 1,
+				text: "カードA",
+			});
+
+			expect(saved).toEqual({ position: "prefix", text: "カードA" });
+			const submissions = await getSubmissions({ roundId });
+			expect(submissions).toHaveLength(1);
+
+			const [cardA] = await db
+				.select()
+				.from(playerCardTable)
+				.where(eq(playerCardTable.text, "カードA"));
+			expect(cardA?.submissionId).toBe(submissions[0]?.id);
+			expect(cardA?.roundId).toBe(roundId);
+		});
+
+		test("同一ラウンドで既に提出済みの場合は重複保存せず、既存の提出内容を返す", async () => {
+			const { gameId, playerId, roundId } = await setupRound();
+
+			await gameService.saveSubmission({
+				gameId,
+				playerId,
+				position: "prefix",
+				roundNo: 1,
+				text: "カードA",
+			});
+			const saved = await gameService.saveSubmission({
+				gameId,
+				playerId,
+				position: "suffix",
+				roundNo: 1,
+				text: "カードB",
+			});
+
+			expect(saved).toEqual({ position: "prefix", text: "カードA" });
+			expect(await getSubmissions({ roundId })).toHaveLength(1);
+
+			// 2回目の提出カードは使用済みにならない
+			const [cardB] = await db
+				.select()
+				.from(playerCardTable)
+				.where(eq(playerCardTable.text, "カードB"));
+			expect(cardB?.submissionId).toBeNull();
+			expect(cardB?.roundId).toBeNull();
+		});
+
+		test("同じ内容で再実行（リトライ）しても重複保存されない", async () => {
+			const { gameId, playerId, roundId } = await setupRound();
+			const params = {
+				gameId,
+				playerId,
+				position: "suffix",
+				roundNo: 1,
+				text: "カードA",
+			} as const;
+
+			await gameService.saveSubmission(params);
+			const saved = await gameService.saveSubmission(params);
+
+			expect(saved).toEqual({ position: "suffix", text: "カードA" });
+			expect(await getSubmissions({ roundId })).toHaveLength(1);
 		});
 	});
 });

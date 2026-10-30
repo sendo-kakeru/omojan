@@ -243,7 +243,9 @@ export class GameService {
 	}
 
 	/**
-	 * 提出をDBに保存する
+	 * 提出をDBに保存し、保存された提出内容を返す
+	 * 同一ラウンド・同一プレイヤーの提出が既に存在する場合は保存せず、既存の提出内容を返す
+	 * （リトライや時間切れ処理との競合による重複提出を防ぐため）
 	 */
 	async saveSubmission({
 		gameId,
@@ -255,8 +257,8 @@ export class GameService {
 		Pick<PlayerCard, "text"> & {
 			gameId: GameId;
 			roundNo: RoundNo;
-		}): Promise<void> {
-		await this.db.transaction(async (tx) => {
+		}): Promise<Pick<Submission, "position"> & Pick<PlayerCard, "text">> {
+		return await this.db.transaction(async (tx) => {
 			// gameIdとroundNoからラウンドIDを取得
 			const [round] = await tx
 				.select({ id: roundTable.id })
@@ -267,6 +269,19 @@ export class GameService {
 
 			if (!round) {
 				throw new HTTPException(404, { message: "ラウンドが見つかりません" });
+			}
+
+			// 既に提出済みの場合は保存せず、既存の提出内容を返す
+			const existingSubmission = await this.findSubmission({
+				playerId,
+				roundId: round.id,
+				tx,
+			});
+			if (existingSubmission) {
+				return {
+					position: existingSubmission.position,
+					text: existingSubmission.text ?? text,
+				};
 			}
 
 			// 提出レコードを作成
@@ -295,7 +310,44 @@ export class GameService {
 						eq(playerCardTable.text, text),
 					),
 				);
+
+			return { position, text };
 		});
+	}
+
+	/**
+	 * 保存済みの提出内容（位置と提出したカードの文字）を取得する
+	 * 提出がない場合はundefinedを返す
+	 */
+	private async findSubmission({
+		playerId,
+		roundId,
+		tx,
+	}: Pick<Submission, "playerId" | "roundId"> & {
+		tx: Parameters<Parameters<DrizzleClient["transaction"]>[0]>[0];
+	}): Promise<
+		| (Pick<Submission, "position"> & { text: PlayerCard["text"] | null })
+		| undefined
+	> {
+		const [existing] = await tx
+			.select({
+				position: submissionTable.position,
+				text: playerCardTable.text,
+			})
+			.from(submissionTable)
+			.leftJoin(
+				playerCardTable,
+				eq(playerCardTable.submissionId, submissionTable.id),
+			)
+			.where(
+				and(
+					eq(submissionTable.roundId, roundId),
+					eq(submissionTable.playerId, playerId),
+				),
+			)
+			.limit(1);
+
+		return existing;
 	}
 
 	/**

@@ -282,43 +282,48 @@ export class GameDurableObject extends DurableObject<Env> {
 	}
 
 	async alarm(): Promise<void> {
-		await this.restoreState();
-		if (!this.gameId) return;
-		await this.ctx.storage.deleteAlarm();
+		// SUBMIT/VOTEと同様に排他制御する
+		// alarm処理中（DB保存の待機中など）にメッセージ処理が割り込み、
+		// 永続化前の古い状態で二重に提出・投票されるのを防ぐ
+		await this.ctx.blockConcurrencyWhile(async () => {
+			await this.restoreState();
+			if (!this.gameId) return;
+			await this.ctx.storage.deleteAlarm();
 
-		try {
-			switch (this.state) {
-				case "WAITING":
-					await this.handleInitialize();
-					break;
-				case "START_PENDING":
-					await this.handleStartFirstTurn();
-					break;
-				case "SUBMISSION":
-					await this.handleSubmissionTimeout();
-					break;
-				case "SUBMITTED":
-					await this.proceedToNextTurn();
-					break;
-				case "VOTING":
-					await this.handleVoteTimeout();
-					break;
-				case "RESULT":
-					await this.proceedToNextRound();
-					break;
+			try {
+				switch (this.state) {
+					case "WAITING":
+						await this.handleInitialize();
+						break;
+					case "START_PENDING":
+						await this.handleStartFirstTurn();
+						break;
+					case "SUBMISSION":
+						await this.handleSubmissionTimeout();
+						break;
+					case "SUBMITTED":
+						await this.proceedToNextTurn();
+						break;
+					case "VOTING":
+						await this.handleVoteTimeout();
+						break;
+					case "RESULT":
+						await this.proceedToNextRound();
+						break;
+				}
+			} catch (error) {
+				console.error(
+					`alarmハンドラで未処理エラーが発生しました (state=${this.state}):`,
+					error,
+				);
+				await this.handleGameAbort({
+					message: `alarmハンドラで未処理エラーが発生しました (state=${this.state})`,
+				});
+				return;
 			}
-		} catch (error) {
-			console.error(
-				`alarmハンドラで未処理エラーが発生しました (state=${this.state}):`,
-				error,
-			);
-			await this.handleGameAbort({
-				message: `alarmハンドラで未処理エラーが発生しました (state=${this.state})`,
-			});
-			return;
-		}
 
-		await this.persistState();
+			await this.persistState();
+		});
 	}
 
 	/**
@@ -901,13 +906,16 @@ export class GameDurableObject extends DurableObject<Env> {
 		}
 
 		// 提出を処理（DB保存、メモリ更新、カード使用済み）
-		await this.submitPlayerCard({ playerId, submission });
+		const savedSubmission = await this.submitPlayerCard({
+			playerId,
+			submission,
+		});
 
 		// 状態をSUBMITTEDに変更
 		this.state = "SUBMITTED";
 
 		// TURN_ENDをブロードキャスト
-		await this.broadcastTurnEnd({ submission });
+		await this.broadcastTurnEnd({ submission: savedSubmission });
 
 		// 1秒後に次のターンへ進む
 		await this.ctx.storage.setAlarm(Date.now() + TIMING.TRANSITION_DELAY_MS);
@@ -1352,6 +1360,7 @@ export class GameDurableObject extends DurableObject<Env> {
 
 	/**
 	 * プレイヤーの提出を処理する（DB保存、メモリ状態更新、カード使用済み）
+	 * 既にDBに提出が保存されていた場合はその内容でメモリを更新し、確定した提出内容を返す
 	 */
 	private async submitPlayerCard({
 		playerId,
@@ -1359,14 +1368,16 @@ export class GameDurableObject extends DurableObject<Env> {
 	}: {
 		playerId: PlayerId;
 		submission: Pick<Submission, "position"> & Pick<PlayerCard, "text">;
-	}): Promise<void> {
+	}): Promise<Pick<Submission, "position"> & Pick<PlayerCard, "text">> {
 		// DBに提出を保存
+		let savedSubmission: Pick<Submission, "position"> &
+			Pick<PlayerCard, "text">;
 		try {
-			await pRetry(
+			savedSubmission = await pRetry(
 				async () => {
-					if (!this.gameId) return;
+					if (!this.gameId) return submission;
 
-					await this.gameService.saveSubmission({
+					return await this.gameService.saveSubmission({
 						gameId: this.gameId,
 						playerId,
 						position: submission.position,
@@ -1384,16 +1395,18 @@ export class GameDurableObject extends DurableObject<Env> {
 				message: "提出処理に失敗しました。CPUに切り替えます。",
 				playerId,
 			});
-			return;
+			return submission;
 		}
 
 		// メモリ上のプレイヤー状態を更新
 		this.updatePlayer(playerId, (p) => ({
 			cards: p.cards.map((card) =>
-				card.word === submission.text ? { ...card, used: true } : card,
+				card.word === savedSubmission.text ? { ...card, used: true } : card,
 			),
-			submission,
+			submission: savedSubmission,
 		}));
+
+		return savedSubmission;
 	}
 
 	/**
@@ -1421,10 +1434,13 @@ export class GameDurableObject extends DurableObject<Env> {
 		const submission = { position, text: randomCard.word };
 
 		// 提出を処理（DB保存、メモリ更新、カード使用済み）
-		await this.submitPlayerCard({ playerId, submission });
+		const savedSubmission = await this.submitPlayerCard({
+			playerId,
+			submission,
+		});
 
 		// TURN_ENDをブロードキャスト
-		await this.broadcastTurnEnd({ submission });
+		await this.broadcastTurnEnd({ submission: savedSubmission });
 	}
 
 	/**
