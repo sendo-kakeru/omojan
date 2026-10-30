@@ -82,7 +82,7 @@ export default function UserPage({
 			</main>
 
 			{isMe && (
-				<p className="text-center text-neutral-400 text-xs">
+				<p className="text-center text-xs text-neutral-400">
 					退会をご希望の場合は
 					<a
 						className="underline"
@@ -145,26 +145,26 @@ function UserProfile({ user }: { user: PublicUser }) {
 						}
 					/>
 
-					<h1 className="font-bold text-lime-800 text-xl">
+					<h1 className="text-xl font-bold text-lime-800">
 						{getDisplayName(user.name)}
 					</h1>
 				</div>
 
 				<div className="flex gap-x-32">
 					<div className="grid place-items-center gap-y-4">
-						<span className="font-bold text-lime-800 text-xl">
+						<span className="text-xl font-bold text-lime-800">
 							{user.playCount}
 						</span>
-						<span className="flex items-center gap-x-4 text-neutral-500 text-sm">
+						<span className="flex items-center gap-x-4 text-sm text-neutral-500">
 							<IoGameController className="size-16 text-lime-800" />
 							プレイ
 						</span>
 					</div>
 					<div className="grid place-items-center gap-y-4">
-						<span className="font-bold text-lime-800 text-xl">
+						<span className="text-xl font-bold text-lime-800">
 							{user.winCount}
 						</span>
-						<span className="flex items-center gap-x-4 text-neutral-500 text-sm">
+						<span className="flex items-center gap-x-4 text-sm text-neutral-500">
 							<FaCrown className="size-16 text-amber-500" />
 							勝利
 						</span>

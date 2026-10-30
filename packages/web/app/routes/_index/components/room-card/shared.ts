@@ -8,5 +8,5 @@ import classNames from "classnames";
  */
 export const ROOM_CARD_ACTION_CLASS_NAME = classNames(
 	"pointer-events-auto text-left outline-none before:absolute before:inset-0 before:rounded-lg before:content-['']",
-	"focus-visible:before:outline-2 focus-visible:before:outline-lime-800 focus-visible:before:-outline-offset-2",
+	"focus-visible:before:outline-2 focus-visible:before:-outline-offset-2 focus-visible:before:outline-lime-800",
 );

@@ -15,7 +15,7 @@ export function Header() {
 				>
 					<span
 						aria-hidden="true"
-						className="carved-text font-bold text-2xl text-orange-600"
+						className="text-2xl font-bold text-orange-600 carved-text"
 					>
 						お
 					</span>

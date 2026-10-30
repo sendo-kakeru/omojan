@@ -57,7 +57,7 @@ export const ColorList: Story = {
 					<div className="grid justify-items-center gap-y-4" key={name}>
 						<Avatar name={name} size="L" />
 						<p className="text-sm">{name}</p>
-						<p className="text-neutral-500 text-xs">{colorClassName}</p>
+						<p className="text-xs text-neutral-500">{colorClassName}</p>
 					</div>
 				))}
 			</div>

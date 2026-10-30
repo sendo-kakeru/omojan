@@ -52,7 +52,7 @@ export function GameResult({
 						<p className="text-center font-bold text-lime-800">
 							ラウンド {game.roundNo} の結果
 						</p>
-						<p className="text-center text-neutral-500 text-xs">
+						<p className="text-center text-xs text-neutral-500">
 							お題「{game.theme}」
 						</p>
 					</div>
@@ -98,7 +98,7 @@ export function GameResult({
 											{isWinner && (
 												<FaCrown className="size-20 text-amber-500" />
 											)}
-											<p className="font-bold text-neutral-500 text-xs">
+											<p className="text-xs font-bold text-neutral-500">
 												{getDisplayName(player.playerName)}
 												{isSelf && (
 													<span className="font-normal text-neutral-400">
@@ -107,7 +107,7 @@ export function GameResult({
 												)}
 											</p>
 										</div>
-										<p className="wrap-break-word carved-text font-bold text-lime-800 text-sm md:text-base">
+										<p className="text-sm font-bold wrap-break-word text-lime-800 carved-text md:text-base">
 											{combination}
 										</p>
 									</div>
@@ -115,7 +115,7 @@ export function GameResult({
 									<div className="grid w-64 place-items-center">
 										<p
 											className={classNames(
-												"whitespace-nowrap rounded-full border-2 px-12 py-2 font-bold text-sm",
+												"rounded-full border-2 px-12 py-2 text-sm font-bold whitespace-nowrap",
 												isWinner
 													? "border-amber-500 bg-amber-300 text-lime-800"
 													: "border-lime-800/30 bg-lime-800/10 text-lime-800",

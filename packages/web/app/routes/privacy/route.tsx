@@ -6,7 +6,7 @@ export default function PrivacyPage() {
 		<>
 			<Header />
 			<main className="grid gap-y-32 pb-40 sm:mt-24">
-				<h1 className="font-bold text-xl">プライバシーポリシー</h1>
+				<h1 className="text-xl font-bold">プライバシーポリシー</h1>
 
 				<div className="grid gap-y-24 text-sm leading-relaxed">
 					<p>
@@ -14,7 +14,7 @@ export default function PrivacyPage() {
 					</p>
 
 					<section className="grid gap-y-8">
-						<h2 className="font-bold text-base">第1条（収集する情報）</h2>
+						<h2 className="text-base font-bold">第1条（収集する情報）</h2>
 						<p>
 							本サービスは、Googleアカウントを利用したログイン時に、以下の情報を取得します。
 						</p>
@@ -29,7 +29,7 @@ export default function PrivacyPage() {
 					</section>
 
 					<section className="grid gap-y-8">
-						<h2 className="font-bold text-base">第2条（利用目的）</h2>
+						<h2 className="text-base font-bold">第2条（利用目的）</h2>
 						<p>収集した情報は、以下の目的で利用します。</p>
 						<ol className="grid list-decimal gap-y-4 pl-20">
 							<li>本サービスの提供・運営</li>
@@ -42,7 +42,7 @@ export default function PrivacyPage() {
 					</section>
 
 					<section className="grid gap-y-8">
-						<h2 className="font-bold text-base">第3条（第三者提供）</h2>
+						<h2 className="text-base font-bold">第3条（第三者提供）</h2>
 						<p>
 							運営者は、以下の場合を除き、ユーザーの個人情報を第三者に提供することはありません。
 						</p>
@@ -56,7 +56,7 @@ export default function PrivacyPage() {
 					</section>
 
 					<section className="grid gap-y-8">
-						<h2 className="font-bold text-base">第4条（外部サービスの利用）</h2>
+						<h2 className="text-base font-bold">第4条（外部サービスの利用）</h2>
 						<p>
 							本サービスは、以下の外部サービスを利用してデータの処理・保管を行っています。各サービスのプライバシーポリシーについては、それぞれのサービス提供元をご確認ください。
 						</p>
@@ -75,7 +75,7 @@ export default function PrivacyPage() {
 					</section>
 
 					<section className="grid gap-y-8">
-						<h2 className="font-bold text-base">
+						<h2 className="text-base font-bold">
 							第5条（Cookieおよびローカルストレージ）
 						</h2>
 						<p>
@@ -84,7 +84,7 @@ export default function PrivacyPage() {
 					</section>
 
 					<section className="grid gap-y-8">
-						<h2 className="font-bold text-base">第6条（データの保管）</h2>
+						<h2 className="text-base font-bold">第6条（データの保管）</h2>
 						<p>
 							ユーザーの個人情報は、Cloudflare
 							Workers上で動作するアプリケーションおよびTursoデータベースに保管されます。運営者は、適切なセキュリティ対策を講じてデータの保護に努めます。
@@ -92,21 +92,21 @@ export default function PrivacyPage() {
 					</section>
 
 					<section className="grid gap-y-8">
-						<h2 className="font-bold text-base">第7条（データの削除・退会）</h2>
+						<h2 className="text-base font-bold">第7条（データの削除・退会）</h2>
 						<p>
 							ユーザーは、アカウントの無効化（退会）を行うことで、本サービスにおけるアカウント情報の利用を停止できます。退会後、個人情報は運営者の判断により合理的な期間内に削除されます。
 						</p>
 					</section>
 
 					<section className="grid gap-y-8">
-						<h2 className="font-bold text-base">第8条（ポリシーの変更）</h2>
+						<h2 className="text-base font-bold">第8条（ポリシーの変更）</h2>
 						<p>
 							運営者は、必要に応じて本ポリシーを変更することがあります。変更後のプライバシーポリシーは、本サービス上に掲載された時点で効力を生じるものとします。
 						</p>
 					</section>
 
 					<section className="grid gap-y-8">
-						<h2 className="font-bold text-base">第9条（お問い合わせ）</h2>
+						<h2 className="text-base font-bold">第9条（お問い合わせ）</h2>
 						<p>
 							本ポリシーに関するお問い合わせは、以下の連絡先までお願いいたします。
 						</p>
@@ -121,9 +121,9 @@ export default function PrivacyPage() {
 						</p>
 					</section>
 
-					<p className="text-neutral-500 text-xs">2026年2月16日 制定</p>
+					<p className="text-xs text-neutral-500">2026年2月16日 制定</p>
 
-					<Link className="text-blue-600 text-sm underline" to="/terms">
+					<Link className="text-sm text-blue-600 underline" to="/terms">
 						利用規約はこちら
 					</Link>
 				</div>

@@ -110,7 +110,7 @@ export function XFollowButton({
 	return (
 		<span className={sizeVariants({ ...variantProps, className })}>
 			{!isLoaded && (
-				<span className="block h-full w-full animate-pulse rounded-full bg-neutral-200" />
+				<span className="block size-full animate-pulse rounded-full bg-neutral-200" />
 			)}
 			<span className={isLoaded ? undefined : "hidden"} ref={containerRef} />
 		</span>

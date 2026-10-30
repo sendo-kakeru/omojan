@@ -50,14 +50,14 @@ export const Long: Story = {
 	args: {
 		children: (
 			<div className="grid grid-cols-1 gap-y-32">
-				<div className="h-100 w-100 bg-amber-300" />
-				<div className="h-100 w-100 bg-amber-300" />
-				<div className="h-100 w-100 bg-amber-300" />
-				<div className="h-100 w-100 bg-amber-300" />
-				<div className="h-100 w-100 bg-amber-300" />
-				<div className="h-100 w-100 bg-amber-300" />
-				<div className="h-100 w-100 bg-amber-300" />
-				<div className="h-100 w-100 bg-amber-300" />
+				<div className="size-100 bg-amber-300" />
+				<div className="size-100 bg-amber-300" />
+				<div className="size-100 bg-amber-300" />
+				<div className="size-100 bg-amber-300" />
+				<div className="size-100 bg-amber-300" />
+				<div className="size-100 bg-amber-300" />
+				<div className="size-100 bg-amber-300" />
+				<div className="size-100 bg-amber-300" />
 			</div>
 		),
 		description: "This dialog has a lot of content to demonstrate scrolling.",

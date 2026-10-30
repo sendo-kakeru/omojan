@@ -220,7 +220,7 @@ export function GameSubmission({
 					<div className="pointer-events-none fixed bottom-120 left-1/2 z-20 -translate-x-1/2">
 						<div className="flex items-center gap-x-8 rounded-full bg-lime-800/90 px-24 py-12 shadow-2xl">
 							<Spinner className="size-24 text-white" />
-							<p className="whitespace-nowrap font-bold text-sm text-white">
+							<p className="text-sm font-bold whitespace-nowrap text-white">
 								{isStarting ? "まもなく開始..." : "他のプレイヤーが選択中..."}
 							</p>
 						</div>
@@ -252,7 +252,7 @@ export function GameSubmission({
 											})}
 										/>
 										<div className="grid flex-1 gap-y-1 md:gap-y-2">
-											<p className="font-semibold text-xs">
+											<p className="text-xs font-semibold">
 												{getDisplayName(player.playerName)}
 												{isSelf && (
 													<span className="font-normal text-neutral-400">
@@ -279,7 +279,7 @@ export function GameSubmission({
 						className={classNames(
 							// NOTE: overflow-x-clip は牌を叩きつける演出の拡大が横スクロール領域を
 							// 広げないようにするため（縦はみ出しは演出なので clip しない）
-							"relative mt-8 grid place-items-center overflow-x-clip rounded-t-2xl border border-cream-200 border-b-0 bg-cream-50/90 p-16",
+							"relative mt-8 grid place-items-center overflow-x-clip rounded-t-2xl border border-b-0 border-cream-200 bg-cream-50/90 p-16",
 							isActivePhase && "z-30",
 						)}
 					>

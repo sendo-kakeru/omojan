@@ -17,7 +17,7 @@ export function Select({
 		<div className="relative flex w-fit">
 			<select
 				className={classNames(
-					"size-full cursor-pointer appearance-none overflow-hidden text-ellipsis whitespace-nowrap rounded-sm border border-cream-200 bg-cream-50 py-4 pr-40 pl-16 text-base transition-colors",
+					"size-full cursor-pointer appearance-none truncate rounded-sm border border-cream-200 bg-cream-50 py-4 pr-40 pl-16 text-base transition-colors",
 					"invalid:text-neutral-500", // 未選択時（一つ目の要素選択時）に文字色を変える
 					"hover:bg-cream-100/50",
 					"focus-visible:border-lime-800",
@@ -30,7 +30,10 @@ export function Select({
 				{...props}
 			>
 				{withPlaceholder && (
-					<option value="">{placeholder || "選択してください"}</option>
+					<option value="">
+						{/* biome-ignore lint/nursery/useNullishCoalescing: 空文字の場合もデフォルト文言を表示する */}
+						{placeholder || "選択してください"}
+					</option>
 				)}
 				{children}
 			</select>

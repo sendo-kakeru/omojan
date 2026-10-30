@@ -29,7 +29,7 @@ export function InPageError({
 							width={72}
 						/>
 					)}
-					<h1 className="font-bold text-2xl text-neutral-800">{heading}</h1>
+					<h1 className="text-2xl font-bold text-neutral-800">{heading}</h1>
 					<p className="text-neutral-500">{description}</p>
 				</div>
 				{showHomeButton && (

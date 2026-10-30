@@ -108,7 +108,7 @@ export function ToastItem({
 		<ToastPrimitive.Root
 			className={classNames(
 				"flex items-center gap-8 rounded-lg border-2 bg-white px-16 py-8",
-				"data-[swipe=cancel]:translate-x-0 data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[state=closed]:animate-toast-hide data-[state=open]:animate-toast-slide-in data-[swipe=end]:animate-toast-swipe-out data-[swipe=cancel]:transition-[transform_200ms_ease-out]",
+				"data-[state=closed]:animate-toast-hide data-[state=open]:animate-toast-slide-in data-[swipe=cancel]:translate-x-0 data-[swipe=cancel]:transition-[transform_200ms_ease-out] data-[swipe=end]:animate-toast-swipe-out data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)]",
 				iconProps.borderColor,
 			)}
 			duration={duration}
@@ -120,7 +120,7 @@ export function ToastItem({
 			open={isOpen}
 		>
 			{iconProps.icon}
-			<ToastPrimitive.Title className="font-bold text-sm">
+			<ToastPrimitive.Title className="text-sm font-bold">
 				{title}
 			</ToastPrimitive.Title>
 			<ToastPrimitive.Close asChild>

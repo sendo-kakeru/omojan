@@ -29,11 +29,11 @@ export function SectionHeading({
 					className="grid size-34 shrink-0 place-items-center"
 					thickness="amber"
 				>
-					<span className="carved-text font-bold text-base text-orange-600">
+					<span className="text-base font-bold text-orange-600 carved-text">
 						{mark}
 					</span>
 				</Tile>
-				<span className="font-bold text-base text-lime-800">{children}</span>
+				<span className="text-base font-bold text-lime-800">{children}</span>
 			</HeadingTag>
 			{action}
 		</div>
@@ -47,7 +47,7 @@ export function SectionMoreLink({ to }: { to: string }) {
 	return (
 		<Link className="w-fit shrink-0" to={to}>
 			<Tile
-				className="flex items-center gap-x-2 rounded-full px-12 py-6 font-bold text-lime-800 text-xs"
+				className="flex items-center gap-x-2 rounded-full px-12 py-6 text-xs font-bold text-lime-800"
 				interactive
 				thickness="amber"
 			>
@@ -65,7 +65,7 @@ export function SectionRefreshButton({ onClick }: { onClick: () => void }) {
 	return (
 		<Tile
 			as="button"
-			className="flex shrink-0 items-center gap-x-4 rounded-full px-12 py-6 font-bold text-lime-800 text-xs"
+			className="flex shrink-0 items-center gap-x-4 rounded-full px-12 py-6 text-xs font-bold text-lime-800"
 			onClick={onClick}
 			thickness="amber"
 		>
