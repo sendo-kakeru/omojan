@@ -26,11 +26,9 @@ export async function honoFetcher<T>(
 		return (await parseResponse(fn())) as T;
 	} catch (error) {
 		if (hasStatusCode(error) && error.statusCode === 401) {
-			if (!refreshPromise) {
-				refreshPromise = cognito.refreshSession().finally(() => {
-					refreshPromise = null;
-				});
-			}
+			refreshPromise ??= cognito.refreshSession().finally(() => {
+				refreshPromise = null;
+			});
 			await refreshPromise;
 			return (await parseResponse(fn())) as T;
 		}

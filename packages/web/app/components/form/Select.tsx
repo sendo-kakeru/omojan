@@ -30,7 +30,10 @@ export function Select({
 				{...props}
 			>
 				{withPlaceholder && (
-					<option value="">{placeholder || "選択してください"}</option>
+					<option value="">
+						{/* biome-ignore lint/nursery/useNullishCoalescing: 空文字の場合もデフォルト文言を表示する */}
+						{placeholder || "選択してください"}
+					</option>
 				)}
 				{children}
 			</select>

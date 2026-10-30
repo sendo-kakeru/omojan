@@ -44,6 +44,7 @@
 				"noMisusedPromises": "error",
 				"noReturnInFinally": "error",
 				"useAwaitThenable": "error",
+				"useNullishCoalescing": "error",
 				"usePromiseRejectErrors": "error",
 				"useTailwindSortedClasses": "warn"
 			},
