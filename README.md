@@ -15,6 +15,30 @@
 - STG: staging/stg
 - 開発(現時点でローカル環境も含む): development/dev
 
+## ローカル開発
+
+### 事前準備: Cloudflare へのログイン
+
+`packages/cdn` は開発時もリモートの R2 バケット（`omojan-ugc-dev`）に接続するため（`wrangler.jsonc` の `"remote": true`）、Cloudflare へのログインが必要です。ログインしていないと `pnpm dev` が起動できません。
+
+初回のみ、以下を実行してブラウザでログインしてください。アカウントは `omojan.online@gmail.com` を使用します。
+
+```bash
+pnpm --filter @repo/cdn exec wrangler login
+```
+
+ログイン状態は以下で確認できます。
+
+```bash
+pnpm --filter @repo/cdn exec wrangler whoami
+```
+
+### 起動
+
+```bash
+pnpm dev
+```
+
 ## ブランチ名規約
 
 - `main`: 本番環境用ブランチ（直接プッシュ禁止）
