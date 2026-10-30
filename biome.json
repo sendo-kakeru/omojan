@@ -16,7 +16,8 @@
 		}
 	},
 	"files": {
-		"ignoreUnknown": false
+		"ignoreUnknown": false,
+		"includes": ["**", "!pnpm-lock.yaml"]
 	},
 	"formatter": {
 		"enabled": true,
@@ -40,13 +41,7 @@
 			},
 			"nursery": {
 				"noFloatingPromises": "error",
-				"useSortedClasses": {
-					"level": "warn",
-					"options": {
-						"attributes": ["classList"],
-						"functions": ["classNames", "tv"]
-					}
-				}
+				"useTailwindSortedClasses": "warn"
 			},
 			"preset": "recommended",
 			"style": {
@@ -67,6 +62,11 @@
 			}
 		}
 	},
+	"markdown": {
+		"formatter": {
+			"enabled": false
+		}
+	},
 	"overrides": [
 		{
 			"assist": {
@@ -79,6 +79,11 @@
 			"includes": ["**/package.json"]
 		}
 	],
+	"tailwind": {
+		"attributes": ["class", "className", "classList"],
+		"mergeFunctions": ["classNames"],
+		"stylesheet": "./packages/web/app/app.css"
+	},
 	"vcs": {
 		"clientKind": "git",
 		"enabled": true,
