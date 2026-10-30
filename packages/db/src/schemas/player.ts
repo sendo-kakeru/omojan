@@ -49,6 +49,10 @@ export const playerTable = sqliteTable(
 		 * ホストが部屋を退出してもホストがいない部屋として続行する
 		 */
 		isHost: integer("is_host", { mode: "boolean" }).notNull().default(false),
+		/** ゲーム全体の勝者かどうか */
+		isWinner: integer("is_winner", { mode: "boolean" })
+			.notNull()
+			.default(false),
 		// NOTE: ログインユーザーはuserのname
 		// 匿名ユーザーは設定させる or `匿名1`のように割り振る
 		playerName: text("player_name").notNull(),

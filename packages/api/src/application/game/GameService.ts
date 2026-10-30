@@ -489,11 +489,99 @@ export class GameService {
 	}
 
 	/**
-	 * ゲームを終了状態に更新する
-	 * - 終了済みゲーム数のカウンターを同一トランザクションで加算する
+	 * ラウンドごとの勝者からプレイヤーごとの勝利数とゲームの勝者を計算する
+	 * 勝利数が0の場合は勝者なし
+	 */
+	static calculateWinnersAndWinCountsFromRoundWinners({
+		winnerPlayerIdsPerRound,
+	}: {
+		/** 1ゲームのラウンドごとの勝者 ID 配列（勝者のいないラウンドは空配列） */
+		winnerPlayerIdsPerRound: PlayerId[][];
+	}): {
+		winCountByPlayer: Map<PlayerId, number>;
+		winnerPlayerIds: PlayerId[];
+	} {
+		const winCountByPlayer = new Map<PlayerId, number>();
+		for (const roundWinnerPlayerIds of winnerPlayerIdsPerRound) {
+			for (const playerId of roundWinnerPlayerIds) {
+				winCountByPlayer.set(
+					playerId,
+					(winCountByPlayer.get(playerId) ?? 0) + 1,
+				);
+			}
+		}
+
+		const maxWinCount = Math.max(...winCountByPlayer.values(), 0);
+		// 勝利数が0の場合は勝者なし
+		if (maxWinCount === 0) return { winCountByPlayer, winnerPlayerIds: [] };
+
+		return {
+			winCountByPlayer,
+			winnerPlayerIds: [...winCountByPlayer.entries()]
+				.filter(([, winCount]) => winCount === maxWinCount)
+				.map(([playerId]) => playerId),
+		};
+	}
+
+	/**
+	 * 1ゲームの提出・投票を取得し、ゲームの勝者を計算する
+	 */
+	private async calculateGameWinners({
+		gameId,
+	}: {
+		gameId: GameId;
+	}): Promise<PlayerId[]> {
+		// 提出と投票を1往復で取得する
+		const [submissions, votes] = await this.db.batch([
+			this.db
+				.select({
+					playerId: submissionTable.playerId,
+					roundId: submissionTable.roundId,
+					submissionId: submissionTable.id,
+				})
+				.from(submissionTable)
+				.innerJoin(roundTable, eq(submissionTable.roundId, roundTable.id))
+				.where(eq(roundTable.gameId, gameId)),
+			this.db
+				.select({
+					roundId: voteTable.roundId,
+					submissionId: voteTable.submissionId,
+				})
+				.from(voteTable)
+				.innerJoin(roundTable, eq(voteTable.roundId, roundTable.id))
+				.where(eq(roundTable.gameId, gameId)),
+		]);
+
+		// ラウンドごとの勝者を計算
+		const roundIds = [
+			...new Set(submissions.map((submission) => submission.roundId)),
+		];
+		const winnerPlayerIdsPerRound = roundIds.map(
+			(roundId) =>
+				GameService.calculateWinnersAndVoteCountsFromVotes({
+					submissions: submissions.filter(
+						(submission) => submission.roundId === roundId,
+					),
+					votes: votes.filter((vote) => vote.roundId === roundId),
+				}).winnerPlayerIds,
+		);
+
+		// ラウンドごとの勝者からゲームの勝者を計算
+		return GameService.calculateWinnersAndWinCountsFromRoundWinners({
+			winnerPlayerIdsPerRound,
+		}).winnerPlayerIds;
+	}
+
+	/**
+	 * ゲームを終了状態に同一トランザクションで更新する
+	 * - 終了済みゲーム数のカウンターを加算する
+	 * - ゲームの勝者を保存する
 	 * - 既に終了済みのゲームは更新・加算しない（二重加算の防止）
 	 */
 	async endGame({ gameId }: { gameId: GameId }): Promise<void> {
+		// 最終ラウンドの投票後はデータが変わらないため、トランザクションの前に計算する
+		const winnerPlayerIds = await this.calculateGameWinners({ gameId });
+
 		await this.db.transaction(async (tx) => {
 			const updated = await tx
 				.update(gameTable)
@@ -501,12 +589,25 @@ export class GameService {
 				.where(and(eq(gameTable.id, gameId), ne(gameTable.status, "finished")))
 				.returning({ id: gameTable.id });
 
+			// 既に finished の場合は加算・勝者の更新をしない
 			if (updated.length === 0) return;
 
 			await tx
 				.update(gameCounterTable)
 				.set({ count: sql`${gameCounterTable.count} + 1` })
 				.where(eq(gameCounterTable.status, "finished"));
+
+			if (winnerPlayerIds.length === 0) return;
+
+			await tx
+				.update(playerTable)
+				.set({ isWinner: true })
+				.where(
+					and(
+						eq(playerTable.gameId, gameId),
+						inArray(playerTable.id, winnerPlayerIds),
+					),
+				);
 		});
 	}
 
@@ -647,8 +748,7 @@ export class GameService {
 			.from(voteTable)
 			.where(inArray(voteTable.roundId, roundIds));
 
-		// 各プレイヤーの勝利数を計算
-		const winCountByPlayer = new Map<PlayerId, number>();
+		// 各ラウンドの勝者を計算
 		const roundWinnersByRoundId = new Map<RoundId, PlayerId[]>();
 		for (const round of rounds) {
 			const roundSubmissions = submissions.filter(
@@ -661,27 +761,27 @@ export class GameService {
 					votes: roundVotes,
 				});
 			roundWinnersByRoundId.set(round.id, winnerPlayerIds);
-			for (const playerId of winnerPlayerIds) {
-				const currentCount = winCountByPlayer.get(playerId) ?? 0;
-				winCountByPlayer.set(playerId, currentCount + 1);
-			}
 		}
 
-		// 最大勝利数を計算
-		const maxWinCount = Math.max(...winCountByPlayer.values(), 0);
+		// 各プレイヤーの勝利数とゲームの勝者を計算
+		const { winCountByPlayer, winnerPlayerIds: gameWinnerPlayerIds } =
+			GameService.calculateWinnersAndWinCountsFromRoundWinners({
+				winnerPlayerIdsPerRound: [...roundWinnersByRoundId.values()],
+			});
 
-		// 勝者一覧（最大勝利数を持つプレイヤー）
-		const winners: GameResultResponseBody["winners"] = players
-			.filter(
-				(player) => (winCountByPlayer.get(player.id) ?? 0) === maxWinCount,
-			)
-			.map((player) => ({
-				id: player.id,
-				image: player.image,
-				playerName: player.playerName,
-				userId: player.userId,
-				winCount: winCountByPlayer.get(player.id) ?? 0,
-			}));
+		// 勝者一覧
+		// NOTE: 勝者が0人の場合は全プレイヤーを勝者とする
+		const winners: GameResultResponseBody["winners"] = (
+			gameWinnerPlayerIds.length > 0
+				? players.filter((player) => gameWinnerPlayerIds.includes(player.id))
+				: players
+		).map((player) => ({
+			id: player.id,
+			image: player.image,
+			playerName: player.playerName,
+			userId: player.userId,
+			winCount: winCountByPlayer.get(player.id) ?? 0,
+		}));
 
 		// ラウンド情報を構築
 		const roundResults: GameResultResponseBody["rounds"] = rounds.map(
