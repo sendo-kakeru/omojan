@@ -15,10 +15,10 @@ jobs:
       VITE_COGNITO_DOMAIN: http://temp.com
       VITE_COGNITO_USER_POOL_ID: temp-user-pool-id
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Setup pnpm
-        uses: ./.github/actions/setup-pnpm
+        uses: $/.github/actions/setup-pnpm
 
       - name: Build dependencies packages
         run: |
