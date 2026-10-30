@@ -21,10 +21,10 @@ jobs:
     timeout-minutes: 10
     environment: e2e
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Setup pnpm
-        uses: ./.github/actions/setup-pnpm
+        uses: $/.github/actions/setup-pnpm
 
       - name: Install Turso CLI
         run: |
@@ -61,10 +61,10 @@ jobs:
       JWT_SECRET: e2e-secret
       WEB_URL: http://localhost:5173
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Setup pnpm
-        uses: ./.github/actions/setup-pnpm
+        uses: $/.github/actions/setup-pnpm
 
       - name: Install Turso CLI
         run: |
@@ -73,7 +73,7 @@ jobs:
 
       - name: Setup E2E Database
         id: setup-db
-        uses: ./.github/actions/setup-e2e-db
+        uses: $/.github/actions/setup-e2e-db
         with:
           turso-api-token: ${{ secrets.TURSO_API_TOKEN }}
           source-db: ${{ env.E2E_BASE_DB_NAME }}
@@ -123,7 +123,7 @@ jobs:
         working-directory: packages/web
         run: pnpm playwright test
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@v7.0.2
         if: ${{ !cancelled() }}
         with:
           name: playwright-report
@@ -132,7 +132,7 @@ jobs:
 
       - name: Delete E2E Database
         if: always()
-        uses: ./.github/actions/delete-e2e-db
+        uses: $/.github/actions/delete-e2e-db
         with:
           turso-api-token: ${{ secrets.TURSO_API_TOKEN }}
           database-name: ${{ steps.setup-db.outputs.database-name }}

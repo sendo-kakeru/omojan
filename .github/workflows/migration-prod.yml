@@ -8,10 +8,10 @@ jobs:
     environment: production
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Setup pnpm
-        uses: ./.github/actions/setup-pnpm
+        uses: $/.github/actions/setup-pnpm
 
       - name: Build dependencies packages
         run: |
