@@ -41,6 +41,10 @@
 			},
 			"nursery": {
 				"noFloatingPromises": "error",
+				"noMisusedPromises": "error",
+				"noReturnInFinally": "error",
+				"useAwaitThenable": "error",
+				"usePromiseRejectErrors": "error",
 				"useTailwindSortedClasses": "warn"
 			},
 			"preset": "recommended",

@@ -173,7 +173,7 @@ export async function ensureXWidgets(): Promise<Twttr> {
 	if (isTwttr(window.twttr)) return window.twttr;
 
 	// 読み込み中の Promise があればそれを返す（重複読み込み防止）
-	if (twttrPromise) return twttrPromise;
+	if (twttrPromise !== null) return twttrPromise;
 
 	twttrPromise = new Promise<Twttr>((resolve, reject) => {
 		const doc = document;

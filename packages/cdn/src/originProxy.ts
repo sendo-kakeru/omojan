@@ -146,7 +146,7 @@ async function getOidcToken({
 	}
 
 	const pending = pendingTokenMap.get(audience);
-	if (pending) {
+	if (pending !== undefined) {
 		return pending;
 	}
 
