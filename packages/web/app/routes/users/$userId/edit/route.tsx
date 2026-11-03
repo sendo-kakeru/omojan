@@ -162,7 +162,7 @@ function EditForm({ me }: { me: Me }) {
 				>
 					<FiChevronLeft className="size-20" />
 				</button>
-				<h1 className="font-bold text-lg">プロフィール編集</h1>
+				<h1 className="text-lg font-bold">プロフィール編集</h1>
 			</div>
 
 			<form.Subscribe selector={(state) => state.values.image}>
@@ -203,7 +203,7 @@ function EditForm({ me }: { me: Me }) {
 							ref={fileInputRef}
 							type="file"
 						/>
-						<p className="text-neutral-400 text-xs">タップして画像を変更</p>
+						<p className="text-xs text-neutral-400">タップして画像を変更</p>
 					</div>
 				)}
 			</form.Subscribe>

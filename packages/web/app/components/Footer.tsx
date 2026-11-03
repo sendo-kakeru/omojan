@@ -8,7 +8,7 @@ const FOOTER_LINKS = [
 
 export function Footer() {
 	return (
-		<footer className="flex justify-center gap-x-16 py-24 text-neutral-400 text-xs">
+		<footer className="flex justify-center gap-x-16 py-24 text-xs text-neutral-400">
 			{FOOTER_LINKS.map((link) => (
 				<Link
 					className="transition hover:text-neutral-600"

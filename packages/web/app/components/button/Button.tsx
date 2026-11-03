@@ -136,7 +136,7 @@ const buttonVariants = tv(
 					"relative bg-orange-700 text-white shadow-[inset_0_1px_0_var(--color-orange-600),0_4px_0_var(--color-orange-900),0_10px_16px_-6px_rgb(90_20_0/0.28)]",
 					// NOTE: transformではなくtranslate。Tailwind v4のtranslate-*は
 					// translateプロパティを吐くため、transformでは補間されない
-					"duration-200 ease-out [transition-property:translate,box-shadow,background-color]",
+					"[transition-property:translate,box-shadow,background-color] duration-200 ease-out",
 					"after:absolute after:inset-x-0 after:top-full after:h-0 after:content-[''] hover:after:h-4",
 					"hover:-translate-y-4 hover:shadow-[inset_0_1px_0_var(--color-orange-600),0_8px_0_var(--color-orange-900),0_20px_30px_-10px_rgb(90_20_0/0.35)]",
 					"active:translate-y-3 active:bg-orange-800 active:shadow-[inset_0_1px_0_var(--color-orange-600),0_1px_0_var(--color-orange-900),0_3px_6px_-3px_rgb(90_20_0/0.3)] active:duration-75",

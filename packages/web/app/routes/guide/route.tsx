@@ -74,8 +74,8 @@ export default function HowToPlayPage() {
 			<Header />
 			<main className="grid gap-y-40 pb-40 sm:mt-24">
 				<div className="grid gap-y-8">
-					<h1 className="font-bold text-xl">遊び方</h1>
-					<p className="text-neutral-500 text-sm">
+					<h1 className="text-xl font-bold">遊び方</h1>
+					<p className="text-sm text-neutral-500">
 						初めてでもすぐ遊べる！おもじゃんオンラインのルールを解説します。
 					</p>
 					<img
@@ -91,7 +91,7 @@ export default function HowToPlayPage() {
 				<div className="grid gap-y-40">
 					{/* おもじゃんとは */}
 					<section className="grid gap-y-12">
-						<h2 className="font-bold text-lg">おもじゃんとは？</h2>
+						<h2 className="text-lg font-bold">おもじゃんとは？</h2>
 						<p className="text-sm leading-relaxed">
 							おもじゃんオンラインは、4人で遊ぶ言葉の対戦ゲームです。お題（テーマ牌）に手持ちの言葉（手持ち牌）をくっつけて面白い造語を作り、みんなで一番面白かった造語に投票します。全4ラウンドで総合得点が一番高い人が優勝です。
 						</p>
@@ -99,7 +99,7 @@ export default function HowToPlayPage() {
 
 					{/* ゲームの流れ */}
 					<section className="grid gap-y-20">
-						<h2 className="font-bold text-lg">ゲームの流れ</h2>
+						<h2 className="text-lg font-bold">ゲームの流れ</h2>
 
 						<div className="grid gap-y-32">
 							{/* STEP 1 */}
@@ -155,7 +155,7 @@ export default function HowToPlayPage() {
 									ラウンドが始まると、みんなに共通のテーマ牌（お題）が出されます。手持ち牌から1枚選ぶと、2つの組み合わせが表示されるので、好きな方を選んで造語を作りましょう。
 								</p>
 								<div className="rounded-lg bg-yellow-100 p-16">
-									<p className="mb-4 font-bold text-xs text-yellow-700">
+									<p className="mb-4 text-xs font-bold text-yellow-700">
 										造語の例
 									</p>
 									<p className="text-center text-sm">
@@ -165,7 +165,7 @@ export default function HowToPlayPage() {
 										{" ＋ "}
 										<span className="font-bold">テーマ「大臣」</span>
 										{" → "}
-										<span className="font-bold text-lg">もちもち大臣</span>
+										<span className="text-lg font-bold">もちもち大臣</span>
 									</p>
 								</div>
 								<ul className="grid list-disc gap-y-4 pl-20">
@@ -233,7 +233,7 @@ export default function HowToPlayPage() {
 
 					{/* ゲームの特徴 */}
 					<section className="grid gap-y-12">
-						<h2 className="font-bold text-lg">特徴</h2>
+						<h2 className="text-lg font-bold">特徴</h2>
 						<div className="grid gap-y-8 sm:grid-cols-2 sm:gap-16">
 							{FEATURES.map((feature) => (
 								<FeatureCard key={feature.title} {...feature} />
@@ -244,7 +244,7 @@ export default function HowToPlayPage() {
 					{/* CTA */}
 					<section className="grid place-items-center gap-y-12">
 						<Link
-							className="rounded-lg bg-yellow-400 px-32 py-12 font-bold text-sm shadow transition hover:bg-yellow-500"
+							className="rounded-lg bg-yellow-400 px-32 py-12 text-sm font-bold shadow transition hover:bg-yellow-500"
 							to="/"
 						>
 							さっそく遊んでみる
@@ -267,10 +267,10 @@ function Step({
 	return (
 		<div className="grid gap-y-12">
 			<div className="flex items-center gap-x-8">
-				<span className="grid size-28 place-items-center rounded-full bg-yellow-400 font-bold text-sm">
+				<span className="grid size-28 place-items-center rounded-full bg-yellow-400 text-sm font-bold">
 					{number}
 				</span>
-				<h3 className="font-bold text-base">{title}</h3>
+				<h3 className="text-base font-bold">{title}</h3>
 			</div>
 			<div className="grid gap-y-12 pl-36 text-sm leading-relaxed">
 				{children}
@@ -288,8 +288,8 @@ function FeatureCard({
 }) {
 	return (
 		<div className="grid gap-y-4 rounded-lg bg-white p-16">
-			<p className="font-bold text-sm">{title}</p>
-			<p className="text-neutral-500 text-xs leading-relaxed">{description}</p>
+			<p className="text-sm font-bold">{title}</p>
+			<p className="text-xs leading-relaxed text-neutral-500">{description}</p>
 		</div>
 	);
 }

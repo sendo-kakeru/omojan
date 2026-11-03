@@ -33,10 +33,10 @@ function TooltipContent({
 		<TooltipPrimitive.Portal>
 			<TooltipPrimitive.Content
 				className={classNames(
-					"z-50 w-fit max-w-xs rounded-md bg-neutral-800 px-12 py-6 text-white text-xs",
+					"z-50 w-fit max-w-xs rounded-md bg-neutral-800 px-12 py-6 text-xs text-white",
 					"origin-(--radix-tooltip-content-transform-origin)",
-					"data-[state=delayed-open]:fade-in-0 data-[state=delayed-open]:zoom-in-95 data-[state=delayed-open]:animate-in",
-					"data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=closed]:animate-out",
+					"data-[state=delayed-open]:animate-in data-[state=delayed-open]:fade-in-0 data-[state=delayed-open]:zoom-in-95",
+					"data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
 					"data-[side=bottom]:slide-in-from-top-8 data-[side=left]:slide-in-from-right-8 data-[side=right]:slide-in-from-left-8 data-[side=top]:slide-in-from-bottom-8",
 					className,
 				)}

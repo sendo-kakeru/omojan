@@ -37,7 +37,7 @@ export function MatchingPresenter({
 			{/* タイトル・基本情報 */}
 			<div className="grid gap-y-8 px-4">
 				<div className="flex items-center justify-between gap-x-8">
-					<h1 className="font-bold text-lime-800 text-xl">{roomMeta.title}</h1>
+					<h1 className="text-xl font-bold text-lime-800">{roomMeta.title}</h1>
 					{roomMeta.isPrivate && (
 						<div className="rounded-full border border-amber-300 bg-amber-300/20 p-4">
 							<IoIosLock
@@ -57,14 +57,14 @@ export function MatchingPresenter({
 			{/* 操作カード */}
 			<Tile className="grid gap-y-16 p-16" thickness="amber">
 				{roomMeta.isPrivate && (
-					<div className="mx-auto grid w-full max-w-400 gap-y-12 rounded-lg border-2 border-amber-300 border-dashed bg-amber-300/10 p-8 md:p-16">
+					<div className="mx-auto grid w-full max-w-400 gap-y-12 rounded-lg border-2 border-dashed border-amber-300 bg-amber-300/10 p-8 md:p-16">
 						<div className="flex items-center justify-between gap-x-8 px-8">
 							<div className="flex items-center gap-x-16">
-								<p className="break-keep font-semibold text-sm md:text-base">
+								<p className="text-sm font-semibold break-keep md:text-base">
 									パスワード
 								</p>
 								<Tile
-									className="w-fit p-8 px-24 font-display text-lg text-lime-800 tracking-widest"
+									className="w-fit p-8 px-24 font-display text-lg tracking-widest text-lime-800"
 									thickness="amber"
 								>
 									{roomMeta.password}
@@ -84,7 +84,7 @@ export function MatchingPresenter({
 								)}
 							</Button>
 						</div>
-						<p className="w-fit text-neutral-500 text-sm">
+						<p className="w-fit text-sm text-neutral-500">
 							参加者にパスワードを共有してください。
 						</p>
 					</div>
@@ -125,7 +125,7 @@ export function MatchingPresenter({
 						友達を誘う
 					</Button>
 				</div>
-				<p className="text-neutral-500 text-sm">
+				<p className="text-sm text-neutral-500">
 					4人揃ったらゲームが開始されます。
 					{isHost && "「今すぐ開始」で募集中のプレイヤーをCPUで開始します。"}
 				</p>
@@ -173,12 +173,10 @@ function MatchingParticipantLabel({
 	}
 
 	return (
-		<div className="flex items-center gap-x-12 rounded-lg border-2 border-cream-300 border-dashed px-12 py-8">
+		<div className="flex items-center gap-x-12 rounded-lg border-2 border-dashed border-cream-300 px-12 py-8">
 			{seatNumber}
-			<div className="size-32 shrink-0 rounded-full border border-cream-300 border-dashed" />
-			<p className="overflow-hidden text-ellipsis whitespace-nowrap text-neutral-400 text-sm">
-				募集中...
-			</p>
+			<div className="size-32 shrink-0 rounded-full border border-dashed border-cream-300" />
+			<p className="truncate text-sm text-neutral-400">募集中...</p>
 		</div>
 	);
 }

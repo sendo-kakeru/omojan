@@ -94,7 +94,7 @@ export const Interactive: Story = {
 
 		return (
 			<div className="mx-auto grid max-w-480 gap-y-16 p-16">
-				<p className="text-neutral-600 text-sm">
+				<p className="text-sm text-neutral-600">
 					選択中: {pending ?? "なし"}（同じ選択肢を2度クリックで確定）
 				</p>
 				<SubmissionCard
@@ -122,7 +122,7 @@ export const AllStates: Story = {
 	render: () => (
 		<div className="mx-auto grid max-w-480 gap-y-32 p-16">
 			<div>
-				<p className="mb-8 font-bold text-neutral-600 text-sm">
+				<p className="mb-8 text-sm font-bold text-neutral-600">
 					組み合わせ選択（未選択）
 				</p>
 				<SubmissionCard
@@ -134,7 +134,7 @@ export const AllStates: Story = {
 				/>
 			</div>
 			<div>
-				<p className="mb-8 font-bold text-neutral-600 text-sm">
+				<p className="mb-8 text-sm font-bold text-neutral-600">
 					組み合わせ選択（前を選択中）
 				</p>
 				<SubmissionCard
@@ -146,13 +146,13 @@ export const AllStates: Story = {
 				/>
 			</div>
 			<div>
-				<p className="mb-8 font-bold text-neutral-600 text-sm">
+				<p className="mb-8 text-sm font-bold text-neutral-600">
 					確定カード（前）
 				</p>
 				<SubmissionCard position="prefix" state="confirmed" text="激辛カレー" />
 			</div>
 			<div>
-				<p className="mb-8 font-bold text-neutral-600 text-sm">
+				<p className="mb-8 text-sm font-bold text-neutral-600">
 					確定カード（後）
 				</p>
 				<SubmissionCard position="suffix" state="confirmed" text="カレー激辛" />

@@ -29,7 +29,7 @@ export function SigninModal({
 						LINEでログイン
 					</LineSigninButton>
 				</div>
-				<p className="text-center text-neutral-500 text-xs">
+				<p className="text-center text-xs text-neutral-500">
 					ログインすることで
 					<Link className="text-blue-600 underline" to="/terms">
 						利用規約

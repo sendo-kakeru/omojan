@@ -455,6 +455,25 @@ export const LongNamesAndWords: Story = {
 	parameters: { authed: true },
 };
 
+// 勝者なし（全ラウンドで誰も票を得なかった）
+export const NoWinner: Story = {
+	args: {
+		result: {
+			...mockResult,
+			rounds: mockResult.rounds.map((round) => ({
+				...round,
+				players: round.players.map((player) => ({
+					...player,
+					isWinner: false,
+				})),
+			})),
+			winners: [],
+		},
+	},
+	name: "勝者なし",
+	parameters: { authed: true },
+};
+
 // 自分が負け（未ログイン状態）
 export const MeAsLoser: Story = {
 	args: {

@@ -119,7 +119,7 @@ export default function Page({ loaderData }: Route.ComponentProps) {
 					aria-labelledby={socialLabelId}
 					className="grid place-items-center gap-y-12 pt-8"
 				>
-					<p className="font-bold text-lime-800 text-sm" id={socialLabelId}>
+					<p className="text-sm font-bold text-lime-800" id={socialLabelId}>
 						友達をさそって遊ぼう
 					</p>
 					<SocialLinks />

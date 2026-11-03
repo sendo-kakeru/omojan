@@ -313,6 +313,52 @@ describe("gameRoutes", () => {
 			expect(winnerIds).toContain(players[1]?.id);
 		});
 
+		test("全ラウンドで投票がない場合、勝者なしとして返される", async () => {
+			const [game] = await db
+				.insert(gameTable)
+				.values({
+					isPrivate: false,
+					password: null,
+					status: "finished",
+					timeLimit: 30,
+					title: "無投票ゲーム",
+				})
+				.returning();
+
+			const players = await db
+				.insert(playerTable)
+				.values(
+					[1, 2, 3, 4].map((seat) => ({
+						gameId: game.id,
+						gameTokenHash: faker.string.alphanumeric(64),
+						playerName: `Player${seat}`,
+						seat: seat as PlayerSeat,
+						userId: null,
+					})),
+				)
+				.returning();
+
+			const [round] = await db
+				.insert(roundTable)
+				.values({ gameId: game.id, roundNo: 1 as RoundNo })
+				.returning();
+			await db.insert(submissionTable).values(
+				players.map((player) => ({
+					playerId: player.id,
+					position: "prefix" as const,
+					roundId: round.id,
+				})),
+			);
+
+			const response = await mockHonoClient.v1.games[":gameId"].result.$get({
+				param: { gameId: game.id },
+			});
+
+			expect(response.status).toBe(200);
+			const body = await response.json();
+			expect(body.data?.winners).toHaveLength(0);
+		});
+
 		test("ラウンド結果のプレイヤーが席順で返る", async () => {
 			const [game] = await db
 				.insert(gameTable)

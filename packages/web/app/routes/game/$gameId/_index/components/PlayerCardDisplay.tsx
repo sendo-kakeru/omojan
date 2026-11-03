@@ -52,7 +52,7 @@ export function PlayerCardDisplay({
 				{cards.map((card) => {
 					const isSelected = selectedCardId === card.id;
 					const cardClassName = classNames(
-						"px-8 py-4 text-center font-bold text-xs xs:text-sm sm:text-base",
+						"px-8 py-4 text-center text-xs font-bold xs:text-sm sm:text-base",
 						card.used
 							? "cursor-not-allowed text-neutral-400 opacity-60"
 							: "text-neutral-800",

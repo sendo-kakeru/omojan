@@ -15,7 +15,7 @@ export function ReactionOverlay({ reactions }: { reactions: Reaction[] }) {
 					>
 						<div className="flex flex-col items-center gap-y-2">
 							<span className="text-2xl">{reaction.emoji}</span>
-							<p className="whitespace-nowrap rounded-full bg-black/60 px-8 py-2 text-white text-xs">
+							<p className="rounded-full bg-black/60 px-8 py-2 text-xs whitespace-nowrap text-white">
 								{getDisplayName(reaction.playerName)}
 							</p>
 						</div>

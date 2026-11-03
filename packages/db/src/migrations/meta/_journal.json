@@ -35,6 +35,13 @@
 			"tag": "0004_zippy_nitro",
 			"version": "6",
 			"when": 1791464385292
+		},
+		{
+			"breakpoints": true,
+			"idx": 5,
+			"tag": "0005_daily_wolfpack",
+			"version": "6",
+			"when": 1792015173819
 		}
 	],
 	"version": "7"
