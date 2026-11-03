@@ -48,7 +48,11 @@ jobs:
   test:
     needs: migrate-e2e-base-db
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
+    # ブラウザと依存パッケージがプリインストールされたイメージを使い、apt やブラウザのダウンロードを省く
+    # タグは packages/web の @playwright/test のバージョンと揃える（renovate.json でグループ化済み）
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-noble@sha256:47b510dd9230bf0b9bfc9b20102241e577ea7a99334ab4c3ca19f19770e9b8ea
     environment: e2e
     env:
       VITE_API_URL: http://localhost:8787
@@ -114,10 +118,6 @@ jobs:
           DATABASE_URL=${DATABASE_URL}
           TURSO_AUTH_TOKEN=${TURSO_AUTH_TOKEN}
           EOF
-
-      - name: Install Playwright Browsers
-        working-directory: packages/web
-        run: pnpm playwright install --with-deps
 
       - name: Run Playwright tests
         working-directory: packages/web

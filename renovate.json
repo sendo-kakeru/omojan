@@ -60,6 +60,10 @@
 			"groupName": "cloudflare",
 			"matchPackageNames": ["wrangler", "@cloudflare/*"]
 		},
+		{
+			"groupName": "playwright",
+			"matchPackageNames": ["@playwright/test", "mcr.microsoft.com/playwright"]
+		},
 		{ "groupName": "node", "matchDepNames": ["node"] },
 		{ "groupName": "pnpm", "matchDepNames": ["pnpm"] }
 	],
