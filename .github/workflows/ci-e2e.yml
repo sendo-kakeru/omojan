@@ -72,6 +72,8 @@ jobs:
 
       - name: Install Turso CLI
         run: |
+          # Playwright イメージには xz が無く、インストーラーの sqld 展開（tar -xJ）が失敗するため入れる
+          apt-get update && apt-get install -y --no-install-recommends xz-utils
           curl -sSfL https://get.tur.so/install.sh | bash
           echo "$HOME/.turso" >> $GITHUB_PATH
 
