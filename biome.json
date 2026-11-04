@@ -32,6 +32,8 @@
 		"enabled": true,
 		"rules": {
 			"complexity": {
+				"noForEach": "error",
+				"noImportantStyles": "error",
 				"useOptionalChain": "error"
 			},
 			"correctness": {
@@ -52,10 +54,17 @@
 			"preset": "recommended",
 			"style": {
 				"noInferrableTypes": "error",
+				"noNonNullAssertion": "error",
 				"noParameterAssign": "error",
 				"noUnusedTemplateLiteral": "error",
 				"noUselessElse": "error",
 				"useAsConstAssertion": "error",
+				"useConsistentTypeDefinitions": {
+					"level": "error",
+					"options": {
+						"style": "type"
+					}
+				},
 				"useDefaultParameterLast": "error",
 				"useEnumInitializers": "error",
 				"useNumberNamespace": "error",
