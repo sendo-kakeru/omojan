@@ -5,6 +5,7 @@ on:
     types:
       - opened
       - synchronize
+      - reopened
     paths:
       - "packages/image-processor/**"
       - ".github/workflows/ci-unit-rust.yml"
