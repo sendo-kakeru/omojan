@@ -104,6 +104,7 @@ type TwttrStub = {
  * - 読み込み完了後: Twttr（完全なAPI）
  */
 declare global {
+	// biome-ignore lint/style/useConsistentTypeDefinitions: lib.dom の Window を declaration merging で拡張するため interface が必須
 	interface Window {
 		twttr?: Twttr | TwttrStub;
 	}
