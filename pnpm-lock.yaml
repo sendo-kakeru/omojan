@@ -319,8 +319,8 @@ importers:
   packages/infra:
     devDependencies:
       '@pulumi/aws':
-        specifier: 7.51.1
-        version: 7.51.1(supports-color@10.2.2)(typescript@7.0.2)
+        specifier: 7.53.0
+        version: 7.53.0(supports-color@10.2.2)(typescript@7.0.2)
       '@pulumi/cloudflare':
         specifier: 6.23.2
         version: 6.23.2(supports-color@10.2.2)(typescript@7.0.2)
@@ -2334,8 +2334,8 @@ packages:
   '@protobufjs/utf8@1.1.2':
     resolution: {integrity: sha512-b1UQwcEZ4yCnMCD8DAL1VlbvBJE9/IX4FTIp7BG1xYpf29SLazLSrqUkj4w7Y5y7cCVP6E5tcqqcI0xemPkHug==}
 
-  '@pulumi/aws@7.51.1':
-    resolution: {integrity: sha512-uJBvElDsU2UVZOwFT3VBprUhc1i1WeHi8MAbbw4mag4okzZDfarHwfSimoMiBkO4XfdQScdY7rDI0g6xIZiosA==}
+  '@pulumi/aws@7.53.0':
+    resolution: {integrity: sha512-qHijd0MQTZhGb3Z1WJzmrqfK8Vxz3WkyUkfTXm/7nWTmyWAdLgshyDwzbHxyGEsPbEVjLpgx+3mjPmY9HIGLrw==}
 
   '@pulumi/cloudflare@6.23.2':
     resolution: {integrity: sha512-0pkVCTydiMJD9vQmRt0V50cMFeWW8AinAaY/PjKPbC7X5aSYKooZ0F30oVVY/Ewi7o5/utBO+5ciqzz1/hYREA==}
@@ -7628,7 +7628,7 @@ snapshots:
 
   '@protobufjs/utf8@1.1.2': {}
 
-  '@pulumi/aws@7.51.1(supports-color@10.2.2)(typescript@7.0.2)':
+  '@pulumi/aws@7.53.0(supports-color@10.2.2)(typescript@7.0.2)':
     dependencies:
       '@pulumi/pulumi': 3.272.0(supports-color@10.2.2)(typescript@7.0.2)
       mime: 2.6.0
