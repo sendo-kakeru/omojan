@@ -6,8 +6,7 @@ on:
 permissions:
   contents: read
 
-# 直列化は呼び出し元（deploy-migration-api-web-prod.yml）の concurrency で行う
-# 呼び出される側では github.workflow が呼び出し元の名前になり group が衝突しうるため、ここには設定しない
+# concurrency は呼び出し元で設定済み（ここに書くと group が衝突しうる）
 
 jobs:
   deploy:
