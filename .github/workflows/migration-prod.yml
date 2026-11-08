@@ -2,6 +2,12 @@ name: Migration Production
 on:
   # deploy-migration-api-web-prod.yml から呼び出す
   workflow_call:
+
+permissions:
+  contents: read
+
+# concurrency は呼び出し元で設定済み（ここに書くと group が衝突しうる）
+
 jobs:
   migration:
     runs-on: ubuntu-latest

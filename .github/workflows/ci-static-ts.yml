@@ -7,6 +7,14 @@ on:
       - synchronize
       - reopened
 
+permissions:
+  contents: read
+
+# 同じ PR に新しい push があったら古い実行を止める
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lint-and-typecheck:
     runs-on: ubuntu-latest

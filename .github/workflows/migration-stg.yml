@@ -3,6 +3,15 @@ on:
   push:
     branches:
       - staging
+
+permissions:
+  contents: read
+
+# 途中で止めると中途半端な状態になるため、キャンセルせず直列に実行する
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
 jobs:
   migration:
     runs-on: ubuntu-latest

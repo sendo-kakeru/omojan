@@ -9,6 +9,15 @@ on:
       - packages/shared/**
       - packages/typescript-config/**
       - .github/workflows/deploy-web-stg.yml
+
+permissions:
+  contents: read
+
+# 途中で止めると中途半端な状態になるため、キャンセルせず直列に実行する
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
