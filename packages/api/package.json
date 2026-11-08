@@ -8,8 +8,8 @@
 		"aws-jwt-verify": "5.2.1",
 		"drizzle-orm": "0.45.4",
 		"drizzle-valibot": "0.4.2",
-		"hono": "4.13.14",
-		"p-retry": "8.0.1",
+		"hono": "4.13.16",
+		"p-retry": "9.0.0",
 		"valibot": "1.5.0"
 	},
 	"devDependencies": {
@@ -20,8 +20,8 @@
 		"@types/node": "24.19.2",
 		"drizzle-seed": "0.3.1",
 		"tsx": "4.23.15",
-		"vitest": "5.0.5",
-		"wrangler": "4.155.0"
+		"vitest": "5.1.0",
+		"wrangler": "4.158.0"
 	},
 	"exports": {
 		".": "./dist/index.d.ts"

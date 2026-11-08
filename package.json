@@ -1,16 +1,16 @@
 {
 	"devDependencies": {
-		"@biomejs/biome": "2.6.3",
+		"@biomejs/biome": "2.6.4",
 		"lefthook": "2.2.2",
 		"tsup": "9.0.0",
 		"turbo": "2.11.10",
 		"typescript": "7.0.2"
 	},
 	"engines": {
-		"node": "24.22.1"
+		"node": "26.13.0"
 	},
 	"name": "omojan",
-	"packageManager": "pnpm@12.15.0",
+	"packageManager": "pnpm@12.17.0",
 	"private": true,
 	"scripts": {
 		"build": "turbo run build",
