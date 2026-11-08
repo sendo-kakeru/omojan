@@ -5,6 +5,9 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 # 本番デプロイは重複実行禁止
 concurrency:
   group: deploy-migration-api-web-prod
