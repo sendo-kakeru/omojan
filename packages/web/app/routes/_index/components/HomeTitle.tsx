@@ -1,5 +1,6 @@
 import classNames from "classnames";
 import type { CSSProperties } from "react";
+import { DecorativeGlyph } from "~/components/DecorativeGlyph";
 import { Tile } from "~/components/Tile";
 
 /**
@@ -48,14 +49,13 @@ export function HomeTitle() {
 							}
 							thickness={tile.thickness}
 						>
-							<span
+							<DecorativeGlyph
+								char={tile.char}
 								className={classNames(
 									"text-xl font-bold carved-text xs:text-2xl",
 									tile.charClassName,
 								)}
-							>
-								{tile.char}
-							</span>
+							/>
 						</Tile>
 					</li>
 				))}

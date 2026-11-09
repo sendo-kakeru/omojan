@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { FiChevronRight } from "react-icons/fi";
 import { RxUpdate } from "react-icons/rx";
 import { Link } from "react-router";
+import { DecorativeGlyph } from "./DecorativeGlyph";
 import { Tile } from "./Tile";
 
 /**
@@ -13,7 +14,7 @@ export function SectionHeading({
 	children,
 	headingTag: HeadingTag = "h2",
 }: {
-	/** 牌に彫る1文字（装飾なので読み上げ対象にしない） */
+	/** 牌に彫る1文字（装飾なので読み上げ・検索スニペットの対象にしない） */
 	mark: string;
 	/** 右端に置くアクション */
 	action?: ReactNode;
@@ -29,9 +30,10 @@ export function SectionHeading({
 					className="grid size-34 shrink-0 place-items-center"
 					thickness="amber"
 				>
-					<span className="text-base font-bold text-orange-600 carved-text">
-						{mark}
-					</span>
+					<DecorativeGlyph
+						char={mark}
+						className="text-base font-bold text-orange-600 carved-text"
+					/>
 				</Tile>
 				<span className="text-base font-bold text-lime-800">{children}</span>
 			</HeadingTag>
