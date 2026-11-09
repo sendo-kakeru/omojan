@@ -11,6 +11,9 @@ on:
 env:
   E2E_BASE_DB_NAME: "omojan-main-e2e"
 
+permissions:
+  contents: read
+
 concurrency:
   group: ci-e2e-${{ github.repository }}
   cancel-in-progress: false

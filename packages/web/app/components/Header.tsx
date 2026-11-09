@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import { AuthUserMenuButton } from "./auth/AuthUserMenuButton";
+import { DecorativeGlyph } from "./DecorativeGlyph";
 import { BeginnerMarkIcon } from "./icon/BeginnerMarkIcon";
 import { Tile } from "./Tile";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./Tooltip";
@@ -13,12 +14,10 @@ export function Header() {
 					interactive
 					thickness="amber"
 				>
-					<span
-						aria-hidden="true"
+					<DecorativeGlyph
+						char="お"
 						className="text-2xl font-bold text-orange-600 carved-text"
-					>
-						お
-					</span>
+					/>
 				</Tile>
 			</Link>
 			<div className="flex items-center gap-x-8">
