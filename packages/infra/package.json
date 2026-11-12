@@ -6,7 +6,7 @@
 		"@pulumi/pulumi": "3.274.0",
 		"@repo/typescript-config": "workspace:*",
 		"@types/node": "24.19.2",
-		"dotenv": "18.0.9",
+		"dotenv": "18.0.10",
 		"typescript": "7.0.2",
 		"valibot": "1.5.0"
 	},
