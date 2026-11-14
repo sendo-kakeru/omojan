@@ -13,7 +13,7 @@ runs:
   steps:
     # バージョンは package.json の packageManager から読み込む
     - name: Setup pnpm
-      uses: pnpm/action-setup@v6.1.0
+      uses: pnpm/action-setup@v6.1.1
 
     # バージョンは package.json の engines.node から読み込む
     - name: Setup Node.js
