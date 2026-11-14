@@ -62,7 +62,11 @@
 		},
 		{
 			"groupName": "playwright",
-			"matchPackageNames": ["@playwright/test", "mcr.microsoft.com/playwright"]
+			"matchPackageNames": [
+				"@playwright/test",
+				"playwright",
+				"mcr.microsoft.com/playwright"
+			]
 		},
 		{ "groupName": "node", "matchDepNames": ["node"] },
 		{ "groupName": "pnpm", "matchDepNames": ["pnpm"] }
