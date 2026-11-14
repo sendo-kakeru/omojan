@@ -23,8 +23,23 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment: e2e
+    outputs:
+      playwright-image: ${{ steps.playwright-image.outputs.image }}
     steps:
       - uses: actions/checkout@v7.0.1
+
+      # Playwright イメージのタグを packages/web の @playwright/test から決める。
+      # イメージを Renovate で別管理すると、公開日時が取れない MCR のイメージだけ
+      # minimumReleaseAge で保留され続け、npm 側とバージョンがずれるため
+      - name: Resolve Playwright image
+        id: playwright-image
+        run: |
+          VERSION=$(jq -r '.devDependencies["@playwright/test"]' packages/web/package.json)
+          if ! [[ "${VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::@playwright/test must be pinned to an exact version (got: ${VERSION})"
+            exit 1
+          fi
+          echo "image=mcr.microsoft.com/playwright:v${VERSION}-noble" >> "$GITHUB_OUTPUT"
 
       - name: Setup pnpm
         uses: $/.github/actions/setup-pnpm
@@ -53,9 +68,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     # ブラウザと依存パッケージがプリインストールされたイメージを使い、apt やブラウザのダウンロードを省く
-    # タグは packages/web の @playwright/test のバージョンと揃える（renovate.json でグループ化済み）
+    # タグは migrate-e2e-base-db ジョブで packages/web の @playwright/test から決める
     container:
-      image: mcr.microsoft.com/playwright:v1.65.0-noble@sha256:9beb546099e11f52d62e505537914870e01a67e0e6b00ae41da4775324e73dbe
+      image: ${{ needs.migrate-e2e-base-db.outputs.playwright-image }}
     environment: e2e
     env:
       VITE_API_URL: http://localhost:8787

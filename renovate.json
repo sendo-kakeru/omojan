@@ -64,8 +64,7 @@
 			"groupName": "playwright",
 			"matchPackageNames": [
 				"@playwright/test",
-				"playwright",
-				"mcr.microsoft.com/playwright"
+				"playwright"
 			]
 		},
 		{ "groupName": "node", "matchDepNames": ["node"] },
