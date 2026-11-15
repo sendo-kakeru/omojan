@@ -62,12 +62,12 @@
 		},
 		{
 			"groupName": "playwright",
+			"internalChecksFilter": "none",
 			"matchPackageNames": [
 				"@playwright/test",
 				"playwright",
 				"mcr.microsoft.com/playwright"
-			],
-			"internalChecksFilter": "none"
+			]
 		},
 		{
 			"matchPackageNames": ["mcr.microsoft.com/playwright"],
