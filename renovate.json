@@ -62,7 +62,16 @@
 		},
 		{
 			"groupName": "playwright",
-			"matchPackageNames": ["@playwright/test", "mcr.microsoft.com/playwright"]
+			"internalChecksFilter": "none",
+			"matchPackageNames": [
+				"@playwright/test",
+				"playwright",
+				"mcr.microsoft.com/playwright"
+			]
+		},
+		{
+			"matchPackageNames": ["mcr.microsoft.com/playwright"],
+			"minimumReleaseAgeBehaviour": "timestamp-optional"
 		},
 		{ "groupName": "node", "matchDepNames": ["node"] },
 		{ "groupName": "pnpm", "matchDepNames": ["pnpm"] }
