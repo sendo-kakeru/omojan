@@ -484,8 +484,8 @@ importers:
         specifier: 1.68.0
         version: 1.68.0(@types/node@24.19.2)(vite@8.3.8(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))(workerd@1.20261109.1)(wrangler@4.159.0(@types/node@24.19.2))
       '@nakanoaas/uuid58':
-        specifier: 1.2.3
-        version: 1.2.3
+        specifier: 2.0.2
+        version: 2.0.2
       '@radix-ui/react-dialog':
         specifier: 1.3.1
         version: 1.3.1(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
@@ -1659,8 +1659,8 @@ packages:
       '@types/react': '>=16'
       react: '>=16'
 
-  '@nakanoaas/uuid58@1.2.3':
-    resolution: {integrity: sha512-T3+4/zLcaEDKUZKnoz5xrJ5gSDcjLjNspWExt2NOriE+4fZtKj1BR+1qzvL/X7vRWtTduzf2IMpzVBWGfF6SOQ==}
+  '@nakanoaas/uuid58@2.0.2':
+    resolution: {integrity: sha512-llydjM7Pk11fsE09pU69yYLFFORr/Ttj9s08ixqktUN4yzlazhqw+80HQHakbj281V/tywUZQ/vW0cuXpa9fFQ==}
     engines: {node: '>=20'}
 
   '@napi-rs/lzma-linux-x64-gnu@1.5.1':
@@ -6751,7 +6751,7 @@ snapshots:
       '@types/react': 19.3.0
       react: 19.3.1
 
-  '@nakanoaas/uuid58@1.2.3': {}
+  '@nakanoaas/uuid58@2.0.2': {}
 
   '@napi-rs/lzma-linux-x64-gnu@1.5.1':
     optional: true
