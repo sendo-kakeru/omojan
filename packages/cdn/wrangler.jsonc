@@ -46,9 +46,7 @@
 	},
 	"main": "src/index.ts",
 	"name": "cdn",
-	"observability": {
-		"enabled": true
-	},
+	"observability": { "enabled": true, "issues": { "enabled": true } },
 	"r2_buckets": [
 		{
 			"binding": "R2",

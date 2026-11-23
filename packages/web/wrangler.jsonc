@@ -26,9 +26,7 @@
 	},
 	"main": "./workers/app.ts",
 	"name": "web",
-	"observability": {
-		"enabled": true
-	},
+	"observability": { "enabled": true, "issues": { "enabled": true } },
 	"vars": {
 		"MAINTENANCE_MODE": "false",
 		"VITE_API_URL": "http://localhost:8787"
